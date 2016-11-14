@@ -6,51 +6,49 @@
 # Gab Abramowitz UNSW 2015 (palshelp at gmail dot com)
 
 rm(list=ls()) # clear all variables
-basedir = '/media/nadja/data/ncFiles/'
-SaveToLOG = 'yes'
-
-# Site specific information
-#--------------------------------------
-name='GWWNc'
-#--------------------------------------
-
-source('/media/nadja/Documents/CCRC/palsR/scripts/SiteSpecificInformation.R')
-
-FluxTemplateVersion = '1.0.3'
-PALSversion = '1.4'
-
-qcScript = paste(basedir,'flux_tower/PALS/ObsUpload/OzFlux/',
-                 sitename,'QC.R',sep='')
-csvfile = paste(basedir,'flux_tower/PALS/ObsUpload/OzFlux',
-                '/',sitename,'Conversion',FluxTemplateVersion,'.csv',sep='')
-
-metfilename = paste(basedir,'flux_tower/PALS/ObsNc/',sitename,'DINGO',PALSversion,'met.nc',sep='')
-fluxfilename = paste(basedir,'flux_tower/PALS/ObsNc/',sitename,'DINGO',PALSversion,'flux.nc',sep='')
-
 library(gdata)
 library(pals)
 library(stringr)
 library(ncdf4)
 
+basedir = '/media/nadja/data/ncFiles/'
+scriptdir = '~/Documents/admin/PALS/scripts/palsR/scripts/'
+SaveToLOG = TRUE
+source = 'OzFlux' # DINGO (spreadsheets) or OzFlux (netcdf)?
+
+# Site specific information
+#--------------------------------------
+sitename='GreatEsternWoodlands'
+#--------------------------------------
+
+source(paste0(scriptdir,'FluxTowerSiteInfo.R'))
+
+FluxTemplateVersion = '1.0.3'
+PALSversion = '1.4'
+
+qcScript = paste(basedir,'flux_tower/PALS/ObsUpload/OzFlux/',sitename,'QC.R',sep='')
+csvfile = paste(basedir,'flux_tower/PALS/ObsUpload/OzFlux',
+                '/',sitename,'Conversion',FluxTemplateVersion,'.csv',sep='')
+
+metfilename = paste0(basedir,'flux_tower/PALS/ObsNc/',sitename,source,PALSversion,'met.nc')
+fluxfilename = paste0(basedir,'flux_tower/PALS/ObsNc/',sitename,source,PALSversion,'flux.nc')
+
 # Start writing to an output file
 if(SaveToLOG == 'yes'){
-  sink(paste(basedir,'flux_tower/PALS/ObsUpload/OzFlux/',name,'LOG.txt',sep=''))
+  sink(paste0(basedir,'flux_tower/PALS/ObsUpload/OzFlux/',sitename,source,'LOG.txt'))
 }
 
-# Save all Fluxnet file names and list to screen:
-if(sitename=="AliceSpringsNc"){
-  fnet = list.files(path = fluxnetdir,pattern='L5',full.names=TRUE)[2:4]
-  cat('Found',length(fnet),'file(s). \n')
-}else if(sitename=="TiTreeNc"){
-  fnet = list.files(path = fluxnetdir,pattern='L5',full.names=TRUE)[2]
-  cat('Found',length(fnet),'file(s). \n')
-}else if(sitename=="GWWNc"){
-  fnet = list.files(path = fluxnetdir,pattern='L6',full.names=TRUE)
-  cat('Found',length(fnet),'file(s). \n')
-}else if(sitename=="TumbarumbaNc"){
-  fnet = list.files(path = fluxnetdir,full.names=TRUE)
-  cat('Found',length(fnet),'file(s). \n')
+if(source == 'DINGO'){
+	sourcedir = paste0(basedir,'flux_tower/OzFlux/DINGO')
+}else if(source == 'OzFlux'){ # Use OzFlux nc data
+	sourcedir = paste0(basedir,'flux_tower/OzFlux/',sitename,'/')
 }
+
+
+# Save all Fluxnet file names and list to screen:
+fnet = list.files(path = sourcedir,full.names=TRUE)
+cat('Found',length(fnet),'file(s). \n')
+
 
 # Load PALS template spreadsheet (4x34):
 PALSinit = as.matrix(read.xls(paste(basedir,'flux_tower/PALS/ObsUpload/PALSFluxTowerTemplate',FluxTemplateVersion,'.xls',sep='')))

@@ -3,17 +3,26 @@
 # Converts data from several OzFlux formatted spreadsheets
 # a single PALS template spreadsheet.
 #
-# Gab Abramowitz UNSW 2015 (palshelp at gmail dot com)
+# Gab Abramowitz, Nadja Herger UNSW 2016 (palshelp at gmail dot com)
 
 rm(list=ls()) # clear all variables
-basedir = '/media/nadja/data/ncFiles/'
-SaveToLOG = 'no'
+library(gdata)
+library(pals)
+library(stringr)
+library(ncdf4)
+
+
+basedir = '~/data/'
+scriptdir = '~/Documents/admin/PALS/scripts/palsR/scripts/'
+
+SaveToLOG = TRUE
+source = 'DINGO' # DINGO (spreadsheets) or OzFlux (netcdf)?
 
 # Site specific information
 #--------------------------------------
-name='Yanco_JAXA'
+name='Yanco'
 #--------------------------------------
-source('/media/nadja/Documents/CCRC/palsR/scripts/SiteSpecificInformation.R')
+source(paste0(scriptdir,'FluxTowerSiteInfo.R'))
 
 FluxTemplateVersion = '1.0.3'
 PALSversion = '1.4'
@@ -23,21 +32,23 @@ qcScript = paste(basedir,'flux_tower/PALS/ObsUpload/OzFlux/',
 csvfile = paste(basedir,'flux_tower/PALS/ObsUpload/OzFlux',
                 '/',sitename,'Conversion',FluxTemplateVersion,'.csv',sep='')
 
-metfilename = paste(basedir,'flux_tower/PALS/ObsNc/',sitename,'DINGO',PALSversion,'met.nc',sep='')
-fluxfilename = paste(basedir,'flux_tower/PALS/ObsNc/',sitename,'DINGO',PALSversion,'flux.nc',sep='')
-
-library(gdata)
-library(pals)
-library(stringr)
+metfilename = paste0(basedir,'flux_tower/PALS/ObsNc/',sitename,source,PALSversion,'met.nc')
+fluxfilename = paste0(basedir,'flux_tower/PALS/ObsNc/',sitename,source,PALSversion,'flux.nc')
 
 # Start writing to an output file
-if(SaveToLOG == 'yes'){
-  sink(paste(basedir,'flux_tower/PALS/ObsUpload/OzFlux/',name,'LOG.txt',sep=''))
+if(SaveToLOG){
+  sink(paste0(basedir,'flux_tower/PALS/ObsUpload/OzFlux/',name,source,'LOG.txt'))
+}
+
+if(source == 'DINGO'){
+	sourcedir = paste0(basedir,'flux_tower/OzFlux/DINGO')
+}else if(source == 'OzFlux'){ # Use OzFlux nc data
+	sourcedir = paste0(basedir,'flux_tower/OzFlux/',name,'/')
 }
 
 # Save all Fluxnet file names and list to screen:
-fnet = list.files(path = fluxnetdir,pattern=sitename,full.names=TRUE)
-cat('Found',length(fnet),'file(s). \n')
+fnet = list.files(path = sourcedir,pattern=sitename,full.names=TRUE)
+cat('Found',length(fnet),'file(s) for site:',name,' \n')
 
 # Load PALS template spreadsheet (4x34):
 PALSinit = as.matrix(read.xls(
@@ -346,7 +357,7 @@ write.csv(as.data.frame(PALSt,optional=TRUE),file=csvfile,
           row.names=FALSE,quote=FALSE)
 
 # Stop writing to the file
-if(SaveToLOG == 'yes'){
+if(SaveToLOG){
   sink()
 }
 

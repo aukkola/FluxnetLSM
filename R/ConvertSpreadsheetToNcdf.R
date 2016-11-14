@@ -5,7 +5,6 @@
 #
 # Gab Abramowitz UNSW 2012 (palshelp at gmail dot com)
 
-library(pals)
 
 defaultLWsynthesis = 'Abramowitz (2012)' # 'Brutsaert (1975)' or 'Swinbank (1963)' or 'Abramowitz (2012)'
 
@@ -39,17 +38,17 @@ ConvertedData = ChangeMetUnits(DataFromText,found,elevation)
 CheckTextDataRanges(ConvertedData,found)
 
 # Create netcdf met driving file:
-CreateMetNcFile(metfilename, ConvertedData, latitude, longitude,
-	DataFromText$timestepsize, sitename, datasetversion, defaultLWsynthesis,
-	found, DataFromText$starttime, DataFromText$templateVersion,
-	elevation=elevation, measurementheight=measurementheight,
-	canopyheight=canopyheight, vegetationtype=vegetationtype,
-	utcoffset=utcoffset, avprecip=avprecip, avtemp=avtemp)
+CreateMetNcFile(metfilename,ConvertedData,latitude,longitude,
+	DataFromText$timestepsize,sitename,datasetversion,defaultLWsynthesis,
+	found,DataFromText$starttime,DataFromText$templateVersion,
+	elevation=elevation,measurementheight=measurementheight,
+	canopyheight=canopyheight,vegetationtype=vegetationtype,
+	utcoffset=utcoffset,avprecip=avprecip,avtemp=avtemp)
 
 # Create netcdf flux data file:
-CreateFluxNcFile(fluxfilename, ConvertedData, latitude, longitude,
-	DataFromText$timestepsize, sitename, datasetversion,
-	found, DataFromText$starttime, DataFromText$templateVersion,
-	elevation=elevation, measurementheight=measurementheight,
-	canopyheight=canopyheight, vegetationtype=vegetationtype,
-	utcoffset=utcoffset, avprecip=avprecip, avtemp=avtemp)
+CreateFluxNcFile(fluxfilename, ConvertedData,latitude,longitude,
+	DataFromText$timestepsize,sitename,datasetversion,
+	found,DataFromText$starttime,DataFromText$templateVersion,
+	elevation=elevation,measurementheight=measurementheight,
+	canopyheight=canopyheight,vegetationtype=vegetationtype,
+	utcoffset=utcoffset,avprecip=avprecip,avtemp=avtemp)

@@ -4,8 +4,9 @@
 #
 # Gab Abramowitz UNSW 2014 (palshelp at gmail dot com)
 
-SynthesizeLWdown <- function(TairK,RH,technique)
-{
+#-----------------------------------------------------------------------------
+
+SynthesizeLWdown=function(TairK,RH,technique){
 	if(technique=='Swinbank (1963)'){
 		# Synthesise LW down from air temperature only:
 		lwdown = 0.0000094*0.0000000567*TairK^6
@@ -24,19 +25,17 @@ SynthesizeLWdown <- function(TairK,RH,technique)
 	return(lwdown)
 }
 
-#---------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
 
-SynthesizePSurf <- function(TairK,elevation)
-{
+SynthesizePSurf=function(TairK,elevation){
 	# Synthesizes PSurf based on temperature and elevation
 	PSurf = 101325 * (TairK / (TairK + 0.0065*elevation))^(9.80665/287.04/0.0065)
 	return(PSurf)
 }
 
-#---------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
 
-gapfillLWdown <- function(LWdownIN,TairK,RH,technique)
-{
+gapfillLWdown = function(LWdownIN,TairK,RH,technique){
 	# Fills any gaps in LWdown time series using synthesis:
 	LWdownOUT = c() # initialise
 	LWflag = c() # initialise
@@ -52,14 +51,13 @@ gapfillLWdown <- function(LWdownIN,TairK,RH,technique)
 	return(list(data=LWdownOUT,flag=LWflag))
 }
 
-#---------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
 
 ######################################################
 # Below are functions previously used for gapfilling Fluxnet formatted spreadhseets
 # Does linear gap filling between met data and flux:
-regressionfill <- function(PALSt,varname,templateVersion,starttime,
-	                         regThreshold=4,winsize=8760)
-{
+regressionfill = function(PALSt,varname,templateVersion,starttime,
+	regThreshold=4,winsize=8760){
 	tsteps = length(PALSt[,1]) - 3
 	# Get index of variable in question:
 	vidx = varIndex(varname,templateVersion)
@@ -177,11 +175,10 @@ regressionfill <- function(PALSt,varname,templateVersion,starttime,
 	return(PALSt)	
 }
 
-#---------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
 
 # Does linear gap filling between endpoints:
-linearfill <- function(PALSt,varname,templateVersion,starttime)
-{
+linearfill = function(PALSt,varname,templateVersion,starttime){
 	tsteps = length(PALSt[,1]) - 3
 	# Get index of variable in question:
 	vidx = varIndex(varname,templateVersion)
@@ -237,11 +234,10 @@ linearfill <- function(PALSt,varname,templateVersion,starttime)
 	return(PALSt)	
 }
 
-#---------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
 
 # Copies previous / future time period for gap filling:
-copyfill <- function(PALSt,varname,templateVersion,starttime)
-{
+copyfill = function(PALSt,varname,templateVersion,starttime){
 	tsteps = length(PALSt[,1]) - 3
 	# Get index of variable in question:
 	vidx = varIndex(varname,templateVersion)
@@ -310,11 +306,10 @@ copyfill <- function(PALSt,varname,templateVersion,starttime)
 	return(PALSt)	
 }
 
-#---------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
 
 # Replaces negative values with 0:
-posfill <- function(PALSt,varname,templateVersion,starttime)
-{
+posfill = function(PALSt,varname,templateVersion,starttime){
 	tsteps = length(PALSt[,1]) - 3
 	# Get index of variable in question:
 	vidx = varIndex(varname,templateVersion)
@@ -329,11 +324,10 @@ posfill <- function(PALSt,varname,templateVersion,starttime)
 	return(PALSt)	
 }
 
-#---------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
 
 # Replaces values above a cap value with that value:
-capfill <- function(PALSt,varname,templateVersion,starttime,capvalue)
-{
+capfill = function(PALSt,varname,templateVersion,starttime,capvalue){
 	tsteps = length(PALSt[,1]) - 3
 	# Get index of variable in question:
 	vidx = varIndex(varname,templateVersion)
@@ -348,11 +342,10 @@ capfill <- function(PALSt,varname,templateVersion,starttime,capvalue)
 	return(PALSt)	
 }
 
-#---------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
 
 # Replaces qc -9999 values with 1 => data okay:
-qcfill <- function(PALSt,varname,templateVersion,starttime)
-{
+qcfill = function(PALSt,varname,templateVersion,starttime){
 	tsteps = length(PALSt[,1]) - 3
 	# Get index of variable in question:
 	vidx = varIndex(varname,templateVersion)
@@ -367,11 +360,10 @@ qcfill <- function(PALSt,varname,templateVersion,starttime)
 	return(PALSt)	
 }
 
-#---------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
 
 # Train multiple linear regression:
-regtrain <- function(PALSt,vidx,startT,endT,sourceDirection,templateVersion,winsize=3000)
-{
+regtrain = function(PALSt,vidx,startT,endT,sourceDirection,templateVersion,winsize=3000){
 	swidx = varIndex('SWdown',templateVersion)
 	tidx = varIndex('Tair',templateVersion)
 	hidx = varIndex('Qair',templateVersion)
@@ -446,11 +438,10 @@ regtrain <- function(PALSt,vidx,startT,endT,sourceDirection,templateVersion,wins
 	return(rgrp)
 }
 
-#---------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
 
 # Use multiple linear regression parameters to predict time series:
-regpredict <- function(rgrp,PALSt,vidx,startT,endT,templateVersion)
-{
+regpredict = function(rgrp,PALSt,vidx,startT,endT,templateVersion){
 	ntsteps = endT - startT + 1
 	# Get indices of predictor variables in matrix:
 	swidx = varIndex('SWdown',templateVersion)
