@@ -35,6 +35,7 @@ SynthesizePSurf=function(TairK,elevation){
 
 #-----------------------------------------------------------------------------
 
+############### NEED TO CHECK FLAGS !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 gapfillLWdown = function(LWdownIN,TairK,RH,technique){
 	# Fills any gaps in LWdown time series using synthesis:
 	LWdownOUT = c() # initialise
@@ -42,10 +43,10 @@ gapfillLWdown = function(LWdownIN,TairK,RH,technique){
 	for(t in 1:length(LWdownIN)){
 		if(LWdownIN[t]==SprdMissingVal){
 			LWdownOUT[t] = SynthesizeLWdown(TairK[t],RH[t],technique)
-			LWflag[t] = 0
+			LWflag[t] = 3  
 		}else{
 			LWdownOUT[t] = LWdownIN[t]
-			LWflag[t] = 1
+			LWflag[t] = 0
 		}
 	}
 	return(list(data=LWdownOUT,flag=LWflag))

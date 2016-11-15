@@ -9,28 +9,48 @@
 #-----------------------------------------------------------------------------
 
 
-ReadTextFluxData = function(fileinname, vars){
+ReadTextFluxData = function(fileinname, vars, essential_vars){
 	# This function reads comma-delimited text files containing
 	# met and flux data from Fluxnet data providers.
   
-#######	# First get site name, lat, lon, elevation and time step size:
-
+  
+  ####### First read available variables, corresponding units and ranges ####
   
 	# Get column names and classes:
-  tcol <- findColIndices(fileinname, var_names=vars$Fluxnet_variable, var_classes=vars$Fluxnet_classes)
-    
+  tcol <- findColIndices(fileinname, var_names=vars$Fluxnet_variable, 
+                         var_classes=vars$Fluxnet_class, 
+                         essential_vars=vars$Essential)  
+  
 	# Read flux tower data (skips unwanted columns):
-	FluxData = read.csv(file=fileinname, header=TRUE,	colClasses=tcol$classes)
+	FluxData = read.csv(file=fileinname, header=TRUE,	colClasses=tcol$classes)  
   
   #Sanity check, does variable order in file match that specified in tcols?
-  if(any(colnames(data)!=tcol$names)) stop("Check variable ordering, variables don't match data retrieved from file")
+  if(any(colnames(data)!=tcol$names)) ErrorCheck("Check variable ordering, variables don't match data retrieved from file")
+
+  #Retrieve units for variables present:
+  units <- retrieve_units(vars_present=tcol$names, all_vars=vars)
+  
+  #Retrieve acceptable variable ranges:
+  var_ranges <- retrieve_ranges(vars_present=tcol$names, all_vars=vars)
+  
+  #Retrieve long variable names:
+  longnames <- retrieve_longname(vars_present=tcol$names, all_vars=vars)
   
   #Change column names and tcol$names to match ALMA convention
-  tcol$names         <- rename_vars(tcol$names)
+  tcol$names         <- rename_vars(vars_present=tcol$names, all_vars=vars)
   colnames(FluxData) <- tcol$names
+  
+  
+  ###### Get time step and date information #######
+  
+  #Retrieve time stamp variable info
+  timevars <- findTimeInfo(fileinname)
     
+  #Read time stamp variables
+  FluxTime <- read.csv(file=fileinname, header=TRUE,  colClasses=timevars$classes)  
+  
 	# Note number of time steps in data:
-	ntsteps = nrow(FluxData)
+	ntsteps = nrow(FluxTime)
   
 	if(!(ntsteps>=12 && ntsteps < 1e9)){
 		CheckError(paste('S5: Unable to determine number of time steps in:',
@@ -38,8 +58,8 @@ ReadTextFluxData = function(fileinname, vars){
 	}
   
 	# and time step size:
-  start <- strptime(FluxData$TIMESTAMP_START[1], "%Y%m%d%H%M") #convert to date string
-  end   <- strptime(FluxData$TIMESTAMP_END[1], "%Y%m%d%H%M")
+  start <- strptime(FluxTime$TIMESTAMP_START[1], "%Y%m%d%H%M") #convert to date string
+  end   <- strptime(FluxTime$TIMESTAMP_END[1], "%Y%m%d%H%M")
   
 	timestepsize <- as.numeric(end) - as.numeric(start)
   
@@ -52,61 +72,21 @@ ReadTextFluxData = function(fileinname, vars){
 	ndays = ntsteps/tstepinday # number of days in data set
 
   # Find starting date / time:
-	#if(substr(FluxData$LocDate[1],2,2)=='/'){ # i.e. one char day
-		sday = as.numeric(format(start, format="%d"))
-		#if(substr(FluxData$LocDate[1],4,4)=='/'){ # i.e. one char month
-		smonth = as.numeric(format(start, format="%m"))
-    syear = as.numeric(format(start, format="%Y"))
-	#		ystart=5
-	#	}else if(substr(FluxData$LocDate[1],5,5)=='/'){ # i.e. two char month
-  #			smonth = format(start, format="%d")
-	#		ystart=6
-	#	}else{
-	#		CheckError(paste('S1: Error interpreting data set starting',
-	#			'date from spreadsheet.'))
-	#	}
-	#}else if(substr(FluxData$LocDate[1],3,3)=='/'){ # i.e. two char day
-	#	sday = as.numeric(substr(FluxData$LocDate[1],1,2))
-	#	if(substr(FluxData$LocDate[1],5,5)=='/'){ # i.e. one char month
-	#		smonth = as.numeric(substr(FluxData$LocDate[1],4,4))
-	#		ystart=6
-	#	}else if(substr(FluxData$LocDate[1],6,6)=='/'){ # i.e. two char month
-	#		smonth = as.numeric(substr(FluxData$LocDate[1],4,5))
-	#		ystart=7
-	#	}else{
-	#		CheckError(paste('S1: Error interpreting data set starting',
-	#			'date from spreadsheet.'))
-	#	}
-#	}else{
-#		CheckError(paste('S1: Error interpreting data set starting',
-#			'date from spreadsheet.'))
-#	}
+	sday = as.numeric(format(start, format="%d"))
+	smonth = as.numeric(format(start, format="%m"))
+  syear = as.numeric(format(start, format="%Y"))
 
-#	# Create starting year:
-#	ystr = substr(FluxData$LocDate[1],ystart,nchar(FluxData$LocDate[1]))
-#	if(nchar(ystr)==2){ # two character yesr
-#		if(as.numeric(ystr)<60){
-#			nystr = paste('20',ystr,sep='')
-#		}else{
-#			nystr = paste('19',ystr,sep='')
-#		}
-#	}else if(nchar(ystr)==4){ # four character year
-#		nystr = ystr
-#		# do nothing	
-#	}else{
-#		CheckError(paste('S1: Error interpreting data set starting',
-#			'date from spreadsheet.'))
-#	}
-#	syear = as.numeric(nystr)	
 	shod = format(start, format="%H") # starting hour of day
 	intyears = Yeardays(syear,ndays)
 
 	# Collate start time variables:
 	starttime=list(syear=syear,smonth=smonth,sday=sday,shod=shod)
 
-# Create list for function exit:
-	filedata = list(data=FluxData, ntsteps=ntsteps,
-	               	starttime=starttime, timestepsize=timestepsize,
+  #Create list for function exit:
+	filedata = list(data=FluxData, vars=tcol$names, long_names=long_names,
+                  units=units, var_ranges=var_ranges,
+                  time=FluxTime, ntsteps=ntsteps, starttime=starttime, 
+                  timestepsize=timestepsize,
                   ndays=ndays,whole=intyears$whole)
 
   return(filedata)
@@ -115,28 +95,11 @@ ReadTextFluxData = function(fileinname, vars){
 
 #-----------------------------------------------------------------------------
 
-CheckSpreadsheetTiming = function(DataFromText) {
-	# Checks that uploaded spreadsheet data is compatible 
-	# with time step size in web form; that a whole number of 
-	# days are present; and whether there are an integer 
-	# number of years.
-	tstepinday=86400/DataFromText$timestepsize # time steps in a day
-	ndays = DataFromText$ntsteps/tstepinday # number of days in data set
-	if((ndays - round(ndays)) != 0){
-		CheckError(paste('S2: Spreadsheet does not appear to contain a',
-			'whole number of days of data. Please amend.'))
-	}
-	if((DataFromText$starttime$sday != 1) | (DataFromText$starttime$smonth != 1)){
-		CheckError(paste('S2: Spreadsheet data does not appear to begin',
-			'on 1st January. Please amend.'))
-	}
-}
 
-#-----------------------------------------------------------------------------
 
-CheckTextDataRanges = function(datain,found){
+CheckTextDataRanges = function(datain, found){
 	# Get acceptable ranges for variables:	
-	range = GetVariableRanges()
+	range = datain
 	# Check variable ranges:
 	if(any(datain$data$SWdown<range$SWdown[1])|
 		any(datain$data$SWdown>range$SWdown[2])){
@@ -242,165 +205,6 @@ CheckTextDataRanges = function(datain,found){
 		CheckError(errtext)
 	}
 }
-
-#-----------------------------------------------------------------------------
-
-# Check the existence of optional variables:
-CheckTextDataVars = function(datain){
-	# First check that all essential variables are present:
-	if(any(datain$data$SWdown==SprdMissingVal)){
-		CheckError('S2: Downward shortwave has missing values.')
-	}
-	if(any(datain$data$Tair==SprdMissingVal)){
-		CheckError('S2: Air temperature has missing values.')
-	}
-	if(any(datain$data$Qair==SprdMissingVal)){
-		CheckError('S2: Humidity has missing values.')
-	}
-	if(any(datain$data$Wind==SprdMissingVal)){
-		CheckError('S2: Windspeed has missing values.')
-	}
-	if(any(datain$data$Rainf==SprdMissingVal)){
-		CheckError('S2: Rainfall has missing values.')
-	}
-	# Initialise list of found variables:
-	LWdown = FALSE# surface incident longwave rad [W/m^2]
-	LWdown_all = FALSE# gapless surface incident longwave rad [W/m^2]
-	Snowf = FALSE # snowfall rate [mm/s]
-	PSurf = FALSE # surface air pressure [Pa]
-	CO2air = FALSE# near surface CO2 concentration [ppmv]
-	Qle = FALSE   # latent heat flux [W/m^2]
-	Qh = FALSE    # sensible heat flux [W/m^2]
-	Qg = FALSE    # ground heat flux [W/m^2]
-	NEE = FALSE   # net ecosystem exchange CO2 [umol/m^2/s]
-	GPP = FALSE   # gross primary production CO2 [umol/m^2/s]
-	SWup = FALSE  # reflected SW rad [W/m^2]
-	Rnet = FALSE  # net absorbed radiation [W/m^2]
-	SWdown_qc = FALSE
-	Tair_qc = FALSE
-	Qair_qc = FALSE
-	Wind_qc = FALSE
-	Rainf_qc = FALSE
-	LWdown_qc = FALSE
-	Snowf_qc = FALSE 
-	PSurf_qc = FALSE 
-	CO2air_qc = FALSE
-	Qle_qc = FALSE   
-	Qh_qc = FALSE    
-	Qg_qc = FALSE    
-	NEE_qc = FALSE
-	GPP_qc = FALSE
-	SWup_qc = FALSE  
-	Rnet_qc = FALSE  
-	found = list(LWdown=LWdown,LWdown_all=LWdown_all,Snowf=Snowf,
-		PSurf=PSurf,CO2air=CO2air,Qle=Qle,Qh=Qh,Qg=Qg,NEE=NEE,
-		SWup=SWup,Rnet=Rnet,SWdown_qc=SWdown_qc,Tair_qc=Tair_qc,
-		Qair_qc=Qair_qc,Wind_qc=Wind_qc,Rainf_qc=Rainf_qc,
-		LWdown_qc=LWdown_qc,Snowf_qc=Snowf_qc,PSurf_qc=PSurf_qc,
-		CO2air_qc=CO2air_qc,Qle_qc=Qle_qc,Qh_qc=Qh_qc,
-		Qg_qc=Qg_qc,NEE_qc=NEE_qc,GPP_qc=GPP_qc,SWup_qc=SWup_qc,
-		Rnet_qc=Rnet_qc)
-	
-	# Begin checking:
-	if(any(datain$data$LWdown!=SprdMissingVal)){ # note unusual condition
-		found$LWdown = TRUE # some data present
-		if(!any(datain$data$LWdown==SprdMissingVal)){
-			found$LWdown_all = TRUE # all data present
-		}
-	}
-	if(!any(datain$data$Snowf==SprdMissingVal)){
-		found$Snowf = TRUE
-	}
-	if(!any(datain$data$PSurf==SprdMissingVal)){
-		found$PSurf = TRUE
-	}
-	if(!any(datain$data$CO2air==SprdMissingVal)){
-		found$CO2air = TRUE
-	}
-	if(!any(datain$data$Qle==SprdMissingVal)){
-		found$Qle = TRUE
-	}
-	if(!any(datain$data$Qh==SprdMissingVal)){
-		found$Qh = TRUE
-	}
-	if(!any(datain$data$Qg==SprdMissingVal)){
-		found$Qg = TRUE
-	}
-	if(!any(datain$data$NEE==SprdMissingVal)){
-		found$NEE = TRUE
-	}
-	if(!any(datain$data$GPP==SprdMissingVal) && 
-		datain$templateVersion!='1.0.1'){
-		found$GPP = TRUE
-	}
-	if(!any(datain$data$SWup==SprdMissingVal)){
-		found$SWup = TRUE
-	}
-	if(!any(datain$data$Rnet==SprdMissingVal)){
-		found$Rnet = TRUE
-	}
-	# Note change of "found" criteria for qc flags:
-	if(any(datain$data$SWdownFlag!=SprdMissingVal)){
-		found$SWdown_qc = TRUE
-	}
-	if(any(datain$data$TairFlag!=SprdMissingVal)){
-		found$Tair_qc = TRUE
-	}
-	if(any(datain$data$QairFlag!=SprdMissingVal)){
-		found$Qair_qc = TRUE
-	}
-	if(any(datain$data$RainfFlag!=SprdMissingVal)){
-		found$Rainf_qc = TRUE
-	}
-	if(any(datain$data$LWdownFlag!=SprdMissingVal)){
-		found$LWdown_qc = TRUE
-	}
-	if(any(datain$data$SnowfFlag!=SprdMissingVal)){
-		found$Snowf_qc = TRUE
-	}
-	if(any(datain$data$PSurfFlag!=SprdMissingVal)){
-		found$PSurf_qc = TRUE
-	}else if(! found$PSurf){
-		# If we didn't find PSurf, we know PALS will 
-		# synthesize, and we'll mark that in qc variable.
-		found$PSurf_qc = TRUE
-	}
-	if(any(datain$data$CO2airFlag!=SprdMissingVal)){
-		found$CO2air_qc = TRUE
-	}
-	if(any(datain$data$WindFlag!=SprdMissingVal)){
-		found$Wind_qc = TRUE
-	}
-	if(any(datain$data$QleFlag!=SprdMissingVal)){
-		found$Qle_qc = TRUE
-	}
-	if(any(datain$data$QhFlag!=SprdMissingVal)){
-		found$Qh_qc = TRUE
-	}
-	if(any(datain$data$QgFlag!=SprdMissingVal)){
-		found$Qg_qc = TRUE
-	}
-	if(any(datain$data$NEEFlag!=SprdMissingVal)){
-		found$NEE_qc = TRUE
-	}
-	if(any(datain$data$GPPFlag!=SprdMissingVal)){
-		found$GPP_qc = TRUE
-	}
-	if(any(datain$data$SWupFlag!=SprdMissingVal)){
-		found$SWup_qc = TRUE
-	}
-	if(any(datain$data$RnetFlag!=SprdMissingVal)){
-		found$Rnet_qc = TRUE
-	}
-	# IF no LSM testing variables are found, report it:
-	if((!found$Qle)&(!found$Qh)&(!found$NEE)&(!found$Rnet)&
-		(!found$GPP)&(!found$SWup)&(!found$Qg)){
-		CheckError(paste('S2: Could not find any LSM evaluation',
-		'variables: Qle, Qh, Qg, NEE, GPP, SWup or Rnet.'))
-	}
-	return(found)	
-}
-
 
 
 #-----------------------------------------------------------------------------
