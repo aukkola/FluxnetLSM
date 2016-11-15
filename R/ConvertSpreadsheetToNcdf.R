@@ -10,8 +10,15 @@
 #path
 lib_path <- "~/Documents/FLUXNET2016_processing/scripts/R"
 
-#filename
-file <- "~/Documents/FLUXNET2016_processing/FLX_AU-How_FLUXNET2015_FULLSET_HH_2001-2014_1-3.csv"
+#input filename
+infile <- "~/Documents/FLUXNET2016_processing/FLX_AU-How_FLUXNET2015_FULLSET_HH_2001-2014_1-3.csv"
+
+#output file
+metfilename <- "~/Documents/FLUXNET2016_processing/output_test_met.nc"
+fluxfilename <- "~/Documents/FLUXNET2016_processing/output_test_flux.nc"
+
+datasetname <- "Fluxnet2015" 
+datasetversion <- "Nov16"
 
 #Fill and/or synthesize LWdown?
 LWdown_fill <- TRUE
@@ -28,10 +35,15 @@ defaultLWsynthesis = 'Abramowitz (2012)' # 'Brutsaert (1975)' or 'Swinbank (1963
 vars <- read.csv(paste(lib_path, "/auxiliary_data/variables.csv", sep=""), header=TRUE, 
                  colClasses=c("character", "character", "character", 
                               "character", "character", "character",
-                              "numeric", "numeric", "logical"))
+                              "numeric",   "numeric",   "logical", 
+                              "character"))
+
+#Read site information (lon, lat, elevation)   NOT YET WORKING
+site_info <- read.csv()
+
 
 # Read text file containing flux data:
-DataFromText = ReadTextFluxData(fileinname=file, vars=vars)
+DataFromText = ReadTextFluxData(fileinname=infile, vars=vars)
 
 # Make sure whole number of days in dataset:
 CheckSpreadsheetTiming(DataFromText)
@@ -42,44 +54,45 @@ gaps_found <- CheckDataGaps(datain=DataFromText, missing_val=SprdMissingVal) # l
 
 ### Synthesize LWdown if not found, 
 ### and gap-fill otherwise if missing values present
-if(LWdown_fill) DataFromText <- LWdown_check_and_fill(DataFromText)
-
-
+if(LWdown_fill) DataFromText <- LWdown_check_and_fill(indata=DataFromText, 
+                                                      defaultLWsynthesis=defaultLWsynthesis, 
+                                                      vars=vars, gaps_found=gaps_found)
 
 
 #Remove variables if a variable has too many gaps
 #Abort code if any of these essential
 
 
+# Change units:  NOT YET WORKING
+ConvertedData <- ChangeUnits(DataFromText, site_info$elevation)
+
+
+# Run preliminary tests on data:   #NOT YET WORKING
+CheckTextDataRanges(ConvertedData)
 
 
 
-# Change units:
-ConvertedData = ChangeMetUnits(DataFromText,found,elevation)
 
-
-# Run preliminary tests on data:
-CheckTextDataRanges(ConvertedData,found)
-
-
-# Create netcdf met driving file:
-CreateMetNcFile(metfilename,ConvertedData,latitude,longitude,
-	DataFromText$timestepsize,sitename,datasetversion,defaultLWsynthesis,
-	found,DataFromText$starttime,
-	elevation=elevation,measurementheight=measurementheight,
-	canopyheight=canopyheight,vegetationtype=vegetationtype,
-	utcoffset=utcoffset,avprecip=avprecip,avtemp=avtemp)
-
+# Create netcdf met driving file: NOT YET CONVERTING DATA, CHANGE indata VARIABLE ONCE DONE THAT !!!!!!!!!!!!!!
+CreateMetNcFile(metfilename=metfilename, datain=DataFromText, 
+                latitude=NA, longitude=NA, 
+                datasetname=datasetname, datasetversion=datasetversion, 
+                defaultLWsynthesis=defaultLWsynthesis, 
+                starttime=DataFromText$starttime, 
+                timestepsize=DataFromText$timestepsize,
+                elevation=NA, measurementheight=NA, canopyheight=NA,
+                vegetationtype=NA, utcoffset=NA, avprecip=NA, avtemp=NA)
 
 
 # Create netcdf flux data file:
-CreateFluxNcFile(fluxfilename, ConvertedData,latitude,longitude,
-	DataFromText$timestepsize,sitename,datasetversion,
-	found,DataFromText$starttime,DataFromText$templateVersion,
-	elevation=elevation,measurementheight=measurementheight,
-	canopyheight=canopyheight,vegetationtype=vegetationtype,
-	utcoffset=utcoffset,avprecip=avprecip,avtemp=avtemp)
-
+CreateFluxNcFile(fluxfilename=fluxfilename, datain=DataFromText, 
+                 latitude=NA, longitude=NA, 
+                 datasetname=datasetname, datasetversion=datasetversion, 
+                 starttime=DataFromText$starttime, 
+                 timestepsize=DataFromText$timestepsize,
+                 elevation=NA, measurementheight=NA, canopyheight=NA,
+                 vegetationtype=NA, utcoffset=NA, avprecip=NA, avtemp=NA)
+                 
 
 
 

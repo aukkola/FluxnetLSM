@@ -151,6 +151,20 @@ retrieve_longname <- function(vars_present, all_vars){
 
 #-----------------------------------------------------------------------------
 
+#Retrieve variable categories to divide into met and flux data
+retrieve_categories <- function(vars_present, all_vars){
+  
+  #Find index for fluxnet variables present in file
+  ind_present <- sapply(vars_present, function(x) which(all_vars$Fluxnet_variable==x))
+  
+  cat <- all_vars$Category[ind_present]
+  names(cat) <- all_vars$ALMA_variable[ind_present]
+  
+  return(cat)
+}
+
+#-----------------------------------------------------------------------------
+
 #Retrieve acceptable variable ranges
 retrieve_ranges <- function(vars_present, all_vars){
 

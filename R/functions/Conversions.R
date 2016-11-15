@@ -6,12 +6,13 @@
 
 ### Unit conversions from Fluxnet to ALMA units ###
 
-ChangeMetUnits = function(datain,found,elevation,humidity_type='relative',pressure_type='mbar'){
+ChangeUnits = function(datain,elevation,humidity_type='relative',pressure_type='mbar'){
   # Performs units changes from flux data provider
   # template units to netcdf met/flux file units.
   # First calculate timestep size:
   timestepsize = 
     (datain$data$LocHoD[2] - datain$data$LocHoD[1])*3600
+  
   # Temperature from C to K:
   datain$data$Tair = datain$data$Tair + zeroC
   if(found$PSurf){
