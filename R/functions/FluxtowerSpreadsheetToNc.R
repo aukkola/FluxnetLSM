@@ -9,7 +9,7 @@
 #-----------------------------------------------------------------------------
 
 
-ReadTextFluxData = function(fileinname, tcols){
+ReadTextFluxData = function(fileinname, vars){
 	# This function reads comma-delimited text files containing
 	# met and flux data from Fluxnet data providers.
   
@@ -17,14 +17,18 @@ ReadTextFluxData = function(fileinname, tcols){
 
   
 	# Get column names and classes:
-  tcol <- findColIndices(fileinname)
+  tcol <- findColIndices(fileinname, var_names=vars$Fluxnet_variable, var_classes=vars$Fluxnet_classes)
     
 	# Read flux tower data (skips unwanted columns):
 	FluxData = read.csv(file=fileinname, header=TRUE,	colClasses=tcol$classes)
   
   #Sanity check, does variable order in file match that specified in tcols?
-  if(any(colnames(data)!=tcols$names)) stop("Check variable ordering (in Constants.R)")
+  if(any(colnames(data)!=tcol$names)) stop("Check variable ordering, variables don't match data retrieved from file")
   
+  #Change column names and tcol$names to match ALMA convention
+  tcol$names         <- rename_vars(tcol$names)
+  colnames(FluxData) <- tcol$names
+    
 	# Note number of time steps in data:
 	ntsteps = nrow(FluxData)
   
@@ -126,47 +130,6 @@ CheckSpreadsheetTiming = function(DataFromText) {
 		CheckError(paste('S2: Spreadsheet data does not appear to begin',
 			'on 1st January. Please amend.'))
 	}
-}
-
-#-----------------------------------------------------------------------------
-
-ChangeMetUnits = function(datain,found,elevation,humidity_type='relative',pressure_type='mbar'){
-	# Performs units changes from flux data provider
-	# template units to netcdf met/flux file units.
-	# First calculate timestep size:
-	timestepsize = 
-		(datain$data$LocHoD[2] - datain$data$LocHoD[1])*3600
-	# Temperature from C to K:
-	datain$data$Tair = datain$data$Tair + zeroC
-	if(found$PSurf){
-		if(pressure_type=='mbar'){
-			# Pressure from mbar to Pa
-			datain$data$PSurf = Mbar2Pa(datain$data$PSurf)
-		}else if(pressure_type=='kpa'){
-			# Pressure from kpa to Pa
-			datain$data$PSurf = datain$data$PSurf*1000
-		}
-	}else{
-		# Synthesize PSurf based on temperature and elevation
-		datain$data$PSurf = SynthesizePSurf(datain$data$Tair,elevation)
-		datain$data$PSurfFlag = 0 # i.e. all gap-filled
-	}
-	# Rainfall from mm/timestep to mm/s
-	datain$data$Rainf = datain$data$Rainf/timestepsize
-	if(found$Snowf){
-		# Snowfall from mm/timestep to mm/s
-		datain$data$Snowf = datain$data$Snowf/timestepsize
-	}
-	if(humidity_type=='relative'){
-		# Relative to specific humidity:
-		datain$data$Qair = Rel2SpecHum(datain$data$Qair,
-			datain$data$Tair,datain$data$PSurf)
-	}else if(humidity_type=='absolute'){
-		# Absolute to specific humidity:
-		datain$data$Qair = Abs2SpecHum(datain$data$Qair,
-			datain$data$Tair,datain$data$PSurf)
-	}
-	return(datain)
 }
 
 #-----------------------------------------------------------------------------
@@ -433,10 +396,12 @@ CheckTextDataVars = function(datain){
 	if((!found$Qle)&(!found$Qh)&(!found$NEE)&(!found$Rnet)&
 		(!found$GPP)&(!found$SWup)&(!found$Qg)){
 		CheckError(paste('S2: Could not find any LSM evaluation',
-		'varaibles: Qle, Qh, Qg, NEE, GPP, SWup or Rnet.'))
+		'variables: Qle, Qh, Qg, NEE, GPP, SWup or Rnet.'))
 	}
 	return(found)	
 }
+
+
 
 #-----------------------------------------------------------------------------
 
