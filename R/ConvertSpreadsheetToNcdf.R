@@ -13,17 +13,28 @@ lib_path <- "~/Documents/FLUXNET2016_processing/scripts/R"
 #input filename
 infile <- "~/Documents/FLUXNET2016_processing/FLX_AU-How_FLUXNET2015_FULLSET_HH_2001-2014_1-3.csv"
 
+
+#ERA input file (needed if using ERAinterim to gapfill met variables)
+era_file <- ""
+
+
+
 #output file
 metfilename <- "~/Documents/FLUXNET2016_processing/output_test_met.nc"
 fluxfilename <- "~/Documents/FLUXNET2016_processing/output_test_flux.nc"
 
+site_name <- "AU-How"
+
 datasetname <- "Fluxnet2015" 
 datasetversion <- "Nov16"
 
-#Fill and/or synthesize LWdown?
-LWdown_fill <- TRUE
+#Synthesize LWdown?
+LWdown_synthesize <- TRUE
 
-defaultLWsynthesis = 'Abramowitz (2012)' # 'Brutsaert (1975)' or 'Swinbank (1963)' or 'Abramowitz (2012)'
+defaultLWsynthesis <- 'Abramowitz (2012)' # 'Brutsaert (1975)' or 'Swinbank (1963)' or 'Abramowitz (2012)'
+
+#Gapfill met variables using ERAinterim?
+ERA_gapfill <- TRUE
 
 
 #----------------------------------------------------------------------#
@@ -35,32 +46,92 @@ defaultLWsynthesis = 'Abramowitz (2012)' # 'Brutsaert (1975)' or 'Swinbank (1963
 vars <- read.csv(paste(lib_path, "/auxiliary_data/variables.csv", sep=""), header=TRUE, 
                  colClasses=c("character", "character", "character", 
                               "character", "character", "character",
-                              "numeric",   "numeric",   "logical", 
+                              "character",
+                              "numeric",   "numeric",   
+                              "logical", "logical",
                               "character"))
 
+
+#Name of time stamp variables
+time_vars <- c("TIMESTAMP_START", "TIMESTAMP_END")
+
+
 #Read site information (lon, lat, elevation)   NOT YET WORKING
-site_info <- read.csv()
+site_info_all <- read.csv(paste(lib_path, "/auxiliary_data/Site_info_tier1_only.csv", sep=""), header=TRUE)
+
+#Extract info for site being processed
+site_info <- site_info_all[which(site_info_all$SiteCode==site_name),]
+
+#Should site be excluded? If so, abort and print reason.
+#This option is set in the site info file (inside auxiliary data folder)
+#Mainly excludes sites with mean annual ET excluding P, implying
+#irrigation or other additional water source.
+if(site_info$Exclude){
+  CheckError(paste("Site not processed. Reason:", site_info$Exclude_reason,
+                   ". This is set in site info file, change >Exclude< options 
+                   in the file to process site"))
+}
 
 
 # Read text file containing flux data:
-DataFromText = ReadTextFluxData(fileinname=infile, vars=vars)
+DataFromText = ReadTextFluxData(fileinname=infile, vars=vars,
+                                time_vars=time_vars)
+
 
 # Make sure whole number of days in dataset:
 CheckSpreadsheetTiming(DataFromText)
 
-# Check which variables are actually present:
-gaps_found <- CheckDataGaps(datain=DataFromText, missing_val=SprdMissingVal) # list of variables, TRUE or FALSE
+# Check if variables have gaps in the time series:
+gaps_found <- CheckDataGaps(datain=DataFromText, missing_val=SprdMissingVal) # returns a list of variables, TRUE or FALSE
+
+
+#Check if gaps are larger than the thresholds set (defaults to >20% time steps missing per year)
+gap_length <- 
+
+  
+  
+#Remove variables if a variable has too many gaps
+#Abort code if any of these essential
+  
+  
+#If gaps are longer than threshold, abort.  
+if(){
+  
+  CheckError(paste())
+  
+}
+  
+  
 
 
 ### Synthesize LWdown if not found, 
 ### and gap-fill otherwise if missing values present
-if(LWdown_fill) DataFromText <- LWdown_check_and_fill(indata=DataFromText, 
-                                                      defaultLWsynthesis=defaultLWsynthesis, 
-                                                      vars=vars, gaps_found=gaps_found)
+if(LWdown_fill) {
+  DataFromText <- LWdown_check_and_fill(indata=DataFromText, 
+                                        defaultLWsynthesis=defaultLWsynthesis, 
+                                        vars=vars, gaps_found=gaps_found)
+}
 
 
-#Remove variables if a variable has too many gaps
-#Abort code if any of these essential
+
+
+
+
+#Gapfill precipitation, air pressure, wind speed and relative humidity 
+# (using VPD) if gaps present using ERA-interim data provided as part of FLUXNET2015
+if(ERA_gapfill){
+  
+  
+  #stop code if can't find ERA-interim data (do this check somewhere earlier in the code....) FIX
+  
+  
+  
+  
+}
+
+  
+
+
 
 
 

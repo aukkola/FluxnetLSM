@@ -5,30 +5,49 @@
 #
 
 # Check the existence of missing values:
-CheckDataGaps <- function(datain, missing_val=SprdMissingVal){
+CheckDataGaps <- function(datain, missing_val=SprdMissingVal,
+                          essential_vars){
   
   gaps_found <- apply(datain$data, MARGIN=2, function(x) any(x==missing_val))
   
-  ### Want to include any of these checks?  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  #  # First check that all essential variables are present:
-  #  if(any(datain$data$SWdown==SprdMissingVal)){
-  #    CheckError('S2: Downward shortwave has missing values.')
-  #  }
-  #  if(any(datain$data$Tair==SprdMissingVal)){
-  #    CheckError('S2: Air temperature has missing values.')
-  #  }
-  #  if(any(datain$data$Qair==SprdMissingVal)){
-  #    CheckError('S2: Humidity has missing values.')
-  #  }
-  #  if(any(datain$data$Wind==SprdMissingVal)){
-  #    CheckError('S2: Windspeed has missing values.')
-  #  }
-  #  if(any(datain$data$Rainf==SprdMissingVal)){
-  #    CheckError('S2: Rainfall has missing values.')
-  #  }
+  #Find indices for each start and end of year
+  secs_per_day   <- 60*60*24
+  tsteps_per_day <- secs_per_day/datain$timestepsize
+  tsteps_per_yr  <- datain$daysPerYr * tsteps_per_day
+  
+  end   <- cumsum(tsteps_per_yr)
+  start <- end - tsteps_per_yr + 1
+  
+    
+  gap_length <- list()
+  #Check how many missing values per year, per variable
+  for(k in 1:length(gaps_found)){
+    
+    data <- datain$data[,k]
+    
+    #Calculate the percentage of data missing each year
+    gap_length[[k]] <- sapply(1:length(start), function(x) 
+                                               length( which(data[start[x]:end[x]] == missing_val)) / 
+                                               length(start[x]:end[x]) * 100)
+  }
+  
+  names(gap_length) <- names(gaps_found)
+  
+  browser()
+  
+  #Check that essential variables have at least one common year of data
+  #without too many gaps
+  
+  
+  #Which years to keep?
+  years_keep
+    
+  
   
   return(gaps_found)  
 }
+
+
 
 #-----------------------------------------------------------------------------
 

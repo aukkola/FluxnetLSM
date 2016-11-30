@@ -9,7 +9,7 @@
 #-----------------------------------------------------------------------------
 
 
-ReadTextFluxData = function(fileinname, vars, essential_vars){
+ReadTextFluxData = function(fileinname, vars, time_vars){
 	# This function reads comma-delimited text files containing
 	# met and flux data from Fluxnet data providers.
   
@@ -17,26 +17,41 @@ ReadTextFluxData = function(fileinname, vars, essential_vars){
   ####### First read available variables, corresponding units and ranges ####
   
 	# Get column names and classes:
-  tcol <- findColIndices(fileinname, var_names=vars$Fluxnet_variable, 
+  tcol <- findColIndices(fileinname=fileinname, 
+                         var_names=vars$Fluxnet_variable, 
                          var_classes=vars$Fluxnet_class, 
-                         essential_vars=vars$Essential)  
+                         essential_vars=vars$Essential_met,
+                         preferred_vars=vars$Preferred_eval,
+                         time_vars=time_vars)  
   
 	# Read flux tower data (skips unwanted columns):
 	FluxData = read.csv(file=fileinname, header=TRUE,	colClasses=tcol$classes)  
   
   #Sanity check, does variable order in file match that specified in tcols?
-  if(any(colnames(data)!=tcol$names)) ErrorCheck("Check variable ordering, variables don't match data retrieved from file")
-
-  #Retrieve units for variables present:
+  if(any(colnames(FluxData) != tcol$all_names)) {
+    ErrorCheck("Check variable ordering, variables don't match data retrieved from file")
+  }
+  
+  
+  #Split time variables from other variables
+  #Extract time stamp data
+  FluxTime <- FluxData[,which(colnames(FluxData)==time_vars)]
+  #Remove time stamp variables from Data variable
+  FluxData <- FluxData[,-which(colnames(FluxData)==time_vars)]
+  
+  
+  #Remove faile
+  
+  #Retrieve original and target units for variables present:
   units <- retrieve_units(vars_present=tcol$names, all_vars=vars)
   
   #Retrieve acceptable variable ranges:
   var_ranges <- retrieve_ranges(vars_present=tcol$names, all_vars=vars)
   
-  #Retrieve long variable names:
-  longnames <- retrieve_longname(vars_present=tcol$names, all_vars=vars)
+  #Retrieve variable attributes (original Fluxnet name, long name and CF name):
+  attributes <- retrieve_atts(vars_present=tcol$names, all_vars=vars)
   
-  #Retrieve variable categories (met/flux):
+  #Retrieve variable categories (met/eval):
   categories <- retrieve_categories(vars_present=tcol$names, all_vars=vars)
   
   #Change column names and tcol$names to match ALMA convention
@@ -45,12 +60,6 @@ ReadTextFluxData = function(fileinname, vars, essential_vars){
   
   
   ###### Get time step and date information #######
-  
-  #Retrieve time stamp variable info
-  timevars <- findTimeInfo(fileinname)
-    
-  #Read time stamp variables
-  FluxTime <- read.csv(file=fileinname, header=TRUE,  colClasses=timevars$classes)  
   
 	# Note number of time steps in data:
 	ntsteps = nrow(FluxTime)
@@ -86,11 +95,11 @@ ReadTextFluxData = function(fileinname, vars, essential_vars){
 	starttime=list(syear=syear,smonth=smonth,sday=sday,shod=shod)
 
   #Create list for function exit:
-	filedata = list(data=FluxData, vars=tcol$names, longnames=longnames,
+	filedata = list(data=FluxData, vars=tcol$names, attributes=attributes,
                   units=units, var_ranges=var_ranges, categories=categories,
                   time=FluxTime, ntsteps=ntsteps, starttime=starttime, 
-                  timestepsize=timestepsize,
-                  ndays=ndays,whole=intyears$whole)
+                  timestepsize=timestepsize, daysPerYr=intyears$daysperyear,
+                  ndays=ndays, whole=intyears$whole)
 
   return(filedata)
 
@@ -235,6 +244,15 @@ CreateFluxNcFile = function(fluxfilename, datain,
   
   
   ## NEEDS SORTING OUT, NOT SURE WHAT the attribute commands are about !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  
+  #Add original Fluxnet variable name to file
+  lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]], 
+                                                   att_name="Fluxnet_name", attval=  xxxx))  #complete !!!!!
+
+  #Add CF-compliant name to file
+  lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]], 
+                                                   att_name="CF_name", attval=  xxxx))  #complete !!!!!
+  
   
   #	ncvar_put(ncid,SWdown,vals=datain$data$SWdown)
   #	ncatt_put(ncid,SWdown,attname='CF_name',attval='surface_downwelling_shortwave_flux_in_air')
@@ -396,7 +414,16 @@ CreateMetNcFile = function(metfilename, datain,
   
     
   ## NEEDS SORTING OUT, NOT SURE WHAT the attribute commands are about !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  
+  	
+	#Add original Fluxnet variable name to file
+	lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]], 
+                                                   att_name="Fluxnet_name", attval=  xxxx))  #complete !!!!!
+	
+	#Add CF-compliant name to file
+	lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]], 
+                                                   att_name="CF_name", attval=  xxxx))  #complete !!!!!
+	
+	
 #	ncvar_put(ncid,SWdown,vals=datain$data$SWdown)
 #	ncatt_put(ncid,SWdown,attname='CF_name',attval='surface_downwelling_shortwave_flux_in_air')
 #	if(! found$PSurf){
