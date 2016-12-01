@@ -6,7 +6,8 @@
 
 # Check the existence of missing values:
 CheckDataGaps <- function(datain, missing_val=SprdMissingVal,
-                          essential_vars){
+                          threshold,
+                          essential_met, preferred_eval){
   
   gaps_found <- apply(datain$data, MARGIN=2, function(x) any(x==missing_val))
   
@@ -33,23 +34,121 @@ CheckDataGaps <- function(datain, missing_val=SprdMissingVal,
   
   names(gap_length) <- names(gaps_found)
   
-  browser()
-  
-  #Check that essential variables have at least one common year of data
-  #without too many gaps
   
   
-  #Which years to keep?
-  years_keep
+  ### Check that essential variables have at least one common year of data
+  ### without too many gaps 
+  ### and the year has one or more evaluation variables available
+  
+  essential_ind <- sapply(essential_met, function(x) which(names(gap_length) == x))
+  preferred_ind <- sapply(preferred_eval, function(x) which(names(gap_length) == x))
+
+  yr_keep <- vector()
+  
+  #Loop through years
+  for(k in 1:length(start)){
+    
+    #Extract gap lengths for the year
+    gaps <- sapply(gap_length, function(x) x[k])
+    
+    #If any essential variables, or all evaluation variables, 
+    #have too many missing values, skip year
+    if(any(gaps[essential_ind] > threshold) | all(gaps[preferred_ind] > threshold))
+    {
+      yr_keep[k] <- FALSE
+    
+    #Else, process year
+    } else {
+      yr_keep[k] <- TRUE
+    }
+    
+  }
+  
+  
+  
+  ### If no years fulfilling criteria, abort. ###
+  if(all(!yr_keep)){
+    CheckError("No years to process, too many gaps present. Aborting.")
+  }
+  
+  
+  #Indices of year(s) to keep
+  yr_ind <- which(yr_keep)
+    
+  #Are all years consecutive? If not, need to split site to
+  #multiple files. Determine which years are consecutive
+  #and how many files need to create
+  
+  ## only one year
+  if(length(yr_ind)==1){  
+  
+    consec <- 1    
+  
+    #determine start and end of time series
+    tstart <- start[yr_ind]
+    tend   <- start[yr_ind]
+    
+  ## two or more years that are not consecutive
+  } else if (any(diff(yr_ind) > 1)) { 
+    
+    #Find non-consecutive instances
+    breaks <- seqToIntervals(yr_ind)
+    
+    #Create an index vector for grouping years
+    consec <- vector()
+    tstart <- vector()
+    tend   <- vector()
+    
+    for(c in 1:(nrow(breaks))){
+      
+      consec <- append(consec, rep(c, times=breaks[c,2] - breaks[c,1] + 1))
+
+      #determine start and end of time series
+      tstart[c] <- start[breaks[c,1]]
+      tend[c]   <- end[breaks[c,2]]
+        
+    }
+    
+  ## multiple years but all consecutive
+  } else { 
+    
+    consec <- rep(1, length(yr_ind))
+  
+    #determine start and end of time series
+    tstart <- start[yr_ind[1]]
+    tend   <- start[yr_ind[length(yr_ind)]]
+    
+  }
     
   
   
-  return(gaps_found)  
+  return(list(gap_length=gap_length, yr_keep=yr_ind, consec=consec, tseries_start=tstart, tseries_end=tend))
 }
 
 
 
 #-----------------------------------------------------------------------------
+
+GapfillMet <- function(datain, era_data){
+  
+  #ERAinterim estimates are provided for 
+  
+  
+  
+  if xx$ALMA_variable == "RelH"
+  #convert ERAinterim VPD to relative humidity
+  
+  
+  
+  
+}
+
+
+#-----------------------------------------------------------------------------
+
+
+
+
 
 CheckSpreadsheetTiming = function(DataFromText) {
   # Checks that uploaded spreadsheet data is compatible 

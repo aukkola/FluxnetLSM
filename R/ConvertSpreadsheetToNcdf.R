@@ -15,8 +15,11 @@ infile <- "~/Documents/FLUXNET2016_processing/FLX_AU-How_FLUXNET2015_FULLSET_HH_
 
 
 #ERA input file (needed if using ERAinterim to gapfill met variables)
-era_file <- ""
+era_file <- "~/Documents/FLUXNET2016_processing/FLX_AU-How_FLUXNET2015_ERAI_HH_1989-2014_1-3.csv"
 
+
+#How many percent of time steps allowed to be missing in any given year?
+threshold <- 20
 
 
 #output file
@@ -82,24 +85,15 @@ DataFromText = ReadTextFluxData(fileinname=infile, vars=vars,
 CheckSpreadsheetTiming(DataFromText)
 
 # Check if variables have gaps in the time series:
-gaps_found <- CheckDataGaps(datain=DataFromText, missing_val=SprdMissingVal) # returns a list of variables, TRUE or FALSE
+gaps  <- CheckDataGaps(datain = DataFromText, missing_val = SprdMissingVal,
+                            threshold = threshold,
+                            essential_met = vars$ALMA_variable[which(vars$Essential_met)],
+                            preferred_eval = vars$ALMA_variable[which(vars$Preferred_eval)]) 
 
-
-#Check if gaps are larger than the thresholds set (defaults to >20% time steps missing per year)
-gap_length <- 
-
   
   
-#Remove variables if a variable has too many gaps
-#Abort code if any of these essential
+#Remove evaluation variables that have too many gaps
   
-  
-#If gaps are longer than threshold, abort.  
-if(){
-  
-  CheckError(paste())
-  
-}
   
   
 
@@ -121,6 +115,8 @@ if(LWdown_fill) {
 # (using VPD) if gaps present using ERA-interim data provided as part of FLUXNET2015
 if(ERA_gapfill){
   
+  era_data <- read.csv(era_file, header=TRUE)
+  
   
   #stop code if can't find ERA-interim data (do this check somewhere earlier in the code....) FIX
   
@@ -136,11 +132,13 @@ if(ERA_gapfill){
 
 
 
+
 # Change units:  NOT YET WORKING
+# also add specific humidity variable
 ConvertedData <- ChangeUnits(DataFromText, site_info$elevation)
 
 
-# Run preliminary tests on data:   #NOT YET WORKING
+# Check that data are within acceptable ranges:   #NOT YET WORKING
 CheckTextDataRanges(ConvertedData)
 
 

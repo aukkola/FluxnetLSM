@@ -36,10 +36,13 @@ ChangeUnits = function(datain,elevation,humidity_type='relative',pressure_type='
     datain$data$Snowf = datain$data$Snowf/timestepsize
   }
   
+  
   if(humidity_type=='relative'){
     # Relative to specific humidity:
     datain$data$Qair = Rel2SpecHum(datain$data$Qair,
                                    datain$data$Tair,datain$data$PSurf)
+    
+    
   }else if(humidity_type=='absolute'){
     # Absolute to specific humidity:
     datain$data$Qair = Abs2SpecHum(datain$data$Qair,
