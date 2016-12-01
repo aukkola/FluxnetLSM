@@ -32,7 +32,7 @@ datasetname <- "Fluxnet2015"
 datasetversion <- "Nov16"
 
 #Synthesize LWdown?
-LWdown_synthesize <- TRUE
+LWdown_synthesize <- FALSE
 
 defaultLWsynthesis <- 'Abramowitz (2012)' # 'Brutsaert (1975)' or 'Swinbank (1963)' or 'Abramowitz (2012)'
 
@@ -100,7 +100,9 @@ gaps  <- CheckDataGaps(datain = DataFromText, missing_val = SprdMissingVal,
 
 ### Synthesize LWdown if not found, 
 ### and gap-fill otherwise if missing values present
-if(LWdown_fill) {
+if(LWdown_synthesize) {
+  
+  
   DataFromText <- LWdown_check_and_fill(indata=DataFromText, 
                                         defaultLWsynthesis=defaultLWsynthesis, 
                                         vars=vars, gaps_found=gaps_found)
@@ -115,13 +117,17 @@ if(LWdown_fill) {
 # (using VPD) if gaps present using ERA-interim data provided as part of FLUXNET2015
 if(ERA_gapfill){
   
-  era_data <- read.csv(era_file, header=TRUE)
+  era_data <- read.csv(era_file, header=TRUE, colClasses=c("character", "character", 
+                                                           rep("numeric", 7)))
+  
+  #Find indices for met variables
+  ind <- which(DataFromText$categories=="Met")
+  
+  temp_data <- GapfillMet(datain=DataFromText$data[,ind])
   
   
-  #stop code if can't find ERA-interim data (do this check somewhere earlier in the code....) FIX
-  
-  
-  
+  DataFromText$data[,which(DataFromText$categories=="Met")]
+    
   
 }
 
@@ -140,6 +146,11 @@ ConvertedData <- ChangeUnits(DataFromText, site_info$elevation)
 
 # Check that data are within acceptable ranges:   #NOT YET WORKING
 CheckTextDataRanges(ConvertedData)
+
+
+
+#Determine number of files to be written
+no_files <-
 
 
 
