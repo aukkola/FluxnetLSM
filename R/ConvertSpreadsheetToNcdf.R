@@ -5,6 +5,7 @@
 #
 # Gab Abramowitz UNSW 2012 (palshelp at gmail dot com)
 
+library(R.utils)
 #NEED TO SET THESE ELSEWHERE IN FINAL CODE !!!!!!!!!
 
 #path
@@ -120,12 +121,29 @@ if(ERA_gapfill){
   era_data <- read.csv(era_file, header=TRUE, colClasses=c("character", "character", 
                                                            rep("numeric", 7)))
   
+  
+  #ERAinterim data provided for 1989-2014, need to extract common years with flux obs
+  #Find start and end
+  obs_start <- DataFromText$time$TIMESTAMP_START
+  start_era <- which(era_data$TIMESTAMP_START == obs_start[1])
+  end_era   <- which(era_data$TIMESTAMP_START == obs_start[length(obs_start)])
+  #Extract
+  era_data  <- era_data[start_era:end_era,]
+  
+
   #Find indices for met variables
   ind <- which(DataFromText$categories=="Met")
   
-  temp_data <- GapfillMet(datain=DataFromText$data[,ind])
+  #Retrieve VPD and air temp units. Used to convert VPD to RH in gapfill function
+  tair_units <- DataFromText$units$original_units[which(DataFromText$vars=="Tair")]
+  vpd_units  <- DataFromText$units$original_units[which(DataFromText$vars=="VPD")]
+  
+  temp_data <- GapfillMet(datain=DataFromText$data[,ind], era_data=era_data,
+                          tair_units=tair_units, vpd_units=vpd_units)
   
   
+  
+  #Replace original met variables with gap-filled variables
   DataFromText$data[,which(DataFromText$categories=="Met")]
     
   

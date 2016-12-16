@@ -56,6 +56,8 @@ ChangeUnits = function(datain,elevation,humidity_type='relative',pressure_type='
 
 #-----------------------------------------------------------------------------
 
+
+#NEED TO CHECK THIS FUNCTION AND ADD A REFERENCE  !!!!!!!!!!!!!
 VPD2RelHum <- function(VPD, Tair, vpd_units, tair_units){
   
   #Check that VPD in Pascals

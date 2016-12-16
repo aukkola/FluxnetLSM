@@ -129,24 +129,26 @@ CheckDataGaps <- function(datain, missing_val=SprdMissingVal,
 
 #-----------------------------------------------------------------------------
 
-GapfillMet <- function(datain, era_data){
+GapfillMet <- function(datain, era_data, tair_units, 
+                       vpd_units){
   
   #ERAinterim estimates are provided for TA, SW_in,
   #LW_IN, VPD, PA, P and WS
   #Gapfill met data using these estimates
   
+  #Check that Fluxnet and ERA data dimensions agree
   
-  #Check that Fluxnet and ERA data dimensions afree
+  if(nrow(datain$data) != nrow(era_data)) {
+    CheckError("Observed flux data and ERAinterim data dimensions do not match, aborting.")
+  }
   
   
+  browser()
   
-  if xx$ALMA_variable == "RelH"
+  #if xx$ALMA_variable == "RelH"
   
   #convert ERAinterim VPD to relative humidity
-  vpd_units  <- datain$units$original_units[which(datain$vars=="VPD")]
-  tair_units <- datain$units$original_units[which(datain$vars=="Tair")]
-
-  era_relH <-  VPD2RelHum(...      vpd_units=vpd_units, tair_units=tair_units)
+ # era_relH <-  VPD2RelHum(...      vpd_units=vpd_units, tair_units=tair_units)
   
   
   
