@@ -11,6 +11,16 @@ library(R.utils)
 #path
 lib_path <- "~/Documents/FLUXNET2016_processing/scripts/R"
 
+
+source(paste(lib_path, "/functions/Constants.R", sep=""))
+source(paste(lib_path, "/functions/Timing_general.R", sep=""))
+source(paste(lib_path, "/functions/Conversions.R", sep=""))
+source(paste(lib_path, "/functions/UtilityFunctions.R", sep=""))
+source(paste(lib_path, "/functions/Check_and_Gapfill.R", sep=""))
+source(paste(lib_path, "/functions/Timing_netcdf.R", sep=""))
+source(paste(lib_path, "/functions/FluxtowerSpreadsheetToNc.R", sep=""))
+
+
 #input filename
 infile <- "~/Documents/FLUXNET2016_processing/FLX_AU-How_FLUXNET2015_FULLSET_HH_2001-2014_1-3.csv"
 
@@ -127,24 +137,32 @@ if(ERA_gapfill){
   obs_start <- DataFromText$time$TIMESTAMP_START
   start_era <- which(era_data$TIMESTAMP_START == obs_start[1])
   end_era   <- which(era_data$TIMESTAMP_START == obs_start[length(obs_start)])
-  #Extract
+  #Extract correct time steps
   era_data  <- era_data[start_era:end_era,]
   
 
-  #Find indices for met variables
+  #Find indices for met variables to be gapfilled
   ind <- which(DataFromText$categories=="Met")
   
-  #Retrieve VPD and air temp units. Used to convert VPD to RH in gapfill function
+  #Retrieve VPD and air temp units. Used to convert ERAinterim VPD to RH in gapfill function
   tair_units <- DataFromText$units$original_units[which(DataFromText$vars=="Tair")]
   vpd_units  <- DataFromText$units$original_units[which(DataFromText$vars=="VPD")]
   
+  
+  #Gapfill met variables
   temp_data <- GapfillMet(datain=DataFromText$data[,ind], era_data=era_data,
-                          tair_units=tair_units, vpd_units=vpd_units)
+                          era_vars=DataFromText$era_vars[ind],
+                          tair_units=tair_units, vpd_units=vpd_units,
+                          missing_val=SprdMissingVal)
   
   
   
   #Replace original met variables with gap-filled variables
-  DataFromText$data[,which(DataFromText$categories=="Met")]
+  DataFromText$data[,ind] <- 
+    
+    
+    
+    
     
   
 }

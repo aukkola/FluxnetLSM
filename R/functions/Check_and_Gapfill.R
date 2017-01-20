@@ -129,37 +129,67 @@ CheckDataGaps <- function(datain, missing_val=SprdMissingVal,
 
 #-----------------------------------------------------------------------------
 
-GapfillMet <- function(datain, era_data, tair_units, 
-                       vpd_units){
+GapfillMet <- function(datain, era_data, era_vars,
+                       tair_units, vpd_units,
+                       missing_val){
   
   #ERAinterim estimates are provided for TA, SW_in,
   #LW_IN, VPD, PA, P and WS
-  #Gapfill met data using these estimates
+  #Gapfill observed met data using these estimates
+  
   
   #Check that Fluxnet and ERA data dimensions agree
-  
-  if(nrow(datain$data) != nrow(era_data)) {
+  if(nrow(datain) != nrow(era_data)) {
     CheckError("Observed flux data and ERAinterim data dimensions do not match, aborting.")
   }
   
   
-  browser()
+  #List available ERA variables
+  avail_era  <- era_vars[which(!is.na(era_vars))]
+  avail_flux <- names(avail_era)
   
-  #if xx$ALMA_variable == "RelH"
+  #Loop through available variables
+  for(k in 1:length(avail_era)){
+    
+    #Find flux data column index and ERAinterim column index
+    #for variable being processed
+    flx_col <- which(colnames(datain)==avail_flux[k])
+    
+    era_name <- era_vars[which(names(era_vars)==avail_flux[k])] #corresponding ERA variable name
+    era_col <- which(colnames(era_data)==era_name)
+    
+    #If gaps in met data variable, gapfill
+    if(any(datain[,flx_col]==missing_val)){
+      
+      #FInd missing values
+      missing <- which(datain[,flx_col]==missing_val)
+      
+      #If Flux variable relative humidity, but ERA variable VPD, convert
+      if(avail_flux[k] == "RelH" & era_name=="VPD_ERA"){
+        
+        # Convert ERAinterim VPD to relative humidity
+        era_rh <-  VPD2RelHum(era_data[,era_col], vpd_units=vpd_units, tair_units=tair_units) 
+        
+        #Gapfill
+        datain[missing,flx_col] <- era_rh[missing]
+          
+      #Other variables: ERAinterim equivalent should exist, use that directly
+      } else {
+        
+        #Gapfill
+        datain[missing,flx_col] <- era_data[missing, era_col]
+        
+      }
+        
+    } #if
+  } #vars
   
-  #convert ERAinterim VPD to relative humidity
- # era_relH <-  VPD2RelHum(...      vpd_units=vpd_units, tair_units=tair_units)
+  return(datain)
   
-  
-  
-}
+} #function
 
 
 #-----------------------------------------------------------------------------
-
-
-
-
 
 CheckSpreadsheetTiming = function(DataFromText) {
   # Checks that uploaded spreadsheet data is compatible 

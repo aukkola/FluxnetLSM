@@ -54,6 +54,9 @@ ReadTextFluxData = function(fileinname, vars, time_vars){
   #Retrieve variable categories (met/eval):
   categories <- retrieve_categories(vars_present=tcol$names, all_vars=vars)
   
+  #Retrieve names of ERAinterim variables
+  era_vars <- retrieve_ERAvars(vars_present=tcol$names, all_vars=vars)
+    
   #Change column names and tcol$names to match ALMA convention
   tcol$names         <- rename_vars(vars_present=tcol$names, all_vars=vars)
   colnames(FluxData) <- tcol$names
@@ -95,7 +98,8 @@ ReadTextFluxData = function(fileinname, vars, time_vars){
 	starttime=list(syear=syear,smonth=smonth,sday=sday,shod=shod)
 
   #Create list for function exit:
-	filedata = list(data=FluxData, vars=tcol$names, attributes=attributes,
+	filedata = list(data=FluxData, vars=tcol$names, era_vars=era_vars, 
+                  attributes=attributes,
                   units=units, var_ranges=var_ranges, categories=categories,
                   time=FluxTime, ntsteps=ntsteps, starttime=starttime, 
                   timestepsize=timestepsize, daysPerYr=intyears$daysperyear,

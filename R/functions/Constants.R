@@ -82,7 +82,7 @@ findColIndices = function(fileinname, var_names, var_classes,
   
   #List outputs
   tcols <- list(names=var_names, time_names=time_info$names, 
-                all_names=all_vars, classes=columnclasses, 
+                all_names=all_vars, classes=columnClasses, 
                 failed_vars=failed_vars)
   
   return(tcols)
@@ -188,6 +188,20 @@ retrieve_categories <- function(vars_present, all_vars){
   ind_present <- sapply(vars_present, function(x) which(all_vars$Fluxnet_variable==x))
   
   cat <- all_vars$Category[ind_present]
+  names(cat) <- all_vars$ALMA_variable[ind_present]
+  
+  return(cat)
+}
+
+#-----------------------------------------------------------------------------
+
+#Retrieve names of ERAinterim variables
+retrieve_ERAvars <- function(vars_present, all_vars){
+  
+  #Find index for fluxnet variables present in file
+  ind_present <- sapply(vars_present, function(x) which(all_vars$Fluxnet_variable==x))
+  
+  cat <- all_vars$ERAinterim_variable[ind_present]
   names(cat) <- all_vars$ALMA_variable[ind_present]
   
   return(cat)
