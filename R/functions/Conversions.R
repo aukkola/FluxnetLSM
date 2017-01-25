@@ -37,10 +37,15 @@ ChangeUnits = function(datain,elevation,humidity_type='relative',pressure_type='
   }
   
   
+  
+  
   if(humidity_type=='relative'){
     # Relative to specific humidity:
     datain$data$Qair = Rel2SpecHum(datain$data$Qair,
                                    datain$data$Tair,datain$data$PSurf)
+    
+    
+    
     
     
   }else if(humidity_type=='absolute'){
@@ -48,6 +53,11 @@ ChangeUnits = function(datain,elevation,humidity_type='relative',pressure_type='
     datain$data$Qair = Abs2SpecHum(datain$data$Qair,
                                    datain$data$Tair,datain$data$PSurf)
   }
+  
+  
+  
+  
+  
   
   
   return(datain)
@@ -61,22 +71,26 @@ ChangeUnits = function(datain,elevation,humidity_type='relative',pressure_type='
 VPD2RelHum <- function(VPD, Tair, vpd_units, tair_units){
   
   #Check that VPD in Pascals
-  if(units.... !="hPa"){
+  if(vpd_units != "hPa"){
     CheckError("Cannot convert VPD to relative humidity. VPD units not recognised,
                expecting VPD in hectopascals")
   }
     
   #Check that temperature in Celcius. Convert if not
-  if()
+  if(tair_units=="K"){
+    Tair <- Tair-273.15
+  }
     
   #Hectopascal to Pascal
   hPa_2_Pa <- 100
   
-  #Saturation vapour pressure (Pa)
-  esat <- 610.78*exp( 17.27*tempC / (tempC + 237.3) )
+  #Saturation vapour pressure (Pa).
+  #From Jones (1992), Plants and microclimate: A quantitative approach 
+  #to environmental plant physiology, p110
+  esat <- 613.75 * exp(17.502 * Tair / (240.97+Tair))
   
   #Relative humidity (%)
-  RelHum <- 100 * (1 - (VPD * hPa_2_Pa)/esat)
+  RelHum <- 100 * (1 - (VPD * hPa_2_Pa) / esat)
   
   return(RelHum)
 }

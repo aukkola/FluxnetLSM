@@ -32,6 +32,8 @@ era_file <- "~/Documents/FLUXNET2016_processing/FLX_AU-How_FLUXNET2015_ERAI_HH_1
 #How many percent of time steps allowed to be missing in any given year?
 threshold <- 20
 
+#Minimum numbers of years to process
+min_yrs <- 2
 
 #output file
 metfilename <- "~/Documents/FLUXNET2016_processing/output_test_met.nc"
@@ -113,7 +115,6 @@ gaps  <- CheckDataGaps(datain = DataFromText, missing_val = SprdMissingVal,
 ### and gap-fill otherwise if missing values present
 if(LWdown_synthesize) {
   
-  
   DataFromText <- LWdown_check_and_fill(indata=DataFromText, 
                                         defaultLWsynthesis=defaultLWsynthesis, 
                                         vars=vars, gaps_found=gaps_found)
@@ -124,13 +125,12 @@ if(LWdown_synthesize) {
 
 
 
-#Gapfill precipitation, air pressure, wind speed and relative humidity 
-# (using VPD) if gaps present using ERA-interim data provided as part of FLUXNET2015
+###--- Gapfill meteorological variables ---### 
+# gapfill using ERA-interim data provided as part of FLUXNET2015
 if(ERA_gapfill){
   
   era_data <- read.csv(era_file, header=TRUE, colClasses=c("character", "character", 
                                                            rep("numeric", 7)))
-  
   
   #ERAinterim data provided for 1989-2014, need to extract common years with flux obs
   #Find start and end
@@ -148,7 +148,6 @@ if(ERA_gapfill){
   tair_units <- DataFromText$units$original_units[which(DataFromText$vars=="Tair")]
   vpd_units  <- DataFromText$units$original_units[which(DataFromText$vars=="VPD")]
   
-  
   #Gapfill met variables
   temp_data <- GapfillMet(datain=DataFromText$data[,ind], era_data=era_data,
                           era_vars=DataFromText$era_vars[ind],
@@ -156,21 +155,18 @@ if(ERA_gapfill){
                           missing_val=SprdMissingVal)
   
   
+  #Check that column names of temp_data and data to be replaced match. Stop if not
+  if(!all(colnames(temp_data)==colnames(DataFromText$data[,ind])){
+    CheckError("Error gap-filling met data with ERAinterim. Column names of data to be replaced don't match")
+  }
+  
   
   #Replace original met variables with gap-filled variables
-  DataFromText$data[,ind] <- 
-    
-    
-    
-    
-    
+  DataFromText$data[,ind] <- temp_data
   
 }
 
   
-
-
-
 
 
 
@@ -190,27 +186,37 @@ no_files <-
 
 
 
+# TO DO: !!!!!!!!
 
-# Create netcdf met driving file: NOT YET CONVERTING DATA, CHANGE indata VARIABLE ONCE DONE THAT !!!!!!!!!!!!!!
-CreateMetNcFile(metfilename=metfilename, datain=DataFromText, 
-                latitude=NA, longitude=NA, 
-                datasetname=datasetname, datasetversion=datasetversion, 
-                defaultLWsynthesis=defaultLWsynthesis, 
-                starttime=DataFromText$starttime, 
-                timestepsize=DataFromText$timestepsize,
-                elevation=NA, measurementheight=NA, canopyheight=NA,
-                vegetationtype=NA, utcoffset=NA, avprecip=NA, avtemp=NA)
+#write years to output file name  !!!!!!!!!!!!!!
+   
+#write github revision number in netcdf attributes  
+  
 
-
-# Create netcdf flux data file:
-CreateFluxNcFile(fluxfilename=fluxfilename, datain=DataFromText, 
-                 latitude=NA, longitude=NA, 
-                 datasetname=datasetname, datasetversion=datasetversion, 
-                 starttime=DataFromText$starttime, 
-                 timestepsize=DataFromText$timestepsize,
-                 elevation=NA, measurementheight=NA, canopyheight=NA,
-                 vegetationtype=NA, utcoffset=NA, avprecip=NA, avtemp=NA)
-                 
-
+for(k in 1:no_files){
+  
+  # Create netcdf met driving file: NOT YET CONVERTING DATA, CHANGE indata VARIABLE ONCE DONE THAT !!!!!!!!!!!!!!
+  CreateMetNcFile(metfilename=metfilename, datain=DataFromText, 
+                  latitude=NA, longitude=NA, 
+                  datasetname=datasetname, datasetversion=datasetversion, 
+                  defaultLWsynthesis=defaultLWsynthesis, 
+                  starttime=DataFromText$starttime, 
+                  timestepsize=DataFromText$timestepsize,
+                  elevation=NA, measurementheight=NA, canopyheight=NA,
+                  vegetationtype=NA, utcoffset=NA, avprecip=NA, avtemp=NA)
+  
+  
+  # Create netcdf flux data file:
+  CreateFluxNcFile(fluxfilename=fluxfilename, datain=DataFromText, 
+                   latitude=NA, longitude=NA, 
+                   datasetname=datasetname, datasetversion=datasetversion, 
+                   starttime=DataFromText$starttime, 
+                   timestepsize=DataFromText$timestepsize,
+                   elevation=NA, measurementheight=NA, canopyheight=NA,
+                   vegetationtype=NA, utcoffset=NA, avprecip=NA, avtemp=NA)
+  
+  
+}  
+  
 
 

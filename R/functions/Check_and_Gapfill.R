@@ -161,23 +161,35 @@ GapfillMet <- function(datain, era_data, era_vars,
     #If gaps in met data variable, gapfill
     if(any(datain[,flx_col]==missing_val)){
       
-      #FInd missing values
+      #FInd missing values to fill
       missing <- which(datain[,flx_col]==missing_val)
       
+      
+      ### Relative humidity ###
       #If Flux variable relative humidity, but ERA variable VPD, convert
       if(avail_flux[k] == "RelH" & era_name=="VPD_ERA"){
         
-        # Convert ERAinterim VPD to relative humidity
-        era_rh <-  VPD2RelHum(era_data[,era_col], vpd_units=vpd_units, tair_units=tair_units) 
+        era_tair_col <- which(colnames(era_data)=="TA_ERA")
         
+        if(length(era_tair_col) == 0){
+          CheckError("Cannot find ERAinterim air temperature data. 
+                     Cannot convert ERA VPD to relative humidity")
+        }
+        
+        # Convert ERAinterim VPD to relative humidity
+        # Assuming that ERA vpd and tair units the same as observed units
+        era_rh <-  VPD2RelHum(VPD=era_data[,era_col], Tair=era_data[,era_tair_col], 
+                              vpd_units=vpd_units, tair_units=tair_units) 
+                  
         #Gapfill
         datain[missing,flx_col] <- era_rh[missing]
           
-      #Other variables: ERAinterim equivalent should exist, use that directly
+      ### Other variables ###
+      #ERAinterim equivalent should exist, use that directly
       } else {
         
         #Gapfill
-        datain[missing,flx_col] <- era_data[missing, era_col]
+        datain[missing, flx_col] <- era_data[missing, era_col]
         
       }
         
