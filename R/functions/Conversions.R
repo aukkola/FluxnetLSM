@@ -4,59 +4,91 @@
 #
 # Gab Abramowitz UNSW 2014 (palshelp at gmail dot com)
 
-### Unit conversions from Fluxnet to ALMA units ###
 
-ChangeUnits = function(datain,elevation,humidity_type='relative',pressure_type='mbar'){
-  # Performs units changes from flux data provider
-  # template units to netcdf met/flux file units.
-  # First calculate timestep size:
-  timestepsize = 
-    (datain$data$LocHoD[2] - datain$data$LocHoD[1])*3600
+ChangeUnits = function(datain){
   
-  # Temperature from C to K:
-  datain$data$Tair = datain$data$Tair + zeroC
-  if(found$PSurf){
-    if(pressure_type=='mbar'){
-      # Pressure from mbar to Pa
-      datain$data$PSurf = Mbar2Pa(datain$data$PSurf)
-    }else if(pressure_type=='kpa'){
-      # Pressure from kpa to Pa
-      datain$data$PSurf = datain$data$PSurf*1000
+  ### Unit conversions from original Fluxnet to target ALMA units ###
+  
+  #Loop through variables. If original and target units do not match,
+  #convert (or return error if conversion between units not known)
+
+  flx_units  <- datain$units$original_units
+  alma_units <- datain$units$target_units
+  
+  
+  #Save timestep size (in seconds):
+  tstep <- datain$timestepsize
+  
+  
+  #track if variable converted or not
+  #used if a conversion relies on several variables
+  #which may or may not have been converted already
+  converted <- rep(FALSE, length(flx_units))
+  
+  
+  for(k in 1:length(flx_units)){
+    
+    
+    #Check if units match, convert if not
+    if(flx_units[k] != alma_units[k]){
+      
+      
+      ## Air temperature (C to K)
+      if(datain$vars[k]=="Tair" & flx_units[k]=="C" & alma_units[k]=="K"){
+        datain$data[[k]] <- datain$data[[k]] + 273.15
+        
+        
+      ## CO2: different but equivalent units, do nothing
+      } else if(datain$vars[k]=="CO2air" & flx_units[k]=="umolCO2/mol" & alma_units[k]=="ppm"){
+        next
+        
+
+      ## Rainfall (mm/timestep to mm/s)
+      } else if(datain$vars[k]=="Rainf" & flx_units[k]=="mm" & alma_units[k]=="mm/s"){
+        datain$data[[k]] <- datain$data[[k]] / tstep
+        
+        
+      ## Air pressure (kPa to Pa)
+      } else if(datain$vars[k]=="PSurf" & flx_units[k]=="kPa" & alma_units[k]=="Pa"){  
+        datain$data[[k]] <- datain$data[[k]] * 1000
+        
+        
+      ## Qair (in kg/kg, calculate from tair, rel humidity and psurf)
+      } else if(datain$vars[k]=="Qair" & flx_units[k]=="%" & alma_units[k]=="kg/kg"){  
+        
+        #Find Tair and PSurf units
+        psurf_units <- flx_units[which(datain$vars=="PSurf")]
+        tair_units  <- flx_units[which(datain$vars=="Tair")]
+        
+        #If already converted, reset units to new converted units
+        if(converted[which(datain$vars=="PSurf")]) {
+          psurf_units <- alma_units[which(datain$vars=="PSurf")]         
+        } else if (converted[which(datain$vars=="Tair")]){
+          tair_units <- alma_units[which(datain$vars=="Tair")]
+        }          
+          
+        datain$data[[k]] <- Rel2SpecHum(relHum=datain$data[[which(datain$vars=="RH")]], 
+                                        Tair=datain$data[[which(datain$vars=="Tair")]], 
+                                        tair_units=tair_units, 
+                                        PSurf=datain$data[[which(datain$vars=="PSurf")]], 
+                                        psurf_units=psurf_units)
+        
+        
+      ## If cannot find conversion, abort  
+      } else {
+        CheckError(paste("Unknown unit conversion, cannot convert between original 
+                         Fluxnet and ALMA units, check variable:", datain$vars[k], ". 
+                         Available conversions: air temp C to K, rainfall mm to mm/s,
+                         air pressure kPa to Pa, humidity from relative (%) to specific (kg/kg)"))
+      }
+        
+
+      #Set to TRUE after converting variable  
+      converted[k] <- TRUE
+
     }
-  }else{
-    # Synthesize PSurf based on temperature and elevation
-    datain$data$PSurf = SynthesizePSurf(datain$data$Tair,elevation)
-    datain$data$PSurfFlag = 0 # i.e. all gap-filled
-  }
-  
-  # Rainfall from mm/timestep to mm/s
-  datain$data$Rainf = datain$data$Rainf/timestepsize
-  if(found$Snowf){
-    # Snowfall from mm/timestep to mm/s
-    datain$data$Snowf = datain$data$Snowf/timestepsize
-  }
-  
-  
-  
-  
-  if(humidity_type=='relative'){
-    # Relative to specific humidity:
-    datain$data$Qair = Rel2SpecHum(datain$data$Qair,
-                                   datain$data$Tair,datain$data$PSurf)
+  } #variables
     
-    
-    
-    
-    
-  }else if(humidity_type=='absolute'){
-    # Absolute to specific humidity:
-    datain$data$Qair = Abs2SpecHum(datain$data$Qair,
-                                   datain$data$Tair,datain$data$PSurf)
-  }
-  
-  
-  
-  
   
   
   
@@ -67,8 +99,9 @@ ChangeUnits = function(datain,elevation,humidity_type='relative',pressure_type='
 #-----------------------------------------------------------------------------
 
 
-#NEED TO CHECK THIS FUNCTION AND ADD A REFERENCE  !!!!!!!!!!!!!
 VPD2RelHum <- function(VPD, Tair, vpd_units, tair_units){
+
+  #Converts VPD (hPa) to relative humidity (%)
   
   #Check that VPD in Pascals
   if(vpd_units != "hPa"){
@@ -98,17 +131,36 @@ VPD2RelHum <- function(VPD, Tair, vpd_units, tair_units){
 
 #-----------------------------------------------------------------------------
 
-Rel2SpecHum = function(relHum,tk,PSurf){
+Rel2SpecHum <- function(relHum, Tair, tair_units, PSurf){
   # Converts relative humidity to specific humidity.
-  # tk - T in Kelvin; PSurf in Pa; relHum as %
-  tempC = tk - zeroC
-  # Sat vapour pressure in Pa
-  esat = 610.78*exp( 17.27*tempC / (tempC + 237.3) )
+  # required units: Tair - temp in C; PSurf in Pa; relHum as %
+  
+  #Check that temperature in Celcius. Convert if not
+  if(tair_units=="K"){
+    Tair <- Tair-273.15
+  } else if(tair_units != "C"){
+    CheckError("Unknown air temperature units, cannot convert relative to specific humidity")
+  }
+  
+  #Check that PSurf is in Pa. Convert if not
+  if(psurf_units=="kPa"){
+    PSurf <- PSurf * 1000
+  } else if(psurf_units != "Pa"){
+    CheckError("Unknown air pressure units, cannot convert relative to specific humidity")
+  }
+  
+  
+  # Sat vapour pressure in Pa (reference as above)
+  esat <- 613.75 * exp(17.502 * Tair / (240.97+Tair))
+  
   # Then specific humidity at saturation:
-  ws = 0.622*esat/(PSurf - esat)
+  ws <- 0.622*esat/(PSurf - esat)
+  
   # Then specific humidity:
-  specHum = (relHum/100) * ws
+  specHum <- (relHum/100) * ws
   
   return(specHum)
 }
+
+
 

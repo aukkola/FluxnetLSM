@@ -214,7 +214,7 @@ CreateFluxNcFile = function(fluxfilename, datain,
   }
   
   
-  # Write global attributes:
+  # Write global attributes:   NEEDS EDITING  !!!!!!!!!!!!!!!!!!!!!
   ncatt_put(ncid,varid=0,attname='Production_time',
             attval=as.character(Sys.time()))
   ncatt_put(ncid,varid=0,attname='Production_source',
@@ -228,6 +228,8 @@ CreateFluxNcFile = function(fluxfilename, datain,
   }
   ncatt_put(ncid,varid=0,attname='PALS contact',
             attval='palshelp@gmail.com')
+  
+  
   
   # Add variable data to file:
   ncvar_put(ncid, lat, vals=latitude)
@@ -247,7 +249,7 @@ CreateFluxNcFile = function(fluxfilename, datain,
                                                    vals=indata$data[,x]))
   
   
-  ## NEEDS SORTING OUT, NOT SURE WHAT the attribute commands are about !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  ## NEEDS SORTING OUT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   
   #Add original Fluxnet variable name to file
   lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]], 
@@ -417,7 +419,7 @@ CreateMetNcFile = function(metfilename, datain,
                                                    vals=indata$data[,x]))
   
     
-  ## NEEDS SORTING OUT, NOT SURE WHAT the attribute commands are about !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  ## NEEDS SORTING OUT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   	
 	#Add original Fluxnet variable name to file
 	lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]], 

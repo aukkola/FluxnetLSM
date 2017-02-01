@@ -6,7 +6,8 @@
 # Gab Abramowitz UNSW 2012 (palshelp at gmail dot com)
 
 library(R.utils)
-#NEED TO SET THESE ELSEWHERE IN FINAL CODE !!!!!!!!!
+
+### NEED TO SET THESE ELSEWHERE IN FINAL CODE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 #path
 lib_path <- "~/Documents/FLUXNET2016_processing/scripts/R"
@@ -51,6 +52,10 @@ defaultLWsynthesis <- 'Abramowitz (2012)' # 'Brutsaert (1975)' or 'Swinbank (196
 
 #Gapfill met variables using ERAinterim?
 ERA_gapfill <- TRUE
+
+
+
+
 
 
 #----------------------------------------------------------------------#
@@ -112,7 +117,7 @@ gaps  <- CheckDataGaps(datain = DataFromText, missing_val = SprdMissingVal,
 
 
 ### Synthesize LWdown if not found, 
-### and gap-fill otherwise if missing values present
+### and gap-fill otherwise if missing values present     NEEDS COMPLETING  !!!
 if(LWdown_synthesize) {
   
   DataFromText <- LWdown_check_and_fill(indata=DataFromText, 
@@ -156,8 +161,8 @@ if(ERA_gapfill){
   
   
   #Check that column names of temp_data and data to be replaced match. Stop if not
-  if(!all(colnames(temp_data)==colnames(DataFromText$data[,ind])){
-    CheckError("Error gap-filling met data with ERAinterim. Column names of data to be replaced don't match")
+  if(!all(colnames(temp_data)==colnames(DataFromText$data[,ind]))){
+    CheckError("Error gap-filling met data with ERAinterim. Column names of data to be replaced do not match")
   }
   
   
@@ -173,7 +178,12 @@ if(ERA_gapfill){
 
 # Change units:  NOT YET WORKING
 # also add specific humidity variable
-ConvertedData <- ChangeUnits(DataFromText, site_info$elevation)
+ConvertedData <- ChangeUnits(DataFromText)
+
+
+
+
+
 
 
 # Check that data are within acceptable ranges:   #NOT YET WORKING
@@ -181,7 +191,7 @@ CheckTextDataRanges(ConvertedData)
 
 
 
-#Determine number of files to be written
+#Determine number of files to be written (split site according to data gaps if necessary) NOT YET WORKING
 no_files <-
 
 
@@ -193,6 +203,7 @@ no_files <-
 #write github revision number in netcdf attributes  
   
 
+  
 for(k in 1:no_files){
   
   # Create netcdf met driving file: NOT YET CONVERTING DATA, CHANGE indata VARIABLE ONCE DONE THAT !!!!!!!!!!!!!!
