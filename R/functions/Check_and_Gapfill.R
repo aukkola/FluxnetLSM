@@ -35,7 +35,6 @@ CheckDataGaps <- function(datain, missing_val=SprdMissingVal,
   names(gap_length) <- names(gaps_found)
   
   
-  
   ### Check that essential variables have at least one common year of data
   ### without too many gaps 
   ### and the year has one or more evaluation variables available
@@ -288,115 +287,37 @@ LWdown_check_and_fill <- function(indata, defaultLWsynthesis, vars, gaps_found){
 
 #-----------------------------------------------------------------------------
 
-CheckTextDataRanges = function(datain){
-  # Get acceptable ranges for variables:	
-  range = datain$var_ranges
+CheckTextDataRanges = function(datain, missingval){
   
-  # Check variable ranges:
-  if(any(datain$data$SWdown<range$SWdown[1])|
-       any(datain$data$SWdown>range$SWdown[2])){
-    badval = FindRangeViolation(datain$data$SWdown,range$SWdown)
-    errtext = paste('S2: Downward SW radiation outside expected',
-                    ' ranges: ',as.character(badval),' [',
-                    as.character(range$SWdown[1]),':',
-                    as.character(range$SWdown[2]),']',sep='')
-    CheckError(errtext)
-  }
-  if(found$LWdown){
-    if(any(datain$data$LWdown<range$LWdown[1])|
-         any(datain$data$LWdown>range$LWdown[2])){
-      badval = FindRangeViolation(datain$data$LWdown,range$LWdown)
-      errtext = paste('S2: Downward LW radiation outside expected',
-                      ' ranges: ',as.character(badval),' [',
-                      as.character(range$LWdown[1]),':',
-                      as.character(range$LWdown[2]),']',sep='')
-      CheckError(errtext)
+  #Checks that variables are within acceptable ranges
+  # as set in the "variables" auxiliary file
+    
+  #Loop through variables
+  for(k in 1:length(datain$vars)){
+    
+    #First mask out missing values so not included in
+    #determination of data range
+    data <- datain$data[[k]]
+    data[data==missingval] <- NA
+    data_range <- range(data, na.rm=TRUE)
+    
+    # Get acceptable ranges for variables:  
+    valid_range <- datain$var_ranges[,k]
+    
+    
+    #Return error if variable outside specified range
+    if(data_range[1] < valid_range[1] | data_range[2] > valid_range[2]){
+      
+      CheckError(paste("Variable outside expected ranges. Check variable ", 
+                       datain$vars[k], "; data range is [", data_range[1], ", ", data_range[2], 
+                       "], valid range is [", valid_range[1], ", ", valid_range[2],
+                       "]. Check data or change data range in variables auxiliary file",
+                       sep="")) 
     }
-  }
-  if(any(datain$data$Tair<range$Tair[1])|
-       any(datain$data$Tair>range$Tair[2])){
-    badval = FindRangeViolation(datain$data$Tair,range$Tair)
-    errtext = paste('S2: Surface air temperature outside expected',
-                    ' ranges: ',as.character(badval),' [',
-                    as.character(range$Tair[1]),':',
-                    as.character(range$Tair[2]),']',sep='')
-    CheckError(errtext)
-  }
-  if(any(datain$data$Qair<range$Qair[1])|
-       any(datain$data$Qair>range$Qair[2])){
-    badval = FindRangeViolation(datain$data$Qair,range$Qair)
-    errtext = paste('S2: Specific humidity outside expected',
-                    ' ranges: ',as.character(badval),' [',
-                    as.character(range$Qair[1]),':',
-                    as.character(range$Qair[2]),']',sep='')
-    CheckError(errtext)
-  }
-  if(any(datain$data$Wind<range$Wind[1])|
-       any(datain$data$Wind>range$Wind[2])){
-    badval = FindRangeViolation(datain$data$Wind,range$Wind)
-    errtext = paste('S2: Scalar windspeed outside expected',
-                    ' ranges: ',as.character(badval),' [',
-                    as.character(range$Wind[1]),':',
-                    as.character(range$Wind[2]),']',sep='')
-    CheckError(errtext)
-  }
-  if(any(datain$data$Rainf<range$Rainf[1])|
-       any(datain$data$Rainf>range$Rainf[2])){
-    badval = FindRangeViolation(datain$data$Rainf,range$Rainf)
-    errtext = paste('S2: Rainfall rate outside expected',
-                    ' ranges: ',as.character(badval),' [',
-                    as.character(range$Rainf[1]),':',
-                    as.character(range$Rainf[2]),']',sep='')
-    CheckError(errtext)
-  }
-  if(found$Snowf){
-    if(any(datain$data$Snowf<range$Snowf[1])|
-         any(datain$data$Snowf>range$Snowf[2])){
-      badval = FindRangeViolation(datain$data$Snowf,range$Snowf)
-      errtext = paste('S2: Snowfall rate outside expected',
-                      ' ranges: ',as.character(badval),' [',
-                      as.character(range$Snowf[1]),':',
-                      as.character(range$Snowf[2]),']',sep='')
-      CheckError(errtext)
-    }
-  }
-  if(any(datain$data$PSurf<range$PSurf[1])|
-       any(datain$data$PSurf>range$PSurf[2])){
-    badval = FindRangeViolation(datain$data$PSurf,range$PSurf)
-    errtext = paste('S2: Surface air pressure outside expected',
-                    ' ranges: ',as.character(badval),' [',
-                    as.character(range$PSurf[1]),':',
-                    as.character(range$PSurf[2]),']',sep='')
-    CheckError(errtext)
-  }
-  if(any(datain$data$Qle<range$Qle[1])|
-       any(datain$data$Qle>range$Qle[2])){
-    badval = FindRangeViolation(datain$data$Qle,range$Qle)
-    errtext = paste('S2: Latent heat flux outside expected',
-                    ' ranges: ',as.character(badval),' [',
-                    as.character(range$Qle[1]),':',
-                    as.character(range$Qle[2]),']',sep='')
-    CheckError(errtext)
-  }
-  if(any(datain$data$Qh<range$Qh[1])|
-       any(datain$data$Qh>range$Qh[2])){
-    badval = FindRangeViolation(datain$data$Qh,range$Qh)
-    errtext = paste('S2: Sensible heat flux outside expected',
-                    ' ranges: ',as.character(badval),' [',
-                    as.character(range$Qh[1]),':',
-                    as.character(range$Qh[2]),']',sep='')
-    CheckError(errtext)
-  }
-  if(any(datain$data$NEE<range$NEE[1])|
-       any(datain$data$NEE>range$NEE[2])){
-    badval = FindRangeViolation(datain$data$NEE,range$NEE)
-    errtext = paste('S2: Net ecosystem exchange outside expected',
-                    ' ranges: ',as.character(badval),' [',
-                    as.character(range$NEE[1]),':',
-                    as.character(range$NEE[2]),']',sep='')
-    CheckError(errtext)
-  }
-}
+    
+    
+  } #variables
+} #function
 
 
 #-----------------------------------------------------------------------------

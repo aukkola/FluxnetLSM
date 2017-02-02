@@ -8,8 +8,7 @@
 
 #-----------------------------------------------------------------------------
 
-
-ReadTextFluxData = function(fileinname, vars, time_vars){
+ReadTextFluxData <- function(fileinname, vars, time_vars){
 	# This function reads comma-delimited text files containing
 	# met and flux data from Fluxnet data providers.
   
@@ -25,7 +24,7 @@ ReadTextFluxData = function(fileinname, vars, time_vars){
                          time_vars=time_vars)  
   
 	# Read flux tower data (skips unwanted columns):
-	FluxData = read.csv(file=fileinname, header=TRUE,	colClasses=tcol$classes)  
+	FluxData <- read.csv(file=fileinname, header=TRUE,	colClasses=tcol$classes)  
   
   #Sanity check, does variable order in file match that specified in tcols?
   if(any(colnames(FluxData) != tcol$all_names)) {
@@ -40,7 +39,6 @@ ReadTextFluxData = function(fileinname, vars, time_vars){
   FluxData <- FluxData[,-which(colnames(FluxData)==time_vars)]
   
   
-  #Remove faile
   
   #Retrieve original and target units for variables present:
   units <- retrieve_units(vars_present=tcol$names, all_vars=vars)
@@ -188,20 +186,8 @@ CreateFluxNcFile = function(fluxfilename, datain,
     opt_vars[[ctr]] = timeoffset
     ctr = ctr + 1
   }
-  # Define average precip:
-  if(!is.na(avprecip)){
-    averageprecip=ncvar_def('averagePrecip','mm',dim=list(xd,yd),
-                            missval=missing_value,longname='Average annual precipitation')
-    opt_vars[[ctr]] = averageprecip
-    ctr = ctr + 1
-  }
-  # Define average temperature:
-  if(!is.na(avtemp)){
-    averagetemp=ncvar_def('averageTemp','K',dim=list(xd,yd),
-                          missval=missing_value,longname='Average temperature')
-    opt_vars[[ctr]] = averagetemp
-    ctr = ctr + 1
-  }
+
+  
   
   # END VARIABLE DEFINITIONS #########################################
   
@@ -477,44 +463,3 @@ OzFluxNc2PALSQCFlag = function(flag){
 
 #-----------------------------------------------------------------------------
 
-NA2MissVal = function(data){
-  # Convert from NA to NcMissingVal for missing value
-  data[which(is.na(data))] = NcMissingVal
-  return(data)
-}
-
-#-----------------------------------------------------------------------------
-
-MeanValue = function(PALSt, var_idx){
-  mean_val = mean(as.numeric(PALSt[4:length(PALSt[,1]),var_idx]), na.rm=TRUE)
-  return(mean_val)
-}
-
-#-----------------------------------------------------------------------------
-
-# Acceptable variable ranges - specific to flux tower data checking
-GetVariableRanges = function(){
-	vnames = c('SWdown','LWdown','Tair','Qair','Rainf','Snowf','PSurf','CO2air','Wind','Qle','Qh','Qg','NEE','GPP','SWup','Rnet')
-	vars = GetVariableDetails(vnames)
-	SWdown = vars[[1]]$range # surface incident shortwave rad [W/m^2]
-	LWdown = vars[[2]]$range  # surface incident longwave rad [W/m^2]
-	Tair = vars[[3]]$range  # near surface air temperature [K]
-	Qair = vars[[4]]$range   # near surface specific humidity [kg/kg]
-	Rainf = vars[[5]]$range  # rainfall rate [mm/s]
-	Snowf = vars[[6]]$range  # snowfall rate [mm/s]
-	PSurf = vars[[7]]$range # surface air pressure [Pa]
-	CO2air = vars[[8]]$range # near surface CO2 concentration [ppmv]
-	Wind = vars[[9]]$range     # scalar windspeed [m/s]
-	Qle = vars[[10]]$range # latent heat flux [W/m^2]
-	Qh = vars[[11]]$range # sensible heat flux [W/m^2]
-	Qg = vars[[12]]$range # ground heat flux [W/m^2]
-	NEE = vars[[13]]$range    # met ecosystem exchange CO2 [umol/m^2/s]
-	GPP = vars[[14]]$range    # met ecosystem exchange CO2 [umol/m^2/s]
-	SWup = vars[[15]]$range   # reflected SW rad [W/m^2]
-	Rnet = vars[[16]]$range# net absorbed radiation [W/m^2]
-	range = list(SWdown=SWdown,LWdown=LWdown,Tair=Tair,
-		Qair=Qair,Rainf=Rainf,Snowf=Snowf,PSurf=PSurf,
-		CO2air=CO2air,Wind=Wind,Qle=Qle,Qh=Qh,NEE=NEE,
-		Rnet=Rnet)
-	return(range)	
-}
