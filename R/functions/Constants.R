@@ -139,6 +139,11 @@ rename_vars <- function(vars_present, all_vars){
   #Find index for fluxnet variables present in file
   ind_present <- sapply(vars_present, function(x) which(all_vars$Fluxnet_variable==x))
   
+  #Check for duplicates (if Fluxnet variable being processed more than once)
+  if(any(duplicated(ind_present))){
+    ind_present <- unlist(remove_duplicates(ind_present))
+  } 
+  
   #Replace names with corresponding ALMA variable names
   renamed_vars <- all_vars$ALMA_variable[ind_present]
 
@@ -153,6 +158,11 @@ retrieve_units <- function(vars_present, all_vars){
   
   #Find index for fluxnet variables present in file
   ind_present <- sapply(vars_present, function(x) which(all_vars$Fluxnet_variable==x))
+  
+  #Check for duplicates (if Fluxnet variable being processed more than once)
+  if(any(duplicated(ind_present))){
+    ind_present <- unlist(remove_duplicates(ind_present))
+  } 
   
   original_units <- all_vars$Fluxnet_unit[ind_present]
   target_units   <- all_vars$ALMA_unit[ind_present]
@@ -169,6 +179,11 @@ retrieve_atts <- function(vars_present, all_vars){
   
   #Find index for fluxnet variables present in file
   ind_present <- sapply(vars_present, function(x) which(all_vars$Fluxnet_variable==x))
+  
+  #Check for duplicates (if Fluxnet variable being processed more than once)
+  if(any(duplicated(ind_present))){
+    ind_present <- unlist(remove_duplicates(ind_present))
+  } 
   
   attributes <- cbind(all_vars$Fluxnet_variable, 
                       all_vars$Longname,
@@ -187,6 +202,11 @@ retrieve_categories <- function(vars_present, all_vars){
   #Find index for fluxnet variables present in file
   ind_present <- sapply(vars_present, function(x) which(all_vars$Fluxnet_variable==x))
   
+  #Check for duplicates (if Fluxnet variable being processed more than once)
+  if(any(duplicated(ind_present))){
+    ind_present <- unlist(remove_duplicates(ind_present))
+  } 
+  
   cat <- all_vars$Category[ind_present]
   names(cat) <- all_vars$ALMA_variable[ind_present]
   
@@ -200,6 +220,11 @@ retrieve_ERAvars <- function(vars_present, all_vars){
   
   #Find index for fluxnet variables present in file
   ind_present <- sapply(vars_present, function(x) which(all_vars$Fluxnet_variable==x))
+  
+  #Check for duplicates (if Fluxnet variable being processed more than once)
+  if(any(duplicated(ind_present))){
+    ind_present <- unlist(remove_duplicates(ind_present))
+  } 
   
   cat <- all_vars$ERAinterim_variable[ind_present]
   names(cat) <- all_vars$ALMA_variable[ind_present]
@@ -215,6 +240,11 @@ retrieve_ranges <- function(vars_present, all_vars){
   #Find index for fluxnet variables present in file
   ind_present <- sapply(vars_present, function(x) which(all_vars$Fluxnet_variable==x))
   
+  #Check for duplicates (if Fluxnet variable being processed more than once)
+  if(any(duplicated(ind_present))){
+    ind_present <- unlist(remove_duplicates(ind_present))
+  } 
+
   #Read min and max values
   range_min <- all_vars$Data_min[ind_present] 
   range_max <- all_vars$Data_max[ind_present] 
@@ -225,6 +255,59 @@ retrieve_ranges <- function(vars_present, all_vars){
   
   return(var_ranges)
 }
+
+
+
+#-----------------------------------------------------------------------------
+
+#Removes duplicate indices if a Fluxnet variable is processed more than once
+remove_duplicates <- function(indices){
+  
+  #Determine how many variables duplicated
+  vars_duplicated <- unique(names(indices)[duplicated(indices)])
+
+  for(k in 1:length(vars_duplicated)){
+    
+    #Find indices for duplicated variable
+    ind <- which(names(indices)==vars_duplicated[k])
+    
+    #Take the n-th element for each occurrence
+    for(n in 1:length(ind)) indices[ind[n]][[1]] <- indices[ind[n]][[1]][n]
+    
+  }
+  
+  return(indices)
+  
+}
+
+
+#-----------------------------------------------------------------------------
+
+#Duplicates columns in Fluxnet data if a variable is being processes multiple times
+
+duplicate_columns <- function(data, vars){
+  
+  #Find which variables are duplicated
+  ind_duplicate <- anyDuplicated(vars)
+  
+  for(k in ind_duplicate){
+    
+    #Find corresponding column
+    ind_column <- which(colnames(data)==vars[k])
+    
+    #Add column to dataframe
+    data <- cbind(data, data[ind_column])
+  
+  }
+  
+  return(data)
+ 
+}
+
+
+
+
+
 
 
 

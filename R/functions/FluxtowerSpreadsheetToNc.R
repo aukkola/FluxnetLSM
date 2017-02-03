@@ -26,21 +26,30 @@ ReadTextFluxData <- function(fileinname, vars, time_vars){
 	# Read flux tower data (skips unwanted columns):
 	FluxData <- read.csv(file=fileinname, header=TRUE,	colClasses=tcol$classes)  
   
+  
+
   #Sanity check, does variable order in file match that specified in tcols?
-  if(any(colnames(FluxData) != tcol$all_names)) {
-    ErrorCheck("Check variable ordering, variables don't match data retrieved from file")
+  #Ignore any possible duplicates in tcol$all_names before check
+  if(any(colnames(FluxData) != unique(tcol$all_names))) {
+    CheckError("Check variable ordering, variables don't match data retrieved from file")
   }
   
-  
+
   #Split time variables from other variables
   #Extract time stamp data
   FluxTime <- FluxData[,which(colnames(FluxData)==time_vars)]
   #Remove time stamp variables from Data variable
   FluxData <- FluxData[,-which(colnames(FluxData)==time_vars)]
   
+  #Duplicate Fluxnet data column if the same variable needs to be
+  #processed several times (e.g. RH converted to RH and Qair)
+  if(ncol(FluxData) != length(tcol$names))
+  {
+    FluxData <- duplicate_columns(data=FluxData, vars=tcol$names)
+  }
   
-  
-  #Retrieve original and target units for variables present:
+
+  #Retrieve original and target units for variables present:  NOT WORKING !!!!!!!!!!
   units <- retrieve_units(vars_present=tcol$names, all_vars=vars)
   
   #Retrieve acceptable variable ranges:
