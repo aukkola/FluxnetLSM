@@ -67,7 +67,7 @@ ChangeUnits = function(datain){
           tair_units <- alma_units[which(datain$vars=="Tair")]
         }          
           
-        datain$data[[k]] <- Rel2SpecHum(relHum=datain$data[[which(datain$vars=="RH")]], 
+        datain$data[[k]] <- Rel2SpecHum(relHum=datain$data[[which(datain$vars=="Qair")]], 
                                         Tair=datain$data[[which(datain$vars=="Tair")]], 
                                         tair_units=tair_units, 
                                         PSurf=datain$data[[which(datain$vars=="PSurf")]], 
@@ -131,7 +131,7 @@ VPD2RelHum <- function(VPD, Tair, vpd_units, tair_units){
 
 #-----------------------------------------------------------------------------
 
-Rel2SpecHum <- function(relHum, Tair, tair_units, PSurf){
+Rel2SpecHum <- function(relHum, Tair, tair_units, PSurf, psurf_units){
   # Converts relative humidity to specific humidity.
   # required units: Tair - temp in C; PSurf in Pa; relHum as %
   
