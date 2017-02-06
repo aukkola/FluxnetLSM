@@ -92,6 +92,21 @@ get_site_metadata_CSV <- function(metadata) {
 # Web-based metadata
 ################################################
 
+#' Get all available site codes from site_status table
+get_ornl_site_codes <- function() {
+    status_table_url <- "https://fluxnet.ornl.gov/site_status"
+
+    page_html <- read_html(status_table_url)
+
+    table <- page_html %>% html_node("#historical_site_list") %>% html_table()
+
+    site_codes = table["FLUXNET ID"]
+
+    return(site_codes)
+
+}
+
+
 #' Get ORNL site URL from site_status table
 get_site_ornl_url <- function(site_code) {
     status_table_url <- "https://fluxnet.ornl.gov/site_status"
