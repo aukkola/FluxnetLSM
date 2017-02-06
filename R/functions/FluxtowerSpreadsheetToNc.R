@@ -181,13 +181,6 @@ CreateFluxNcFile = function(fluxfilename, datain,
     opt_vars[[ctr]] = refheight
     ctr = ctr + 1
   }
-  # Define canopy height:
-  if(!is.na(canopyheight)){
-    canheight=ncvar_def('canopy_height','m',dim=list(xd,yd),
-                        missval=missing_value,longname='Maximum height of vegetation')
-    opt_vars[[ctr]] = canheight
-    ctr = ctr + 1
-  }
   # Define site time offset:
   if(!is.na(utcoffset)){
     timeoffset=ncvar_def('utc_offset','hours',dim=list(xd,yd),

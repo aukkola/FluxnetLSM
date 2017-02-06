@@ -6,8 +6,14 @@
 
 # Check the existence of missing values:
 CheckDataGaps <- function(datain, missing_val=SprdMissingVal,
-                          threshold,
+                          threshold, min_yrs,
                           essential_met, preferred_eval){
+  
+  #Checks the existence of data gaps and determines which
+  #years should be outputted depending on the percentage of data gaps
+  #(set by thereshold) and the number of consecutive years available
+  #(at least number set by min_yrs)
+  
   
   gaps_found <- apply(datain$data, MARGIN=2, function(x) any(x==missing_val))
   
@@ -64,19 +70,20 @@ CheckDataGaps <- function(datain, missing_val=SprdMissingVal,
   }
   
   
-  
-  ### If no years fulfilling criteria, abort. ###
-  if(all(!yr_keep)){
-    CheckError("No years to process, too many gaps present. Aborting.")
-  }
-  
-  
   #Indices of year(s) to keep
   yr_ind <- which(yr_keep)
+  
+  
+  ### If no years fulfilling criteria, abort. ###
+  if(all(!yr_keep) | length(yr_ind) < min_yrs){
+    CheckError("No years to process, too many gaps present or available time period too short. Aborting.")
+  }
+  
     
   #Are all years consecutive? If not, need to split site to
   #multiple files. Determine which years are consecutive
-  #and how many files need to create
+  #and how many files need to create (variables 'consec'
+  #tells which years should go in which file)
   
   ## only one year
   if(length(yr_ind)==1){  
@@ -100,13 +107,33 @@ CheckDataGaps <- function(datain, missing_val=SprdMissingVal,
     
     for(c in 1:(nrow(breaks))){
       
-      consec <- append(consec, rep(c, times=breaks[c,2] - breaks[c,1] + 1))
-
-      #determine start and end of time series
-      tstart[c] <- start[breaks[c,1]]
-      tend[c]   <- end[breaks[c,2]]
+      ind_consec <- rep(c, times=breaks[c,2] - breaks[c,1] + 1)
+      
+      
+      #If number of consecutive years less than min_yrs
+      if(length(ind_consec) < min_yrs){
         
+        #remove these years from yr_ind
+        yr_ind <- yr_ind[-(which(yr_ind==breaks[c,1]):which(yr_ind==breaks[c,2]))]
+        
+        
+        #If all years removed because all available periods shorter than min_yrs, abort
+        if(length(yr_ind)==0){       
+          stop("No years to process, all available time period too short (as set by min_yrs). Aborting.")
+        }
+        
+      
+      #At least min_yrs number of available years
+      } else {
+        
+        consec <- append(consec, ind_consec)
+        
+        #determine start and end of time series
+        tstart <- append(tstart, start[breaks[c,1]])
+        tend   <- append(tend, end[breaks[c,2]])
+      }
     }
+    
     
   ## multiple years but all consecutive
   } else { 

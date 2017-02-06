@@ -7,7 +7,11 @@
 
 library(R.utils)
 
+
 ### NEED TO SET THESE ELSEWHERE IN FINAL CODE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+# initial garbage collection
+rm( list=ls(all=TRUE) )
 
 #path
 lib_path <- "~/Documents/FLUXNET2016_processing/scripts/R"
@@ -37,9 +41,7 @@ threshold <- 20
 min_yrs <- 2
 
 #output file
-metfilename <- "~/Documents/FLUXNET2016_processing/output_test_met.nc"
-fluxfilename <- "~/Documents/FLUXNET2016_processing/output_test_flux.nc"
-
+out_path <- "~/Documents/FLUXNET2016_processing/"
 site_name <- "AU-How"
 
 datasetname <- "Fluxnet2015" 
@@ -56,10 +58,7 @@ ERA_gapfill <- TRUE
 
 
 
-
-
 #----------------------------------------------------------------------#
-
 
 #Read variable data
 #File contains desired variables (refer to Fluxnet2015 documentation for full variable descriptions; 
@@ -104,14 +103,18 @@ CheckSpreadsheetTiming(DataFromText)
 
 # Check if variables have gaps in the time series:
 gaps  <- CheckDataGaps(datain = DataFromText, missing_val = SprdMissingVal,
-                            threshold = threshold,
+                            threshold = threshold, min_yrs=min_yrs,
                             essential_met = vars$ALMA_variable[which(vars$Essential_met)],
                             preferred_eval = vars$ALMA_variable[which(vars$Preferred_eval)]) 
 
   
   
 #Remove evaluation variables that have too many gaps
-  
+
+
+
+
+
   
   
 
@@ -176,23 +179,18 @@ if(ERA_gapfill){
 
 
 
-# Change units:  NOT YET WORKING
-# also add specific humidity variable
+# Convert data units from original Fluxnet units
+# to desired units as set in variables.csv
 ConvertedData <- ChangeUnits(DataFromText)
 
 
 
-
-
-
-
-# Check that data are within acceptable ranges:   #NOT YET WORKING
-CheckTextDataRanges(ConvertedData)
-
+# Check that data are within acceptable ranges:   #FUNCTION WORKS BUT:   FIX Qair and VPD!!!!
+CheckTextDataRanges(ConvertedData, missingval=NcMissingVal)
 
 
 #Determine number of files to be written (split site according to data gaps if necessary) NOT YET WORKING
-no_files <-
+no_files <- length(unique(gaps$consec))
 
 
 
@@ -202,32 +200,81 @@ no_files <-
    
 #write github revision number in netcdf attributes  
   
+#Change start and end time  !!!!
 
+#Extract data period to be written !!!!
+
+
+
+### Write output met and flux NetCDF files ###
   
 for(k in 1:no_files){
   
-  # Create netcdf met driving file: NOT YET CONVERTING DATA, CHANGE indata VARIABLE ONCE DONE THAT !!!!!!!!!!!!!!
+  #Extract start and end years
+  start_yr <- substring(DataFromText$time[gaps$tseries_start[k],1], 1, 4)
+  end_yr <- substring(DataFromText$time[gaps$tseries_end[k],1], 1, 4)
+  
+  
+  #Create output file names
+  #If only one year, only write start year, else write time period
+  if(start_yr==end_yr){
+    metfilename  <- paste(out_path, "/", site_name, "_", start_yr, "_", datasetname, "_Met.nc", sep="")
+    fluxfilename <- paste(out_path, "/", site_name, "_", start_yr, "_", datasetname, "_Flux.nc", sep="")
+    
+  } else{   
+    metfilename  <- paste(out_path, "/", site_name, "_", start_yr, "-", end_yr, "_", datasetname, "_Met.nc", sep="")
+    fluxfilename <- paste(out_path, "/", site_name, "_", start_yr, "-", end_yr, "_", datasetname, "_Flux.nc", sep="")
+    
+  }
+  
+  
+  
+  
+  # Create netcdf met driving file:
   CreateMetNcFile(metfilename=metfilename, datain=DataFromText, 
-                  latitude=NA, longitude=NA, 
+                  latitude=site_info$SiteLatitude, 
+                  longitude=site_info$SiteLongitude, 
+                  
                   datasetname=datasetname, datasetversion=datasetversion, 
-                  defaultLWsynthesis=defaultLWsynthesis, 
-                  starttime=DataFromText$starttime, 
+                                    
+                  ind_start=gaps$tseries_start[k],   #indices for extracting correct time period
+                  ind_end=gaps$tseries_end[k],
+                  
+                  starttime=DataFromText$starttime,   #CORRECT !!!!
                   timestepsize=DataFromText$timestepsize,
-                  elevation=NA, measurementheight=NA, canopyheight=NA,
+                  
+                  elevation=site_info$SiteElevation,
                   vegetationtype=NA, utcoffset=NA, avprecip=NA, avtemp=NA)
   
   
   # Create netcdf flux data file:
   CreateFluxNcFile(fluxfilename=fluxfilename, datain=DataFromText, 
-                   latitude=NA, longitude=NA, 
+                   latitude=site_info$SiteLatitude, 
+                   longitude=site_info$SiteLongitude, 
+                   
                    datasetname=datasetname, datasetversion=datasetversion, 
-                   starttime=DataFromText$starttime, 
+                   
+                   ind_start=gaps$tseries_start[k],   #indices for extracting correct time period
+                   ind_end=gaps$tseries_end[k],
+                   
+                   
+                   starttime=DataFromText$starttime,  #CORRECT !!!!
                    timestepsize=DataFromText$timestepsize,
-                   elevation=NA, measurementheight=NA, canopyheight=NA,
+  
+                   elevation=site_info$SiteElevation,
                    vegetationtype=NA, utcoffset=NA, avprecip=NA, avtemp=NA)
   
   
 }  
-  
+ 
+
+
+
+
+
+
+
+
+
 
 
