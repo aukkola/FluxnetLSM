@@ -11,7 +11,7 @@ ChangeUnits = function(datain){
   
   #Loop through variables. If original and target units do not match,
   #convert (or return error if conversion between units not known)
-
+  
   flx_units  <- datain$units$original_units
   alma_units <- datain$units$target_units
   
@@ -38,22 +38,22 @@ ChangeUnits = function(datain){
         datain$data[[k]] <- datain$data[[k]] + 273.15
         
         
-      ## CO2: different but equivalent units, do nothing
+        ## CO2: different but equivalent units, do nothing
       } else if(datain$vars[k]=="CO2air" & flx_units[k]=="umolCO2/mol" & alma_units[k]=="ppm"){
         next
         
-
-      ## Rainfall (mm/timestep to mm/s)
+        
+        ## Rainfall (mm/timestep to mm/s)
       } else if(datain$vars[k]=="Rainf" & flx_units[k]=="mm" & alma_units[k]=="mm/s"){
         datain$data[[k]] <- datain$data[[k]] / tstep
         
         
-      ## Air pressure (kPa to Pa)
+        ## Air pressure (kPa to Pa)
       } else if(datain$vars[k]=="PSurf" & flx_units[k]=="kPa" & alma_units[k]=="Pa"){  
         datain$data[[k]] <- datain$data[[k]] * 1000
         
         
-      ## Qair (in kg/kg, calculate from tair, rel humidity and psurf)
+        ## Qair (in kg/kg, calculate from tair, rel humidity and psurf)
       } else if(datain$vars[k]=="Qair" & flx_units[k]=="%" & alma_units[k]=="kg/kg"){  
         
         #Find Tair and PSurf units
@@ -66,7 +66,7 @@ ChangeUnits = function(datain){
         } else if (converted[which(datain$vars=="Tair")]){
           tair_units <- alma_units[which(datain$vars=="Tair")]
         }          
-          
+        
         datain$data[[k]] <- Rel2SpecHum(relHum=datain$data[[which(datain$vars=="Qair")]], 
                                         Tair=datain$data[[which(datain$vars=="Tair")]], 
                                         tair_units=tair_units, 
@@ -74,27 +74,26 @@ ChangeUnits = function(datain){
                                         psurf_units=psurf_units)
         
         
-      ## If cannot find conversion, abort  
+        ## If cannot find conversion, abort  
       } else {
         CheckError(paste("Unknown unit conversion, cannot convert between original 
                          Fluxnet and ALMA units, check variable:", datain$vars[k], ". 
                          Available conversions: air temp C to K, rainfall mm to mm/s,
                          air pressure kPa to Pa, humidity from relative (%) to specific (kg/kg)"))
       }
-        
-
+      
+      
       #Set to TRUE after converting variable  
       converted[k] <- TRUE
-
+      
     }
   } #variables
-    
+  
   
   
   
   return(datain)
 }
-
 
 #-----------------------------------------------------------------------------
 
