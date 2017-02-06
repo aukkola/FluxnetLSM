@@ -2,7 +2,6 @@
 #
 # Gab Abramowitz, UNSW, 2014 (palshelp at gmail dot com)
 #
-zeroC = 273.15
 SprdMissingVal = -9999 # missing value in spreadsheet
 NcMissingVal = -9999 # missing value in created netcdf files
 QCmeasured = 0
@@ -255,7 +254,6 @@ retrieve_ranges <- function(vars_present, all_vars){
   
   return(var_ranges)
 }
-
 
 
 #-----------------------------------------------------------------------------

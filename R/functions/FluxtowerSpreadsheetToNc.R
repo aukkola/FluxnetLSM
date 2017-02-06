@@ -49,7 +49,7 @@ ReadTextFluxData <- function(fileinname, vars, time_vars){
   }
   
 
-  #Retrieve original and target units for variables present:  NOT WORKING !!!!!!!!!!
+  #Retrieve original and target units for variables present:
   units <- retrieve_units(vars_present=tcol$names, all_vars=vars)
   
   #Retrieve acceptable variable ranges:
@@ -63,7 +63,8 @@ ReadTextFluxData <- function(fileinname, vars, time_vars){
   
   #Retrieve names of ERAinterim variables
   era_vars <- retrieve_ERAvars(vars_present=tcol$names, all_vars=vars)
-    
+  
+  
   #Change column names and tcol$names to match ALMA convention
   tcol$names         <- rename_vars(vars_present=tcol$names, all_vars=vars)
   colnames(FluxData) <- tcol$names
@@ -93,17 +94,12 @@ ReadTextFluxData <- function(fileinname, vars, time_vars){
 	tstepinday=86400/timestepsize # time steps in a day
 	ndays = ntsteps/tstepinday # number of days in data set
 
+  
   # Find starting date / time:
-	sday = as.numeric(format(start, format="%d"))
-	smonth = as.numeric(format(start, format="%m"))
-  syear = as.numeric(format(start, format="%Y"))
-
-	shod = as.numeric(format(start, format="%H")) # starting hour of day
-	intyears = Yeardays(syear,ndays)
-
-	# Collate start time variables:
-	starttime=list(syear=syear,smonth=smonth,sday=sday,shod=shod)
-
+  starttime <- findStartTime(start=start)
+  
+  intyears = Yeardays(starttime$syear,ndays)
+  
   #Create list for function exit:
 	filedata = list(data=FluxData, vars=tcol$names, era_vars=era_vars, 
                   attributes=attributes,
@@ -118,17 +114,26 @@ ReadTextFluxData <- function(fileinname, vars, time_vars){
 
 #-----------------------------------------------------------------------------
 
-# This function creates a netcdf file for flux variables
-CreateFluxNcFile = function(fluxfilename, datain, 
-                           latitude, longitude, 
-                           datasetname, datasetversion, 
-                           timestepsize, starttime,
-                           elevation=NA, measurementheight=NA, 
-                           canopyheight=NA,	vegetationtype=NA, 
-                           utcoffset=NA, avprecip=NA, avtemp=NA){
+
+# This function creates a netcdf file for met variables
+CreateFluxNcFile = function(fluxfilename, datain,                 #outfile file and data
+                           latitude, longitude,                   #lat, lon
+                           site_code, long_sitename,              #Fluxnet site code and full site name
+                           datasetversion, github_rev,            #Dataset version and github revision
+                           tier,                                  #Fluxnet site tier
+                           ind_start, ind_end,                    #time period indices
+                           starttime, timestepsize,               #timing info
+                           flux_varname, cf_name,                 #Original Fluxnet variable names and CF_compliant names
+                           elevation=NA, towerheight=NA,          #Site elevation and flux tower height
+                           canopyheight=NA,                       #Canopy height
+                           short_veg_type=NA, long_veg_type=NA){  #Long and short IGBP vegetation types
   
   # load netcdf library
   library(ncdf4) 
+  
+  
+  #Extract time period to be written
+  datain$data <- datain$data[ind_start:ind_end,]
   
   # default missing value for all variables
   missing_value=NcMissingVal
@@ -142,24 +147,25 @@ CreateFluxNcFile = function(fluxfilename, datain,
   timeunits = CreateTimeunits(starttime)
   
   # Create time dimension variable:
-  tt=c(0:(datain$ntsteps-1))
+  tt=c(0:(length(ind_start:ind_end)-1))
   timedata = as.double(tt*timestepsize)
   
   # Define time dimension:
   td = ncdim_def('time', unlim=TRUE, units=timeunits, vals=timedata)
-
   
   # VARIABLE DEFINITIONS ##############################################
   
+  
+  
   #Find met variable indices
-  var_ind <- which(indata$categories=="Flux")
+  var_ind <- which(datain$categories=="Eval")
   
   #Create variable definitions for time series variables
-  var_defs <- lapply(var_ind, function(x) ncvar_def(name=indata$vars[x],
-                                                    units=indata$units$target_units[x], 
+  var_defs <- lapply(var_ind, function(x) ncvar_def(name=datain$vars[x],
+                                                    units=datain$units$target_units[x], 
                                                     dim=list(xd,yd,zd,td), 
                                                     missval=missing_value, 
-                                                    longname=indata$longnames[x]))
+                                                    longname=datain$attributes[x,2]))
   
   
   # First necessary non-time variables:
@@ -175,91 +181,96 @@ CreateFluxNcFile = function(fluxfilename, datain,
   opt_vars <- list()
   ctr <- 1
   # Define measurement height on tower:
-  if(!is.na(measurementheight)){
-    refheight=ncvar_def('reference_height','m',dim=list(xd,yd),
-                        missval=missing_value,longname='Measurement height on flux tower')
-    opt_vars[[ctr]] = refheight
-    ctr = ctr + 1
+  if(!is.na(towerheight)){
+    towheight=ncvar_def('tower_height','m',dim=list(xd,yd),
+                        missval=missing_value,longname='Height of flux tower')
+    opt_vars[[ctr]] = towheight
+    ctr <- ctr + 1
+  }  
+  # Define site canopy height:
+  if(!is.na(canopyheight)){
+    canheight=ncvar_def('canopy_height','m',dim=list(xd,yd),
+                        missval=missing_value,longname='Canopy height')
+    opt_vars[[ctr]] = canheight
+    ctr <- ctr + 1
   }
-  # Define site time offset:
-  if(!is.na(utcoffset)){
-    timeoffset=ncvar_def('utc_offset','hours',dim=list(xd,yd),
-                         missval=missing_value,longname='Local time difference from UTC')
-    opt_vars[[ctr]] = timeoffset
-    ctr = ctr + 1
+  #Define site elevation:
+  if(!is.na(elevation)){
+    elev=ncvar_def('elevation','m',dim=list(xd,yd),
+                   missval=missing_value,longname='Site elevation')
+    opt_vars[[ctr]] = elev
+    ctr <- ctr + 1
   }
-
+  # Define IGBP short vegetation type:
+  if(!is.na(short_veg_type)){
+    short_veg=ncvar_def('IGBP_veg_short','-',dim=list(xd,yd),
+                        missval=missing_value,longname='IGBP vegetation type (short)')
+    opt_vars[[ctr]] = short_veg
+    ctr <- ctr + 1
+  }
+  # Define IGBP long vegetation type:
+  if(!is.na(long_veg_type)){
+    long_veg=ncvar_def('IGBP_veg_long','-',dim=list(xd,yd),
+                       missval=missing_value,longname='IGBP vegetation type (long)')
+    opt_vars[[ctr]] = long_veg
+    ctr <- ctr + 1 
+  }
   
   
   # END VARIABLE DEFINITIONS #########################################
   
-  
-  # Create netcdf file:
+  ### Create netcdf file ###
   if(length(opt_vars)==0) {
     ncid = nc_create(fluxfilename, vars=append(var_defs, c(list(latdim), list(londim))))
   } else {
-    ncid = nc_create(fluxfilename, vars=append(var_defs, c(list(latdim), list(londim), list(opt_vars))))
+    ncid = nc_create(fluxfilename, vars=append(var_defs, c(list(latdim), list(londim), opt_vars)))
   }
   
   
-  # Write global attributes:   NEEDS EDITING  !!!!!!!!!!!!!!!!!!!!!
+  #### Write global attributes ###
   ncatt_put(ncid,varid=0,attname='Production_time',
             attval=as.character(Sys.time()))
-  ncatt_put(ncid,varid=0,attname='Production_source',
-            attval='PALS netcdf conversion')
+  ncatt_put(ncid,varid=0,attname='Github_revision',  
+            attval=github_rev, prec="text")
+  ncatt_put(ncid,varid=0,attname='site_code',
+            attval=site_code, prec="text")
   ncatt_put(ncid,varid=0,attname='site_name',
-            attval=datasetname)
+            attval=as.character(long_sitename), prec="text")
   ncatt_put(ncid,varid=0,attname='Fluxnet_dataset_version',
-            attval=datasetversion)
-  if(!is.na(vegetationtype)){
-    ncatt_put(ncid,varid=0,attname='IGBP_vegetation_type',attval=vegetationtype)
-  }
+            attval=datasetversion, prec="text")	  
+  ncatt_put(ncid,varid=0,attname='Fluxnet site tier',
+            attval=tier)
   ncatt_put(ncid,varid=0,attname='PALS contact',
             attval='palshelp@gmail.com')
   
-  
-  
   # Add variable data to file:
-  ncvar_put(ncid, lat, vals=latitude)
-  ncvar_put(ncid, lon, vals=longitude)
+  ncvar_put(ncid, latdim, vals=latitude)
+  ncvar_put(ncid, londim, vals=longitude)
+  
   
   # Optional meta data for each site:
   if(!is.na(elevation)) {ncvar_put(ncid,elev,vals=elevation)}
-  if(!is.na(measurementheight)) {ncvar_put(ncid,refheight,vals=measurementheight)}
+  if(!is.na(towerheight)) {ncvar_put(ncid,towheight,vals=towerheight)}
   if(!is.na(canopyheight)) {ncvar_put(ncid,canheight,vals=canopyheight)}
-  if(!is.na(utcoffset)) {ncvar_put(ncid,timeoffset,vals=utcoffset)}
-  if(!is.na(avprecip)) {ncvar_put(ncid,averageprecip,vals=avprecip)}
-  if(!is.na(avtemp)) {ncvar_put(ncid,averagetemp,vals=avtemp)}
+  if(!is.na(short_veg_type)) {ncvar_put(ncid,short_veg,vals=short_veg_type)}
+  if(!is.na(long_veg_type)) {ncvar_put(ncid,long_veg,vals=short_veg_type)}
+  
+  
   
   # Time dependent variables:
   lapply(1:length(var_defs), function(x) ncvar_put(nc=ncid, 
                                                    varid=var_defs[[x]], 
-                                                   vals=indata$data[,x]))
+                                                   vals=datain$data[,x]))
   
-  
-  ## NEEDS SORTING OUT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   
   #Add original Fluxnet variable name to file
-  lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]], 
-                                                   att_name="Fluxnet_name", attval=  xxxx))  #complete !!!!!
-
-  #Add CF-compliant name to file
-  lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]], 
-                                                   att_name="CF_name", attval=  xxxx))  #complete !!!!!
+  lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]], attname="Fluxnet_name", 
+                                                   attval=datain$attributes[x,1], prec="text"))  
   
+  #Add CF-compliant name to file (if not missing)
+  lapply(1:length(var_defs), function(x) if(!is.na(datain$attributes[x,3]))  
+    ncatt_put(nc=ncid, varid=var_defs[[x]], attname="CF_name", attval=datain$attributes[x,3], prec="text"))
   
-  #	ncvar_put(ncid,SWdown,vals=datain$data$SWdown)
-  #	ncatt_put(ncid,SWdown,attname='CF_name',attval='surface_downwelling_shortwave_flux_in_air')
-  #	if(! found$PSurf){
-  #		ncatt_put(ncid,PSurf,'source','Synthesized in PALS based on elevation and temperature')
-  #	}
-  #	if(! found$LWdown){
-  #		ncatt_put(ncid,LWdown,'source',paste('Entirely synthesized in PALS using',defaultLWsynthesis))
-  #	}else if(found$LWdown & !found$LWdown_all){
-  #		ncatt_put(ncid,LWdown,'gapfill_technique',paste('Gap-filled in PALS using',defaultLWsynthesis))
-  #		ncatt_put(ncid,LWdown,'gapfill_note','Fluxdata.org template has no QC flag for LWdown - data are assumed original.')
-  #	}
-  #
   
   
   # Close netcdf file:
@@ -270,17 +281,24 @@ CreateFluxNcFile = function(fluxfilename, datain,
 #-----------------------------------------------------------------------------
 
 # This function creates a netcdf file for met variables
-CreateMetNcFile = function(metfilename, datain, 
-                           latitude, longitude, 
-	                         datasetname, datasetversion, 
-                           defaultLWsynthesis, 
-                           timestepsize, starttime,
-                           elevation=NA, measurementheight=NA, 
-                           canopyheight=NA,	vegetationtype=NA, 
-                           utcoffset=NA, avprecip=NA, avtemp=NA){
+CreateMetNcFile = function(metfilename, datain,                   #outfile file and data
+                           latitude, longitude,                   #lat, lon
+                           site_code, long_sitename,              #Fluxnet site code and full site name
+                           datasetversion, github_rev,            #Dataset version and github revision
+                           tier,                                  #Fluxnet site tier
+                           ind_start, ind_end,                    #time period indices
+                           starttime, timestepsize,               #timing info
+                           flux_varname, cf_name,                 #Original Fluxnet variable names and CF_compliant names
+                           elevation=NA, towerheight=NA,          #Site elevation and flux tower height
+                           canopyheight=NA,                       #Canopy height
+                           short_veg_type=NA, long_veg_type=NA){  #Long and short IGBP vegetation types
   
   # load netcdf library
 	library(ncdf4) 
+  
+
+  #Extract time period to be written
+  datain$data <- datain$data[ind_start:ind_end,]
   
 	# default missing value for all variables
 	missing_value=NcMissingVal
@@ -294,7 +312,7 @@ CreateMetNcFile = function(metfilename, datain,
 	timeunits = CreateTimeunits(starttime)
   
 	# Create time dimension variable:
-	tt=c(0:(datain$ntsteps-1))
+	tt=c(0:(length(ind_start:ind_end)-1))
 	timedata = as.double(tt*timestepsize)
   
 	# Define time dimension:
@@ -305,14 +323,14 @@ CreateMetNcFile = function(metfilename, datain,
 
   
   #Find met variable indices
-  var_ind <- which(indata$categories=="Met")
+  var_ind <- which(datain$categories=="Met")
   
   #Create variable definitions for time series variables
-  var_defs <- lapply(var_ind, function(x) ncvar_def(name=indata$vars[x],
-                                                    units=indata$units$target_units[x], 
+  var_defs <- lapply(var_ind, function(x) ncvar_def(name=datain$vars[x],
+                                                    units=datain$units$target_units[x], 
                                                     dim=list(xd,yd,zd,td), 
                                                     missval=missing_value, 
-                                                    longname=indata$longnames[x]))
+                                                    longname=datain$attributes[x,2]))
   
   
 	# First necessary non-time variables:
@@ -324,144 +342,103 @@ CreateMetNcFile = function(metfilename, datain,
 	                   missval=missing_value,longname='Longitude')
   
   
-  #Then optional non-time variables:
-  opt_vars <- list()
+	#Then optional non-time variables:
+	opt_vars <- list()
   ctr <- 1
 	# Define measurement height on tower:
-	if(!is.na(measurementheight)){
-		refheight=ncvar_def('reference_height','m',dim=list(xd,yd),
-			missval=missing_value,longname='Measurement height on flux tower')
-		opt_vars[[ctr]] = refheight
-    ctr = ctr + 1
-	}
-	# Define canopy height:
+	if(!is.na(towerheight)){
+	  towheight=ncvar_def('tower_height','m',dim=list(xd,yd),
+	                      missval=missing_value,longname='Height of flux tower')
+	  opt_vars[[ctr]] = towheight
+    ctr <- ctr + 1
+	}  
+  # Define site canopy height:
 	if(!is.na(canopyheight)){
-		canheight=ncvar_def('canopy_height','m',dim=list(xd,yd),
-			missval=missing_value,longname='Maximum height of vegetation')
-		opt_vars[[ctr]] = canheight
-		ctr = ctr + 1
+	  canheight=ncvar_def('canopy_height','m',dim=list(xd,yd),
+	                      missval=missing_value,longname='Canopy height')
+	  opt_vars[[ctr]] = canheight
+	  ctr <- ctr + 1
 	}
-	# Define site time offset:
-	if(!is.na(utcoffset)){
-		timeoffset=ncvar_def('utc_offset','hours',dim=list(xd,yd),
-			missval=missing_value,longname='Local time difference from UTC')
-		opt_vars[[ctr]] = timeoffset
-		ctr = ctr + 1
+  #Define site elevation:
+	if(!is.na(elevation)){
+	  elev=ncvar_def('elevation','m',dim=list(xd,yd),
+	                      missval=missing_value,longname='Site elevation')
+	  opt_vars[[ctr]] = elev
+	  ctr <- ctr + 1
 	}
-	# Define average precip:
-	if(!is.na(avprecip)){
-		averageprecip=ncvar_def('averagePrecip','mm',dim=list(xd,yd),
-			missval=missing_value,longname='Average annual precipitation')
-		opt_vars[[ctr]] = averageprecip
-		ctr = ctr + 1
+	# Define IGBP short vegetation type:
+	if(!is.na(short_veg_type)){
+	  short_veg=ncvar_def('IGBP_veg_short','-',dim=list(xd,yd),
+	                      missval=missing_value,longname='IGBP vegetation type (short)')
+	  opt_vars[[ctr]] = short_veg
+	  ctr <- ctr + 1
 	}
-	# Define average temperature:
-	if(!is.na(avtemp)){
-		averagetemp=ncvar_def('averageTemp','K',dim=list(xd,yd),
-			missval=missing_value,longname='Average temperature')
-		opt_vars[[ctr]] = averagetemp
-		ctr = ctr + 1
+	# Define IGBP long vegetation type:
+	if(!is.na(long_veg_type)){
+	  long_veg=ncvar_def('IGBP_veg_long','-',dim=list(xd,yd),
+	                      missval=missing_value,longname='IGBP vegetation type (long)')
+	  opt_vars[[ctr]] = long_veg
+	  ctr <- ctr + 1 
 	}
+	
 
 	# END VARIABLE DEFINITIONS #########################################
-
   
-  # Create netcdf file:
+  ### Create netcdf file ###
 	if(length(opt_vars)==0) {
     ncid = nc_create(metfilename, vars=append(var_defs, c(list(latdim), list(londim))))
 	} else {
-	  ncid = nc_create(metfilename, vars=append(var_defs, c(list(latdim), list(londim), list(opt_vars))))
+	  ncid = nc_create(metfilename, vars=append(var_defs, c(list(latdim), list(londim), opt_vars)))
 	}
   
   
-	# Write global attributes:
+	#### Write global attributes ###
   ncatt_put(ncid,varid=0,attname='Production_time',
 		attval=as.character(Sys.time()))
-	ncatt_put(ncid,varid=0,attname='Production_source',
-		attval='PALS netcdf conversion')
-	ncatt_put(ncid,varid=0,attname='site_name',
-		attval=datasetname)
-	ncatt_put(ncid,varid=0,attname='Fluxnet_dataset_version',
-		attval=datasetversion)
-	if(!is.na(vegetationtype)){
-		ncatt_put(ncid,varid=0,attname='IGBP_vegetation_type',attval=vegetationtype)
-	}
+	ncatt_put(ncid,varid=0,attname='Github_revision',  
+		attval=github_rev, prec="text")
+	ncatt_put(ncid,varid=0,attname='site_code',
+		attval=site_code, prec="text")
+  ncatt_put(ncid,varid=0,attname='site_name',
+          attval=as.character(long_sitename), prec="text")
+  ncatt_put(ncid,varid=0,attname='Fluxnet_dataset_version',
+		attval=datasetversion, prec="text")	  
+  ncatt_put(ncid,varid=0,attname='Fluxnet site tier',
+          attval=tier)
 	ncatt_put(ncid,varid=0,attname='PALS contact',
 		attval='palshelp@gmail.com')
   
 	# Add variable data to file:
-	ncvar_put(ncid, lat, vals=latitude)
-	ncvar_put(ncid, lon, vals=longitude)
-  
+	ncvar_put(ncid, latdim, vals=latitude)
+	ncvar_put(ncid, londim, vals=longitude)
+
+
 	# Optional meta data for each site:
 	if(!is.na(elevation)) {ncvar_put(ncid,elev,vals=elevation)}
-	if(!is.na(measurementheight)) {ncvar_put(ncid,refheight,vals=measurementheight)}
-	if(!is.na(canopyheight)) {ncvar_put(ncid,canheight,vals=canopyheight)}
-	if(!is.na(utcoffset)) {ncvar_put(ncid,timeoffset,vals=utcoffset)}
-	if(!is.na(avprecip)) {ncvar_put(ncid,averageprecip,vals=avprecip)}
-	if(!is.na(avtemp)) {ncvar_put(ncid,averagetemp,vals=avtemp)}
-  
+	if(!is.na(towerheight)) {ncvar_put(ncid,towheight,vals=towerheight)}
+  if(!is.na(canopyheight)) {ncvar_put(ncid,canheight,vals=canopyheight)}
+	if(!is.na(short_veg_type)) {ncvar_put(ncid,short_veg,vals=short_veg_type)}
+  if(!is.na(long_veg_type)) {ncvar_put(ncid,long_veg,vals=short_veg_type)}
+
+
+ 
 	# Time dependent variables:
   lapply(1:length(var_defs), function(x) ncvar_put(nc=ncid, 
                                                    varid=var_defs[[x]], 
-                                                   vals=indata$data[,x]))
+                                                   vals=datain$data[,x]))
   
-    
-  ## NEEDS SORTING OUT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  	
+      	
 	#Add original Fluxnet variable name to file
-	lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]], 
-                                                   att_name="Fluxnet_name", attval=  xxxx))  #complete !!!!!
+	lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]], attname="Fluxnet_name", 
+                                                   attval=datain$attributes[x,1], prec="text"))  
 	
-	#Add CF-compliant name to file
-	lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]], 
-                                                   att_name="CF_name", attval=  xxxx))  #complete !!!!!
+	#Add CF-compliant name to file (if not missing)
+	lapply(1:length(var_defs), function(x) if(!is.na(datain$attributes[x,3]))  
+    ncatt_put(nc=ncid, varid=var_defs[[x]], attname="CF_name", attval=datain$attributes[x,3], prec="text"))
 	
 	
-#	ncvar_put(ncid,SWdown,vals=datain$data$SWdown)
-#	ncatt_put(ncid,SWdown,attname='CF_name',attval='surface_downwelling_shortwave_flux_in_air')
-#	if(! found$PSurf){
-#		ncatt_put(ncid,PSurf,'source','Synthesized in PALS based on elevation and temperature')
-#	}
-#	if(! found$LWdown){
-#		ncatt_put(ncid,LWdown,'source',paste('Entirely synthesized in PALS using',defaultLWsynthesis))
-#	}else if(found$LWdown & !found$LWdown_all){
-#		ncatt_put(ncid,LWdown,'gapfill_technique',paste('Gap-filled in PALS using',defaultLWsynthesis))
-#		ncatt_put(ncid,LWdown,'gapfill_note','Fluxdata.org template has no QC flag for LWdown - data are assumed original.')
-#	}
-#
-
 
 	# Close netcdf file:
 	nc_close(ncid)
 }
-
-#-----------------------------------------------------------------------------
-
-OzFlux2PALSQCFlag = function(flag){
-  ## In PALS:
-  # 1: original data
-  # 0: not original data
-  # -9999: unknown
-  flag[flag>1]=0
-  flag[flag<1]=0
-  flag[is.na(flag)]=0 #-9999
-  return(flag)
-}
-
-#-----------------------------------------------------------------------------
-
-OzFluxNc2PALSQCFlag = function(flag){
-  # Find these flag values in constants.R
-  flagnew = as.integer(flag)
-  flagnew[flag!=0]=QCnotmeasured
-  flagnew[flag==0] = QCmeasured # original data
-  flagnew[flag==10] = QCmeasured # instrument calibration correction, but good data
- # flagnew[flag==20] = QCmeasured # filled with nearby station or out-of-sample tested ACCESS forecast (met data only)
-  flagnew[flag==-9999]=QCnotmeasured
-  flagnew[is.na(flag)]=QCnotmeasured
-  return(flagnew)
-}
-
-#-----------------------------------------------------------------------------
 
