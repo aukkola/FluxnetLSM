@@ -6,8 +6,17 @@
 #' Modification:
 #' --------------
 
+library(rvest)  # read_html, html_node, html_attr, html_table
 
-get_metadata_template <- function(site_code) {
+
+#################################################
+# General metadata functions
+################################################
+
+#' Empty site metadata template, including only the site code
+#'
+#' @return metadata list
+site_metadata_template <- function(site_code) {
     metadata <- list(
         SiteCode = site_code,
         Fullname = NULL,
@@ -22,9 +31,20 @@ get_metadata_template <- function(site_code) {
         Exclude = FALSE,
         Exclude_reason = NULL
     )
+
+    return(metadata)
 }
 
 
+#' Get site name from metadata
+get_site_code <- function(metadata){
+    return(metadata[["SiteCode"]])
+}
+
+
+#' Adds processor metadata, including processor version
+#'
+#' @return metadata list
 add_processing_metadata <- function(metadata) {
     metadata["processing"] <- list(
         processor = "FluxnetProcessing",
@@ -37,6 +57,13 @@ add_processing_metadata <- function(metadata) {
 }
 
 
+################################################
+# CSV-stored metadata
+################################################
+
+#' Tries to gather metadata from the included site CSV
+#'
+#' @return metadata list
 get_site_metadata_CSV <- function(metadata) {
 
     # TODO: use system.file("help", "aliases.rds", package="FLUXNETProcessing")
@@ -46,15 +73,15 @@ get_site_metadata_CSV <- function(metadata) {
 
     print(paste("Trying to load metadata from csv cache (", site_csv_file, ")"))
 
-    site_code <- metadata[["SiteCode"]]
+    site_code <- get_site_code(metadata)
 
-    csv_data <- as.list(read.csv(site_csv_file, header = TRUE,
-                                 stringsAsFactors = FALSE,
-                                 row.names = 1)[site_code, ])
+    csv_row <- as.list(read.csv(site_csv_file, header = TRUE,
+                                stringsAsFactors = FALSE,
+                                row.names = 1)[site_code, ])
 
-    for (n in names(csv_data)) {
-        if (!is.na(csv_data[n])) {
-            metadata[n] <- csv_data[n]
+    for (n in names(csv_row)) {
+        if (!is.na(csv_row[n])) {
+            metadata[n] <- csv_row[n]
         }
     }
 
@@ -62,6 +89,89 @@ get_site_metadata_CSV <- function(metadata) {
 }
 
 
+################################################
+# Web-based metadata
+################################################
+
+#' Get ORNL site URL from site_status table
+get_site_ornl_url <- function(site_code) {
+    status_table_url <- "https://fluxnet.ornl.gov/site_status"
+
+    page_html <- read_html(status_table_url)
+
+    ornl_rel_url <- page_html %>% html_node(xpath = "//td[text()='AU-How']/..") %>%
+        html_node("a") %>%
+        html_attr("href")
+
+    ornl_url <- paste0("https://fluxnet.ornl.gov/", ornl_rel_url)
+
+    return(ornl_url)
+
+}
+
+
+#' Get metadata from ORNL
+#'
+#' @return metadata list
+get_site_metadata_ornl <- function(metadata) {
+    site_code <- get_site_code(metadata)
+
+    site_url <- get_site_ornl_url(site_code)
+    metadata$ORNL_URL <- site_url
+
+    page_html <- read_html(site_url)
+
+    # General info
+    table <- page_html %>% html_node("table#fluxnet_site_information") %>% html_table()
+    metadata$Fullname <- table[table[1] == "Site Name:"][2]
+    metadata$Description <- table[table[1] == "Description:"][2]
+    metadata$TowerStatus <- table[table[1] == "Tower Status:"][2]
+
+    # Location Information
+    table <- page_html %>% html_node("table#fluxnet_site_location_information") %>% html_table()
+    metadata$Country <- table[table[1] == "Country:"][2]
+    lat_lon <- strsplit(table[table[1] == "Coordinates:(Lat, Long)"][2], ", ")[[1]]
+    metadata$SiteLatitude <- as.numeric(lat_lon[1])
+    metadata$SiteLongitude <- as.numeric(lat_lon[1])
+
+    # Site Characteristics
+    table <- page_html %>% html_node("table#fluxnet_site_characteristics") %>% html_table()
+    metadata$SiteElevation <- table[table[1] == "GTOPO30 Elevation:"][2]
+    metadata$IGBP_vegetation_long <- table[table[1] == "IGBP Land Cover"][2]
+    # ORNL doesn't have any of these:
+    #    metadata$IGBP_vegetation_short = NULL,
+    #    metadata$TowerHeight = NaN,
+    #    metadata$CanopyHeight = NaN,
+    #    metadata$Tier = NaN,
+    #    metadata$Exclude = FALSE,
+    #    metadata$Exclude_reason = NULL
+
+    # TODO: ORNL has other potentially useful site information, affiliation info,
+    # and investigator info. Should we use some?
+
+    return(metadata)
+}
+
+
+#' Tries to load metadata from known Fluxnet info sources on the 'web
+#'
+#' @return metadata list
+get_site_metadata_web <- function(metadata) {
+    metadata <- get_site_metadata_ornl(metadata)
+
+    # TODO: Add loaders for OzFlux, AmeriFlux, etc.
+
+    return(metadata)
+}
+
+
+################################################
+# metadata checks
+################################################
+
+#' Checks which metadata are missing (correcting for OK NAs)
+#'
+#' @return boolean metadata availability list
 check_missing <- function(metadata) {
     missing_data <- is.na(metadata)
     if (missing_data$Exclude_reason & metadata$Exclude) {
@@ -72,7 +182,8 @@ check_missing <- function(metadata) {
 }
 
 
-warn_missing <- function(metadata) {
+#' Warns about missing metadata for the site
+warn_missing_metadata <- function(metadata) {
     missing_data <- check_missing(metadata)
 
     if (any(missing_data)) {
@@ -82,15 +193,21 @@ warn_missing <- function(metadata) {
 }
 
 
-get_site_metadata_web <- function(metadata) {
-    # TODO: stub
-    return(metadata)
-}
+################################################
+# Main metadata functions
+################################################
 
+#' Get site metadata. Tries multiple methods to retrieve full metadata
+#'
+#' @return metadata list
+get_site_metadata <- function(site_code, incl_processing=TRUE,
+                              use_csv=TRUE, update_csv=False) {
+    metadata <- site_metadata_template(site_code)
 
-get_site_metadata <- function(site_code, incl_processing=TRUE) {
-    metadata <- get_metadata_template(site_code)
-    metadata <- get_site_metadata_CSV(metadata)
+    if (use_csv) {
+        metadata <- get_site_metadata_CSV(metadata)
+    }
+
     if (any(check_missing(metadata))) {
         metadata <- get_site_metadata_web(metadata)
     }
@@ -99,6 +216,10 @@ get_site_metadata <- function(site_code, incl_processing=TRUE) {
 
     if (incl_processing) {
         metadata <- add_processing_metadata(metadata)
+    }
+
+    if (update_csv) {
+        # TODO: metadata_to_csv(metadata)
     }
 
     return(metadata)
