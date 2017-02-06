@@ -49,8 +49,7 @@ add_processing_metadata <- function(metadata) {
     metadata["processing"] <- list(
         processor = "FluxnetProcessing",
         URL = "https://github.com/aukkola/FLUXNET2015_processing",
-        version = system("git rev-parse --verify HEAD", intern = TRUE,
-                         show.output.on.console = FALSE)
+        version = system("git rev-parse --verify HEAD", intern = TRUE)
     )
 
     return(metadata)
@@ -71,7 +70,7 @@ get_site_metadata_CSV <- function(metadata) {
     # https://stackoverflow.com/questions/3433603/parsing-command-line-arguments-in-r-scripts
     site_csv_file <- "./R/auxiliary_data/Site_info_tier1_only.csv"
 
-    print(paste("Trying to load metadata from csv cache (", site_csv_file, ")"))
+    cat(paste("Trying to load metadata from csv cache (", site_csv_file, ")"), "\n")
 
     site_code <- get_site_code(metadata)
 
@@ -99,7 +98,10 @@ get_site_ornl_url <- function(site_code) {
 
     page_html <- read_html(status_table_url)
 
-    ornl_rel_url <- page_html %>% html_node(xpath = "//td[text()='AU-How']/..") %>%
+    # looks for table cell with site code as contents, then looks up the parent
+    # row, and finds the href of the first link.
+    xpath =  paste0("//td[text()='", site_code, "']/..")
+    ornl_rel_url <- page_html %>% html_node(xpath = xpath) %>%
         html_node("a") %>%
         html_attr("href")
 
@@ -137,7 +139,7 @@ get_site_metadata_ornl <- function(metadata) {
     # Site Characteristics
     table <- page_html %>% html_node("table#fluxnet_site_characteristics") %>% html_table()
     metadata$SiteElevation <- table[table[1] == "GTOPO30 Elevation:"][2]
-    metadata$IGBP_vegetation_long <- table[table[1] == "IGBP Land Cover"][2]
+    metadata$IGBP_vegetation_long <- table[table[1] == "IGBP Land Cover:"][2]
     # ORNL doesn't have any of these:
     #    metadata$IGBP_vegetation_short = NULL,
     #    metadata$TowerHeight = NaN,
@@ -173,7 +175,7 @@ get_site_metadata_web <- function(metadata) {
 #'
 #' @return boolean metadata availability list
 check_missing <- function(metadata) {
-    missing_data <- is.na(metadata)
+    missing_data <- as.list(is.na(metadata))
     if (missing_data$Exclude_reason & metadata$Exclude) {
         missing_data$Exclude_reason <- FALSE
     }
@@ -187,8 +189,8 @@ warn_missing_metadata <- function(metadata) {
     missing_data <- check_missing(metadata)
 
     if (any(missing_data)) {
-        print(paste("Missing metadata for site ", metadata$SiteCode, ":"))
-        print(paste("    ", paste(names(metadata)[missing_data]), collapse = ", "))
+        cat(paste("Missing metadata for site ", metadata$SiteCode, ":"), "\n")
+        cat("   ", paste(names(metadata)[as.logical(missing_data)], collapse = ", "), "\n")
     }
 }
 
@@ -201,7 +203,7 @@ warn_missing_metadata <- function(metadata) {
 #'
 #' @return metadata list
 get_site_metadata <- function(site_code, incl_processing=TRUE,
-                              use_csv=TRUE, update_csv=False) {
+                              use_csv=TRUE, update_csv=FALSE) {
     metadata <- site_metadata_template(site_code)
 
     if (use_csv) {
