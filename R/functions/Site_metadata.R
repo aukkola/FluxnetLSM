@@ -90,6 +90,54 @@ get_site_metadata_CSV <- function(metadata) {
 }
 
 
+#' Writes metadata to CSV, only updating non-NA data
+save_metadata_to_csv <- function(metadata) {
+    save_metadata_list_to_csv(list(metadata))
+}
+
+
+#' Write multiple site metadata to list at once
+save_metadata_list_to_csv <- function(metadata_lists) {
+    site_code <- metadata$SiteCode
+
+    to_save <- list("SiteCode", "Fullname", "Description", "TowerStatus",
+                    "Country", "SiteLatitude", "SiteLongitude", "SiteElevation",
+                    "IGBP_vegetation_short", "IGBP_vegetation_long",
+                    "TowerHeight", "CanopyHeight", "Tier"
+                    )
+
+    csv_data <- read.csv(site_csv_file, header = TRUE,
+                         stringsAsFactors = FALSE,
+                         row.names = 1)
+
+    for (metadata in metadata_lists) {
+        for (v in to_save) {
+            if (v %in% names(metadata) & !is.na(metadata[[v]])) {
+                csv_data[site_code, v] <- metadata[[v]]
+            }
+        }
+    }
+
+    write.csv(csv_data, site_csv_file)
+}
+
+
+#' Reads all ORNL data into the CSV file
+update_csv_from_ornl <- function() {
+    ornl_site_codes <- get_ornl_site_codes()
+    ornl_url_list <- get_ornl_site_url_list(ornl_site_codes)
+    message(length(ornl_url_list), ' sites found.')
+
+    metadata_lists <- list()
+    for (site_code in ornl_site_codes) {
+        metadata_lists[[site_code]] <- get_ornl_site_metadata(site_metadata_template(site_code),
+                                                              ornl_url_list[[site_code]])
+    }
+
+    message("Saving ORNL metadata to ", site_csv_file)
+    save_metadata_list_to_csv(metadata_lists)
+}
+
 ################################################
 # Web-based metadata
 ################################################
@@ -257,7 +305,7 @@ get_site_metadata <- function(site_code, incl_processing=TRUE,
     }
 
     if (update_csv) {
-        # TODO: metadata_to_csv(metadata)
+        save_metadata_to_csv(metadata)
     }
 
     return(metadata)
