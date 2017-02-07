@@ -1,0 +1,13 @@
+Package: FluxnetProcessing
+Type: Package
+Title: Quality control and data conversion scripts for Fluxnet data
+Version: 0.1
+Date: 2017-01-31
+Author: Anna Ukkola
+Maintainer: Who to complain to <yourfault@somewhere.net>
+URL: https://github.com/aukkola/FLUXNET2015_processing
+Description: Scripts for checking quality of fluxnet data, and converting from csv format to netCDF, and managing metadata.
+License: TODO: What license is it under?
+RoxygenNote: 6.0.0.9000
+Roxygen: list(markdown = TRUE)
+Suggests: testthat

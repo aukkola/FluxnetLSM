@@ -15,4 +15,6 @@ TODO:
 
 - Write time step interval to file name? Some sites hourly, others half-hourly
 
+- Document functions
+- Fill out documentation in /man/
 
