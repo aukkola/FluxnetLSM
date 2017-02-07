@@ -15,6 +15,7 @@ TODO:
 
 - Write time step interval to file name? Some sites hourly, others half-hourly
 
-- Document functions
-- Fill out documentation in /man/
+- Either move all functions from R/functions into R/, or merge back into palsR, and depend on that.
+- Document undocumented functions
+- Fill out documentation in /man/FluxnetProcessing-package.Rd ?
 
