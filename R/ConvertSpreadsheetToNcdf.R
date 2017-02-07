@@ -1,17 +1,25 @@
-  # ConvertSpreadsheetToNcdf.R
-  #
-  # Converts data from a PALS formatted spreadhseet to
-  # netcdf.
-  #
-  # Gab Abramowitz UNSW 2012 (palshelp at gmail dot com)
+#' ConvertSpreadsheetToNcdf.R
+#'
+#' Converts data from a PALS formatted spreadhseet to
+#' netcdf.
+#'
+#' Gab Abramowitz UNSW 2012 (palshelp at gmail dot com)
 
-#Main function to convert Fluxnet2015 CSV-files to NetCDF
-
+#' Main function to convert Fluxnet2015 CSV-files to NetCDF
+#'
+#' @param infile input filename,
+#'   e.g. "FULLSET/FLX_AU-How_FLUXNET2015_FULLSET_HH_2001-2014_1-3.csv"
+#' @param era_file ERA input file (needed if using ERAinterim to gapfill met variables)
+#'   e.g. "FULLSET/FLX_AU-How_FLUXNET2015_ERAI_HH_1989-2014_1-3.csv"
+#' @param threshold How many percent of time steps allowed to be missing in any given year?
+#' @param min_yrs Minimum numbers of years to process
+#' @param out_path output path e.g. "~/Documents/FLUXNET2016_processing/"
+#' @param site_code Fluxnet site code e.g. "AU-How"
+#' @param ERA_gapfill Gapfill met variables using ERAinterim?
 convert_fluxnet_to_netcdf <- function(infile, site_code, out_path, lib_path,
                                       era_file=NA, era_gapfill=FALSE,
                                       datasetname="Fluxnet2015", datasetversion="Nov16",
                                       gap_threshold=20, min_yrs=2) {
-                                       
   
   library(R.utils)
     
@@ -24,28 +32,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path, lib_path,
   source(paste(lib_path, "/functions/Site_metadata.R", sep=""))
   source(paste(lib_path, "/functions/FluxtowerSpreadsheetToNc.R", sep=""))
   
-  
-  #input filename
-  #infile <- "~/Documents/FLUXNET2016_processing/FLX_AU-How_FLUXNET2015_FULLSET_HH_2001-2014_1-3.csv"
-  #ERA input file (needed if using ERAinterim to gapfill met variables)
-  #era_file <- "~/Documents/FLUXNET2016_processing/FLX_AU-How_FLUXNET2015_ERAI_HH_1989-2014_1-3.csv"
-  
-  #How many percent of time steps allowed to be missing in any given year?
-  #threshold <- 20
-  
-  #Minimum numbers of years to process
-  #min_yrs <- 2
-  
-  #output file
-  #out_path <- "~/Documents/FLUXNET2016_processing/"
-  #site_code <- "AU-How"
-  
 
-  #Gapfill met variables using ERAinterim?
-  #ERA_gapfill <- TRUE
-  
-  
-  
   ################################
   ###--- Read variable data ---###
   ################################
