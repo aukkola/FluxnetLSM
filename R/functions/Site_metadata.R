@@ -72,7 +72,7 @@ site_csv_file <- "./R/auxiliary_data/Site_info_tier1_only.csv"
 #' @return metadata list
 get_site_metadata_CSV <- function(metadata) {
 
-    cat(paste0("Trying to load metadata from csv cache (", site_csv_file, ")"), "\n")
+    message("Trying to load metadata from csv cache (", site_csv_file, ")")
 
     site_code <- get_site_code(metadata)
 
@@ -148,7 +148,7 @@ get_site_metadata_ornl <- function(metadata) {
     site_url <- get_site_ornl_url(site_code)
     metadata$ORNL_URL <- site_url
 
-    cat(paste0("Trying to load metadata from ORNL (", site_url, ")"), "\n")
+    message("Trying to load metadata for ", site_code, " from ORNL (", site_url, ")")
 
     page_html <- read_html(site_url)
 
@@ -218,8 +218,8 @@ warn_missing_metadata <- function(metadata) {
     missing_data <- check_missing(metadata)
 
     if (any(missing_data)) {
-        cat(paste("Missing metadata for site ", metadata$SiteCode, ":"), "\n")
-        cat("   ", paste(names(metadata)[missing_data], collapse = ", "), "\n")
+        message("Missing metadata for site ", metadata$SiteCode, ":")
+        message("   ", paste(names(metadata)[missing_data], collapse = ", "))
     }
 }
 
