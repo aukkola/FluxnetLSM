@@ -46,10 +46,11 @@ get_site_code <- function(metadata){
 #'
 #' @return metadata list
 add_processing_metadata <- function(metadata) {
-    metadata["processing"] <- list(
+    metadata$Processing <- list(
         processor = "FluxnetProcessing",
         URL = "https://github.com/aukkola/FLUXNET2015_processing",
-        version = system("git rev-parse --verify HEAD", intern = TRUE)
+        # TODO: add git tags if we start using them.
+        git_rev = system("git rev-parse --verify HEAD", intern = TRUE)
     )
 
     return(metadata)
@@ -70,7 +71,7 @@ get_site_metadata_CSV <- function(metadata) {
     # https://stackoverflow.com/questions/3433603/parsing-command-line-arguments-in-r-scripts
     site_csv_file <- "./R/auxiliary_data/Site_info_tier1_only.csv"
 
-    cat(paste("Trying to load metadata from csv cache (", site_csv_file, ")"), "\n")
+    cat(paste0("Trying to load metadata from csv cache (", site_csv_file, ")"), "\n")
 
     site_code <- get_site_code(metadata)
 
@@ -136,6 +137,8 @@ get_site_metadata_ornl <- function(metadata) {
     site_url <- get_site_ornl_url(site_code)
     metadata$ORNL_URL <- site_url
 
+    cat(paste0("Trying to load metadata from ORNL (", site_url, ")"), "\n")
+
     page_html <- read_html(site_url)
 
     # General info
@@ -188,11 +191,11 @@ get_site_metadata_web <- function(metadata) {
 
 #' Checks which metadata are missing (correcting for OK NAs)
 #'
-#' @return boolean metadata availability list
+#' @return boolean metadata availability vector
 check_missing <- function(metadata) {
-    missing_data <- as.list(is.na(metadata))
-    if (missing_data$Exclude_reason & metadata$Exclude) {
-        missing_data$Exclude_reason <- FALSE
+    missing_data <- is.na(metadata)
+    if (missing_data["Exclude_reason"] & metadata$Exclude) {
+        missing_data["Exclude_reason"] <- FALSE
     }
 
     return(missing_data)
@@ -205,7 +208,7 @@ warn_missing_metadata <- function(metadata) {
 
     if (any(missing_data)) {
         cat(paste("Missing metadata for site ", metadata$SiteCode, ":"), "\n")
-        cat("   ", paste(names(metadata)[as.logical(missing_data)], collapse = ", "), "\n")
+        cat("   ", paste(names(metadata)[missing_data], collapse = ", "), "\n")
     }
 }
 
