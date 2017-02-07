@@ -15,4 +15,15 @@ TODO:
 
 - Write time step interval to file name? Some sites hourly, others half-hourly
 
+- Provide option to produce PALS-style plots at the end of data processing?
+
+- Need a separate qc flag for time steps filled using ERAinterim data
+
+
+
+
+Some info to create package...
+
+package depends on: rvest, R.utils
+
 

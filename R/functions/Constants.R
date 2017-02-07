@@ -250,7 +250,7 @@ retrieve_ranges <- function(vars_present, all_vars){
   
   #Combine
   var_ranges <- rbind(range_min, range_max)
-  colnames(var_ranges) <- vars$ALMA_variable[ind_present]  
+  colnames(var_ranges) <- all_vars$ALMA_variable[ind_present]  
   
   return(var_ranges)
 }

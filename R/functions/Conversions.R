@@ -63,14 +63,16 @@ ChangeUnits = function(datain){
         #If already converted, reset units to new converted units
         if(converted[which(datain$vars=="PSurf")]) {
           psurf_units <- alma_units[which(datain$vars=="PSurf")]         
-        } else if (converted[which(datain$vars=="Tair")]){
+        } 
+        if (converted[which(datain$vars=="Tair")]){
           tair_units <- alma_units[which(datain$vars=="Tair")]
         }          
-        
+
+        browser()
         datain$data[[k]] <- Rel2SpecHum(relHum=datain$data[[which(datain$vars=="Qair")]], 
-                                        Tair=datain$data[[which(datain$vars=="Tair")]], 
+                                        airtemp=datain$data[[which(datain$vars=="Tair")]], 
                                         tair_units=tair_units, 
-                                        PSurf=datain$data[[which(datain$vars=="PSurf")]], 
+                                        pressure=datain$data[[which(datain$vars=="PSurf")]], 
                                         psurf_units=psurf_units)
         
         
@@ -98,7 +100,7 @@ ChangeUnits = function(datain){
 #-----------------------------------------------------------------------------
 
 
-VPD2RelHum <- function(VPD, Tair, vpd_units, tair_units){
+VPD2RelHum <- function(VPD, airtemp, vpd_units, tair_units){
 
   #Converts VPD (hPa) to relative humidity (%)
   
@@ -110,16 +112,14 @@ VPD2RelHum <- function(VPD, Tair, vpd_units, tair_units){
     
   #Check that temperature in Celcius. Convert if not
   if(tair_units=="K"){
-    Tair <- Tair-273.15
+    airtemp <- airtemp - 273.15
   }
     
   #Hectopascal to Pascal
   hPa_2_Pa <- 100
   
   #Saturation vapour pressure (Pa).
-  #From Jones (1992), Plants and microclimate: A quantitative approach 
-  #to environmental plant physiology, p110
-  esat <- 613.75 * exp(17.502 * Tair / (240.97+Tair))
+  esat <- calc_esat(airtemp) 
   
   #Relative humidity (%)
   RelHum <- 100 * (1 - (VPD * hPa_2_Pa) / esat)
@@ -127,33 +127,32 @@ VPD2RelHum <- function(VPD, Tair, vpd_units, tair_units){
   return(RelHum)
 }
 
-
 #-----------------------------------------------------------------------------
 
-Rel2SpecHum <- function(relHum, Tair, tair_units, PSurf, psurf_units){
+Rel2SpecHum <- function(relHum, airtemp, tair_units, pressure, psurf_units){
   # Converts relative humidity to specific humidity.
-  # required units: Tair - temp in C; PSurf in Pa; relHum as %
+  # required units: airtemp - temp in C; pressure in Pa; relHum as %
   
   #Check that temperature in Celcius. Convert if not
   if(tair_units=="K"){
-    Tair <- Tair-273.15
+    airtemp <- airtemp - 273.15
   } else if(tair_units != "C"){
     CheckError("Unknown air temperature units, cannot convert relative to specific humidity")
   }
   
   #Check that PSurf is in Pa. Convert if not
   if(psurf_units=="kPa"){
-    PSurf <- PSurf * 1000
+    pressure <- pressure * 1000
   } else if(psurf_units != "Pa"){
     CheckError("Unknown air pressure units, cannot convert relative to specific humidity")
   }
   
   
   # Sat vapour pressure in Pa (reference as above)
-  esat <- 613.75 * exp(17.502 * Tair / (240.97+Tair))
+  esat <- calc_esat(airtemp)
   
   # Then specific humidity at saturation:
-  ws <- 0.622*esat/(PSurf - esat)
+  ws <- 0.622*esat/(pressure - esat)
   
   # Then specific humidity:
   specHum <- (relHum/100) * ws
@@ -162,4 +161,15 @@ Rel2SpecHum <- function(relHum, Tair, tair_units, PSurf, psurf_units){
 }
 
 
+#-----------------------------------------------------------------------------
 
+calc_esat <- function(airtemp){
+  #Calculates saturation vapour pressure
+  #Tair in degrees C
+  
+  #From Jones (1992), Plants and microclimate: A quantitative approach 
+  #to environmental plant physiology, p110
+  esat <- 613.75 * exp(17.502 * airtemp / (240.97+airtemp))
+  
+  return(esat)
+}

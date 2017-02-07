@@ -7,14 +7,13 @@
 
 #Main function to convert Fluxnet2015 CSV-files to NetCDF
 
-convert_fluxnet_to_netcdf <- function(infile, site_code, out_path, lib_path,
-                                      era_file=NA, era_gapfill=FALSE,
+
+convert_fluxnet_to_netcdf <- function(infile, site_code, out_path, lib_path,  #REMOVE lib_path IN FINAL CODE
+                                      ERA_file=NA, ERA_gapfill=FALSE,
                                       datasetname="Fluxnet2015", datasetversion="Nov16",
                                       gap_threshold=20, min_yrs=2) {
                                        
-  
-  library(R.utils)
-    
+      
   source(paste(lib_path, "/functions/Constants.R", sep=""))
   source(paste(lib_path, "/functions/Timing_general.R", sep=""))
   source(paste(lib_path, "/functions/Conversions.R", sep=""))
@@ -24,27 +23,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path, lib_path,
   source(paste(lib_path, "/functions/Site_metadata.R", sep=""))
   source(paste(lib_path, "/functions/FluxtowerSpreadsheetToNc.R", sep=""))
   
-  
-  #input filename
-  #infile <- "~/Documents/FLUXNET2016_processing/FLX_AU-How_FLUXNET2015_FULLSET_HH_2001-2014_1-3.csv"
-  #ERA input file (needed if using ERAinterim to gapfill met variables)
-  #era_file <- "~/Documents/FLUXNET2016_processing/FLX_AU-How_FLUXNET2015_ERAI_HH_1989-2014_1-3.csv"
-  
-  #How many percent of time steps allowed to be missing in any given year?
-  #threshold <- 20
-  
-  #Minimum numbers of years to process
-  #min_yrs <- 2
-  
-  #output file
-  #out_path <- "~/Documents/FLUXNET2016_processing/"
-  #site_code <- "AU-How"
-  
 
-  #Gapfill met variables using ERAinterim?
-  #ERA_gapfill <- TRUE
-  
-  
   
   ################################
   ###--- Read variable data ---###
@@ -108,7 +87,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path, lib_path,
   # gapfill using ERA-interim data provided as part of FLUXNET2015
   if(ERA_gapfill){
     
-    era_data <- read.csv(era_file, header=TRUE, colClasses=c("character", "character", 
+    era_data <- read.csv(ERA_file, header=TRUE, colClasses=c("character", "character", 
                                                              rep("numeric", 7)))
     
     #ERAinterim data provided for 1989-2014, need to extract common years with flux obs
@@ -243,24 +222,6 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path, lib_path,
 
 
 } #function
-
-
-
-
-
-
-#Example call REMOVE IN FINAL CODE
-convert_fluxnet_to_netcdf(infile="~/phd/data/Fluxnet2015/FULLSET/AU-How/FLX_AU-How_FLUXNET2015_FULLSET_HH_2001-2014_1-3.csv",
-                          site_code="AU-How",
-                          out_path="~/phd/data/Fluxnet2015/processed/",
-                          lib_path="~/phd/software/FluxnetProcessing/R",    #TEMPORARY, remove when code turned into a package
-                          era_file="~/phd/data/Fluxnet2015/FULLSET/AU-How/FLX_AU-How_FLUXNET2015_ERAI_HH_1989-2014_1-3.csv",
-                          era_gapfill=TRUE,
-                          datasetname="Fluxnet2015",
-                          datasetversion="Nov16",
-                          gap_threshold=20,
-                          min_yrs=2)
-
 
 
 

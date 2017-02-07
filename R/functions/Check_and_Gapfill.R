@@ -14,6 +14,7 @@ CheckDataGaps <- function(datain, missing_val=SprdMissingVal,
   #(set by thereshold) and the number of consecutive years available
   #(at least number set by min_yrs)
   
+  library(R.utils)
   
   gaps_found <- apply(datain$data, MARGIN=2, function(x) any(x==missing_val))
   
@@ -204,7 +205,7 @@ GapfillMet <- function(datain, era_data, era_vars,
         
         # Convert ERAinterim VPD to relative humidity
         # Assuming that ERA vpd and tair units the same as observed units
-        era_rh <-  VPD2RelHum(VPD=era_data[,era_col], Tair=era_data[,era_tair_col], 
+        era_rh <-  VPD2RelHum(VPD=era_data[,era_col], airtemp=era_data[,era_tair_col], 
                               vpd_units=vpd_units, tair_units=tair_units) 
                   
         #Gapfill
