@@ -19,17 +19,17 @@ library(rvest)  # read_html, html_node, html_attr, html_table
 site_metadata_template <- function(site_code) {
     metadata <- list(
         SiteCode = site_code,
-        Fullname = NULL,
-        SiteLatitude = NaN,
-        SiteLongitude = NaN,
-        SiteElevation = NaN,
-        IGBP_vegetation_short = NULL,
-        IGBP_vegetation_long = NULL,
-        TowerHeight = NaN,
-        CanopyHeight = NaN,
-        Tier = NaN,
+        Fullname = NA,
+        SiteLatitude = NA,
+        SiteLongitude = NA,
+        SiteElevation = NA,
+        IGBP_vegetation_short = NA,
+        IGBP_vegetation_long = NA,
+        TowerHeight = NA,
+        CanopyHeight = NA,
+        Tier = NA,
         Exclude = FALSE,
-        Exclude_reason = NULL
+        Exclude_reason = NA
     )
 
     return(metadata)
