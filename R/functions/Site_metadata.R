@@ -98,7 +98,6 @@ save_metadata_to_csv <- function(metadata) {
 
 #' Write multiple site metadata to list at once
 save_metadata_list_to_csv <- function(metadata_lists) {
-    site_code <- metadata$SiteCode
 
     to_save <- list("SiteCode", "Fullname", "Description", "TowerStatus",
                     "Country", "SiteLatitude", "SiteLongitude", "SiteElevation",
@@ -111,6 +110,7 @@ save_metadata_list_to_csv <- function(metadata_lists) {
                          row.names = 1)
 
     for (metadata in metadata_lists) {
+        site_code <- metadata$SiteCode
         for (v in to_save) {
             if (v %in% names(metadata) & !is.na(metadata[[v]])) {
                 csv_data[site_code, v] <- metadata[[v]]
@@ -150,7 +150,7 @@ get_ornl_site_codes <- function() {
 
     table <- page_html %>% html_node("#historical_site_list") %>% html_table()
 
-    site_codes <- table[["FLUXNET ID"]]
+    site_codes <- sort(table[["FLUXNET ID"]])
 
     return(site_codes)
 
