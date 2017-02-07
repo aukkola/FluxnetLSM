@@ -1,6 +1,5 @@
-
-
-- write Github revision number to file attributes 
+TODO:
+----
 
 - Currently duplicates error message, fix
 
