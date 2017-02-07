@@ -22,7 +22,7 @@ convert_fluxnet_to_netcdf(infile="~/Documents/FLUXNET2016_processing/FLX_AU-How_
 
 #Main function to convert Fluxnet2015 CSV-files to NetCDF
 
-convert_fluxnet_to_netcdf <- function(infile, site_name, out_path, lib_path,
+convert_fluxnet_to_netcdf <- function(infile, site_code, out_path, lib_path,
                                       era_file=NA, era_gapfill=FALSE,
                                       datasetname="Fluxnet2015", datasetversion="Nov16",
                                       gap_threshold=20, min_yrs=2) {
@@ -36,6 +36,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_name, out_path, lib_path,
   source(paste(lib_path, "/functions/UtilityFunctions.R", sep=""))
   source(paste(lib_path, "/functions/Check_and_Gapfill.R", sep=""))
   source(paste(lib_path, "/functions/Timing_netcdf.R", sep=""))
+  source(paste(lib_path, "/functions/Site_metadata.R", sep=""))
   source(paste(lib_path, "/functions/FluxtowerSpreadsheetToNc.R", sep=""))
   
   
@@ -52,7 +53,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_name, out_path, lib_path,
   
   #output file
   #out_path <- "~/Documents/FLUXNET2016_processing/"
-  #site_name <- "AU-How"
+  #site_code <- "AU-How"
   
 
   #Gapfill met variables using ERAinterim?
@@ -79,11 +80,8 @@ convert_fluxnet_to_netcdf <- function(infile, site_name, out_path, lib_path,
   time_vars <- c("TIMESTAMP_START", "TIMESTAMP_END")
   
   
-  #Read site information (lon, lat, elevation)   NOT YET WORKING
-  site_info_all <- read.csv(paste(lib_path, "/auxiliary_data/Site_info_tier1_only.csv", sep=""), header=TRUE)
-  
-  #Extract info for site being processed
-  site_info <- site_info_all[which(site_info_all$SiteCode==site_name),]
+  #Read site information (lon, lat, elevation)
+  site_info <- get_site_metadata(site_code)
   
   #Should site be excluded? If so, abort and print reason.
   #This option is set in the site info file (inside auxiliary data folder)
@@ -204,12 +202,12 @@ convert_fluxnet_to_netcdf <- function(infile, site_name, out_path, lib_path,
     #Create output file names
     #If only one year, only write start year, else write time period
     if(start_yr==end_yr){
-      metfilename  <- paste(out_path, "/", site_name, "_", start_yr, "_", datasetname, "_Met.nc", sep="")
-      fluxfilename <- paste(out_path, "/", site_name, "_", start_yr, "_", datasetname, "_Flux.nc", sep="")
+      metfilename  <- paste(out_path, "/", site_code, "_", start_yr, "_", datasetname, "_Met.nc", sep="")
+      fluxfilename <- paste(out_path, "/", site_code, "_", start_yr, "_", datasetname, "_Flux.nc", sep="")
       
     } else {   
-      metfilename  <- paste(out_path, "/", site_name, "_", start_yr, "-", end_yr, "_", datasetname, "_Met.nc", sep="")
-      fluxfilename <- paste(out_path, "/", site_name, "_", start_yr, "-", end_yr, "_", datasetname, "_Flux.nc", sep="")
+      metfilename  <- paste(out_path, "/", site_code, "_", start_yr, "-", end_yr, "_", datasetname, "_Met.nc", sep="")
+      fluxfilename <- paste(out_path, "/", site_code, "_", start_yr, "-", end_yr, "_", datasetname, "_Flux.nc", sep="")
       
     }
     
@@ -218,9 +216,10 @@ convert_fluxnet_to_netcdf <- function(infile, site_name, out_path, lib_path,
     CreateMetNcFile( metfilename=metfilename, datain=DataFromText,                   
                      latitude=site_info$SiteLatitude, 
                      longitude=site_info$SiteLongitude,                
-                     site_code=site_name, long_sitename=site_info$Fullname,             
+                     site_code=site_code,
+                     long_sitename=site_info$Fullname,
                      datasetversion=datasetversion, 
-                     github_rev="TEST",    #FIX !!!!!!!!!!!!!!!!!!!!!!            
+                     github_rev=site_info$Processing$git_rev,
                      tier=site_info$Tier,                                
                      ind_start=gaps$tseries_start[k], 
                      ind_end=gaps$tseries_end[k],                  
@@ -238,9 +237,10 @@ convert_fluxnet_to_netcdf <- function(infile, site_name, out_path, lib_path,
     CreateFluxNcFile(fluxfilename=fluxfilename, datain=DataFromText,                   
                      latitude=site_info$SiteLatitude, 
                      longitude=site_info$SiteLongitude,                
-                     site_code=site_name, long_sitename=site_info$Fullname,             
+                     site_code=site_code,
+                     long_sitename=site_info$Fullname,
                      datasetversion=datasetversion, 
-                     github_rev="TEST",    #FIX !!!!!!!!!!!!!!!!!!!!!!            
+                     github_rev=site_info$Processing$git_rev,
                      tier=site_info$Tier,                                
                      ind_start=gaps$tseries_start[k], 
                      ind_end=gaps$tseries_end[k],                  
