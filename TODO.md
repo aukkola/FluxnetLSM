@@ -19,8 +19,9 @@ TODO:
 
 - Need a separate qc flag for time steps filled using ERAinterim data
 
-- Document functions
-- Fill out documentation in /man/
+- Either move all functions from R/functions into R/, or merge back into palsR, and depend on that.
+- Document undocumented functions
+- Fill out documentation in /man/FluxnetProcessing-package.Rd ?
 
 
 Some info to create package...
