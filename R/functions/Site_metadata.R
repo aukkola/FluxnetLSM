@@ -64,7 +64,7 @@ add_processing_metadata <- function(metadata) {
 # TODO: use system.file("help", "aliases.rds", package="FLUXNETProcessing")
 # when this is a proper package.
 # https://stackoverflow.com/questions/3433603/parsing-command-line-arguments-in-r-scripts
-site_csv_file <- "./R/auxiliary_data/Site_info_tier1_only.csv"
+site_csv_file <- "./data/Site_info_tier1_only.csv"
 
 
 #' Tries to gather metadata from the included site CSV

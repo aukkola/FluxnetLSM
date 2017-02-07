@@ -52,7 +52,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path, lib_path,
 
   #File contains desired variables (refer to Fluxnet2015 documentation for full variable descriptions; 
   #http://fluxnet.fluxdata.org/data/fluxnet2015-dataset/fullset-data-product/)
-  vars <- read.csv(paste(lib_path, "/auxiliary_data/variables.csv", sep=""), header=TRUE, 
+  vars <- read.csv(paste(lib_path, "/../data/variables.csv", sep=""), header=TRUE,
                    colClasses=c("character", "character", "character", 
                                 "character", "character", "character",
                                 "character",
