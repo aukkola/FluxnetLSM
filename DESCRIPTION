@@ -9,5 +9,4 @@ URL: https://github.com/aukkola/FLUXNET2015_processing
 Description: Scripts for checking quality of fluxnet data, and converting from csv format to netCDF, and managing metadata.
 License: TODO: What license is it under?
 RoxygenNote: 6.0.0.9000
-Roxygen: list(markdown = TRUE)
 Suggests: testthat
