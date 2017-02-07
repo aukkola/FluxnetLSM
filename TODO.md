@@ -19,7 +19,8 @@ TODO:
 
 - Need a separate qc flag for time steps filled using ERAinterim data
 
-
+- Document functions
+- Fill out documentation in /man/
 
 
 Some info to create package...
