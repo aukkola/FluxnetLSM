@@ -3,6 +3,7 @@
 #' Converts useful variables from a Fluxnet 2015 spreatsheet format into two
 #' netcdf files, one for fluxes, and one for met forcings.
 
+library(FluxnetProcessing)  # convert_fluxnet_to_netcdf
 
 # initial garbage collection
 rm(list=ls(all=TRUE))
@@ -10,10 +11,6 @@ rm(list=ls(all=TRUE))
 # This directory should contain appropriate data from http://fluxnet.fluxdata.org/data/fluxnet2015-dataset/
 in_path <- "~/Documents/FLUXNET2016_processing/"
 out_path <- "~/Documents/FLUXNET2016_processing/"
-
-# Path to FluxnetProcessing R scripts
-lib_path <- "~/Documents/FLUXNET2016_processing/scripts/R/"
-source(paste(lib_path, "/ConvertSpreadsheetToNcdf.R", sep=""))
 
 site_code <- "AU-How"
 
