@@ -260,7 +260,7 @@ get_site_metadata_web <- function(metadata) {
 #' @return boolean metadata availability vector
 check_missing <- function(metadata) {
     missing_data <- is.na(metadata)
-    if (missing_data["Exclude_reason"] & metadata$Exclude) {
+    if (missing_data["Exclude_reason"] & !metadata$Exclude) {
         missing_data["Exclude_reason"] <- FALSE
     }
 

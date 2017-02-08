@@ -88,9 +88,6 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path, lib_path,   #
   #Remove evaluation variables that have too many gaps    COMPLETE !!!!!!
   
   
-  browser()
-  
-  
   ##############################################
   ###--- Gapfill meteorological variables ---### 
   ##############################################
