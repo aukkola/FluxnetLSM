@@ -8,10 +8,22 @@
 # Function for crashing semi-gracefully:
 CheckError = function(errtext,errcode='U1:'){
 	if(errtext != 'ok'){
-		# Additionally report command line call
+    		# Additionally report command line call
 		calltext = paste(commandArgs(),collapse=' ')
 		alltext = paste(errtext,calltext)
 		# If error, write to std error
-		cat(alltext,' ^ \n',file=stderr()); stop(alltext,call. = FALSE)
+		stop(alltext, call. = FALSE)
 	}
+}
+
+
+#-----------------------------------------------------------------------------
+
+
+# Strips path from filename: 
+stripFilename = function(fpath) {
+  fsplit = strsplit(fpath,'/')
+  fcharvec = as.character(fsplit[[1]])
+  fname = fcharvec[length(fcharvec)]
+  return(fname)
 }

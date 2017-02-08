@@ -12,7 +12,7 @@
 #' @param era_file ERA input file (needed if using ERAinterim to gapfill met variables)
 #'   e.g. "FULLSET/FLX_AU-How_FLUXNET2015_ERAI_HH_1989-2014_1-3.csv"
 #' @param threshold How many percent of time steps allowed to be missing in any given year?
-#' @param min_yrs Minimum numbers of years to process
+#' @param min_yrs Minimum number of consecutive years to process
 #' @param out_path output path e.g. "~/Documents/FLUXNET2016_processing/"
 #' @param site_code Fluxnet site code e.g. "AU-How"
 #' @param ERA_gapfill Gapfill met variables using ERAinterim?
@@ -59,7 +59,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path, lib_path,   #
   site_info <- get_site_metadata(site_code)
   
   #Should site be excluded? If so, abort and print reason.
-  #This option is set in the site info file (inside auxiliary data folder)
+  #This option is set in the site info file (inside data folder)
   #Mainly excludes sites with mean annual ET excluding P, implying
   #irrigation or other additional water source.
   if(site_info$Exclude){
@@ -86,6 +86,14 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path, lib_path,   #
     
     
   #Remove evaluation variables that have too many gaps    COMPLETE !!!!!!
+  
+  
+  
+  
+  
+  
+  
+  
   
   
   ##############################################

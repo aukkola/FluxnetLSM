@@ -106,8 +106,8 @@ VPD2RelHum <- function(VPD, airtemp, vpd_units, tair_units){
   
   #Check that VPD in Pascals
   if(vpd_units != "hPa"){
-    CheckError("Cannot convert VPD to relative humidity. VPD units not recognised,
-               expecting VPD in hectopascals")
+    CheckError(paste("Cannot convert VPD to relative humidity. VPD units not recognised,
+               expecting VPD in hectopascals [ function:", match.call()[[1]], "]"))
   }
     
   #Check that temperature in Celcius. Convert if not
@@ -137,14 +137,18 @@ Rel2SpecHum <- function(relHum, airtemp, tair_units, pressure, psurf_units){
   if(tair_units=="K"){
     airtemp <- airtemp - 273.15
   } else if(tair_units != "C"){
-    CheckError("Unknown air temperature units, cannot convert relative to specific humidity")
+    CheckError(paste("Unknown air temperature units, cannot convert 
+                     relative to specific humidity. Accepts air temperature in K or C 
+                     [ function:", match.call()[[1]], "]"))
   }
   
   #Check that PSurf is in Pa. Convert if not
   if(psurf_units=="kPa"){
     pressure <- pressure * 1000
   } else if(psurf_units != "Pa"){
-    CheckError("Unknown air pressure units, cannot convert relative to specific humidity")
+    CheckError(paste("Unknown air pressure units, cannot convert 
+               relative to specific humidity. Accepts air pressure
+               in kPa or Pa", match.call()[[1]], "]"))
   }
   
   

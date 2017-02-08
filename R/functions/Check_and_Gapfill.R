@@ -120,10 +120,11 @@ CheckDataGaps <- function(datain, missing_val=SprdMissingVal,
         
         #If all years removed because all available periods shorter than min_yrs, abort
         if(length(yr_ind)==0){       
-          stop("No years to process, all available time period too short (as set by min_yrs). Aborting.")
-        }
+          CheckError(paste("No years to process, all available time period too short (as set by min_yrs). 
+                     Aborting [ function:", match.call()[[1]], "]"))
+        }        
         
-      
+        
       #At least min_yrs number of available years
       } else {
         
@@ -167,7 +168,8 @@ GapfillMet <- function(datain, era_data, era_vars,
   
   #Check that Fluxnet and ERA data dimensions agree
   if(nrow(datain) != nrow(era_data)) {
-    CheckError("Observed flux data and ERAinterim data dimensions do not match, aborting.")
+    CheckError(paste("Observed flux data and ERAinterim data dimensions 
+                     do not match, aborting [ function:", match.call()[[1]], "]"))
   }
   
   
@@ -175,6 +177,7 @@ GapfillMet <- function(datain, era_data, era_vars,
   avail_era  <- era_vars[which(!is.na(era_vars))]
   avail_flux <- names(avail_era)
   
+    
   #Loop through available variables
   for(k in 1:length(avail_era)){
     
@@ -188,7 +191,7 @@ GapfillMet <- function(datain, era_data, era_vars,
     #If gaps in met data variable, gapfill
     if(any(datain[,flx_col]==missing_val)){
       
-      #FInd missing values to fill
+      #Find missing values to fill
       missing <- which(datain[,flx_col]==missing_val)
       
       
@@ -211,6 +214,7 @@ GapfillMet <- function(datain, era_data, era_vars,
         #Gapfill
         datain[missing,flx_col] <- era_rh[missing]
           
+        
       ### Other variables ###
       #ERAinterim equivalent should exist, use that directly
       } else {
@@ -219,6 +223,23 @@ GapfillMet <- function(datain, era_data, era_vars,
         datain[missing, flx_col] <- era_data[missing, era_col]
         
       }
+      
+      
+      ## Set QC flags to "4" for time steps filled with ERA data ##
+      #Find corresponding qc variable, if available
+      qc_col <- which(colnames(datain)==paste(avail_flux[k], "_qc", sep=""))
+      
+      
+      #Replace era gap-filled time steps with "4"
+      if(length(qc_col) > 0){
+        datain[missing,qc_col] <- 4 
+        
+      } else {
+        warning(paste("Could not find QC variable for met variable being gap-filled
+                          with ERA data. QC flag for variable", 
+                          avail_flux[k], "not updated"))
+      }
+      
         
     } #if
   } #vars
@@ -277,6 +298,7 @@ CheckTextDataRanges = function(datain, missingval){
                        "]. Check data or change data range in variables auxiliary file",
                        sep="")) 
     }
+    
     
     
   } #variables

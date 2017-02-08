@@ -36,14 +36,14 @@ findColIndices = function(fileinname, var_names, var_classes,
 
   #Check if any essential meteorological variables missing, abort if so
   if(any(essential_vars[failed_ind])){
-    CheckError(paste("Cannot find all essential variables (missing: ", 
+    CheckError(paste("Cannot find all essential variables in input file (missing: ", 
                      paste(var_names[failed_ind[which(essential_vars[failed_ind])]], collapse=","),
                      "), aborting", sep=""))
   }
   
   #Check if no desired evaluation variables present, abort if so
   if(all(preferred_vars[failed_ind])){
-    CheckError(paste("Cannot find any evaluation variables (missing: ", 
+    CheckError(paste("Cannot find any evaluation variables in input file (missing: ", 
                      paste(var_names[failed_ind[which(essential_vars[failed_ind])]], collapse=","),
                      "), aborting", sep=""))
   }
@@ -62,7 +62,8 @@ findColIndices = function(fileinname, var_names, var_classes,
   
   #Check that column indices for time and other variables don't overlap
   if(length(intersect(time_info$ind, ind)) > 0){
-    CheckError("Error determining column indices for time and other variables, two or more variables overlap")
+    CheckError(paste("Error determining column indices for time and other 
+               variables, two or more variables overlap [ function:", match.call()[[1]], "]"))
   }
   
   #Combine column classes for time and other variables
