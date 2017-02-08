@@ -41,14 +41,22 @@ ReadTextFluxData <- function(fileinname, vars, time_vars){
   #Remove time stamp variables from Data variable
   FluxData <- FluxData[,-which(colnames(FluxData)==time_vars)]
   
+  browser()
+  
   #Duplicate Fluxnet data column if the same variable needs to be
   #processed several times (e.g. RH converted to RH and Qair)
   if(ncol(FluxData) != length(tcol$names))
   {
+    
     FluxData <- duplicate_columns(data=FluxData, vars=tcol$names)
+    
+    #Make sure FluxData now has correct no. of columns
+    if(ncol(FluxData) != length(tcol$names)){
+      stop("Duplicate variable names exist but columns could not be be duplicated correctly")
+    }
+    
   }
   
-
   #Retrieve original and target units for variables present:
   units <- retrieve_units(vars_present=tcol$names, all_vars=vars)
   
@@ -264,8 +272,10 @@ CreateFluxNcFile = function(fluxfilename, datain,                 #outfile file 
   
   
   #Add original Fluxnet variable name to file
-  lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]], attname="Fluxnet_name", 
-                                                   attval=datain$attributes[x,1], prec="text"))  
+  lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]], 
+                                                   attname="Fluxnet_name", 
+                                                   attval=datain$attributes[x,1], 
+                                                   prec="text"))  
   
   #Add CF-compliant name to file (if not missing)
   lapply(1:length(var_defs), function(x) if(!is.na(datain$attributes[x,3]))  

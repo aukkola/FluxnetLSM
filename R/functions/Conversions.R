@@ -68,8 +68,7 @@ ChangeUnits = function(datain){
           tair_units <- alma_units[which(datain$vars=="Tair")]
         }          
 
-        browser()
-        datain$data[[k]] <- Rel2SpecHum(relHum=datain$data[[which(datain$vars=="Qair")]], 
+        datain$data[[k]] <- Rel2SpecHum(relHum=datain$data[[which(datain$vars=="RelH")]], 
                                         airtemp=datain$data[[which(datain$vars=="Tair")]], 
                                         tair_units=tair_units, 
                                         pressure=datain$data[[which(datain$vars=="PSurf")]], 

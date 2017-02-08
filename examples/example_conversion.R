@@ -13,7 +13,7 @@ out_path <- "~/Documents/FLUXNET2016_processing/"
 
 # Path to FluxnetProcessing R scripts
 lib_path <- "~/Documents/FLUXNET2016_processing/scripts/R/"
-source(paste0(lib_path, "/ConvertSpreadsheetToNcdf.R"))
+source(paste(lib_path, "/ConvertSpreadsheetToNcdf.R", sep=""))
 
 site_code <- "AU-How"
 
@@ -26,5 +26,5 @@ fname <- sprintf("FLX_%s_FLUXNET2015_ERAI_HH_1989-2014_1-3.csv", site_code)
 era_file <- paste(in_path, fname, sep="")
 era_gapfill = TRUE
 
-convert_fluxnet_to_netcdf(infile=infile, site_code=site_code, out_path=out_path,
+convert_fluxnet_to_netcdf(infile=infile, site_code=site_code, out_path=out_path, lib_path="./R",
                           ERA_file=era_file, ERA_gapfill=era_gapfill)

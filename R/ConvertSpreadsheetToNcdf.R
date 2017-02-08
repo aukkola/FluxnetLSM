@@ -17,7 +17,8 @@
 #' @param site_code Fluxnet site code e.g. "AU-How"
 #' @param ERA_gapfill Gapfill met variables using ERAinterim?
 #' 
-convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
+#' 
+convert_fluxnet_to_netcdf <- function(infile, site_code, out_path, lib_path,   #REMOVE lib_path from final code !!!!!
                                       ERA_file=NA, ERA_gapfill=FALSE,
                                       datasetname="Fluxnet2015", datasetversion="Nov16",
                                       gap_threshold=20, min_yrs=2) {
@@ -25,14 +26,14 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
   library(R.utils)
     
   # TODO: Merge these files with palsR where possible.
-#  source(paste(lib_path, "/functions/Constants.R", sep=""))
-#  source(paste(lib_path, "/functions/Timing_general.R", sep=""))
-#  source(paste(lib_path, "/functions/Conversions.R", sep=""))
-#  source(paste(lib_path, "/functions/UtilityFunctions.R", sep=""))
-#  source(paste(lib_path, "/functions/Check_and_Gapfill.R", sep=""))
-#  source(paste(lib_path, "/functions/Timing_netcdf.R", sep=""))
-#  source(paste(lib_path, "/functions/FluxtowerSpreadsheetToNc.R", sep=""))
-#  source(paste(lib_path, "/Site_metadata.R", sep=""))
+  source(paste(lib_path, "/functions/Constants.R", sep=""))
+  source(paste(lib_path, "/functions/Timing_general.R", sep=""))
+  source(paste(lib_path, "/functions/Conversions.R", sep=""))
+  source(paste(lib_path, "/functions/UtilityFunctions.R", sep=""))
+  source(paste(lib_path, "/functions/Check_and_Gapfill.R", sep=""))
+  source(paste(lib_path, "/functions/Timing_netcdf.R", sep=""))
+  source(paste(lib_path, "/functions/FluxtowerSpreadsheetToNc.R", sep=""))
+  source(paste(lib_path, "/Site_metadata.R", sep=""))
   
 
   ################################
@@ -87,7 +88,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
   #Remove evaluation variables that have too many gaps    COMPLETE !!!!!!
   
   
-  
+  browser()
   
   
   ##############################################

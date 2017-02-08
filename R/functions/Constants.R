@@ -285,25 +285,24 @@ remove_duplicates <- function(indices){
 
 duplicate_columns <- function(data, vars){
   
-  #Find which variables are duplicated
-  ind_duplicate <- anyDuplicated(vars)
+  #Find instances that are duplicated
+  ind_duplicate <- which(duplicated(vars))
   
   for(k in ind_duplicate){
     
-    #Find corresponding column
-    ind_column <- which(colnames(data)==vars[k])
+    #Find corresponding column (only use first instance)
+    ind_column <- which(colnames(data)==vars[k])[1]
     
-    #Add column to dataframe
-    data <- cbind(data, data[ind_column])
-  
-  }
+    #Add column to dataframe and rearrange column order
+    #drop=False ensures original column name is kept
+    #although R automatically renames duplicate column names from e.g. RH to RH.1
+    data <- cbind(data, data[,ind_column, drop=FALSE])[, append(1:ncol(data), ncol(data) + 1, after=k-1)]
+    
+    }
   
   return(data)
  
 }
-
-
-
 
 
 
