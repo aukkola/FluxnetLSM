@@ -1,0 +1,16 @@
+# Set the default behavior, in case people don't have core.autocrlf set.
+* text=auto
+
+# convert to native file endings on checkout.
+*.R text
+*.Rd text
+*.csv text
+*.md text
+*.txt text
+DESCRIPTION text
+NAMESPACE text
+*.gitattributes text
+*.gitignore text
+
+# Denote all files that are truly binary and should not be modified.
+*.nc binary
