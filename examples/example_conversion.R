@@ -7,15 +7,14 @@
 # initial garbage collection
 rm(list=ls(all=TRUE))
 
-lib_path = paste(out_path, "/scripts/R/", sep="")
-source(paste(lib_path, "/ConvertSpreadsheetToNcdf.R", sep=""))
-
-site_code = "AU-How"
-
 # This directory should contain appropriate data from http://fluxnet.fluxdata.org/data/fluxnet2015-dataset/
 in_path <- "~/Documents/FLUXNET2016_processing/"
 out_path="~/Documents/FLUXNET2016_processing/"
 
+lib_path = paste(out_path, "/scripts/R/", sep="")
+source(paste(lib_path, "/ConvertSpreadsheetToNcdf.R", sep=""))
+
+site_code = "AU-How"
 
 # Flux file
 fname <- sprintf("FLX_%s_FLUXNET2015_FULLSET_HH_2001-2014_1-3.csv", site)
