@@ -1,10 +1,5 @@
-#' Author: ned haughton
-#' Date:
-#' --------------
-#' Author:
-#' Date:
-#' Modification:
-#' --------------
+# Author: ned haughton
+# Date: 2017-02-17
 
 library(rvest)  # read_html, html_node, html_attr, html_table
 

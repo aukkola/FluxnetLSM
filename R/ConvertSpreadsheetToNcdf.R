@@ -17,7 +17,7 @@
 #' @param site_code Fluxnet site code e.g. "AU-How"
 #' @param ERA_gapfill Gapfill met variables using ERAinterim?
 #' 
-#' 
+#' @export
 convert_fluxnet_to_netcdf <- function(infile, site_code, out_path, lib_path,   #REMOVE lib_path from final code !!!!!
                                       ERA_file=NA, ERA_gapfill=FALSE,
                                       datasetname="Fluxnet2015", datasetversion="Nov16",
