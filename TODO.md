@@ -21,8 +21,6 @@ TODO:
 
 - Remove lib_path input once package working
 
-- No QC flags for some met variables (e.g. Rainf). Should code create these at least when ERA gapfill is used?
-
 
 
 Some info to create package...
