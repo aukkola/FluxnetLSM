@@ -211,15 +211,15 @@ CreateFluxNcFile = function(fluxfilename, datain,                 #outfile file 
   }
   # Define IGBP short vegetation type:
   if(!is.na(short_veg_type)){
-    short_veg=ncvar_def('IGBP_veg_short','-',dim=list(xd,yd),
-                        missval=missing_value,longname='IGBP vegetation type (short)')
+    short_veg=ncvar_def('IGBP_veg_short','-',dim=list(xd,yd), missval=NULL,
+                        longname='IGBP vegetation type (short)', prec="char")
     opt_vars[[ctr]] = short_veg
     ctr <- ctr + 1
   }
   # Define IGBP long vegetation type:
   if(!is.na(long_veg_type)){
-    long_veg=ncvar_def('IGBP_veg_long','-',dim=list(xd,yd),
-                       missval=missing_value,longname='IGBP vegetation type (long)')
+    long_veg=ncvar_def('IGBP_veg_long','-',dim=list(xd,yd), missval=NULL,
+                       longname='IGBP vegetation type (long)', prec="char")
     opt_vars[[ctr]] = long_veg
     ctr <- ctr + 1 
   }
@@ -261,7 +261,7 @@ CreateFluxNcFile = function(fluxfilename, datain,                 #outfile file 
   if(!is.na(towerheight)) {ncvar_put(ncid,towheight,vals=towerheight)}
   if(!is.na(canopyheight)) {ncvar_put(ncid,canheight,vals=canopyheight)}
   if(!is.na(short_veg_type)) {ncvar_put(ncid,short_veg,vals=short_veg_type)}
-  if(!is.na(long_veg_type)) {ncvar_put(ncid,long_veg,vals=short_veg_type)}
+  if(!is.na(long_veg_type)) {ncvar_put(ncid,long_veg,vals=long_veg_type)}
   
   
   
@@ -378,15 +378,15 @@ CreateMetNcFile = function(metfilename, datain,                   #outfile file 
 	}
 	# Define IGBP short vegetation type:
 	if(!is.na(short_veg_type)){
-	  short_veg=ncvar_def('IGBP_veg_short','-',dim=list(xd,yd),
-	                      missval=missing_value,longname='IGBP vegetation type (short)')
+	  short_veg=ncvar_def('IGBP_veg_short','-',dim=list(xd,yd), missval=NULL,
+                        longname='IGBP vegetation type (short)', prec="char")
 	  opt_vars[[ctr]] = short_veg
 	  ctr <- ctr + 1
 	}
 	# Define IGBP long vegetation type:
 	if(!is.na(long_veg_type)){
-	  long_veg=ncvar_def('IGBP_veg_long','-',dim=list(xd,yd),
-	                      missval=missing_value,longname='IGBP vegetation type (long)')
+	  long_veg=ncvar_def('IGBP_veg_long','-',dim=list(xd,yd), missval=NULL,
+                       longname='IGBP vegetation type (long)', prec="char")
 	  opt_vars[[ctr]] = long_veg
 	  ctr <- ctr + 1 
 	}
@@ -422,13 +422,13 @@ CreateMetNcFile = function(metfilename, datain,                   #outfile file 
 	ncvar_put(ncid, latdim, vals=latitude)
 	ncvar_put(ncid, londim, vals=longitude)
 
-
+  
 	# Optional meta data for each site:
 	if(!is.na(elevation)) {ncvar_put(ncid,elev,vals=elevation)}
 	if(!is.na(towerheight)) {ncvar_put(ncid,towheight,vals=towerheight)}
   if(!is.na(canopyheight)) {ncvar_put(ncid,canheight,vals=canopyheight)}
 	if(!is.na(short_veg_type)) {ncvar_put(ncid,short_veg,vals=short_veg_type)}
-  if(!is.na(long_veg_type)) {ncvar_put(ncid,long_veg,vals=short_veg_type)}
+  if(!is.na(long_veg_type)) {ncvar_put(ncid,long_veg,vals=long_veg_type)}
 
 
  
