@@ -18,14 +18,13 @@ source(paste0(lib_path, "/ConvertSpreadsheetToNcdf.R"))
 site_code <- "AU-How"
 
 # Flux file
-fname <- sprintf("FLX_%s_FLUXNET2015_FULLSET_HH_2001-2014_1-3.csv", site)
+fname <- sprintf("FLX_%s_FLUXNET2015_FULLSET_HH_2001-2014_1-3.csv", site_code)
 infile <- paste(in_path, fname, sep="")
 
 # ERA file
-fname <- sprintf("FLX_%s_FLUXNET2015_ERAI_HH_1989-2014_1-3.csv", site)
+fname <- sprintf("FLX_%s_FLUXNET2015_ERAI_HH_1989-2014_1-3.csv", site_code)
 era_file <- paste(in_path, fname, sep="")
 era_gapfill = TRUE
 
 convert_fluxnet_to_netcdf(infile=infile, site_code=site_code, out_path=out_path,
-                          lib_path=lib_path, ERA_file=era_file,
-                          ERA_gapfill=era_gapfill)
+                          ERA_file=era_file, ERA_gapfill=era_gapfill)
