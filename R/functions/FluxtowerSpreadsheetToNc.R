@@ -211,15 +211,15 @@ CreateFluxNcFile = function(fluxfilename, datain,                 #outfile file 
   }
   # Define IGBP short vegetation type:
   if(!is.na(short_veg_type)){
-    short_veg=ncvar_def('IGBP_veg_short','-',dim=list(xd,yd),
-                        missval=missing_value,longname='IGBP vegetation type (short)')
+    short_veg=ncvar_def('IGBP_veg_short','-',dim=list(xd,yd), missval=NULL,
+                        longname='IGBP vegetation type (short)', prec="char")
     opt_vars[[ctr]] = short_veg
     ctr <- ctr + 1
   }
   # Define IGBP long vegetation type:
   if(!is.na(long_veg_type)){
-    long_veg=ncvar_def('IGBP_veg_long','-',dim=list(xd,yd),
-                       missval=missing_value,longname='IGBP vegetation type (long)')
+    long_veg=ncvar_def('IGBP_veg_long','-',dim=list(xd,yd), missval=NULL,
+                       longname='IGBP vegetation type (long)', prec="char")
     opt_vars[[ctr]] = long_veg
     ctr <- ctr + 1 
   }
@@ -261,25 +261,27 @@ CreateFluxNcFile = function(fluxfilename, datain,                 #outfile file 
   if(!is.na(towerheight)) {ncvar_put(ncid,towheight,vals=towerheight)}
   if(!is.na(canopyheight)) {ncvar_put(ncid,canheight,vals=canopyheight)}
   if(!is.na(short_veg_type)) {ncvar_put(ncid,short_veg,vals=short_veg_type)}
-  if(!is.na(long_veg_type)) {ncvar_put(ncid,long_veg,vals=short_veg_type)}
+  if(!is.na(long_veg_type)) {ncvar_put(ncid,long_veg,vals=long_veg_type)}
   
   
   
   # Time dependent variables:
   lapply(1:length(var_defs), function(x) ncvar_put(nc=ncid, 
                                                    varid=var_defs[[x]], 
-                                                   vals=datain$data[,x]))
+                                                   vals=datain$data[,var_ind[x]]))
   
   
   #Add original Fluxnet variable name to file
   lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]], 
                                                    attname="Fluxnet_name", 
-                                                   attval=datain$attributes[x,1], 
+                                                   attval=datain$attributes[var_ind[x],1], 
                                                    prec="text"))  
   
   #Add CF-compliant name to file (if not missing)
-  lapply(1:length(var_defs), function(x) if(!is.na(datain$attributes[x,3]))  
-    ncatt_put(nc=ncid, varid=var_defs[[x]], attname="CF_name", attval=datain$attributes[x,3], prec="text"))
+  lapply(1:length(var_defs), function(x)  ncatt_put(nc=ncid, varid=var_defs[[x]], 
+                                                    attname="CF_name", 
+                                                    attval=datain$attributes[var_ind[x],3], 
+                                                    prec="text"))
   
   
   
@@ -335,6 +337,7 @@ CreateMetNcFile = function(metfilename, datain,                   #outfile file 
   #Find met variable indices
   var_ind <- which(datain$categories=="Met")
   
+  
   #Create variable definitions for time series variables
   var_defs <- lapply(var_ind, function(x) ncvar_def(name=datain$vars[x],
                                                     units=datain$units$target_units[x], 
@@ -378,15 +381,15 @@ CreateMetNcFile = function(metfilename, datain,                   #outfile file 
 	}
 	# Define IGBP short vegetation type:
 	if(!is.na(short_veg_type)){
-	  short_veg=ncvar_def('IGBP_veg_short','-',dim=list(xd,yd),
-	                      missval=missing_value,longname='IGBP vegetation type (short)')
+	  short_veg=ncvar_def('IGBP_veg_short','-',dim=list(xd,yd), missval=NULL,
+                        longname='IGBP vegetation type (short)', prec="char")
 	  opt_vars[[ctr]] = short_veg
 	  ctr <- ctr + 1
 	}
 	# Define IGBP long vegetation type:
 	if(!is.na(long_veg_type)){
-	  long_veg=ncvar_def('IGBP_veg_long','-',dim=list(xd,yd),
-	                      missval=missing_value,longname='IGBP vegetation type (long)')
+	  long_veg=ncvar_def('IGBP_veg_long','-',dim=list(xd,yd), missval=NULL,
+                       longname='IGBP vegetation type (long)', prec="char")
 	  opt_vars[[ctr]] = long_veg
 	  ctr <- ctr + 1 
 	}
@@ -422,29 +425,31 @@ CreateMetNcFile = function(metfilename, datain,                   #outfile file 
 	ncvar_put(ncid, latdim, vals=latitude)
 	ncvar_put(ncid, londim, vals=longitude)
 
-
+  
 	# Optional meta data for each site:
 	if(!is.na(elevation)) {ncvar_put(ncid,elev,vals=elevation)}
 	if(!is.na(towerheight)) {ncvar_put(ncid,towheight,vals=towerheight)}
   if(!is.na(canopyheight)) {ncvar_put(ncid,canheight,vals=canopyheight)}
 	if(!is.na(short_veg_type)) {ncvar_put(ncid,short_veg,vals=short_veg_type)}
-  if(!is.na(long_veg_type)) {ncvar_put(ncid,long_veg,vals=short_veg_type)}
+  if(!is.na(long_veg_type)) {ncvar_put(ncid,long_veg,vals=long_veg_type)}
 
 
  
 	# Time dependent variables:
   lapply(1:length(var_defs), function(x) ncvar_put(nc=ncid, 
                                                    varid=var_defs[[x]], 
-                                                   vals=datain$data[,x]))
+                                                   vals=datain$data[,var_ind[x]]))
   
       	
 	#Add original Fluxnet variable name to file
 	lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]], attname="Fluxnet_name", 
-                                                   attval=datain$attributes[x,1], prec="text"))  
+                                                   attval=datain$attributes[var_ind[x],1], prec="text"))  
 	
 	#Add CF-compliant name to file (if not missing)
-	lapply(1:length(var_defs), function(x) if(!is.na(datain$attributes[x,3]))  
-    ncatt_put(nc=ncid, varid=var_defs[[x]], attname="CF_name", attval=datain$attributes[x,3], prec="text"))
+	lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]], 
+                                                   attname="CF_name", 
+                                                   attval=datain$attributes[var_ind[x],3], 
+                                                   prec="text"))
 	
 	
 

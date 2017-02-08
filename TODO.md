@@ -1,7 +1,7 @@
 TODO:
 ----
 
-- Currently duplicates error message, fix
+- Currently prints error message on several lines, fix
 
 - Use QC flags in a better way? Good, medium, poor quality gap-fill. Currently only checks if gap-filled or not
 
@@ -15,13 +15,11 @@ TODO:
 
 - Provide option to produce PALS-style plots at the end of data processing?
 
-- Need a separate qc flag for time steps filled using ERAinterim data
+- Need a separate qc flag for time steps filled using ERAinterim data. DONE, but not documented. Do we want to add info about qf flags in the netcdf files?
 
 - Some variables are outside our specified range in the original dataset. E.g. SWup has negative values in Howard Springs. Do we want to  change these to zero or change the range in variables.csv?
 
 - Remove lib_path input once package working
-
-- No QC flags for some met variables (e.g. Rainf). Should code create these at least when ERA gapfill is used?
 
 
 
