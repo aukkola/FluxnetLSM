@@ -16,6 +16,7 @@ library(rvest)  # read_html, html_node, html_attr, html_table
 #' Empty site metadata template, including only the site code
 #'
 #' @return metadata list
+#' @export
 site_metadata_template <- function(site_code) {
     metadata <- list(
         SiteCode = site_code,
@@ -37,6 +38,7 @@ site_metadata_template <- function(site_code) {
 
 
 #' Get site name from metadata
+#' @export
 get_site_code <- function(metadata){
     return(metadata[["SiteCode"]])
 }
@@ -45,6 +47,7 @@ get_site_code <- function(metadata){
 #' Adds processor metadata, including processor version
 #'
 #' @return metadata list
+#' @export
 add_processing_metadata <- function(metadata) {
     metadata$Processing <- list(
         processor = "FluxnetProcessing",
@@ -70,6 +73,7 @@ site_csv_file <- "./data/Site_info_tier1_only.csv"
 #' Tries to gather metadata from the included site CSV
 #'
 #' @return metadata list
+#' @export
 get_site_metadata_CSV <- function(metadata) {
 
     message("Trying to load metadata from csv cache (", site_csv_file, ")")
@@ -91,12 +95,14 @@ get_site_metadata_CSV <- function(metadata) {
 
 
 #' Writes metadata to CSV, only updating non-NA data
+#' @export
 save_metadata_to_csv <- function(metadata) {
     save_metadata_list_to_csv(list(metadata))
 }
 
 
 #' Write multiple site metadata to list at once
+#' @export
 save_metadata_list_to_csv <- function(metadata_lists) {
 
     to_save <- list("SiteCode", "Fullname", "Description", "TowerStatus",
@@ -123,6 +129,7 @@ save_metadata_list_to_csv <- function(metadata_lists) {
 
 
 #' Reads all ORNL data into the CSV file
+#' @export
 update_csv_from_ornl <- function() {
     ornl_site_codes <- get_ornl_site_codes()
     ornl_url_list <- get_ornl_site_url_list(ornl_site_codes)
@@ -143,6 +150,7 @@ update_csv_from_ornl <- function() {
 ################################################
 
 #' Get all available site codes from site_status table
+#' @export
 get_ornl_site_codes <- function() {
     status_table_url <- "https://fluxnet.ornl.gov/site_status"
 
@@ -158,6 +166,7 @@ get_ornl_site_codes <- function() {
 
 
 #' Get a single ORNL site URL from site_status table
+#' @export
 get_site_ornl_url <- function(site_code) {
     ornl_url <- get_ornl_site_url_list(list(site_code))[[site_code]]
     return(ornl_url)
@@ -165,6 +174,7 @@ get_site_ornl_url <- function(site_code) {
 
 
 #' Get a list of ORNL site URLs from site_status table
+#' @export
 get_ornl_site_url_list <- function(site_code_list) {
     status_table_url <- "https://fluxnet.ornl.gov/site_status"
 
@@ -190,6 +200,7 @@ get_ornl_site_url_list <- function(site_code_list) {
 #' Get metadata from ORNL
 #'
 #' @return metadata list
+#' @export
 get_ornl_site_metadata <- function(metadata, site_url=NULL) {
     site_code <- get_site_code(metadata)
 
@@ -242,6 +253,7 @@ get_ornl_site_metadata <- function(metadata, site_url=NULL) {
 #' Tries to load metadata from known Fluxnet info sources on the 'web
 #'
 #' @return metadata list
+#' @export
 get_site_metadata_web <- function(metadata) {
     metadata <- get_ornl_site_metadata(metadata)
 
@@ -258,6 +270,7 @@ get_site_metadata_web <- function(metadata) {
 #' Checks which metadata are missing (correcting for OK NAs)
 #'
 #' @return boolean metadata availability vector
+#' @export
 check_missing <- function(metadata) {
     missing_data <- is.na(metadata)
     if (missing_data["Exclude_reason"] & !metadata$Exclude) {
@@ -269,6 +282,7 @@ check_missing <- function(metadata) {
 
 
 #' Warns about missing metadata for the site
+#' @export
 warn_missing_metadata <- function(metadata) {
     missing_data <- check_missing(metadata)
 
@@ -286,6 +300,7 @@ warn_missing_metadata <- function(metadata) {
 #' Get site metadata. Tries multiple methods to retrieve full metadata
 #'
 #' @return metadata list
+#' @export
 get_site_metadata <- function(site_code, incl_processing=TRUE,
                               use_csv=TRUE, update_csv=FALSE) {
     metadata <- site_metadata_template(site_code)
