@@ -26,7 +26,6 @@ ReadTextFluxData <- function(fileinname, vars, time_vars){
 	# Read flux tower data (skips unwanted columns):
 	FluxData <- read.csv(file=fileinname, header=TRUE,	colClasses=tcol$classes)  
   
-  
 
   #Sanity check, does variable order in file match that specified in tcols?
   #Ignore any possible duplicates in tcol$all_names before check
@@ -41,7 +40,6 @@ ReadTextFluxData <- function(fileinname, vars, time_vars){
   #Remove time stamp variables from Data variable
   FluxData <- FluxData[,-which(colnames(FluxData)==time_vars)]
   
-  browser()
   
   #Duplicate Fluxnet data column if the same variable needs to be
   #processed several times (e.g. RH converted to RH and Qair)

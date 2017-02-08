@@ -9,8 +9,6 @@ TODO:
 
 - Add UFC offset to file attributes?
 
-- Fix RH to Qair conversion
-
 - Add function to change timestep size?
 
 - Write time step interval to file name? Some sites hourly, others half-hourly
@@ -19,6 +17,7 @@ TODO:
 
 - Need a separate qc flag for time steps filled using ERAinterim data
 
+- Some variables are outside our specified range in the original dataset. E.g. SWup has negative values in Howard Springs. Do we want to  change these to zero or change the range in variables.csv?
 
 
 

@@ -52,6 +52,7 @@ Yeardays = function(startyear,ndays) {
 #-----------------------------------------------------------------------------
 
 is.leap = function(year){
+  #Finds leap years
 	if((((year %% 4)==0) & ((year %% 100)!=0)) || 
 		(((year %% 4)==0) & ((year %% 400)==0))){
 		leap=TRUE	

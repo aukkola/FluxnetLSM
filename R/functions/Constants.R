@@ -119,19 +119,6 @@ findTimeInfo <- function(time_vars, headers){
 
 #-----------------------------------------------------------------------------
 
-# Gets index of a variable 
-varIndex = function(varname){
-	idx = 0
-	for(v in 1:length(tcols$names)){
-		if(varname == tcols$names[v]){
-			idx = v	
-		}
-	}
-	return(idx)	
-}
-
-#-----------------------------------------------------------------------------
-
 # #Rename Fluxnet variables to ALMA convention
 rename_vars <- function(vars_present, all_vars){
 
@@ -281,11 +268,11 @@ remove_duplicates <- function(indices){
 
 #-----------------------------------------------------------------------------
 
-#Duplicates columns in Fluxnet data if a variable is being processes multiple times
-
 duplicate_columns <- function(data, vars){
+  #Duplicates columns in Fluxnet data if a variable is
+  #being processes multiple times
   
-  #Find instances that are duplicated
+  #Find variables that are duplicated
   ind_duplicate <- which(duplicated(vars))
   
   for(k in ind_duplicate){
