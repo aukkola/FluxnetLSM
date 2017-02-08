@@ -120,6 +120,19 @@ dateFromTstep = function(starttime,tstep){
 	
 }
 
+Create2Uchar = function(intin){
+	# Creates string of length 2 from integer of length 1 or 2
+	if(intin<10){
+		temp=as.character(intin)
+		charout=paste('0',temp,sep='')
+	}else if(intin>99){
+		charout='NA'
+		CheckError('I3: Character variable too long in function Create2Uchar.')
+	}else{
+		charout=as.character(intin)
+	}
+	return(charout)
+}
 
 
 findStartTime <- function(start){
