@@ -268,18 +268,20 @@ CreateFluxNcFile = function(fluxfilename, datain,                 #outfile file 
   # Time dependent variables:
   lapply(1:length(var_defs), function(x) ncvar_put(nc=ncid, 
                                                    varid=var_defs[[x]], 
-                                                   vals=datain$data[,x]))
+                                                   vals=datain$data[,var_ind[x]]))
   
   
   #Add original Fluxnet variable name to file
   lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]], 
                                                    attname="Fluxnet_name", 
-                                                   attval=datain$attributes[x,1], 
+                                                   attval=datain$attributes[var_ind[x],1], 
                                                    prec="text"))  
   
   #Add CF-compliant name to file (if not missing)
-  lapply(1:length(var_defs), function(x) if(!is.na(datain$attributes[x,3]))  
-    ncatt_put(nc=ncid, varid=var_defs[[x]], attname="CF_name", attval=datain$attributes[x,3], prec="text"))
+  lapply(1:length(var_defs), function(x)  ncatt_put(nc=ncid, varid=var_defs[[x]], 
+                                                    attname="CF_name", 
+                                                    attval=datain$attributes[var_ind[x],3], 
+                                                    prec="text"))
   
   
   
@@ -334,6 +336,7 @@ CreateMetNcFile = function(metfilename, datain,                   #outfile file 
   
   #Find met variable indices
   var_ind <- which(datain$categories=="Met")
+  
   
   #Create variable definitions for time series variables
   var_defs <- lapply(var_ind, function(x) ncvar_def(name=datain$vars[x],
@@ -435,16 +438,18 @@ CreateMetNcFile = function(metfilename, datain,                   #outfile file 
 	# Time dependent variables:
   lapply(1:length(var_defs), function(x) ncvar_put(nc=ncid, 
                                                    varid=var_defs[[x]], 
-                                                   vals=datain$data[,x]))
+                                                   vals=datain$data[,var_ind[x]]))
   
       	
 	#Add original Fluxnet variable name to file
 	lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]], attname="Fluxnet_name", 
-                                                   attval=datain$attributes[x,1], prec="text"))  
+                                                   attval=datain$attributes[var_ind[x],1], prec="text"))  
 	
 	#Add CF-compliant name to file (if not missing)
-	lapply(1:length(var_defs), function(x) if(!is.na(datain$attributes[x,3]))  
-    ncatt_put(nc=ncid, varid=var_defs[[x]], attname="CF_name", attval=datain$attributes[x,3], prec="text"))
+	lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]], 
+                                                   attname="CF_name", 
+                                                   attval=datain$attributes[var_ind[x],3], 
+                                                   prec="text"))
 	
 	
 
