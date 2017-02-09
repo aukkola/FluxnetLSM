@@ -23,8 +23,11 @@ fname <- sprintf("FLX_%s_FLUXNET2015_ERAI_HH_1989-2014_1-3.csv", site_code)
 era_file <- paste(in_path, fname, sep="")
 era_gapfill = TRUE
 
+
+source("./R/ConvertSpreadsheetToNcdf.R")
+
 convert_fluxnet_to_netcdf(infile=infile, site_code=site_code, out_path=out_path, lib_path="./R",
-                          ERA_file=era_file, ERA_gapfill=era_gapfill)
+                          ERA_file=era_file, ERA_gapfill=era_gapfill, plot=NA)#c("annual", "diurnal","timeseries"))
 
 
 

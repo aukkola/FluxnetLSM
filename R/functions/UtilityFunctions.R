@@ -27,3 +27,6 @@ stripFilename = function(fpath) {
   fname = fcharvec[length(fcharvec)]
   return(fname)
 }
+
+
+

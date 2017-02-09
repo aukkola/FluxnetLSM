@@ -7,7 +7,7 @@ TODO:
 
 - Check if VPD range set appropriately in variables.csv
 
-- Add UFC offset to file attributes?
+- Add UTC offset to file attributes?
 
 - Add function to change timestep size?
 
