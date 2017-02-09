@@ -2,6 +2,7 @@
 #
 # Needs comments
 #
+# TODO: Check and merge back in to palsR
 #
 
 # Check the existence of missing values:
@@ -266,26 +267,6 @@ missing_val){
     return(list(datain=datain, new_qc=new_qc))
     
 } #function
-
-
-#-----------------------------------------------------------------------------
-
-CheckSpreadsheetTiming = function(DataFromText) {
-    # Checks that uploaded spreadsheet data is compatible
-    # with time step size in web form; that a whole number of
-    # days are present; and whether there are an integer
-    # number of years.
-    tstepinday=86400/DataFromText$timestepsize # time steps in a day
-    ndays = DataFromText$ntsteps/tstepinday # number of days in data set
-    if((ndays - round(ndays)) != 0){
-        CheckError(paste('S2: Spreadsheet does not appear to contain a',
-        'whole number of days of data. Please amend.'))
-    }
-    if((DataFromText$starttime$sday != 1) | (DataFromText$starttime$smonth != 1)){
-        CheckError(paste('S2: Spreadsheet data does not appear to begin',
-        'on 1st January. Please amend.'))
-    }
-}
 
 
 #-----------------------------------------------------------------------------
