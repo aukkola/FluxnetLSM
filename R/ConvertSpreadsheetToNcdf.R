@@ -16,14 +16,16 @@
 #' @param out_path output path e.g. "~/Documents/FLUXNET2016_processing/"
 #' @param site_code Fluxnet site code e.g. "AU-How"
 #' @param ERA_gapfill Gapfill met variables using ERAinterim?
+#' @param plot Should annual, diurnal and/or 14-day running mean plot be produced? Set to NA it not
 #' 
 #' @export
 #'
 #'
 convert_fluxnet_to_netcdf <- function(infile, site_code, out_path, lib_path,   #REMOVE lib_path from final code !!!!!
-ERA_file=NA, ERA_gapfill=FALSE,
-datasetname="Fluxnet2015", datasetversion="Nov16",
-gap_threshold=20, min_yrs=2) {
+                                      ERA_file=NA, ERA_gapfill=FALSE,
+                                      datasetname="Fluxnet2015", datasetversion="Nov16",
+                                      gap_threshold=20, min_yrs=2,
+                                      plot=c("annual", "diurnal", "timeseries")) {
     
     library(R.utils)
     library(pals)
@@ -79,10 +81,9 @@ gap_threshold=20, min_yrs=2) {
     
     # Check if variables have gaps in the time series:
     gaps  <- CheckDataGaps(datain = DataFromText, missing_val = SprdMissingVal,
-    threshold = gap_threshold, min_yrs=min_yrs,
-    essential_met = vars$ALMA_variable[which(vars$Essential_met)],
-    preferred_eval = vars$ALMA_variable[which(vars$Preferred_eval)])
-    
+                           threshold = gap_threshold, min_yrs=min_yrs,
+                           essential_met = vars$ALMA_variable[which(vars$Essential_met)],
+                           preferred_eval = vars$ALMA_variable[which(vars$Preferred_eval)])
     
     
     #Remove evaluation variables that have too many gaps    COMPLETE !!!!!!
@@ -254,6 +255,57 @@ gap_threshold=20, min_yrs=2) {
         
         
     }
+    
+    
+    
+    
+    
+    #################################
+    ### Plotting analysis outputs ###
+    ################################# 
+    
+    #Plots annual and diurnal cycle plots, as well
+    #as a 14-day running mean time series depending on
+    #analysis choices (separate figures for Met and Flux vars)
+        
+    if(!is.na(plot)){
+      
+      #Open met and flux NetCDF file handles
+      nc_met <- nc_open(metfilename)
+      nc_flux <- nc_open(fluxfilename)
+      
+      #Initialise output file names SHOULD THESE GO IN A SEPARATE FOLDER TO NC FILES ???????????
+      outfile_met  <- paste(out_path, "/", site_code, "_plot_Met_", sep="")
+      outfile_flux <- paste(out_path, "/", site_code, "_plot_Flux_", sep="")
+      
+   
+      ## Plotting ##
+      if(any(plot="annual") | any(plot="diurnal") | any(plot="timeseries")){
+                
+        plot_nc(ncfile=nc_met, analysis_type=plot, 
+                 vars=DataFromText$vars[DataFromText$categories=="Met"],
+                 outfile=outfile_met))      
+        
+        plot_nc()
+
+
+      #Analysis type doesn't match options, return warning
+      } else {
+        warning("Could not produce output plots. Analysis type not
+                recognised, choose all or any of 'annual', 
+                'diurnal' and 'timeseries'")
+      }
+      
+      
+      #Close file handles
+      nc_close(nc_met)
+      nc_close(nc_flux)  
+      
+    } #plotting
+    
+    
+    
+    
     
     
     

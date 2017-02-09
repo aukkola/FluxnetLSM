@@ -1,3 +1,6 @@
+# General
+*.tar.gz
+
 # OSX specific
 .DS_Store
 .AppleDouble
