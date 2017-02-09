@@ -28,16 +28,14 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path, lib_path,   #
                                       plot=c("annual", "diurnal", "timeseries")) {
     
     library(R.utils)
+    library(pals)
     
     # TODO: Merge these files with palsR where possible.
     source(paste(lib_path, "/functions/Constants.R", sep=""))
     source(paste(lib_path, "/functions/Timing_general.R", sep=""))
     source(paste(lib_path, "/functions/Conversions.R", sep=""))
-    source(paste(lib_path, "/functions/UtilityFunctions.R", sep=""))
     source(paste(lib_path, "/functions/Check_and_Gapfill.R", sep=""))
-    source(paste(lib_path, "/functions/Timing_netcdf.R", sep=""))
     source(paste(lib_path, "/functions/FluxtowerSpreadsheetToNc.R", sep=""))
-    source(paste(lib_path, "/Site_metadata.R", sep=""))
     
     
     ################################

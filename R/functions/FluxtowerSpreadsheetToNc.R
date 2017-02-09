@@ -5,9 +5,12 @@
 #
 # Gab Abramowitz UNSW 2016 (palshelp at gmail dot com)
 #
+# TODO: Check and merge back in to palsR
+#
 
 #-----------------------------------------------------------------------------
 
+# TODO: This function exists in palsR/Gab and has a different signature. Merge?
 ReadTextFluxData <- function(fileinname, vars, time_vars){
 	# This function reads comma-delimited text files containing
 	# met and flux data from Fluxnet data providers.
@@ -124,6 +127,7 @@ ReadTextFluxData <- function(fileinname, vars, time_vars){
 
 
 # This function creates a netcdf file for met variables
+# TODO: This function exists in palsR/Gab and has a different signature. Merge?
 CreateFluxNcFile = function(fluxfilename, datain,                 #outfile file and data
                            latitude, longitude,                   #lat, lon
                            site_code, long_sitename,              #Fluxnet site code and full site name
@@ -293,6 +297,7 @@ CreateFluxNcFile = function(fluxfilename, datain,                 #outfile file 
 #-----------------------------------------------------------------------------
 
 # This function creates a netcdf file for met variables
+# TODO: This function exists in palsR/Gab and has a different signature. Merge?
 CreateMetNcFile = function(metfilename, datain,                   #outfile file and data
                            latitude, longitude,                   #lat, lon
                            site_code, long_sitename,              #Fluxnet site code and full site name

@@ -22,12 +22,12 @@ TODO:
 - Remove lib_path input once package working
 
 
-
 Some info to create package...
 
-package depends on: rvest, R.utils
+package depends on: rvest, R.utils, pals.R
 
 - Either move all functions from R/functions into R/, or merge back into palsR, and depend on that.
+
 - Document undocumented functions
 - Fill out documentation in /man/FluxnetProcessing-package.Rd ?
 

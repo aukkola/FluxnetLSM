@@ -2,6 +2,8 @@
 #
 # Gab Abramowitz, UNSW, 2014 (palshelp at gmail dot com)
 #
+# TODO: Check and merge back in to palsR
+#
 SprdMissingVal = -9999 # missing value in spreadsheet
 NcMissingVal = -9999 # missing value in created netcdf files
 QCmeasured = 0

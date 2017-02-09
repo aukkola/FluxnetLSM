@@ -9,6 +9,10 @@ URL: https://github.com/aukkola/FLUXNET2015_processing
 
 Package managed with [`devtools`](https://github.com/hadley/devtools).
 
+> TODO: Depends on a on-standard version of palsR, need to update when
+> https://github.com/dudek313/palsR/pull/4 is complete. For now, install with
+> `devtools::install_github('dudek313/palsR', rev='Gab', subdir='pals')`
+
 To install:
 
 ```{r}
