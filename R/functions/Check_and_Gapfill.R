@@ -271,6 +271,7 @@ missing_val){
 
 #-----------------------------------------------------------------------------
 
+# TODO: This function exists in palsR/Gab in pals/R/FluxtowerSpreadsheetToNc.R and has a different signature. Merge?
 CheckTextDataRanges = function(datain, missingval){
     
     #Checks that variables are within acceptable ranges

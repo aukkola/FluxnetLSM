@@ -131,6 +131,7 @@ VPD2RelHum <- function(VPD, airtemp, vpd_units, tair_units){
 
 #-----------------------------------------------------------------------------
 
+# TODO: This function exists in palsR/Gab in pals/R/Units.R and has a different signature. Merge?
 Rel2SpecHum <- function(relHum, airtemp, tair_units, pressure, psurf_units){
   # Converts relative humidity to specific humidity.
   # required units: airtemp - temp in C; pressure in Pa; relHum as %
