@@ -284,7 +284,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path, lib_path,   #
                 
         plot_nc(ncfile=nc_met, analysis_type=plot, 
                  vars=DataFromText$vars[DataFromText$categories=="Met"],
-                 outfile=outfile_met))      
+                 outfile=outfile_met)      
         
         plot_nc()
 
