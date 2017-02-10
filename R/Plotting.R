@@ -28,6 +28,11 @@ plot_nc <- function(ncfile, analysis_type, vars, outfile){
   time <- ncvar_get(ncfile, "time")
   
   
+  
+  
+  
+  
+  
   #Load qc variables if available
   if(length(qc_vars) > 0) {
     qc_data <- lapply(qc_vars, ncvar_get, nc=ncfile)

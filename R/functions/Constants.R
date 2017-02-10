@@ -64,8 +64,8 @@ findColIndices = function(fileinname, var_names, var_classes,
   
   #Check that column indices for time and other variables don't overlap
   if(length(intersect(time_info$ind, ind)) > 0){
-    CheckError(paste("Error determining column indices for time and other 
-               variables, two or more variables overlap [ function:", match.call()[[1]], "]"))
+    CheckError(paste("Error determining column indices for time and other", 
+               "variables, two or more variables overlap [ function:", match.call()[[1]], "]"))
   }
   
   #Combine column classes for time and other variables

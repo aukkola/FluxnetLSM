@@ -33,8 +33,8 @@ ReadTextFluxData <- function(fileinname, vars, time_vars){
   #Sanity check, does variable order in file match that specified in tcols?
   #Ignore any possible duplicates in tcol$all_names before check
   if(any(colnames(FluxData) != unique(tcol$all_names))) {
-    CheckError(paste("Check variable ordering, variables don't match data 
-               retrieved from file [ function:", match.call()[[1]], "]"))
+    CheckError(paste("Check variable ordering, variables don't match data", 
+               "retrieved from file [ function:", match.call()[[1]], "]"))
   }
   
 
@@ -54,8 +54,8 @@ ReadTextFluxData <- function(fileinname, vars, time_vars){
     
     #Make sure FluxData now has correct no. of columns
     if(ncol(FluxData) != length(tcol$names)){
-      CheckError(paste("Duplicate variable names exist but columns could 
-                 not be be duplicated correctly [ function:", match.call()[[1]], "]"))
+      CheckError(paste("Duplicate variable names exist but columns could", 
+                 "not be be duplicated correctly [ function:", match.call()[[1]], "]"))
     }
     
   }
@@ -88,7 +88,7 @@ ReadTextFluxData <- function(fileinname, vars, time_vars){
   
 	if(!(ntsteps>=12 && ntsteps < 1e9)){
 		CheckError(paste('Unable to determine number of time steps in:',
-			stripFilename(fileinname)))
+			                stripFilename(fileinname)))
 	}
   
 	# and time step size:
@@ -99,7 +99,7 @@ ReadTextFluxData <- function(fileinname, vars, time_vars){
   
 	if( !(timestepsize>=300 && timestepsize<=3600) ){
 		CheckError(paste('Unable to ascertain time step size in',
-			stripFilename(fileinname)))
+			               stripFilename(fileinname)))
 	}
   
 	tstepinday=86400/timestepsize # time steps in a day

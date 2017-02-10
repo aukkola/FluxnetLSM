@@ -80,10 +80,11 @@ ChangeUnits = function(datain){
         
       ## If cannot find conversion, abort  
       } else {
-        CheckError(paste("Unknown unit conversion, cannot convert between original 
-                         Fluxnet and ALMA units, check variable:", datain$vars[k], ". 
-                         Available conversions: air temp C to K, rainfall mm to mm/s,
-                         air pressure kPa to Pa, humidity from relative (%) to specific (kg/kg)"))
+        CheckError(paste("Unknown unit conversion. cannot convert between original ", 
+                         "Fluxnet and ALMA units, check variable: ", datain$vars[k], 
+                         ". Available conversions: air temp C to K, rainfall mm to mm/s, ",
+                         "air pressure kPa to Pa, humidity from relative (%) to specific (kg/kg)",
+                         sep=""))
       }
       
       
@@ -108,8 +109,8 @@ VPD2RelHum <- function(VPD, airtemp, vpd_units, tair_units){
   
   #Check that VPD in Pascals
   if(vpd_units != "hPa"){
-    CheckError(paste("Cannot convert VPD to relative humidity. VPD units not recognised,
-               expecting VPD in hectopascals [ function:", match.call()[[1]], "]"))
+    CheckError(paste("Cannot convert VPD to relative humidity. VPD units not recognised,",
+               "expecting VPD in hectopascals [ function:", match.call()[[1]], "]"))
   }
     
   #Check that temperature in Celcius. Convert if not
@@ -140,18 +141,18 @@ Rel2SpecHum <- function(relHum, airtemp, tair_units, pressure, psurf_units){
   if(tair_units=="K"){
     airtemp <- airtemp - 273.15
   } else if(tair_units != "C"){
-    CheckError(paste("Unknown air temperature units, cannot convert 
-                     relative to specific humidity. Accepts air temperature in K or C 
-                     [ function:", match.call()[[1]], "]"))
+    CheckError(paste("Unknown air temperature units, cannot convert", 
+                     "relative to specific humidity. Accepts air temperature in K or C", 
+                     "[ function:", match.call()[[1]], "]"))
   }
   
   #Check that PSurf is in Pa. Convert if not
   if(psurf_units=="kPa"){
     pressure <- pressure * 1000
   } else if(psurf_units != "Pa"){
-    CheckError(paste("Unknown air pressure units, cannot convert 
-               relative to specific humidity. Accepts air pressure
-               in kPa or Pa", match.call()[[1]], "]"))
+    CheckError(paste("Unknown air pressure units, cannot convert", 
+               "relative to specific humidity. Accepts air pressure",
+               "in kPa or Pa", match.call()[[1]], "]"))
   }
   
   

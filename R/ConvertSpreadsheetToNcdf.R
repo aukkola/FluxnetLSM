@@ -66,8 +66,8 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path, lib_path,   #
     #irrigation or other additional water source.
     if(site_info$Exclude){
         CheckError(paste("Site not processed. Reason:", site_info$Exclude_reason,
-        ". This is set in site info file, change >Exclude< options
-        in the file to process site"))
+        ". This is set in site info file, change >Exclude< options",
+        "in the file to process site"))
     }
     
     
@@ -131,7 +131,8 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path, lib_path,   #
         
         #Check that column names of temp_data and data to be replaced match. Stop if not
         if(!all(colnames(temp_data)==colnames(DataFromText$data[,ind]))){
-            CheckError("Error gap-filling met data with ERAinterim. Column names of data to be replaced do not match")
+            CheckError(paste("Error gap-filling met data with ERAinterim.", 
+                             "Column names of data to be replaced do not match"))
         }
         
         
@@ -274,7 +275,8 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path, lib_path,   #
       nc_met <- nc_open(metfilename)
       nc_flux <- nc_open(fluxfilename)
       
-      #Initialise output file names SHOULD THESE GO IN A SEPARATE FOLDER TO NC FILES ???????????
+      #Initialise output file names (completed in plotting code)
+      #SHOULD THESE GO IN A SEPARATE FOLDER TO NC FILES ???????????
       outfile_met  <- paste(out_path, "/", site_code, "_plot_Met_", sep="")
       outfile_flux <- paste(out_path, "/", site_code, "_plot_Flux_", sep="")
       
@@ -291,9 +293,9 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path, lib_path,   #
 
       #Analysis type doesn't match options, return warning
       } else {
-        warning("Could not produce output plots. Analysis type not
-                recognised, choose all or any of 'annual', 
-                'diurnal' and 'timeseries'")
+        warning(paste("Could not produce output plots. Analysis type not",
+                "recognised, choose all or any of 'annual',", 
+                "'diurnal' and 'timeseries'."))
       }
       
       

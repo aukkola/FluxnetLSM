@@ -78,7 +78,8 @@ essential_met, preferred_eval){
     
     ### If no years fulfilling criteria, abort. ###
     if(all(!yr_keep) | length(yr_ind) < min_yrs){
-        CheckError("No years to process, too many gaps present or available time period too short. Aborting.")
+        CheckError(paste("No years to process, too many gaps present or",
+                   "available time period too short. Aborting."))
     }
     
     
@@ -121,8 +122,9 @@ essential_met, preferred_eval){
                 
                 #If all years removed because all available periods shorter than min_yrs, abort
                 if(length(yr_ind)==0){
-                    CheckError(paste("No years to process, all available time period too short (as set by min_yrs).
-                    Aborting [ function:", match.call()[[1]], "]"))
+                    CheckError(paste("No years to process, all available time",
+                                     "period too short (as set by min_yrs).",
+                                      "Aborting [ function:", match.call()[[1]], "]"))
                 }
                 
                 
@@ -170,8 +172,8 @@ missing_val){
     
     #Check that Fluxnet and ERA data dimensions agree
     if(nrow(datain) != nrow(era_data)) {
-        CheckError(paste("Observed flux data and ERAinterim data dimensions
-        do not match, aborting [ function:", match.call()[[1]], "]"))
+        CheckError(paste("Observed flux data and ERAinterim data dimensions",
+                         "do not match, aborting [ function:", match.call()[[1]], "]"))
     }
     
     
@@ -209,8 +211,8 @@ missing_val){
                 era_tair_col <- which(colnames(era_data)=="TA_ERA")
                 
                 if(length(era_tair_col) == 0){
-                    CheckError("Cannot find ERAinterim air temperature data.
-                    Cannot convert ERA VPD to relative humidity")
+                    CheckError(paste("Cannot find ERAinterim air temperature data.",
+                               "Cannot convert ERA VPD to relative humidity"))
                 }
                 
                 # Convert ERAinterim VPD to relative humidity
@@ -294,10 +296,11 @@ CheckTextDataRanges = function(datain, missingval){
         if(data_range[1] < valid_range[1] | data_range[2] > valid_range[2]){
             
             CheckError(paste("Variable outside expected ranges. Check variable ",
-            datain$vars[k], "; data range is [", data_range[1], ", ", data_range[2],
-            "], valid range is [", valid_range[1], ", ", valid_range[2],
-            "]. Check data or change data range in variables auxiliary file",
-            sep=""))
+                             datain$vars[k], "; data range is [", data_range[1], 
+                             ", ", data_range[2], "], valid range is [", 
+                             valid_range[1], ", ", valid_range[2],
+                             "]. Check data or change data range in variables auxiliary file",
+                              sep=""))
         }
         
         
