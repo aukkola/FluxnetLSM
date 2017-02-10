@@ -84,35 +84,36 @@ ReadTextFluxData <- function(fileinname, vars, time_vars){
   ###### Get time step and date information #######
   
 	# Note number of time steps in data:
-	ntsteps = nrow(FluxTime)
+	ntsteps <- nrow(FluxTime)
   
 	if(!(ntsteps>=12 && ntsteps < 1e9)){
 		CheckError(paste('Unable to determine number of time steps in:',
 			                stripFilename(fileinname)))
 	}
   
-	# and time step size:
-  start <- strptime(FluxTime$TIMESTAMP_START[1], "%Y%m%d%H%M") #convert to date string
+	# and time step size (convert to date string)
+  start <- strptime(FluxTime$TIMESTAMP_START[1], "%Y%m%d%H%M")
   end   <- strptime(FluxTime$TIMESTAMP_END[1], "%Y%m%d%H%M")
   
 	timestepsize <- as.numeric(end) - as.numeric(start)
   
-	if( !(timestepsize>=300 && timestepsize<=3600) ){
+	if( !(timestepsize>=300 && timestepsize<=3600) ){   #DO WE WANT THIS? DOES IT LIMIT tstep TO 1HR ????????????????????
 		CheckError(paste('Unable to ascertain time step size in',
 			               stripFilename(fileinname)))
 	}
   
-	tstepinday=86400/timestepsize # time steps in a day
-	ndays = ntsteps/tstepinday # number of days in data set
+  # Time steps in a day and number of days in data set
+	tstepinday <- 86400/timestepsize 
+	ndays      <- ntsteps/tstepinday 
 
   
   # Find starting date / time:
   starttime <- findStartTime(start=start)
   
-  intyears = Yeardays(starttime$syear,ndays)
+  intyears  <- Yeardays(starttime$syear,ndays)
   
   #Create list for function exit:
-	filedata = list(data=FluxData, vars=tcol$names, era_vars=era_vars, 
+	filedata <- list(data=FluxData, vars=tcol$names, era_vars=era_vars, 
                   attributes=attributes,
                   units=units, var_ranges=var_ranges, categories=categories,
                   time=FluxTime, ntsteps=ntsteps, starttime=starttime, 
