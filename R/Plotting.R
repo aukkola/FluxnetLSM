@@ -127,13 +127,10 @@ plot_nc <- function(ncfile, analysis_type, vars, outfile){
     ## 14-day running time series ##   COMPLETE !!!!!!!!!!!!!!!
     ################################
     } else if(analysis_type[k]=="timeseries"){
-    
-      
+
       #List time variables (required in this format)
-      timing <- list(timestepsize, syear)
-      names(timing) <- c("tstepsize", "syear")
-     
-      
+      timing <- GetTimingNcfile(ncfile)
+
       #Initialise file
       pdf(paste(outfile, "Timeseries.pdf", sep=""), height=no_vars*2.2, width=no_vars*1.4)
       
