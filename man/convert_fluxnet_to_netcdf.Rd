@@ -6,7 +6,8 @@
 \usage{
 convert_fluxnet_to_netcdf(infile, site_code, out_path, lib_path,
   ERA_file = NA, ERA_gapfill = FALSE, datasetname = "Fluxnet2015",
-  datasetversion = "Nov16", gap_threshold = 20, min_yrs = 2)
+  datasetversion = "Nov16", gap_threshold = 20, min_yrs = 2,
+  plot = c("annual", "diurnal", "timeseries"))
 }
 \arguments{
 \item{infile}{input filename,
@@ -19,6 +20,8 @@ e.g. "FULLSET/FLX_AU-How_FLUXNET2015_FULLSET_HH_2001-2014_1-3.csv"}
 \item{ERA_gapfill}{Gapfill met variables using ERAinterim?}
 
 \item{min_yrs}{Minimum number of consecutive years to process}
+
+\item{plot}{Should annual, diurnal and/or 14-day running mean plot be produced? Set to NA it not}
 
 \item{era_file}{ERA input file (needed if using ERAinterim to gapfill met variables)
 e.g. "FULLSET/FLX_AU-How_FLUXNET2015_ERAI_HH_1989-2014_1-3.csv"}
