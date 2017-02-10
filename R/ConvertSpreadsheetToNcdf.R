@@ -46,11 +46,11 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path, lib_path,   #
     #http://fluxnet.fluxdata.org/data/fluxnet2015-dataset/fullset-data-product/)
     vars <- read.csv(paste(lib_path, "/../data/variables.csv", sep=""), header=TRUE,
     colClasses=c("character", "character", "character",
-    "character", "character", "character",
-    "character",
-    "numeric",   "numeric",
-    "logical", "logical",
-    "character"))
+                 "character", "character", "character",
+                 "character",
+                 "numeric",   "numeric",
+                 "logical", "logical",
+                 "character"))
     
     
     #Name of time stamp variables
@@ -66,14 +66,14 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path, lib_path,   #
     #irrigation or other additional water source.
     if(site_info$Exclude){
         CheckError(paste("Site not processed. Reason:", site_info$Exclude_reason,
-        ". This is set in site info file, change >Exclude< options",
-        "in the file to process site"))
+                         ". This is set in site info file, change >Exclude< options",
+                         "in the file to process site"))
     }
     
     
     # Read text file containing flux data:
-    DataFromText = ReadTextFluxData(fileinname=infile, vars=vars,
-    time_vars=time_vars)
+    DataFromText <- ReadTextFluxData(fileinname=infile, vars=vars,
+                                     time_vars=time_vars)
     
     
     # Make sure whole number of days in dataset:
@@ -112,6 +112,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path, lib_path,   #
         obs_start <- DataFromText$time$TIMESTAMP_START
         start_era <- which(era_data$TIMESTAMP_START == obs_start[1])
         end_era   <- which(era_data$TIMESTAMP_START == obs_start[length(obs_start)])
+        
         #Extract correct time steps
         era_data  <- era_data[start_era:end_era,]
         
@@ -198,7 +199,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path, lib_path,   #
         
         #Extract start and end years
         start_yr <- substring(DataFromText$time[gaps$tseries_start[k],1], 1, 4)
-        end_yr <- substring(DataFromText$time[gaps$tseries_end[k],1], 1, 4)
+        end_yr   <- substring(DataFromText$time[gaps$tseries_end[k],1], 1, 4)
         
         
         #Create output file names
@@ -215,44 +216,45 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path, lib_path,   #
         
         
         ### Create netcdf met driving file ###
-        CreateMetNcFile( metfilename=metfilename, datain=DataFromText,
-        latitude=site_info$SiteLatitude,
-        longitude=site_info$SiteLongitude,
-        site_code=site_code,
-        long_sitename=site_info$Fullname,
-        datasetversion=datasetversion,
-        github_rev=site_info$Processing$git_rev,
-        tier=site_info$Tier,
-        ind_start=gaps$tseries_start[k],
-        ind_end=gaps$tseries_end[k],
-        starttime=nc_starttime,
-        timestepsize=DataFromText$timestepsize,
-        elevation=site_info$SiteElevation,
-        towerheight=site_info$TowerHeight,
-        canopyheight=site_info$CanopyHeight,
-        short_veg_type=site_info$IGBP_vegetation_short,
-        long_veg_type=site_info$IGBP_vegetation_long)
+        CreateMetNcFile( metfilename=metfilename, 
+                         datain=DataFromText,
+                         latitude=site_info$SiteLatitude,
+                         longitude=site_info$SiteLongitude,
+                         site_code=site_code,
+                         long_sitename=site_info$Fullname,
+                         datasetversion=datasetversion,
+                         github_rev=site_info$Processing$git_rev,
+                         tier=site_info$Tier,
+                         ind_start=gaps$tseries_start[k],
+                         ind_end=gaps$tseries_end[k],
+                         starttime=nc_starttime,
+                         timestepsize=DataFromText$timestepsize,
+                         elevation=site_info$SiteElevation,
+                         towerheight=site_info$TowerHeight,
+                         canopyheight=site_info$CanopyHeight,
+                         short_veg_type=site_info$IGBP_vegetation_short,
+                         long_veg_type=site_info$IGBP_vegetation_long)
         
         
         
         ### Create netcdf flux data file ###
         CreateFluxNcFile(fluxfilename=fluxfilename, datain=DataFromText,
-        latitude=site_info$SiteLatitude,
-        longitude=site_info$SiteLongitude,
-        site_code=site_code,
-        long_sitename=site_info$Fullname,
-        datasetversion=datasetversion,
-        github_rev=site_info$Processing$git_rev,
-        tier=site_info$Tier,
-        ind_start=gaps$tseries_start[k],
-        ind_end=gaps$tseries_end[k],
-        starttime=nc_starttime,
-        timestepsize=DataFromText$timestepsize,
-        elevation=site_info$SiteElevation,
-        towerheight=site_info$TowerHeight,
-        canopyheight=site_info$CanopyHeight,
-        short_veg_type=site_info$IGBP_vegetation_short,
-        long_veg_type=site_info$IGBP_vegetation_long)
+                         latitude=site_info$SiteLatitude,
+                         longitude=site_info$SiteLongitude,
+                         site_code=site_code,
+                         long_sitename=site_info$Fullname,
+                         datasetversion=datasetversion,
+                         github_rev=site_info$Processing$git_rev,
+                         tier=site_info$Tier,
+                         ind_start=gaps$tseries_start[k],
+                         ind_end=gaps$tseries_end[k],
+                         starttime=nc_starttime,
+                         timestepsize=DataFromText$timestepsize,
+                         elevation=site_info$SiteElevation,
+                         towerheight=site_info$TowerHeight,
+                         canopyheight=site_info$CanopyHeight,
+                         short_veg_type=site_info$IGBP_vegetation_short,
+                         long_veg_type=site_info$IGBP_vegetation_long)
         
         
     }
@@ -285,8 +287,8 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path, lib_path,   #
       if(any(plot="annual") | any(plot="diurnal") | any(plot="timeseries")){
                 
         plot_nc(ncfile=nc_met, analysis_type=plot, 
-                 vars=DataFromText$vars[DataFromText$categories=="Met"],
-                 outfile=outfile_met)      
+                vars=DataFromText$vars[DataFromText$categories=="Met"],
+                outfile=outfile_met)      
         
         plot_nc()
 
