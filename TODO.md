@@ -21,6 +21,8 @@ TODO:
 
 - Remove lib_path input once package working
 
+- Add % gap-filled as a variable attribute
+
 
 Some info to create package...
 
