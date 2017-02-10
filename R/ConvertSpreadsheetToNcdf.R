@@ -36,6 +36,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path, lib_path,   #
     source(paste(lib_path, "/functions/Conversions.R", sep=""))
     source(paste(lib_path, "/functions/Check_and_Gapfill.R", sep=""))
     source(paste(lib_path, "/functions/FluxtowerSpreadsheetToNc.R", sep=""))
+    source(paste(lib_path, "/Plotting.R", sep=""))
     
     
     ################################
@@ -271,7 +272,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path, lib_path,   #
     #as a 14-day running mean time series depending on
     #analysis choices (separate figures for Met and Flux vars)
         
-    if(!is.na(plot)){
+    if(!any(is.na(plot))){
       
       #Open met and flux NetCDF file handles
       nc_met <- nc_open(metfilename)
@@ -284,13 +285,15 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path, lib_path,   #
       
    
       ## Plotting ##
-      if(any(plot="annual") | any(plot="diurnal") | any(plot="timeseries")){
+      if(any(plot=="annual") | any(plot=="diurnal") | any(plot=="timeseries")){
                 
         plot_nc(ncfile=nc_met, analysis_type=plot, 
                 vars=DataFromText$vars[DataFromText$categories=="Met"],
                 outfile=outfile_met)      
         
-        plot_nc()
+ #       plot_nc(ncfile=nc_flux, analysis_type=plot, 
+#                vars=DataFromText$vars[DataFromText$categories=="Eval"],
+ #               outfile=outfile_met)
 
 
       #Analysis type doesn't match options, return warning
