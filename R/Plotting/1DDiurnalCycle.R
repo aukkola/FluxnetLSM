@@ -7,7 +7,7 @@
 # Gab Abramowitz CCRC, UNSW 2014 (palshelp at gmail dot com)
 #
 DiurnalCycle = function(obslabel,dcdata,varname,ytext,legendtext,
-	timestepsize,whole,plotcolours,modlabel='no',vqcdata=matrix(-1,nrow=1,ncol=1)){
+	timestepsize,whole,plotcolours,modlabel='no',vqcdata=matrix(-1,nrow=1,ncol=1), na.rm=FALSE){
 	errtext = 'ok'
 	metrics = list()
 	if(!whole){ # we need a whole number of years for this to run
@@ -59,16 +59,16 @@ DiurnalCycle = function(obslabel,dcdata,varname,ytext,legendtext,
 						# Allow NA value only if all years of season sum are NA:
 						if(l==1){ # 1st year of sum					
 							avday[k,i,p] = avday[k,i,p] + sum(thisyearsseason[
-								as.logical(qc_days[(stid[k]+(l-1)*365):(fnid[k]+(l-1)*365),i])])
+								as.logical(qc_days[(stid[k]+(l-1)*365):(fnid[k]+(l-1)*365),i])], na.rm=na.rm)
 						}else{
 							if((!sumnotexist) & (!is.na(avday[k,i,p]))){ 
 								# i.e. sum exists and values for previous years exist
 								avday[k,i,p] = avday[k,i,p] + sum(thisyearsseason[
-									as.logical(qc_days[(stid[k]+(l-1)*365):(fnid[k]+(l-1)*365),i])])		
+									as.logical(qc_days[(stid[k]+(l-1)*365):(fnid[k]+(l-1)*365),i])], na.rm=na.rm)		
 							}else if(!sumnotexist){ 
 								# i.e. sum exists but previous years' sums are NA
 								avday[k,i,p] = sum(thisyearsseason[
-									as.logical(qc_days[(stid[k]+(l-1)*365):(fnid[k]+(l-1)*365),i])])
+									as.logical(qc_days[(stid[k]+(l-1)*365):(fnid[k]+(l-1)*365),i])], na.rm=na.rm)
 							}		
 						}
 					}
@@ -86,11 +86,11 @@ DiurnalCycle = function(obslabel,dcdata,varname,ytext,legendtext,
 							if((!sumnotexist) & (!is.na(avday[k,i,p]))){ 
 								# i.e. sum exists and values for previous years/DJF portions exist
 								avday[k,i,p] = avday[k,i,p] + sum(thisyearsseason[
-									as.logical(qc_days[(stid[k+4]+(l-1)*365):(fnid[k+4]+(l-1)*365),i])])		
+									as.logical(qc_days[(stid[k+4]+(l-1)*365):(fnid[k+4]+(l-1)*365),i])], na.rm=na.rm)		
 							}else if(!sumnotexist){ 
 								# i.e. sum exists but previous years' sums are NA
 								avday[k,i,p] = sum(thisyearsseason[
-									as.logical(qc_days[(stid[k+4]+(l-1)*365):(fnid[k+4]+(l-1)*365),i])])
+									as.logical(qc_days[(stid[k+4]+(l-1)*365):(fnid[k+4]+(l-1)*365),i])], na.rm=na.rm)
 							}	
 						}
 					}
@@ -121,8 +121,8 @@ DiurnalCycle = function(obslabel,dcdata,varname,ytext,legendtext,
 		} # over each season
 		if(p>1){
 			# Calculate all-season score:
-			pscoretotal[p-1] = sum(abs(as.vector(avday[,,p] - avday[,,1])),na.rm=TRUE) / 
-				sum(abs(as.vector(mean(avday[,,1],na.rm=TRUE) - avday[,,1])),na.rm=TRUE)
+			pscoretotal[p-1] = sum(abs(as.vector(avday[,,p] - avday[,,1])),na.rm=na.rm) / 
+				sum(abs(as.vector(mean(avday[,,1],na.rm=na.rm) - avday[,,1])),na.rm=na.rm)
 			removefractotal = sum(exclvals) / ntsteps
 		}
 	} # for each curve (mod, obs, etc)
@@ -142,8 +142,8 @@ DiurnalCycle = function(obslabel,dcdata,varname,ytext,legendtext,
 	
 	# Determine boundaries for plots:
 	xloc=c(0:(tstepinday-1)) # set location of x-coords in plot
-	yaxmin=min(avday) # y axis minimum in plot
-	yaxmax=max(avday)+(max(avday)-yaxmin)*0.15 # y axis maximum in plot
+	yaxmin=min(avday, na.rm=na.rm) # y axis minimum in plot
+	yaxmax=max(avday, na.rm=na.rm)+(max(avday, na.rm=na.rm)-yaxmin)*0.15 # y axis maximum in plot
 	# Now plot each panel:
 	for(k in 1:4){# for each season (DJF, MAM etc)
 		# Plot obs data result:
@@ -155,8 +155,8 @@ DiurnalCycle = function(obslabel,dcdata,varname,ytext,legendtext,
 			for(p in 2:ncurves){ # for each additional curve
 				lines(xloc,avday[k,,p],lwd=3,col=plotcolours[p])
 				# Score is normalised mean error:
-				pscore[k,p-1] = sum(abs(avday[k,,p] - avday[k,,1]),na.rm=TRUE) /
-					sum(abs(as.vector(mean(avday[k,,1],na.rm=TRUE) - avday[k,,1])),na.rm=TRUE)
+				pscore[k,p-1] = sum(abs(avday[k,,p] - avday[k,,1]),na.rm=na.rm) /
+					sum(abs(as.vector(mean(avday[k,,1],na.rm=na.rm) - avday[k,,1])),na.rm=na.rm)
 			}	
 		}	
 		axis(1,at=c(0,6*tstepinday/24,12*tstepinday/24,18*tstepinday/24,
@@ -191,6 +191,14 @@ DiurnalCycle = function(obslabel,dcdata,varname,ytext,legendtext,
 			}
 			legend(-1,ypos[2],legendtext[1:ncurves],lty=1,col=plotcolours[1:ncurves],
 				lwd=3,bty="n",yjust=0.5)
+      
+			#If any data missing, print % missing to plot
+			if(na.rm && any(is.na(dcdata))){
+			  perc_missing <- length(which(is.na(dcdata))) / length(dcdata)
+			  text(x=max(xloc)-2, y=ypos[2], 
+			       labels=paste(round(perc_missing, digits=3), "% missing"), col="red", adj=c(0.5,1))
+			}
+      
 			if(ncurves>1){
 				scorestring = paste(signif(pscoretotal,digits=2),collapse=', ')
 				removestring = paste(signif(removefractotal*100,digits=2),collapse=', ')

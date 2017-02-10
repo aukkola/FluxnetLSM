@@ -6,7 +6,7 @@
 
 Timeseries = function(obslabel,tsdata,varname,ytext,legendtext,
                       plotcex,timing,smoothed=FALSE,winsize=1,plotcolours,modlabel='no',
-                      vqcdata=matrix(-1,nrow=1,ncol=1)){
+                      vqcdata=matrix(-1,nrow=1,ncol=1), na.rm=FALSE){
   #
   errtext = 'ok'
   metrics = list()
@@ -40,8 +40,8 @@ Timeseries = function(obslabel,tsdata,varname,ytext,legendtext,
         datasd = paste(datasd,', ',as.character(signif(sd(tsdata[,p]),3)),sep='')
       }
     }
-    ymin = signif(min(data_smooth),3)
-    ymax = signif(max(data_smooth),3)
+    ymin = signif(min(data_smooth, na.rm=na.rm),3)
+    ymax = signif(max(data_smooth, na.rm=na.rm),3)
     # If we're adding a gap-filling QC line, make space for it:
     if(vqcdata[1,1] != -1) {
       ymin = ymin - (ymax-ymin)*0.06
@@ -148,10 +148,10 @@ Timeseries = function(obslabel,tsdata,varname,ytext,legendtext,
     }		
   }else{
     # this code not functioning but kept for future modification:
-    yvalmin = signif(min(tsdata),3)
-    yvalmax = signif(max(tsdata),3)
-    datamean = signif(mean(tsdata[,1]),3)
-    datasd = signif(sd(tsdata[,1]),3)
+    yvalmin = signif(min(tsdata, na.rm=na.rm),3)
+    yvalmax = signif(max(tsdata, na.rm=na.rm),3)
+    datamean = signif(mean(tsdata[,1], na.rm=na.rm),3)
+    datasd = signif(sd(tsdata[,1], na.rm=na.rm),3)
     ymin = yvalmin
     ymax = yvalmax
     xmin = 1
@@ -186,6 +186,14 @@ Timeseries = function(obslabel,tsdata,varname,ytext,legendtext,
     legend(0-(xmax-xmin)*0.05,(ymin + (ymax-ymin)*1.42),legend=legendtext[1:ncurves],lty=1,
            col=plotcolours[1:ncurves],lwd=3,bty="n",cex=max((plotcex*0.75),1))
     title(paste(obslabel,varname[1]),cex.main=plotcex)
+    
+    #If any data missing, print % missing to plot
+    if(na.rm && any(is.na(tsdata))){
+      perc_missing <- length(which(is.na(tsdata))) / length(tsdata)
+      text(x=max(xloc)-2, y=(ymin + (ymax-ymin)*1.42), 
+           labels=paste(round(perc_missing, digits=3), "% missing"), col="red")
+    }
+    
     # Locations of max,min,mean,sd text:
     stattextx = c(xmin,xmin+(xmax-xmin)*0.5)
     stattexty = c(ymin + (ymax-ymin)*1.18,ymin + (ymax-ymin)*1.24)

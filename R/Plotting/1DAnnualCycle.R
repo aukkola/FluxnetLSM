@@ -6,9 +6,10 @@
 # AND be a integer number of years in length.
 #
 # Gab Abramowitz CCRC, UNSW 2014 (palshelp at gmail dot com)
-#
+
+
 AnnualCycle = function(obslabel,acdata,varname,ytext,legendtext,
-	timestepsize,whole,plotcolours,modlabel='no'){
+	timestepsize,whole,plotcolours,modlabel='no', na.rm=FALSE){
 	######
 	errtext = 'ok'
 	metrics = list()
@@ -31,7 +32,7 @@ AnnualCycle = function(obslabel,acdata,varname,ytext,legendtext,
 		avday=c() # initialise
 		# Transform data into daily averages:
 		for(i in 1:ndays){
-			avday[i]=mean(data_days[i,]) # calc daily average value
+			avday[i]=mean(data_days[i,], na.rm=na.rm) # calc daily average value
 		}	
 		# Transform daily means into monthly means:
 		for(m in 1:12){ # for each month
@@ -49,8 +50,8 @@ AnnualCycle = function(obslabel,acdata,varname,ytext,legendtext,
 	}
 	xloc=c(1:12) # set location of x-coords
 	# Plot model output result:
-	yaxmin=min(data_monthly) # y axis minimum in plot
-	yaxmax=max(data_monthly)+0.18*(max(data_monthly)-yaxmin) # y axis maximum in plot
+	yaxmin=min(data_monthly, na.rm=na.rm) # y axis minimum in plot
+	yaxmax=max(data_monthly, na.rm=na.rm)+0.18*(max(data_monthly, na.rm=na.rm)-yaxmin) # y axis maximum in plot
 	plot(xloc,data_monthly[,1],type="l",xaxt="n",xlab='Month',ylab=ytext,
 		lwd=3,col=plotcolours[1],ylim=c(yaxmin,yaxmax),cex.lab=1.2,cex.axis=1.3,
 		mgp = c(2.5,0.8,0))
@@ -61,23 +62,31 @@ AnnualCycle = function(obslabel,acdata,varname,ytext,legendtext,
 			lines(xloc,data_monthly[,p],lwd=3,col=plotcolours[p])
 			# Score is normalised mean error:
 			pscore[p-1] = sum(abs(data_monthly[,p] - data_monthly[,1])) /
-				sum(abs(mean(data_monthly[,1]) - data_monthly[,1]))
+				sum(abs(mean(data_monthly[,1], na.rm=na.rm) - data_monthly[,1]))
 		}	
 	}
 	axis(1,at=c(2,4,6,8,10,12),labels=c('2','4','6','8','10','12'),cex.axis=1.3)
 	if(modlabel=='no'){ # i.e. an obs analysis
-		title(paste('Average monthly ',varname[1],':   Obs - ',obslabel,
-			sep=''),cex.main=1.1) # add title
+		title(paste('Average monthly ',varname[1],
+			          sep=''),cex.main=1.1) # add title
 	}else{
 		title(paste('Average monthly ',varname[1],':   Obs - ',obslabel,'   Model - ',
 			modlabel,sep=''),cex.main=1.1) # add title
 	}
-	legend(1,max(data_monthly)+0.15*(max(data_monthly)-yaxmin),legendtext[1:ncurves],
+	legend(1,max(data_monthly, na.rm=na.rm)+0.15*(max(data_monthly, na.rm=na.rm)-yaxmin),legendtext[1:ncurves],
 		lty=1,col=plotcolours[1:ncurves],lwd=3,bty="n",yjust=0.8)
+  
+  #If any data missing, print % missing to plot
+  if(na.rm && any(is.na(acdata))){
+    perc_missing <- length(which(is.na(acdata))) / length(acdata)
+    text(x=max(xloc)-2, y=max(data_monthly, na.rm=na.rm)+0.15*(max(data_monthly, na.rm=na.rm)-yaxmin), 
+         labels=paste(round(perc_missing, digits=3), "% missing"), col="red", adj=c(0.5,0.8+0.5))
+  }
+  
 	if(ncurves>1){
 		scorestring = paste(signif(pscore,digits=3),collapse=', ')
 		scoretext = paste('Score: ',scorestring,'\n','(NME)',sep='')
-		text(8,max(data_monthly)+0.1*(max(data_monthly)-yaxmin),scoretext,pos=4,offset=1)
+		text(8,max(data_monthly, na.rm=na.rm)+0.1*(max(data_monthly, na.rm=na.rm)-yaxmin),scoretext,pos=4,offset=1)
 		if(ncurves==2){ # model only
 			metrics[[1]] = list(name='NME',model_value=pscore[1])	
 		}else if(ncurves==3){

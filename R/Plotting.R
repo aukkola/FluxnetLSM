@@ -27,6 +27,8 @@ plot_nc <- function(ncfile, analysis_type, vars, outfile){
   time       <- ncvar_get(ncfile, "time")
   time_units <- ncatt_get(ncfile, "time", "units")$value
   
+    
+  
   #Abort if time unit not in seconds
   if(!grepl("seconds since", time_units)){
     CheckError(paste("Unknown time units, unable to produce",
@@ -80,7 +82,8 @@ plot_nc <- function(ncfile, analysis_type, vars, outfile){
                     ytext=paste(data_vars[n], " (", data_units[n], ")", sep=""), 
                     legendtext=data_vars[n], 
                     timestepsize=timestepsize,
-                    whole=TRUE, plotcolours="blue")  
+                    whole=TRUE, plotcolours="blue",
+                    na.rm=TRUE)  
       }
   
       #Close file
@@ -104,11 +107,32 @@ plot_nc <- function(ncfile, analysis_type, vars, outfile){
       #Plot
       for(n in 1:length(data)){
         
+        #Find corresponding QC variable (if available)
+        qc_ind <- which(qc_vars==paste(data_vars[n], "_qc", sep=""))
+        
+        #Extract QC data and replace all gap-filled values with 0
+        # and measured with 1 (opposite to Fluxnet but what PALS expects)
+        if(length(qc_ind) >0){
+          
+          var_qc <- qc_data[[qc_ind]]
+          
+          var_qc[var_qc > 0]  <- 2 #replace gap-filled values with a temporary value
+          var_qc[var_qc == 0] <- 1 #set measured to 1
+          var_qc[var_qc == 2] <- 0 #set gap-filled to 0
+          
+          #Else set to PALS option corresponding to no QC data
+        } else {
+          var_qc <- matrix(-1, nrow = 1, ncol = 1)
+        }
+        
+        
         DiurnalCycle(obslabel=data_vars[n],dcdata=as.matrix(data[[n]]),
                      varname=data_vars[n], 
                      ytext=paste(data_vars[n], " (", data_units[n], ")", sep=""), 
                      legendtext=data_vars[n], timestepsize=timestepsize,
-                     whole=TRUE, plotcolours="red")  
+                     whole=TRUE, plotcolours="red",
+                     vqcdata=as.matrix(var_qc),
+                     na.rm=TRUE)  
       }
       
       #Close file
@@ -164,8 +188,9 @@ plot_nc <- function(ncfile, analysis_type, vars, outfile){
                    legendtext=data_vars[n],
                    plotcex=1.5, timing=timing, 
                    smoothed = TRUE, winsize = 14, 
-                  plotcolours="blue", 
-                  vqcdata = as.matrix(var_qc))
+                   plotcolours="blue", 
+                   vqcdata = as.matrix(var_qc),
+                   na.rm=TRUE)
       
       }
 
