@@ -1,10 +1,11 @@
-#
-#
-#
-# ADD COMMENTS
-#
-#
-#
+#' Plots standard analysis plots from netcdf data
+#'
+#' @param ncfile an open netcdf file
+#' @param analysis_type vector of plot names:c ("annual", "diurnal", "timeseries")
+#' @param vars vector of variable names to plot
+#' @param outfile output path prefix, including directory
+#'
+#' @export
 
 
 plot_nc <- function(ncfile, analysis_type, vars, outfile){
@@ -147,8 +148,7 @@ plot_nc <- function(ncfile, analysis_type, vars, outfile){
     } else if(analysis_type[k]=="timeseries"){
     
       #List time variables (required in this format)
-      timing <- list(timestepsize, syear)
-      names(timing) <- c("tstepsize", "syear")
+      timing <- GetTimingNcfile(ncfile)
      
       
       #Initialise file
