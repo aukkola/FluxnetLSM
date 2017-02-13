@@ -35,7 +35,8 @@ plot_nc <- function(ncfile, analysis_type, vars, outfile){
   time       <- ncvar_get(ncfile, "time")
   time_units <- ncatt_get(ncfile, "time", "units")$value
   
-    
+  #Find time attributes
+  timing <- GetTimingNcfile(ncfile)  
   
   #Abort if time unit not in seconds
   if(!grepl("seconds since", time_units)){
@@ -83,14 +84,14 @@ plot_nc <- function(ncfile, analysis_type, vars, outfile){
       par(mfrow=c(ceiling(sqrt(no_vars)), ceiling(sqrt(no_vars))))
       
       #Plot
-      for(n in 1:length(data)){   #NEED TO GET whole ARGUMENT FROM DATA, NOT SET TO TRUE IN FUNCTION !!!!!!!!!!!
+      for(n in 1:length(data)){
         
         AnnualCycle(obslabel="", acdata=as.matrix(data[[n]]),
                     varname=data_vars[n], 
                     ytext=paste(data_vars[n], " (", data_units[n], ")", sep=""), 
                     legendtext=data_vars[n], 
                     timestepsize=timestepsize,
-                    whole=TRUE, plotcolours="blue",
+                    whole=timing$whole, plotcolours="blue",
                     na.rm=TRUE)  
       }
   
@@ -139,7 +140,7 @@ plot_nc <- function(ncfile, analysis_type, vars, outfile){
                      varname=data_vars[n], 
                      ytext=paste(data_vars[n], " (", data_units[n], ")", sep=""), 
                      legendtext=data_vars[n], timestepsize=timestepsize,
-                     whole=TRUE, plotcolours="blue",
+                     whole=timing$whole, plotcolours="blue",
                      vqcdata=as.matrix(var_qc),
                      na.rm=TRUE)  
       }
@@ -150,12 +151,9 @@ plot_nc <- function(ncfile, analysis_type, vars, outfile){
       
       
     ################################
-    ## 14-day running time series ##   COMPLETE !!!!!!!!!!!!!!!
+    ## 14-day running time series ##
     ################################
     } else if(analysis_type[k]=="timeseries"){
-
-      #List time variables (required in this format)
-      timing <- GetTimingNcfile(ncfile)
 
       #Initialise file
       pdf(paste(outfile, "Timeseries.pdf", sep=""), height=no_vars*2.2, width=no_vars*1.4)
