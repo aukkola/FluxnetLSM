@@ -21,7 +21,7 @@
 #' @export
 #'
 #'
-convert_fluxnet_to_netcdf <- function(infile, site_code, out_path, lib_path,   #REMOVE lib_path from final code !!!!!
+convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                                       ERA_file=NA, ERA_gapfill=FALSE,
                                       datasetname="Fluxnet2015", datasetversion="Nov16",
                                       gap_threshold=20, min_yrs=2,
@@ -31,13 +31,13 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path, lib_path,   #
     library(pals)
     
     # TODO: Merge these files with palsR where possible.
-    source(paste(lib_path, "/functions/Constants.R", sep=""))
-    source(paste(lib_path, "/functions/Timing_general.R", sep=""))
-    source(paste(lib_path, "/functions/Conversions.R", sep=""))
-    source(paste(lib_path, "/functions/Check_and_Gapfill.R", sep=""))
-    source(paste(lib_path, "/functions/FluxtowerSpreadsheetToNc.R", sep=""))
-    source(paste(lib_path, "/Plotting.R", sep=""))
-    source(paste(lib_path, "/Site_metadata.R", sep=""))
+ #   source(paste(lib_path, "/functions/Constants.R", sep=""))
+#    source(paste(lib_path, "/functions/Timing_general.R", sep=""))
+ #   source(paste(lib_path, "/functions/Conversions.R", sep=""))
+  #  source(paste(lib_path, "/functions/Check_and_Gapfill.R", sep=""))
+   # source(paste(lib_path, "/functions/FluxtowerSpreadsheetToNc.R", sep=""))
+  #  source(paste(lib_path, "/Plotting.R", sep=""))
+  #  source(paste(lib_path, "/Site_metadata.R", sep=""))
     
     
     
