@@ -10,9 +10,9 @@ Description: Scripts for checking quality of fluxnet data, and converting from c
 License: TODO: What license is it under?
 RoxygenNote: 6.0.0.9000
 Imports:
-    R.utils
-    ncdf4
-    pals
+    R.utils,
+    ncdf4,
+    pals,
     rvest
 Suggests:
     testthat
