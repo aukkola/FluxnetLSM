@@ -92,9 +92,10 @@ plot_nc <- function(ncfile, analysis_type, vars, outfile){
       
       
     ###################
-    ## Diurnal cycle ##      FIX???? SAVES EACH VARIABLE IN SEPARATE FIGURE due to multiple mfrow !!!!!!!!
+    ## Diurnal cycle ## 
     ###################
     } else if(analysis_type[k]=="diurnal"){
+      
       
       #Initialise file
       pdf(paste(outfile, "DiurnalCycle.pdf", sep=""), height=no_vars,
@@ -105,7 +106,7 @@ plot_nc <- function(ncfile, analysis_type, vars, outfile){
       par(mfrow=c(ceiling(sqrt(no_vars)), ceiling(sqrt(no_vars))))
       
       #Plot
-      for(n in 1:length(data)){
+      for(n in 1:length(data)){  
         
         #Find corresponding QC variable (if available)
         qc_ind <- which(qc_vars==paste(data_vars[n], "_qc", sep=""))
@@ -130,7 +131,7 @@ plot_nc <- function(ncfile, analysis_type, vars, outfile){
                      varname=data_vars[n], 
                      ytext=paste(data_vars[n], " (", data_units[n], ")", sep=""), 
                      legendtext=data_vars[n], timestepsize=timestepsize,
-                     whole=TRUE, plotcolours="red",
+                     whole=TRUE, plotcolours="blue",
                      vqcdata=as.matrix(var_qc),
                      na.rm=TRUE)  
       }
@@ -145,7 +146,6 @@ plot_nc <- function(ncfile, analysis_type, vars, outfile){
     ################################
     } else if(analysis_type[k]=="timeseries"){
     
-      
       #List time variables (required in this format)
       timing <- list(timestepsize, syear)
       names(timing) <- c("tstepsize", "syear")

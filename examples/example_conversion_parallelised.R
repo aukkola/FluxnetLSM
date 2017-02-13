@@ -4,6 +4,7 @@
 #' netcdf files, one for fluxes, and one for met forcings.
 
 library(FluxnetProcessing)  # convert_fluxnet_to_netcdf
+library(parallel)
 
 # initial garbage collection
 rm(list=ls(all=TRUE))
@@ -33,6 +34,4 @@ ERA_file     <- paste(in_path, fname, sep="")
 plot <- c("annual", "diurnal","timeseries")
 
 convert_fluxnet_to_netcdf(infile=infile, site_code=site_code, out_path=out_path, lib_path="./R",
-                          ERA_file=ERA_file, ERA_gapfill=ERA_gapfill, datasetname="Fluxnet2015", 
-                          datasetversion="Nov16", gap_threshold=20, min_yrs=2, plot=plot)
-
+                          ERA_file=ERA_file, ERA_gapfill=ERA_gapfill, plot=plot)

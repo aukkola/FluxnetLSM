@@ -40,6 +40,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path, lib_path,   #
     source(paste(lib_path, "/Plotting/1DAnnualCycle.R", sep=""))
     source(paste(lib_path, "/Plotting/1DTimeseries.R", sep=""))
     source(paste(lib_path, "/Plotting/1DDiurnalCycle.R", sep=""))
+    source(paste(lib_path, "/Site_metadata.R", sep=""))
     
     
     
@@ -300,7 +301,6 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path, lib_path,   #
       nc_flux <- nc_open(fluxfilename)
       
       #Initialise output file names (completed in plotting code)
-      #SHOULD THESE GO IN A SEPARATE FOLDER TO NC FILES ???????????
       outfile_met  <- paste(outpath_plot, "/", site_code, "_plot_Met_", sep="")
       outfile_flux <- paste(outpath_plot, "/", site_code, "_plot_Flux_", sep="")
       
@@ -311,6 +311,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path, lib_path,   #
         plot_nc(ncfile=nc_met, analysis_type=plot, 
                 vars=DataFromText$vars[DataFromText$categories=="Met"],
                 outfile=outfile_met)      
+        
         
         plot_nc(ncfile=nc_flux, analysis_type=plot,
                 vars=DataFromText$vars[DataFromText$categories=="Eval"],

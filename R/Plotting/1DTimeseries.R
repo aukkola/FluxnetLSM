@@ -6,7 +6,7 @@
 
 Timeseries = function(obslabel,tsdata,varname,ytext,legendtext,
                       plotcex,timing,smoothed=FALSE,winsize=1,plotcolours,modlabel='no',
-                      vqcdata=matrix(-1,nrow=1,ncol=1), na.rm=FALSE){
+                      vqcdata=matrix(-1,nrow=1,ncol=1),na.rm=FALSE){
   #
   errtext = 'ok'
   metrics = list()
@@ -25,26 +25,33 @@ Timeseries = function(obslabel,tsdata,varname,ytext,legendtext,
       data_days=matrix(tsdata[,p],ncol=tstepinday,byrow=TRUE) 
       for(i in 1:(ndays-winsize-1)){
         # Find evaporative fraction using averaging window:
-        data_smooth[i,p] = mean(data_days[i:(i+winsize-1),])
+        data_smooth[i,p] = mean(data_days[i:(i+winsize-1),],na.rm=na.rm)
       }
       if(p==1){
-        yvalmin = as.character(signif(min(tsdata[,p]),3))
-        yvalmax = as.character(signif(max(tsdata[,p]),3))
-        datamean = as.character(signif(mean(tsdata[,p]),3))
-        datasd = as.character(signif(sd(tsdata[,p]),3))
+        yvalmin = as.character(signif(min(tsdata[,p],na.rm=na.rm),3))
+        yvalmax = as.character(signif(max(tsdata[,p],na.rm=na.rm),3))
+        datamean = as.character(signif(mean(tsdata[,p],na.rm=na.rm),3))
+        datasd = as.character(signif(sd(tsdata[,p],na.rm=na.rm),3))
         
       }else{
-        yvalmin = paste(yvalmin,', ',as.character(signif(min(tsdata[,p]),3)),sep='')
-        yvalmax = paste(yvalmax,', ',as.character(signif(max(tsdata[,p]),3)),sep='')
-        datamean = paste(datamean,', ',as.character(signif(mean(tsdata[,p]),3)),sep='')
-        datasd = paste(datasd,', ',as.character(signif(sd(tsdata[,p]),3)),sep='')
+        yvalmin = paste(yvalmin,', ',as.character(signif(min(tsdata[,p],na.rm=na.rm),3)),sep='')
+        yvalmax = paste(yvalmax,', ',as.character(signif(max(tsdata[,p],na.rm=na.rm),3)),sep='')
+        datamean = paste(datamean,', ',as.character(signif(mean(tsdata[,p],na.rm=na.rm),3)),sep='')
+        datasd = paste(datasd,', ',as.character(signif(sd(tsdata[,p]),3),na.rm=na.rm),sep='')
       }
     }
-    ymin = signif(min(data_smooth, na.rm=na.rm),3)
-    ymax = signif(max(data_smooth, na.rm=na.rm),3)
+    ymin = signif(min(data_smooth,na.rm=na.rm),3)
+    ymax = signif(max(data_smooth,na.rm=na.rm),3)
     # If we're adding a gap-filling QC line, make space for it:
     if(vqcdata[1,1] != -1) {
       ymin = ymin - (ymax-ymin)*0.06
+    }
+    #If ignoring NA, make space for printing % missing
+    #Also shift other labels and legend down in this case
+    y_adj=1
+    if(na.rm){
+      ymax=ymax*1.1
+      y_adj = 0.94
     }
     xmin = 1
     xmax = length(data_smooth[,1])
@@ -102,7 +109,7 @@ Timeseries = function(obslabel,tsdata,varname,ytext,legendtext,
       xxlab[(2*l)]=paste('1 Jun',substr(as.character(timing$syear+l-1),3,4))
     }
     # place legend:
-    legend(xmin-(xmax-xmin)*0.03,(ymin + (ymax-ymin)*1.24),legend=legendtext[1:ncurves],lty=1,
+    legend(xmin-(xmax-xmin)*0.03,(ymin + (ymax-ymin)*(y_adj+0.24)),legend=legendtext[1:ncurves],lty=1,
            col=plotcolours[1:ncurves],lwd=3,bty="n",cex=max((plotcex*0.75),1))
     # Add title:
     if(modlabel=='no'){
@@ -113,23 +120,33 @@ Timeseries = function(obslabel,tsdata,varname,ytext,legendtext,
                   obslabel,'   Model - ',modlabel,sep=''),cex.main=plotcex)
     }
     # Add Max/Min/Mean/SD numbers:
-    text(x=(xmin+(xmax-xmin)*0.25),y=c(ymin + (ymax-ymin)*1.19,ymin + (ymax-ymin)*1.14),
+    text(x=(xmin+(xmax-xmin)*0.25),y=c(ymin + (ymax-ymin)*(y_adj+0.19),ymin + (ymax-ymin)*(y_adj+0.14)),
          labels=c(paste('Min = (',yvalmin,')',sep=''),
                   paste('Max = (',yvalmax,')',sep='')),
          cex=max((plotcex*0.75),1),pos=4)
-    text(x=(xmin+(xmax-xmin)*0.25),y=c(ymin + (ymax-ymin)*1.09,ymin + (ymax-ymin)*1.04),
+    text(x=(xmin+(xmax-xmin)*0.25),y=c(ymin + (ymax-ymin)*(y_adj+0.09),ymin + (ymax-ymin)*(y_adj+0.04)),
          labels=c(paste('Mean = (',datamean,')',sep=''),paste('SD = (',datasd,')',sep='')),
          cex=max((plotcex*0.75),1),pos=4)
     # Add NME scores to plot (if there is at least one model output):
     if(ncurves>1){
       sscorestring = paste(signif(smoothscore,digits=3),collapse=', ')
       ascorestring = paste(signif(allscore,digits=3),collapse=', ')
-      text(x=c(xmin+(xmax-xmin)*0.65),y=(ymin + (ymax-ymin)*1.18),
+      text(x=c(xmin+(xmax-xmin)*0.65),y=(ymin + (ymax-ymin)*(y_adj+0.18)),
            labels=paste('Score_smooth: ',sscorestring,sep=''),,pos=4)
-      text(x=c(xmin+(xmax-xmin)*0.65),y=(ymin + (ymax-ymin)*1.12),
+      text(x=c(xmin+(xmax-xmin)*0.65),y=(ymin + (ymax-ymin)*(y_adj+0.12)),
            labels= paste('Score_all: ',ascorestring,sep=''),pos=4)
-      text(x=c(xmin+(xmax-xmin)*0.65),y=(ymin + (ymax-ymin)*1.06),
+      text(x=c(xmin+(xmax-xmin)*0.65),y=(ymin + (ymax-ymin)*(y_adj+0.06)),
            labels=' (NME)',pos=4)
+    }
+    #Print percentage of data missing if na.rm=TRUE and some data missing
+    if(na.rm){
+      perc_missing = round(sapply(1:ncol(tsdata), function(x) 
+        sum(is.na(tsdata[,x]))/length(tsdata[,x])), digits=3)      
+      if(any(perc_missing > 0)){
+        text(xmin-(xmax-xmin)*0.03,y=(ymin + (ymax-ymin)*(y_adj+0.24)),
+             paste("(",paste(perc_missing,collapse=", "), ")% data missing", sep=""),
+             pos=4,offset=1, col="red")
+      }
     }
     # Calculate QC time series information, if it exists:
     if(vqcdata[1,1] != -1){
@@ -148,10 +165,10 @@ Timeseries = function(obslabel,tsdata,varname,ytext,legendtext,
     }		
   }else{
     # this code not functioning but kept for future modification:
-    yvalmin = signif(min(tsdata, na.rm=na.rm),3)
-    yvalmax = signif(max(tsdata, na.rm=na.rm),3)
-    datamean = signif(mean(tsdata[,1], na.rm=na.rm),3)
-    datasd = signif(sd(tsdata[,1], na.rm=na.rm),3)
+    yvalmin = signif(min(tsdata),3)
+    yvalmax = signif(max(tsdata),3)
+    datamean = signif(mean(tsdata[,1]),3)
+    datasd = signif(sd(tsdata[,1]),3)
     ymin = yvalmin
     ymax = yvalmax
     xmin = 1
@@ -186,14 +203,6 @@ Timeseries = function(obslabel,tsdata,varname,ytext,legendtext,
     legend(0-(xmax-xmin)*0.05,(ymin + (ymax-ymin)*1.42),legend=legendtext[1:ncurves],lty=1,
            col=plotcolours[1:ncurves],lwd=3,bty="n",cex=max((plotcex*0.75),1))
     title(paste(obslabel,varname[1]),cex.main=plotcex)
-    
-    #If any data missing, print % missing to plot
-    if(na.rm && any(is.na(tsdata))){
-      perc_missing <- length(which(is.na(tsdata))) / length(tsdata)
-      text(x=max(xloc)-2, y=(ymin + (ymax-ymin)*1.42), 
-           labels=paste(round(perc_missing, digits=3), "% missing"), col="red")
-    }
-    
     # Locations of max,min,mean,sd text:
     stattextx = c(xmin,xmin+(xmax-xmin)*0.5)
     stattexty = c(ymin + (ymax-ymin)*1.18,ymin + (ymax-ymin)*1.24)

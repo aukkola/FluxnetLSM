@@ -7,7 +7,8 @@
 # Gab Abramowitz CCRC, UNSW 2014 (palshelp at gmail dot com)
 #
 DiurnalCycle = function(obslabel,dcdata,varname,ytext,legendtext,
-	timestepsize,whole,plotcolours,modlabel='no',vqcdata=matrix(-1,nrow=1,ncol=1), na.rm=FALSE){
+	timestepsize,whole,plotcolours,modlabel='no',vqcdata=matrix(-1,nrow=1,ncol=1),
+  na.rm=FALSE){
 	errtext = 'ok'
 	metrics = list()
 	if(!whole){ # we need a whole number of years for this to run
@@ -27,6 +28,7 @@ DiurnalCycle = function(obslabel,dcdata,varname,ytext,legendtext,
 	par(mfcol=c(2,2),mar=c(4,4,3,0.5),oma=c(0,0,0,1),
 		mgp=c(2.5,0.7,0),ps=16,tcl=-0.4)
 	avday=array(0,dim=c(4,tstepinday,ncurves)) # initialise
+	perc_missing = matrix(0,4,ncurves) #initialise, % data missing each season and model/obs
 	if(modlabel=='no'){
 		alltitle=paste('Obs:',obslabel)
 	}else{
@@ -43,6 +45,8 @@ DiurnalCycle = function(obslabel,dcdata,varname,ytext,legendtext,
 		data_days = matrix(dcdata[,p],ncol=tstepinday,byrow=TRUE)
 		# A count of excluded values - zero if not using gap-filling info:
 		exclvals = matrix(0,4,tstepinday) # to count gap-filled data
+    #  A count of missing values for each season
+    missing_vals = matrix(0, ncol=4)
 		# First calculate values to be plotted:
 		for(k in 1:4){# for each season (DJF, MAM etc)
 			# Sum up variable over each year of data set for current season
@@ -59,16 +63,19 @@ DiurnalCycle = function(obslabel,dcdata,varname,ytext,legendtext,
 						# Allow NA value only if all years of season sum are NA:
 						if(l==1){ # 1st year of sum					
 							avday[k,i,p] = avday[k,i,p] + sum(thisyearsseason[
-								as.logical(qc_days[(stid[k]+(l-1)*365):(fnid[k]+(l-1)*365),i])], na.rm=na.rm)
+								as.logical(qc_days[(stid[k]+(l-1)*365):(fnid[k]+(l-1)*365),i])],na.rm=na.rm)
+              missing_vals[k] = missing_vals[k] + sum(is.na(thisyearsseason)) #count no. missing timesteps
 						}else{
 							if((!sumnotexist) & (!is.na(avday[k,i,p]))){ 
 								# i.e. sum exists and values for previous years exist
 								avday[k,i,p] = avday[k,i,p] + sum(thisyearsseason[
-									as.logical(qc_days[(stid[k]+(l-1)*365):(fnid[k]+(l-1)*365),i])], na.rm=na.rm)		
+									as.logical(qc_days[(stid[k]+(l-1)*365):(fnid[k]+(l-1)*365),i])],na.rm=na.rm)
+								missing_vals[k] = missing_vals[k] + sum(is.na(thisyearsseason)) #count no. missing timesteps
 							}else if(!sumnotexist){ 
 								# i.e. sum exists but previous years' sums are NA
 								avday[k,i,p] = sum(thisyearsseason[
-									as.logical(qc_days[(stid[k]+(l-1)*365):(fnid[k]+(l-1)*365),i])], na.rm=na.rm)
+									as.logical(qc_days[(stid[k]+(l-1)*365):(fnid[k]+(l-1)*365),i])],na.rm=na.rm)
+								missing_vals[k] = missing_vals[k] + sum(is.na(thisyearsseason)) #count no. missing timesteps
 							}		
 						}
 					}
@@ -86,43 +93,51 @@ DiurnalCycle = function(obslabel,dcdata,varname,ytext,legendtext,
 							if((!sumnotexist) & (!is.na(avday[k,i,p]))){ 
 								# i.e. sum exists and values for previous years/DJF portions exist
 								avday[k,i,p] = avday[k,i,p] + sum(thisyearsseason[
-									as.logical(qc_days[(stid[k+4]+(l-1)*365):(fnid[k+4]+(l-1)*365),i])], na.rm=na.rm)		
+									as.logical(qc_days[(stid[k+4]+(l-1)*365):(fnid[k+4]+(l-1)*365),i])],na.rm=na.rm)
 							}else if(!sumnotexist){ 
 								# i.e. sum exists but previous years' sums are NA
 								avday[k,i,p] = sum(thisyearsseason[
-									as.logical(qc_days[(stid[k+4]+(l-1)*365):(fnid[k+4]+(l-1)*365),i])], na.rm=na.rm)
+									as.logical(qc_days[(stid[k+4]+(l-1)*365):(fnid[k+4]+(l-1)*365),i])],na.rm=na.rm)
 							}	
+							missing_vals[k] = missing_vals[k] + sum(is.na(thisyearsseason)) #count missing values
 						}
 					}
 				}else{ # no gap-filling information - assume all data are useable:
 					for(i in 1:tstepinday){
 						# Sum all values for each timestep:
 						avday[k,i,p]=avday[k,i,p] + 
-							sum(data_days[(stid[k]+(l-1)*365):(fnid[k]+(l-1)*365),i])
+							sum(data_days[(stid[k]+(l-1)*365):(fnid[k]+(l-1)*365),i], na.rm=na.rm)
+						missing_vals[k] = missing_vals[k] + 
+              sum(is.na(data_days[(stid[k]+(l-1)*365):(fnid[k]+(l-1)*365),i])) #count missing values
 					}
 					if(k==1){ # i.e. DJF, which is split in any year
 						# add Dec to Jan/Feb
 						for(i in 1:tstepinday){
 							avday[k,i,p]=avday[k,i,p] + 
-								sum(data_days[(stid[k+4]+(l-1)*365):(fnid[k+4]+(l-1)*365),i])
+								sum(data_days[(stid[k+4]+(l-1)*365):(fnid[k+4]+(l-1)*365),i], na.rm=na.rm)
+							missing_vals[k] = missing_vals[k] + 
+                sum(is.na(data_days[(stid[k]+(l-1)*365):(fnid[k]+(l-1)*365),i])) #count missing values
 						}
+            
 					}
 				} # use gap-filling info or not
 			} # for each year in the data set
 			
 			# Then find the average of these values:
 			if(k==1){ # i.e. DJF, which is split in any year
-				avday[k,,p]=avday[k,,p]/(90*nyears - exclvals[k,])
+				avday[k,,p]=avday[k,,p]/(90*nyears - exclvals[k,] - (missing_vals[k]/tstepinday))
 				removefrac[k] = sum(exclvals[k,])/(90*nyears*tstepinday)
+        perc_missing[k,p] <- missing_vals[k]/tstepinday/(90*nyears)*100
 			}else{
-				avday[k,,p]=avday[k,,p]/((fnid[k]-stid[k])*nyears - exclvals[k,])
+				avday[k,,p]=avday[k,,p]/((fnid[k]-stid[k])*nyears - exclvals[k,] - (missing_vals[k]/tstepinday))
 				removefrac[k] =  sum(exclvals[k,]) / ((fnid[k]-stid[k])*nyears*tstepinday)
+				perc_missing[k,p] <- missing_vals[k]/tstepinday/((fnid[k]-stid[k])*nyears)*100
 			}
 		} # over each season
 		if(p>1){
 			# Calculate all-season score:
-			pscoretotal[p-1] = sum(abs(as.vector(avday[,,p] - avday[,,1])),na.rm=na.rm) / 
-				sum(abs(as.vector(mean(avday[,,1],na.rm=na.rm) - avday[,,1])),na.rm=na.rm)
+			pscoretotal[p-1] = sum(abs(as.vector(avday[,,p] - avday[,,1])),na.rm=TRUE) / 
+				sum(abs(as.vector(mean(avday[,,1],na.rm=TRUE) - avday[,,1])),na.rm=TRUE)
 			removefractotal = sum(exclvals) / ntsteps
 		}
 	} # for each curve (mod, obs, etc)
@@ -142,8 +157,8 @@ DiurnalCycle = function(obslabel,dcdata,varname,ytext,legendtext,
 	
 	# Determine boundaries for plots:
 	xloc=c(0:(tstepinday-1)) # set location of x-coords in plot
-	yaxmin=min(avday, na.rm=na.rm) # y axis minimum in plot
-	yaxmax=max(avday, na.rm=na.rm)+(max(avday, na.rm=na.rm)-yaxmin)*0.15 # y axis maximum in plot
+	yaxmin=min(avday,na.rm=na.rm) # y axis minimum in plot
+	yaxmax=max(avday,na.rm=na.rm)+(max(avday,na.rm=na.rm)-yaxmin)*0.15 # y axis maximum in plot
 	# Now plot each panel:
 	for(k in 1:4){# for each season (DJF, MAM etc)
 		# Plot obs data result:
@@ -155,8 +170,8 @@ DiurnalCycle = function(obslabel,dcdata,varname,ytext,legendtext,
 			for(p in 2:ncurves){ # for each additional curve
 				lines(xloc,avday[k,,p],lwd=3,col=plotcolours[p])
 				# Score is normalised mean error:
-				pscore[k,p-1] = sum(abs(avday[k,,p] - avday[k,,1]),na.rm=na.rm) /
-					sum(abs(as.vector(mean(avday[k,,1],na.rm=na.rm) - avday[k,,1])),na.rm=na.rm)
+				pscore[k,p-1] = sum(abs(avday[k,,p] - avday[k,,1]),na.rm=TRUE) /
+					sum(abs(as.vector(mean(avday[k,,1],na.rm=TRUE) - avday[k,,1])),na.rm=TRUE)
 			}	
 		}	
 		axis(1,at=c(0,6*tstepinday/24,12*tstepinday/24,18*tstepinday/24,
@@ -191,14 +206,6 @@ DiurnalCycle = function(obslabel,dcdata,varname,ytext,legendtext,
 			}
 			legend(-1,ypos[2],legendtext[1:ncurves],lty=1,col=plotcolours[1:ncurves],
 				lwd=3,bty="n",yjust=0.5)
-      
-			#If any data missing, print % missing to plot
-			if(na.rm && any(is.na(dcdata))){
-			  perc_missing <- length(which(is.na(dcdata))) / length(dcdata)
-			  text(x=max(xloc)-2, y=ypos[2], 
-			       labels=paste(round(perc_missing, digits=3), "% missing"), col="red", adj=c(0.5,1))
-			}
-      
 			if(ncurves>1){
 				scorestring = paste(signif(pscoretotal,digits=2),collapse=', ')
 				removestring = paste(signif(removefractotal*100,digits=2),collapse=', ')
@@ -222,6 +229,14 @@ DiurnalCycle = function(obslabel,dcdata,varname,ytext,legendtext,
 			scoretext = paste('Score: ',scorestring,'\n','(NME; ',
 				removestring,'% data removed)',sep='')
 			text((tstepinday/2),yaxmax-(yaxmax-yaxmin)*0.07,scoretext,pos=4)	
+		}
+		#Print percentage of data missing if na.rm=TRUE and some data missing
+		if(na.rm){
+		  if(any(perc_missing[k,] > 0)){
+        rounded=round(perc_missing[k,],digits=3)
+		    text(-1,yaxmax,paste("(",paste(rounded,collapse=", "), ")% data missing", sep=""),
+             pos=4, col="red")
+		  }
 		}
 	} # each plot / season
 	result=list(err=FALSE,errtext=errtext,metrics=metrics)
