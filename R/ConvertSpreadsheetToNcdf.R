@@ -37,9 +37,6 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path, lib_path,   #
     source(paste(lib_path, "/functions/Check_and_Gapfill.R", sep=""))
     source(paste(lib_path, "/functions/FluxtowerSpreadsheetToNc.R", sep=""))
     source(paste(lib_path, "/Plotting.R", sep=""))
-    source(paste(lib_path, "/Plotting/1DAnnualCycle.R", sep=""))
-    source(paste(lib_path, "/Plotting/1DTimeseries.R", sep=""))
-    source(paste(lib_path, "/Plotting/1DDiurnalCycle.R", sep=""))
     source(paste(lib_path, "/Site_metadata.R", sep=""))
     
     
