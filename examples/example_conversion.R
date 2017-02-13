@@ -35,6 +35,7 @@ ERA_file     <- paste(in_path, fname, sep="")
 datasetname    <- "Fluxnet2015"
 datasetversion <- "Nov16"
 
+
 #How many percent of time steps allowed to be missing in any given year?
 #and minimum number of consecutive years to process
 gap_threshold <- 20
