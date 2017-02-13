@@ -16,7 +16,7 @@
 #' @param out_path output path e.g. "~/Documents/FLUXNET2016_processing/"
 #' @param site_code Fluxnet site code e.g. "AU-How"
 #' @param ERA_gapfill Gapfill met variables using ERAinterim?
-#' @param plot Should annual, diurnal and/or 14-day running mean plot be produced? Set to NA it not
+#' @param plot Should annual, diurnal and/or 14-day running mean plots be produced? Set to NA if not
 #' 
 #' @export
 #'
@@ -37,7 +37,25 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path, lib_path,   #
     source(paste(lib_path, "/functions/Check_and_Gapfill.R", sep=""))
     source(paste(lib_path, "/functions/FluxtowerSpreadsheetToNc.R", sep=""))
     source(paste(lib_path, "/Plotting.R", sep=""))
+    source(paste(lib_path, "/Plotting/1DAnnualCycle.R", sep=""))
+    source(paste(lib_path, "/Plotting/1DTimeseries.R", sep=""))
+    source(paste(lib_path, "/Plotting/1DDiurnalCycle.R", sep=""))
+    source(paste(lib_path, "/Site_metadata.R", sep=""))
     
+    
+    
+    ## Create sub-folders for outputs ##
+    
+    #NetCDF files
+    outpath_nc <- paste(out_path, "/Nc_files", sep="")
+    dir.create(outpath_nc, showWarnings = FALSE)
+    
+    #Plots (if code set to plot)
+    if(!any(is.na(plot))){
+      outpath_plot <- paste(out_path, "/Figures", sep="")
+      dir.create(outpath_plot, showWarnings = FALSE)
+    }
+
     
     ################################
     ###--- Read variable data ---###
@@ -206,12 +224,16 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path, lib_path,   #
         #Create output file names
         #If only one year, only write start year, else write time period
         if(start_yr==end_yr){
-            metfilename  <- paste(out_path, "/", site_code, "_", start_yr, "_", datasetname, "_Met.nc", sep="")
-            fluxfilename <- paste(out_path, "/", site_code, "_", start_yr, "_", datasetname, "_Flux.nc", sep="")
+            metfilename  <- paste(outpath_nc, "/", site_code, "_", start_yr, 
+                                  "_", datasetname, "_Met.nc", sep="")
+            fluxfilename <- paste(outpath_nc, "/", site_code, "_", start_yr, 
+                                  "_", datasetname, "_Flux.nc", sep="")
             
         } else {
-            metfilename  <- paste(out_path, "/", site_code, "_", start_yr, "-", end_yr, "_", datasetname, "_Met.nc", sep="")
-            fluxfilename <- paste(out_path, "/", site_code, "_", start_yr, "-", end_yr, "_", datasetname, "_Flux.nc", sep="")
+            metfilename  <- paste(outpath_nc, "/", site_code, "_", start_yr, 
+                                  "-", end_yr, "_", datasetname, "_Met.nc", sep="")
+            fluxfilename <- paste(outpath_nc, "/", site_code, "_", start_yr, 
+                                  "-", end_yr, "_", datasetname, "_Flux.nc", sep="")
             
         }
         
@@ -279,9 +301,8 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path, lib_path,   #
       nc_flux <- nc_open(fluxfilename)
       
       #Initialise output file names (completed in plotting code)
-      #SHOULD THESE GO IN A SEPARATE FOLDER TO NC FILES ???????????
-      outfile_met  <- paste(out_path, "/", site_code, "_plot_Met_", sep="")
-      outfile_flux <- paste(out_path, "/", site_code, "_plot_Flux_", sep="")
+      outfile_met  <- paste(outpath_plot, "/", site_code, "_plot_Met_", sep="")
+      outfile_flux <- paste(outpath_plot, "/", site_code, "_plot_Flux_", sep="")
       
    
       ## Plotting ##
@@ -291,9 +312,10 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path, lib_path,   #
                 vars=DataFromText$vars[DataFromText$categories=="Met"],
                 outfile=outfile_met)      
         
- #       plot_nc(ncfile=nc_flux, analysis_type=plot, 
-#                vars=DataFromText$vars[DataFromText$categories=="Eval"],
- #               outfile=outfile_met)
+        
+        plot_nc(ncfile=nc_flux, analysis_type=plot,
+                vars=DataFromText$vars[DataFromText$categories=="Eval"],
+                outfile=outfile_flux)
 
 
       #Analysis type doesn't match options, return warning
