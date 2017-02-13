@@ -21,7 +21,7 @@
 #' @export
 #'
 #'
-convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
+convert_fluxnet_to_netcdf <- function(infile, site_code, out_path, lib_path,
                                       ERA_file=NA, ERA_gapfill=FALSE,
                                       datasetname="Fluxnet2015", datasetversion="Nov16",
                                       gap_threshold=20, min_yrs=2,
