@@ -1,7 +1,7 @@
 # Author: ned haughton
 # Date: 2017-02-17
 
-library(rvest)  # read_html, html_node, html_attr, html_table
+#library(rvest)  # read_html, html_node, html_attr, html_table
 
 
 #################################################
@@ -147,6 +147,8 @@ update_csv_from_ornl <- function() {
 #' Get all available site codes from site_status table
 #' @export
 get_ornl_site_codes <- function() {
+  
+    library(rvest)
     status_table_url <- "https://fluxnet.ornl.gov/site_status"
 
     page_html <- read_html(status_table_url)
@@ -171,6 +173,8 @@ get_site_ornl_url <- function(site_code) {
 #' Get a list of ORNL site URLs from site_status table
 #' @export
 get_ornl_site_url_list <- function(site_code_list) {
+ 
+    library(rvest)
     status_table_url <- "https://fluxnet.ornl.gov/site_status"
 
     page_html <- read_html(status_table_url)
@@ -197,6 +201,8 @@ get_ornl_site_url_list <- function(site_code_list) {
 #' @return metadata list
 #' @export
 get_ornl_site_metadata <- function(metadata, site_url=NULL) {
+  
+    library(rvest)
     site_code <- get_site_code(metadata)
 
     if (is.null(site_url)) {
