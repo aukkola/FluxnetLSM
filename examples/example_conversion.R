@@ -17,10 +17,10 @@ rm(list=ls(all=TRUE))
 ###--- Required inputs ---###
 
 # This directory should contain appropriate data from http://fluxnet.fluxdata.org/data/fluxnet2015-dataset/
-in_path <- "~/Documents/FLUXNET2016_processing/"
+in_path <- "~/Documents/FLUXNET2016_processing/Inputs/"
 
 #Outputs will be saved to this directory
-out_path <- "~/Documents/FLUXNET2016_processing/"
+out_path <- "~/Documents/FLUXNET2016_processing/Outputs/"
 
 #Fluxnet site ID
 site_code <- "AU-How"
@@ -57,7 +57,7 @@ plot <- c("annual", "diurnal","timeseries")
 ###--- Run analysis ---###
 ##########################
 
-convert_fluxnet_to_netcdf(infile=infile, site_code=site_code, out_path=out_path,
+convert_fluxnet_to_netcdf(infile=infile, site_code=site_code, out_path=out_path, lib_path="./R",
                           ERA_file=ERA_file, ERA_gapfill=ERA_gapfill, datasetname=datasetname, 
                           datasetversion=datasetversion, gap_threshold=gap_threshold, 
                           min_yrs=min_yrs, plot=plot)
