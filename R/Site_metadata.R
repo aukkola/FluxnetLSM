@@ -1,7 +1,7 @@
 # Author: ned haughton
 # Date: 2017-02-17
 
-#library(rvest)  # read_html, html_node, html_attr, html_table
+# Uses rvest library for read_html, html_node, html_attr, html_table
 
 
 #################################################

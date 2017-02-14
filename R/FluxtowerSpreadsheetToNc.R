@@ -3,7 +3,7 @@
 # A collection of functions to read and convert 
 # flux tower data from spreadsheet to netcdf.
 #
-# Gab Abramowitz UNSW 2016 (palshelp at gmail dot com)
+# author: Anna Ukkola UNSW 2017
 #
 # TODO: Check and merge back in to palsR
 #
