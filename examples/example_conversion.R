@@ -26,16 +26,16 @@ out_path <- "~/Documents/FLUXNET2016_processing/Outputs/"
 site_code <- "AU-How"
 
 # Fluxnet file (using FULLSET in this example)
-fname  <- sprintf("FLX_%s_FLUXNET2015_FULLSET_HH_2001-2014_1-3.csv", site_code)
-infile <- paste(in_path, fname, sep="")
+fname  <- sprintf("FLX_%s_FLUXNET2015_FULLSET", site_code)
+infile <- list.files(in_path, pattern=fname, full.names=TRUE)
 
 
 ###--- Optional settings ---###
 
 # ERAinterim meteo file for gap-filling met data (set to FALSE if not desired)
 ERA_gapfill  <- TRUE
-fname        <- sprintf("FLX_%s_FLUXNET2015_ERAI_HH_1989-2014_1-3.csv", site_code)
-ERA_file     <- paste(in_path, fname, sep="")
+eraname      <- sprintf("FLX_%s_FLUXNET2015_ERAI", site_code)
+ERA_file     <- list.files(in_path, pattern=eraname, full.names=TRUE)
 
 #Name and version of dataset being processed
 datasetname    <- "Fluxnet2015"
