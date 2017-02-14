@@ -2,6 +2,7 @@
 #
 # Functions for units changes
 #
+# author: Anna Ukkola UNSW 2017
 #
 # TODO: Check and merge back in to palsR
 
@@ -101,7 +102,7 @@ ChangeUnits = function(datain){
 
 #-----------------------------------------------------------------------------
 
-#' Converts VPD (hPa) to relative humidity (%)
+#' Converts VPD (hPa) to relative humidity (percentage)
 #' @return RelHum
 #' @export
 VPD2RelHum <- function(VPD, airtemp, vpd_units, tair_units){
