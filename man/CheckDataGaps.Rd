@@ -2,16 +2,15 @@
 % Please edit documentation in R/Check_and_Gapfill.R
 \name{CheckDataGaps}
 \alias{CheckDataGaps}
-\title{Check_and_Gapfill.R}
+\title{Checks for data gaps and determines output years}
 \usage{
 CheckDataGaps(datain, missing_val = SprdMissingVal, threshold, min_yrs,
   essential_met, preferred_eval)
 }
-\description{
-A collections of functions for checking for
-data gaps and ranges, and gap-filling
+\value{
+out
 }
-\details{
-TODO: Check and merge back in to palsR
+\description{
+Checks for data gaps and determines output years
 }
 

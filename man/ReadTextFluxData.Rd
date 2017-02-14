@@ -2,24 +2,14 @@
 % Please edit documentation in R/FluxtowerSpreadsheetToNc.R
 \name{ReadTextFluxData}
 \alias{ReadTextFluxData}
-\title{FluxtowerSpreadsheetToNc.R}
+\title{Reads comma-delimited text files containing Fluxnet2015 data}
 \usage{
 ReadTextFluxData(fileinname, vars, time_vars)
 }
-\arguments{
-\item{fileinname}{Input file name}
-
-\item{vars}{List of desired variables and their attributes}
-
-\item{time_vars}{Vector of time stamp variables}
+\value{
+filedata
 }
 \description{
-A collection of functions to read and convert
-flux tower data from spreadsheet to netcdf.
-}
-\details{
-Gab Abramowitz UNSW 2016 (palshelp at gmail dot com)
-
-TODO: Check and merge back in to palsR
+Reads comma-delimited text files containing Fluxnet2015 data
 }
 

@@ -2,14 +2,14 @@
 % Please edit documentation in R/Conversions.R
 \name{ChangeUnits}
 \alias{ChangeUnits}
-\title{Conversions.R}
+\title{Converts units from original Fluxnet to target ALMA units}
 \usage{
 ChangeUnits(datain)
 }
-\description{
-Functions for units changes
+\value{
+datain
 }
-\details{
-TODO: Check and merge back in to palsR
+\description{
+Converts units from original Fluxnet to target ALMA units
 }
 
