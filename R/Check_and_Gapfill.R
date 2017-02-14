@@ -1,14 +1,17 @@
-#
-#
-# Needs comments
-#
-# TODO: Check and merge back in to palsR
-#
-
-# Check the existence of missing values:
+#' Check_and_Gapfill.R
+#'
+#' A collections of functions for checking for
+#' data gaps and ranges, and gap-filling
+#'
+#' TODO: Check and merge back in to palsR
+#'
+#' 
+#' @export
+#'
+#'
 CheckDataGaps <- function(datain, missing_val=SprdMissingVal,
-threshold, min_yrs,
-essential_met, preferred_eval){
+                          threshold, min_yrs,
+                          essential_met, preferred_eval){
     
     #Checks the existence of data gaps and determines which
     #years should be outputted depending on the percentage of data gaps

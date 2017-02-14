@@ -1,9 +1,13 @@
-# Constants.R
-#
-# Gab Abramowitz, UNSW, 2014 (palshelp at gmail dot com)
-#
-# TODO: Check and merge back in to palsR
-#
+#' Constants.R
+#'
+#' Functions to find variables and their attributes
+#' from Fluxnet csv-file
+#'
+#' TODO: Check and merge back in to palsR
+#'
+#'
+#' @export
+#' 
 SprdMissingVal = -9999 # missing value in spreadsheet
 NcMissingVal = -9999 # missing value in created netcdf files
 QCmeasured = 0

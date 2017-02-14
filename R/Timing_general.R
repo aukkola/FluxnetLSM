@@ -1,12 +1,11 @@
-# Timing_general.R
-#
-# Functions that assess or convert timing variables.
-#
-# Gab Abramowitz UNSW 2014 (palshelp at gmail dot com)
-#
-# TODO: Check and merge back in to palsR
-#
-
+#' Timing_general.R
+#'
+#' Functions that assess or convert timing variables.
+#'
+#' TODO: Check and merge back in to palsR
+#'
+#' @export
+#' 
 findStartTime <- function(start){
   
   # Find starting date / time:

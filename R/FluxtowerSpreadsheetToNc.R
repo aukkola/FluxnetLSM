@@ -1,12 +1,18 @@
-# SpreadsheetToNc.R
-#
-# A collection of functions to convert flux tower
-# data from spreadsheet to netcdf.
-#
-# Gab Abramowitz UNSW 2016 (palshelp at gmail dot com)
-#
-# TODO: Check and merge back in to palsR
-#
+#' FluxtowerSpreadsheetToNc.R
+#'
+#' A collection of functions to read and convert 
+#' flux tower data from spreadsheet to netcdf.
+#'
+#' Gab Abramowitz UNSW 2016 (palshelp at gmail dot com)
+#'
+#' TODO: Check and merge back in to palsR
+#'
+#' @param fileinname Input file name
+#' @param vars List of desired variables and their attributes
+#' @param time_vars Vector of time stamp variables
+#' 
+#' @export
+#'
 
 #-----------------------------------------------------------------------------
 

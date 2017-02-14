@@ -1,12 +1,13 @@
-# Conversions.R
-#
-# functions for units changes. zeroC is in Constants.R
-#
-# Gab Abramowitz UNSW 2014 (palshelp at gmail dot com)
-#
-# TODO: Check and merge back in to palsR
-
-
+#' Conversions.R
+#'
+#' Functions for units changes
+#'
+#'
+#' TODO: Check and merge back in to palsR
+#'
+#' @export
+#'
+#'
 ChangeUnits = function(datain){
   
   ### Unit conversions from original Fluxnet to target ALMA units ###
