@@ -1,14 +1,18 @@
-#' Check_and_Gapfill.R
-#'
-#' A collections of functions for checking for
-#' data gaps and ranges, and gap-filling
-#'
-#' TODO: Check and merge back in to palsR
-#'
-#' 
+# Check_and_Gapfill.R
+#
+# A collections of functions for checking for
+# data gaps and ranges, and gap-filling
+#
+# TODO: Check and merge back in to palsR
+#
+# 
+# 
+#
+
+
+#' Checks for data gaps and determines output years
+#' @return out
 #' @export
-#'
-#'
 CheckDataGaps <- function(datain, missing_val=SprdMissingVal,
                           threshold, min_yrs,
                           essential_met, preferred_eval){
@@ -155,14 +159,19 @@ CheckDataGaps <- function(datain, missing_val=SprdMissingVal,
     }
     
     
+    out <- list(gap_length=gap_length, yr_keep=yr_ind, consec=consec, 
+                tseries_start=tstart, tseries_end=tend)
     
-    return(list(gap_length=gap_length, yr_keep=yr_ind, consec=consec, tseries_start=tstart, tseries_end=tend))
+    return(out)
 }
 
 
 
 #-----------------------------------------------------------------------------
 
+#' Gapfills met data
+#' @return out
+#' @export
 GapfillMet <- function(datain, era_data, era_vars,
 tair_units, vpd_units,
 missing_val){
@@ -268,8 +277,9 @@ missing_val){
     #Assign new QC variable names to data frame column names
     if(length(new_qc) > 0){ colnames(new_qc) <- qc_names}
     
+    out <- list(datain=datain, new_qc=new_qc)
     
-    return(list(datain=datain, new_qc=new_qc))
+    return(out)
     
 } #function
 
@@ -277,6 +287,8 @@ missing_val){
 #-----------------------------------------------------------------------------
 
 # TODO: This function exists in palsR/Gab in pals/R/FluxtowerSpreadsheetToNc.R and has a different signature. Merge?
+#' Checks that data within specified ranges
+#' @export
 CheckTextDataRanges = function(datain, missingval){
     
     #Checks that variables are within acceptable ranges
@@ -314,9 +326,12 @@ CheckTextDataRanges = function(datain, missingval){
 
 #-----------------------------------------------------------------------------
 
+#'Creates attributes for a new QC variable
+#' @return datain
+#' @export
 create_qc_var <- function(datain, qc_name){
     
-    #Fill all variable categories in indata
+    #Appends attributes for new QC variable to indata
     #In some cases, need to add a column name as not set automatically
     
     #vars

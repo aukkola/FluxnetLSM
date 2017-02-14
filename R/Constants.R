@@ -1,13 +1,10 @@
-#' Constants.R
-#'
-#' Functions to find variables and their attributes
-#' from Fluxnet csv-file
-#'
-#' TODO: Check and merge back in to palsR
-#'
-#'
-#' @export
-#' 
+# Constants.R
+#
+# Functions to find variables and their attributes
+# from Fluxnet csv-file
+#
+# TODO: Check and merge back in to palsR
+
 SprdMissingVal = -9999 # missing value in spreadsheet
 NcMissingVal = -9999 # missing value in created netcdf files
 QCmeasured = 0
@@ -17,6 +14,9 @@ QCmissing = NcMissingVal
 
 #-----------------------------------------------------------------------------
 
+#' Finds variables present in input file
+#' @return tcols
+#' @export
 # Variable names in spreadsheet to be processed:
 findColIndices = function(fileinname, var_names, var_classes, 
                           essential_vars, preferred_vars,
@@ -97,6 +97,9 @@ findColIndices = function(fileinname, var_names, var_classes,
 
 #-----------------------------------------------------------------------------
 
+#' Extract time stamp information
+#' @return tcols
+#' @export
 findTimeInfo <- function(time_vars, headers){
     
   ind <- sapply(time_vars, function(x) which(headers==x))
@@ -126,7 +129,9 @@ findTimeInfo <- function(time_vars, headers){
 
 #-----------------------------------------------------------------------------
 
-# #Rename Fluxnet variables to ALMA convention
+#' Renames Fluxnet variables to ALMA convention
+#' @return renamed_vars
+#' @export
 rename_vars <- function(vars_present, all_vars){
 
   #Find index for fluxnet variables present in file
@@ -146,7 +151,9 @@ rename_vars <- function(vars_present, all_vars){
 
 #-----------------------------------------------------------------------------
 
-#Retrieves original and target variable units
+#' Retrieves original and target variable units
+#' @return units
+#' @export
 retrieve_units <- function(vars_present, all_vars){
   
   #Find index for fluxnet variables present in file
@@ -167,7 +174,9 @@ retrieve_units <- function(vars_present, all_vars){
 
 #-----------------------------------------------------------------------------
 
-#Retrieve variable longnames to be written in NetCDF
+#' Retrieve variables longnames to be written in NetCDF
+#' @return attributes
+#' @export
 retrieve_atts <- function(vars_present, all_vars){
   
   #Find index for fluxnet variables present in file
@@ -189,7 +198,9 @@ retrieve_atts <- function(vars_present, all_vars){
 
 #-----------------------------------------------------------------------------
 
-#Retrieve variable categories to divide into met and flux data
+#' Retrieves variable categories to divide into met and flux data
+#' @return vat_vars
+#' @export
 retrieve_categories <- function(vars_present, all_vars){
   
   #Find index for fluxnet variables present in file
@@ -200,15 +211,17 @@ retrieve_categories <- function(vars_present, all_vars){
     ind_present <- unlist(remove_duplicates(ind_present))
   } 
   
-  cat <- all_vars$Category[ind_present]
-  names(cat) <- all_vars$ALMA_variable[ind_present]
+  cat_vars <- all_vars$Category[ind_present]
+  names(cat_vars) <- all_vars$ALMA_variable[ind_present]
   
-  return(cat)
+  return(cat_vars)
 }
 
 #-----------------------------------------------------------------------------
 
-#Retrieve names of ERAinterim variables
+#' Retrieves names of ERAinterim variables
+#' @return cat_vars
+#' @export
 retrieve_ERAvars <- function(vars_present, all_vars){
   
   #Find index for fluxnet variables present in file
@@ -219,15 +232,17 @@ retrieve_ERAvars <- function(vars_present, all_vars){
     ind_present <- unlist(remove_duplicates(ind_present))
   } 
   
-  cat <- all_vars$ERAinterim_variable[ind_present]
-  names(cat) <- all_vars$ALMA_variable[ind_present]
+  cat_vars <- all_vars$ERAinterim_variable[ind_present]
+  names(cat_vars) <- all_vars$ALMA_variable[ind_present]
   
-  return(cat)
+  return(cat_vars)
 }
 
 #-----------------------------------------------------------------------------
 
-#Retrieve acceptable variable ranges
+#' Retrieves acceptable variable ranges
+#' @return var_ranges
+#' @export
 retrieve_ranges <- function(vars_present, all_vars){
 
   #Find index for fluxnet variables present in file
@@ -252,7 +267,9 @@ retrieve_ranges <- function(vars_present, all_vars){
 
 #-----------------------------------------------------------------------------
 
-#Removes duplicate indices if a Fluxnet variable is processed more than once
+#' Removes duplicate indices if a Fluxnet variable is processed more than once
+#' @return indices
+#' @export
 remove_duplicates <- function(indices){
   
   #Determine how many variables duplicated
@@ -275,9 +292,11 @@ remove_duplicates <- function(indices){
 
 #-----------------------------------------------------------------------------
 
+#' Duplicates columns in Fluxnet data if a variable is being processes multiple times
+#' @return data
+#' @export
+
 duplicate_columns <- function(data, vars){
-  #Duplicates columns in Fluxnet data if a variable is
-  #being processes multiple times
   
   #Find variables that are duplicated
   ind_duplicate <- which(duplicated(vars))

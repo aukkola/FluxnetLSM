@@ -1,17 +1,15 @@
-#' Conversions.R
-#'
-#' Functions for units changes
-#'
-#'
-#' TODO: Check and merge back in to palsR
-#'
+# Conversions.R
+#
+# Functions for units changes
+#
+#
+# TODO: Check and merge back in to palsR
+
+#' Converts units from original Fluxnet to target ALMA units
+#' @return datain
 #' @export
-#'
-#'
 ChangeUnits = function(datain){
-  
-  ### Unit conversions from original Fluxnet to target ALMA units ###
-  
+    
   #Loop through variables. If original and target units do not match,
   #convert (or return error if conversion between units not known)
   
@@ -103,10 +101,11 @@ ChangeUnits = function(datain){
 
 #-----------------------------------------------------------------------------
 
-
+#' Converts VPD (hPa) to relative humidity (%)
+#' @return RelHum
+#' @export
 VPD2RelHum <- function(VPD, airtemp, vpd_units, tair_units){
 
-  ## Converts VPD (hPa) to relative humidity (%)
   
   #Check that VPD in Pascals
   if(vpd_units != "hPa"){
@@ -134,8 +133,10 @@ VPD2RelHum <- function(VPD, airtemp, vpd_units, tair_units){
 #-----------------------------------------------------------------------------
 
 # TODO: This function exists in palsR/Gab in pals/R/Units.R and has a different signature. Merge?
+#' Converts relative humidity to specific humidity.
+#' @return specHum
+#' @export
 Rel2SpecHum <- function(relHum, airtemp, tair_units, pressure, psurf_units){
-  # Converts relative humidity to specific humidity.
   # required units: airtemp - temp in C; pressure in Pa; relHum as %
   
   #Check that temperature in Celcius. Convert if not
@@ -172,8 +173,10 @@ Rel2SpecHum <- function(relHum, airtemp, tair_units, pressure, psurf_units){
 
 #-----------------------------------------------------------------------------
 
+#' Calculates saturation vapour pressure
+#' @return esat
+#' @export
 calc_esat <- function(airtemp){
-  #Calculates saturation vapour pressure
   #Tair in degrees C
   
   #From Jones (1992), Plants and microclimate: A quantitative approach 
