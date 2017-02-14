@@ -230,7 +230,8 @@ get_ornl_site_metadata <- function(metadata, site_url=NULL) {
     # Site Characteristics
     tryCatch({
         table <- page_html %>% html_node("table#fluxnet_site_characteristics") %>% html_table()
-        metadata$SiteElevation <- table[table[1] == "GTOPO30 Elevation:"][2]
+        elevation_text <- table[table[1] == "GTOPO30 Elevation:"][2]
+        metadata$SiteElevation <- as.numeric(gsub("m", "", elevation_text))
         metadata$IGBP_vegetation_long <- table[table[1] == "IGBP Land Cover:"][2]
     }, error = function(cond) {
         message(site_code, " doesn't have a Site Characteristics table at ", site_url)
