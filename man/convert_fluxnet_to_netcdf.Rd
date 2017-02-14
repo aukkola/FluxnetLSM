@@ -33,7 +33,7 @@ Converts data from a PALS formatted spreadhseet to
 netcdf.
 }
 \details{
-Gab Abramowitz UNSW 2012 (palshelp at gmail dot com)
+author: Anna Ukkola UNSW 2017
 Main function to convert Fluxnet2015 CSV-files to NetCDF
 }
 

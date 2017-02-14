@@ -3,6 +3,8 @@
 # Functions to find variables and their attributes
 # from Fluxnet csv-file
 #
+# author: Anna Ukkola UNSW 2017
+#
 # TODO: Check and merge back in to palsR
 
 SprdMissingVal = -9999 # missing value in spreadsheet

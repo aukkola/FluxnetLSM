@@ -2,7 +2,7 @@
 % Please edit documentation in R/Conversions.R
 \name{VPD2RelHum}
 \alias{VPD2RelHum}
-\title{Converts VPD (hPa) to relative humidity (%)}
+\title{Converts VPD (hPa) to relative humidity (percentage)}
 \usage{
 VPD2RelHum(VPD, airtemp, vpd_units, tair_units)
 }
@@ -10,6 +10,6 @@ VPD2RelHum(VPD, airtemp, vpd_units, tair_units)
 RelHum
 }
 \description{
-Converts VPD (hPa) to relative humidity (%)
+Converts VPD (hPa) to relative humidity (percentage)
 }
 
