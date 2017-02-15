@@ -1,3 +1,8 @@
+# Plotting.R
+#
+# author: Anna Ukkola UNSW 2017
+#
+
 #' Plots standard analysis plots from netcdf data
 #'
 #' @param ncfile an open netcdf file
@@ -206,8 +211,5 @@ plot_nc <- function(ncfile, analysis_type, vars, outfile){
     
     
     
-
-    
   } #analyses
-    
-}
+} #function
