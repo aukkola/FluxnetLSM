@@ -21,7 +21,7 @@
 #' @export
 #'
 #'
-convert_fluxnet_to_netcdf <- function(infile, site_code, out_path, lib_path,
+convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                                       ERA_file=NA, ERA_gapfill=FALSE,
                                       datasetname="Fluxnet2015", datasetversion="Nov16",
                                       gap_threshold=20, min_yrs=2,
@@ -29,16 +29,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path, lib_path,
     
     library(R.utils)
     library(pals)
-    
-    # TODO: Merge these files with palsR where possible.
-   # source(paste(lib_path, "/functions/Constants.R", sep=""))
-    #source(paste(lib_path, "/functions/Timing_general.R", sep=""))
-  #  source(paste(lib_path, "/functions/Conversions.R", sep=""))
-  #  source(paste(lib_path, "/functions/Check_and_Gapfill.R", sep=""))
-   # source(paste(lib_path, "/functions/FluxtowerSpreadsheetToNc.R", sep=""))
-    #source(paste(lib_path, "/Plotting.R", sep=""))
-    #source(paste(lib_path, "/Site_metadata.R", sep=""))
-    
+  
     
     
     ## Create sub-folders for outputs ##
@@ -60,7 +51,12 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path, lib_path,
     
     #File contains desired variables (refer to Fluxnet2015 documentation for full variable descriptions;
     #http://fluxnet.fluxdata.org/data/fluxnet2015-dataset/fullset-data-product/)
-    vars <- read.csv(paste(lib_path, "/../data/variables.csv", sep=""), header=TRUE,
+    
+    #Find variable file path (not using data() command directly because reads a CSV with a
+    #semicolon separator and this leads to incorrect table headers)
+    var_file <- system.file("data","Variables_to_process.csv",package="FluxnetProcessing")
+    
+    vars <- read.csv(var_file, header=TRUE,
     colClasses=c("character", "character", "character",
                  "character", "character", "character",
                  "character",
