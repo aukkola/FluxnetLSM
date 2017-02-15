@@ -94,15 +94,11 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     # Check if variables have gaps in the time series:
     gaps  <- CheckDataGaps(datain = DataFromText, missing_val = SprdMissingVal,
                            threshold = gap_threshold, min_yrs=min_yrs,
-                           essential_met = vars$ALMA_variable[which(vars$Essential_met)],
-                           preferred_eval = vars$ALMA_variable[which(vars$Preferred_eval)])
+                           essential_met = vars$Output_variable[which(vars$Essential_met)],
+                           preferred_eval = vars$Output_variable[which(vars$Preferred_eval)])
     
     
     #Remove evaluation variables that have too many gaps    COMPLETE !!!!!!
-    
-    
-    
-    
     
     
     
