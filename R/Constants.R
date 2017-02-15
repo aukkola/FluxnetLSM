@@ -17,7 +17,7 @@ QCmissing = NcMissingVal
 #-----------------------------------------------------------------------------
 
 #' Finds variables present in input file
-#' @return tcols
+#' @return list of variables and their attributes
 #' @export
 # Variable names in spreadsheet to be processed:
 findColIndices = function(fileinname, var_names, var_classes, 
@@ -100,7 +100,7 @@ findColIndices = function(fileinname, var_names, var_classes,
 #-----------------------------------------------------------------------------
 
 #' Extract time stamp information
-#' @return tcols
+#' @return time stamp variables
 #' @export
 findTimeInfo <- function(time_vars, headers){
     
@@ -132,7 +132,7 @@ findTimeInfo <- function(time_vars, headers){
 #-----------------------------------------------------------------------------
 
 #' Renames Fluxnet variables to ALMA convention
-#' @return renamed_vars
+#' @return renamed variables
 #' @export
 rename_vars <- function(vars_present, all_vars){
 
@@ -154,7 +154,7 @@ rename_vars <- function(vars_present, all_vars){
 #-----------------------------------------------------------------------------
 
 #' Retrieves original and target variable units
-#' @return units
+#' @return original and target units
 #' @export
 retrieve_units <- function(vars_present, all_vars){
   
@@ -177,7 +177,7 @@ retrieve_units <- function(vars_present, all_vars){
 #-----------------------------------------------------------------------------
 
 #' Retrieve variables longnames to be written in NetCDF
-#' @return attributes
+#' @return Long name attributes
 #' @export
 retrieve_atts <- function(vars_present, all_vars){
   
@@ -201,7 +201,7 @@ retrieve_atts <- function(vars_present, all_vars){
 #-----------------------------------------------------------------------------
 
 #' Retrieves variable categories to divide into met and flux data
-#' @return vat_vars
+#' @return variable categories
 #' @export
 retrieve_categories <- function(vars_present, all_vars){
   
@@ -222,7 +222,7 @@ retrieve_categories <- function(vars_present, all_vars){
 #-----------------------------------------------------------------------------
 
 #' Retrieves names of ERAinterim variables
-#' @return cat_vars
+#' @return ERAinterim variables
 #' @export
 retrieve_ERAvars <- function(vars_present, all_vars){
   
@@ -243,7 +243,7 @@ retrieve_ERAvars <- function(vars_present, all_vars){
 #-----------------------------------------------------------------------------
 
 #' Retrieves acceptable variable ranges
-#' @return var_ranges
+#' @return variable ranges
 #' @export
 retrieve_ranges <- function(vars_present, all_vars){
 
@@ -270,7 +270,7 @@ retrieve_ranges <- function(vars_present, all_vars){
 #-----------------------------------------------------------------------------
 
 #' Removes duplicate indices if a Fluxnet variable is processed more than once
-#' @return indices
+#' @return duplicate indices
 #' @export
 remove_duplicates <- function(indices){
   
@@ -295,7 +295,7 @@ remove_duplicates <- function(indices){
 #-----------------------------------------------------------------------------
 
 #' Duplicates columns in Fluxnet data if a variable is being processes multiple times
-#' @return data
+#' @return data with duplicated columns
 #' @export
 
 duplicate_columns <- function(data, vars){

@@ -13,7 +13,10 @@
 
 # TODO: This function exists in palsR/Gab and has a different signature. Merge?
 #' Reads comma-delimited text files containing Fluxnet2015 data
-#' @return filedata
+#' @param fileinname fluxnet data file, including directory
+#' @param vars data.table of variables and their attributes
+#' @param time_vars vector of time variables
+#' @return list of flux data, variables and timing information
 #' @export
 ReadTextFluxData <- function(fileinname, vars, time_vars){
   

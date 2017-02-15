@@ -103,7 +103,7 @@ ChangeUnits = function(datain){
 #-----------------------------------------------------------------------------
 
 #' Converts VPD (hPa) to relative humidity (percentage)
-#' @return RelHum
+#' @return relative humidity as percentage
 #' @export
 VPD2RelHum <- function(VPD, airtemp, vpd_units, tair_units){
 
@@ -135,7 +135,7 @@ VPD2RelHum <- function(VPD, airtemp, vpd_units, tair_units){
 
 # TODO: This function exists in palsR/Gab in pals/R/Units.R and has a different signature. Merge?
 #' Converts relative humidity to specific humidity.
-#' @return specHum
+#' @return specific humidity in kg/kg
 #' @export
 Rel2SpecHum <- function(relHum, airtemp, tair_units, pressure, psurf_units){
   # required units: airtemp - temp in C; pressure in Pa; relHum as %
@@ -175,7 +175,7 @@ Rel2SpecHum <- function(relHum, airtemp, tair_units, pressure, psurf_units){
 #-----------------------------------------------------------------------------
 
 #' Calculates saturation vapour pressure
-#' @return esat
+#' @return saturation vapour pressure
 #' @export
 calc_esat <- function(airtemp){
   #Tair in degrees C
