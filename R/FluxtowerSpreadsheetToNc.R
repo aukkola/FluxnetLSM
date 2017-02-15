@@ -80,7 +80,7 @@ ReadTextFluxData <- function(fileinname, vars, time_vars){
   era_vars <- retrieve_ERAvars(vars_present=tcol$names, all_vars=vars)
   
   
-  #Change column names and tcol$names to match ALMA convention
+  #Change column names and tcol$names to match output variable names
   tcol$names         <- rename_vars(vars_present=tcol$names, all_vars=vars)
   colnames(FluxData) <- tcol$names
   

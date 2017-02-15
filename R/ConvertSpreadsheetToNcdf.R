@@ -13,7 +13,7 @@
 #'   e.g. "FULLSET/FLX_AU-How_FLUXNET2015_ERAI_HH_1989-2014_1-3.csv"
 #' @param threshold How many percent of time steps allowed to be missing in any given year?
 #' @param min_yrs Minimum number of consecutive years to process
-#' @param out_path output path e.g. "~/Documents/FLUXNET2016_processing/"
+#' @param out_path output path e.g. "./FLUXNET2016_processing/"
 #' @param site_code Fluxnet site code e.g. "AU-How"
 #' @param ERA_gapfill Gapfill met variables using ERAinterim?
 #' @param plot Should annual, diurnal and/or 14-day running mean plots be produced? Set to NA if not

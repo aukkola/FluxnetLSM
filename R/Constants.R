@@ -131,7 +131,7 @@ findTimeInfo <- function(time_vars, headers){
 
 #-----------------------------------------------------------------------------
 
-#' Renames Fluxnet variables to ALMA convention
+#' Renames Fluxnet variables to desired output variable names
 #' @return renamed variables
 #' @export
 rename_vars <- function(vars_present, all_vars){
@@ -144,8 +144,8 @@ rename_vars <- function(vars_present, all_vars){
     ind_present <- unlist(remove_duplicates(ind_present))
   } 
   
-  #Replace names with corresponding ALMA variable names
-  renamed_vars <- all_vars$ALMA_variable[ind_present]
+  #Replace names with corresponding output variable names
+  renamed_vars <- all_vars$Output_variable[ind_present]
 
   return(renamed_vars)
   
@@ -166,8 +166,9 @@ retrieve_units <- function(vars_present, all_vars){
     ind_present <- unlist(remove_duplicates(ind_present))
   } 
   
+  #Retrieve original and taret units, and list
   original_units <- all_vars$Fluxnet_unit[ind_present]
-  target_units   <- all_vars$ALMA_unit[ind_present]
+  target_units   <- all_vars$Output_unit[ind_present]
   
   units <- list(original_units=original_units, target_units=target_units)
   
@@ -214,7 +215,7 @@ retrieve_categories <- function(vars_present, all_vars){
   } 
   
   cat_vars <- all_vars$Category[ind_present]
-  names(cat_vars) <- all_vars$ALMA_variable[ind_present]
+  names(cat_vars) <- all_vars$Output_variable[ind_present]
   
   return(cat_vars)
 }
@@ -235,7 +236,7 @@ retrieve_ERAvars <- function(vars_present, all_vars){
   } 
   
   cat_vars <- all_vars$ERAinterim_variable[ind_present]
-  names(cat_vars) <- all_vars$ALMA_variable[ind_present]
+  names(cat_vars) <- all_vars$Output_variable[ind_present]
   
   return(cat_vars)
 }
@@ -261,7 +262,7 @@ retrieve_ranges <- function(vars_present, all_vars){
   
   #Combine
   var_ranges <- rbind(range_min, range_max)
-  colnames(var_ranges) <- all_vars$ALMA_variable[ind_present]  
+  colnames(var_ranges) <- all_vars$Output_variable[ind_present]  
   
   return(var_ranges)
 }
