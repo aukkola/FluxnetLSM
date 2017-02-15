@@ -57,7 +57,7 @@ plot <- c("annual", "diurnal","timeseries")
 ###--- Run analysis ---###
 ##########################
 
-convert_fluxnet_to_netcdf(infile=infile, site_code=site_code, out_path=out_path, lib_path="./R",
+convert_fluxnet_to_netcdf(infile=infile, site_code=site_code, out_path=out_path,
                           ERA_file=ERA_file, ERA_gapfill=ERA_gapfill, datasetname=datasetname, 
                           datasetversion=datasetversion, gap_threshold=gap_threshold, 
                           min_yrs=min_yrs, plot=plot)

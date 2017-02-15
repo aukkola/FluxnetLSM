@@ -75,7 +75,7 @@ if(exists("datasetversion")) {clusterExport(cl, 'datasetversion')}
 
 
 clusterMap(cl=cl, function(x,y,z) {library(FluxnetProcessing) 
-                                   convert_fluxnet_to_netcdf(infile=x, site_code=y, ERA_file=z, lib_path="./R",
+                                   convert_fluxnet_to_netcdf(infile=x, site_code=y, ERA_file=z,
                                    out_path=out_path, ERA_gapfill=ERA_gapfill,
                                    datasetname=datasetname, datasetversion=datasetversion,
                                    gap_threshold=gap_threshold, min_yrs=min_yrs, plot=plot)
