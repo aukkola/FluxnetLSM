@@ -192,7 +192,7 @@ retrieve_atts <- function(vars_present, all_vars){
   
   attributes <- cbind(all_vars$Fluxnet_variable, 
                       all_vars$Longname,
-                      all_vars$CF_name)[ind_present,]
+                      all_vars$Standard_name)[ind_present,]
       
   colnames(attributes) <- c("Fluxnet_variable", "Longname", "CF_name")
   

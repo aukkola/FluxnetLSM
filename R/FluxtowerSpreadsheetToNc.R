@@ -289,7 +289,7 @@ CreateFluxNcFile = function(fluxfilename, datain,                 #outfile file 
   
   #Add CF-compliant name to file (if not missing)
   lapply(1:length(var_defs), function(x)  ncatt_put(nc=ncid, varid=var_defs[[x]], 
-                                                    attname="CF_name", 
+                                                    attname="Standard_name", 
                                                     attval=datain$attributes[var_ind[x],3], 
                                                     prec="text"))
   
@@ -460,7 +460,7 @@ CreateMetNcFile = function(metfilename, datain,                   #outfile file 
 	
 	#Add CF-compliant name to file (if not missing)
 	lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]], 
-                                                   attname="CF_name", 
+                                                   attname="Standard_name", 
                                                    attval=datain$attributes[var_ind[x],3], 
                                                    prec="text"))
 	
