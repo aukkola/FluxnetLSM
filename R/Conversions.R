@@ -47,7 +47,7 @@ ChangeUnits = function(datain){
         
         
       ## Rainfall (mm/timestep to mm/s)
-      } else if(datain$vars[k]=="Rainf" & flx_units[k]=="mm" & alma_units[k]=="mm/s"){
+      } else if(datain$vars[k]=="Rainf" & flx_units[k]=="mm" & alma_units[k]=="kg/m2/s"){
         datain$data[[k]] <- datain$data[[k]] / tstep
         
         
@@ -82,7 +82,7 @@ ChangeUnits = function(datain){
       } else {
         CheckError(paste("Unknown unit conversion. cannot convert between original ", 
                          "Fluxnet and ALMA units, check variable: ", datain$vars[k], 
-                         ". Available conversions: air temp C to K, rainfall mm to mm/s, ",
+                         ". Available conversions: air temp C to K, rainfall mm to kg/m2/s, ",
                          "air pressure kPa to Pa, humidity from relative (%) to specific (kg/kg)",
                          sep=""))
       }
