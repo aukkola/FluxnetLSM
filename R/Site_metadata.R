@@ -55,6 +55,28 @@ add_processing_metadata <- function(metadata) {
 }
 
 
+#' Updates old metadata with new metadata, ignoring NAs, and warning on differences
+#'
+#' @return metadata list
+#' @export
+update_metadata <- function(metadata, new_metadata, overwrite=TRUE) {
+    for (n in names(new_metadata)) {
+        if (!is.na(new_metadata[[n]])) {
+            if (n %in% names(metadata) && !is.na(metadata[[n]]) &&
+                new_metadata[[n]] != metadata[[n]]) {
+                overwrite_text = if (overwrite) "Overwriting" else "Not overwriting"
+                message("New metadata for ", n, " has different values! ",
+                        overwrite_text, ".\n",
+                        "  old: ", metadata[n], ", new: ", new_metadata[n])
+            }
+            metadata[n] <- new_metadata[n]
+        }
+    }
+
+    return(metadata)
+}
+
+
 ################################################
 # CSV-stored metadata
 ################################################
@@ -66,7 +88,7 @@ add_processing_metadata <- function(metadata) {
 #Find site info file path (not using data() command directly because reads a CSV with a
 #semicolon separator and this leads to incorrect table headers)
 
-site_csv_file <- system.file("data","Site_info.csv",package="FluxnetProcessing")
+site_csv_file <- system.file("data","Fluxnet_site_info.csv",package="FluxnetProcessing")
 
 #' Tries to gather metadata from the included site CSV
 #'
@@ -74,18 +96,18 @@ site_csv_file <- system.file("data","Site_info.csv",package="FluxnetProcessing")
 #' @export
 get_site_metadata_CSV <- function(metadata) {
 
-    message("Trying to load metadata from csv cache (", site_csv_file, ")")
-
     site_code <- get_site_code(metadata)
 
-    csv_row <- as.list(read.csv(site_csv_file, header = TRUE,
-                                stringsAsFactors = FALSE,
-                                row.names = 1)[site_code, ])
+    message("Loading metadata for ", site_code, " from csv cache (", site_csv_file, ")")
 
-    for (n in names(csv_row)) {
-        if (!is.na(csv_row[n])) {
-            metadata[n] <- csv_row[n]
-        }
+    csv <- read.csv(site_csv_file, header = TRUE,
+                    stringsAsFactors = FALSE, row.names = 1)
+
+    if (site_code %in% row.names(csv)) {
+        csv_row <- as.list(csv[site_code, ])
+        metadata = update_metadata(metadata, csv_row)
+    } else {
+        message("    ", site_code, " not found in CSV file")
     }
 
     return(metadata)
@@ -147,6 +169,8 @@ update_csv_from_ornl <- function() {
 # Web-based metadata
 ################################################
 
+### fluxnet.ornl.gov ###
+
 #' Get all available site codes from site_status table
 #' @export
 get_ornl_site_codes <- function() {
@@ -203,7 +227,7 @@ get_ornl_site_url_list <- function(site_code_list) {
 #'
 #' @return metadata list
 #' @export
-get_ornl_site_metadata <- function(metadata, site_url=NULL) {
+get_ornl_site_metadata <- function(metadata, site_url=NULL, overwrite=TRUE) {
   
     library(rvest)
     site_code <- get_site_code(metadata)
@@ -217,25 +241,26 @@ get_ornl_site_metadata <- function(metadata, site_url=NULL) {
 
     page_html <- read_html(site_url)
 
+    new_metadata = list()
     # General info
     table <- page_html %>% html_node("table#fluxnet_site_information") %>% html_table()
-    metadata$Fullname <- table[table[1] == "Site Name:"][2]
-    metadata$Description <- table[table[1] == "Description:"][2]
-    metadata$TowerStatus <- table[table[1] == "Tower Status:"][2]
+    new_metadata$Fullname <- table[table[1] == "Site Name:"][2]
+    new_metadata$Description <- table[table[1] == "Description:"][2]
+    new_metadata$TowerStatus <- table[table[1] == "Tower Status:"][2]
 
     # Location Information
     table <- page_html %>% html_node("table#fluxnet_site_location_information") %>% html_table()
-    metadata$Country <- table[table[1] == "Country:"][2]
+    new_metadata$Country <- table[table[1] == "Country:"][2]
     lat_lon <- strsplit(table[table[1] == "Coordinates:(Lat, Long)"][2], ", ")[[1]]
-    metadata$SiteLatitude <- as.numeric(lat_lon[1])
-    metadata$SiteLongitude <- as.numeric(lat_lon[1])
+    new_metadata$SiteLatitude <- as.numeric(lat_lon[1])
+    new_metadata$SiteLongitude <- as.numeric(lat_lon[2])
 
     # Site Characteristics
     tryCatch({
         table <- page_html %>% html_node("table#fluxnet_site_characteristics") %>% html_table()
         elevation_text <- table[table[1] == "GTOPO30 Elevation:"][2]
-        metadata$SiteElevation <- as.numeric(gsub("m", "", elevation_text))
-        metadata$IGBP_vegetation_long <- table[table[1] == "IGBP Land Cover:"][2]
+        new_metadata$SiteElevation <- as.numeric(gsub("m", "", elevation_text))
+        new_metadata$IGBP_vegetation_long <- table[table[1] == "IGBP Land Cover:"][2]
     }, error = function(cond) {
         message(site_code, " doesn't have a Site Characteristics table at ", site_url)
     })
@@ -251,6 +276,69 @@ get_ornl_site_metadata <- function(metadata, site_url=NULL) {
     # TODO: ORNL has other potentially useful site information, affiliation info,
     # and investigator info. Should we use some?
 
+    metadata = update_metadata(metadata, new_metadata, overwrite=overwrite)
+
+    return(metadata)
+}
+
+
+### Fluxdata.org ###
+
+#' Get a single fluxdata_org site URL from site_status table
+#' @export
+get_site_fluxdata_org_url <- function(site_code) {
+    fluxdata_org_url <- paste0("http://sites.fluxdata.org/", site_code, "/")
+    return(fluxdata_org_url)
+}
+
+
+#' Get metadata from Fluxdata.org
+#'
+#' @return metadata list
+#' @export
+get_fluxdata_org_site_metadata <- function(metadata, site_url=NULL) {
+    library(rvest)
+
+    site_code <- get_site_code(metadata)
+
+    if (is.null(site_url)) {
+        site_url <- get_site_fluxdata_org_url(site_code)
+        new_metadata$fluxdata_org_URL <- site_url
+    }
+
+    message("Trying to load new_metadata for ", site_code, " from Fluxdata.org (", site_url, ")")
+
+    page_html <- read_html(site_url)
+
+    # General info
+    table <- page_html %>% html_node("table.maininfo") %>% html_table()
+    new_metadata$Fullname <- table[table[1] == "Site Name:"][2]
+    new_metadata$SiteLatitude <- as.numeric(table[table[1] == "Latitude:"][2])
+    new_metadata$SiteLongitude <- as.numeric(table[table[1] == "Longitude:"][2])
+
+    elevation_text <- table[table[1] == "Elevation (m):"][2]
+    elevation <- as.numeric(gsub("m", "", elevation_text))
+    if (!is.na(elevation)) {  # lots of Fluxdata.org elevtions are missing, don't overwrite
+    new_metadata$SiteElevation <- elevation
+    }
+
+    IGBP_text = strsplit(gsub("\\)", "", table[table[1] == "IGBP:"][2]), " \\(")[[1]]
+    new_metadata$IGBP_vegetation_short <- IGBP_text[1]
+    new_metadata$IGBP_vegetation_long <- IGBP_text[2]
+
+    # Fluxdata.org doesn't have any of these:
+    #    metadata$Description
+    #    metadata$TowerStatus
+    #    metadata$Country
+    #    metadata$TowerHeight
+    #    metadata$CanopyHeight
+    #    metadata$Tier
+
+    # TODO: fluxdata_org has other potentially useful site information, affiliation info,
+    # and investigator info. Should we use some?
+
+    metadata = update_metadata(metadata, new_metadata)
+
     return(metadata)
 }
 
@@ -260,7 +348,11 @@ get_ornl_site_metadata <- function(metadata, site_url=NULL) {
 #' @return metadata list
 #' @export
 get_site_metadata_web <- function(metadata) {
-    metadata <- get_ornl_site_metadata(metadata)
+    metadata <- get_fluxdata_org_site_metadata(metadata)
+
+    if (any(check_missing(metadata))) {
+        metadata <- get_ornl_site_metadata(metadata, overwrite=FALSE)
+    }
 
     # TODO: Add loaders for OzFlux, AmeriFlux, etc.
 
@@ -277,10 +369,12 @@ get_site_metadata_web <- function(metadata) {
 #' @return boolean metadata availability vector
 #' @export
 check_missing <- function(metadata) {
-    missing_data <- is.na(metadata)
-    if (missing_data["Exclude_reason"] & !metadata$Exclude) {
-        missing_data["Exclude_reason"] <- FALSE
-    }
+    key_data = c("SiteCode", "Fullname",
+                 "SiteLatitude", "SiteLongitude", "SiteElevation",
+                 "IGBP_vegetation_short", "IGBP_vegetation_long",
+                 "TowerHeight", "CanopyHeight", "Tier")
+
+    missing_data <- is.na(metadata[key_data])
 
     return(missing_data)
 }
