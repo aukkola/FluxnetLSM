@@ -2,7 +2,7 @@ README for auxiliary data files
 ===============================
 
 
-Site_info_tier1_only.csv
+Fluxnet_site_info.csv
 ------------------------
 
 SiteCode
@@ -33,7 +33,7 @@ Tier
 : Tier of flux tower site (refer to http://fluxnet.fluxdata.org/data/data-policy/ for data policy). Only Tier 1 sites of Fluxnet2015 November 2016 release currently provided in this file.
 
 
-variables.csv
+Fluxnet_variables.csv
 -------------
 
 NB. Variables can be added and removed as per user requirements as long as all fields are provided. Fluxnet variables can be duplicated as per example file (e.g. RH, outputted as two ALMA variables, RH and Qair). However, the following options will not work unless required variables are present in variables.csv:
