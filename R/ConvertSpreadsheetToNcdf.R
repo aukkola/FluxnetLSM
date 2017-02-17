@@ -54,7 +54,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     
     #Find variable file path (not using data() command directly because reads a CSV with a
     #semicolon separator and this leads to incorrect table headers)
-    var_file <- system.file("data","Variables_to_process.csv",package="FluxnetProcessing")
+    var_file <- system.file("data","Fluxnet_variables.csv",package="FluxnetProcessing")
     
     vars <- read.csv(var_file, header=TRUE,
     colClasses=c("character", "character", "character",
