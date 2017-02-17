@@ -10,7 +10,7 @@
 SprdMissingVal = -9999 # missing value in spreadsheet
 NcMissingVal = -9999 # missing value in created netcdf files
 QCmeasured = 0
-QCnotmeasured = c(1, 2, 3, 4)  #1: good quality gapfill, 2: medium, 3: poor, 4: ERA gapfilled
+QCgapfilled = c(1, 2, 3, 4)  #1: good quality gapfill, 2: medium, 3: poor, 4: ERA gapfilled
 QCmissing = NcMissingVal
 
 
