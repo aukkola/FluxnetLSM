@@ -23,8 +23,10 @@
 #'
 convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                                       ERA_file=NA, ERA_gapfill=FALSE,
-                                      datasetname="Fluxnet2015", datasetversion="Nov16",
-                                      gap_threshold=20, min_yrs=2,
+                                      datasetname="FLUXNET2015", datasetversion="v1-3",
+                                      missing = 10, gapfill_all=10,
+                                      gapfill_good=NA, gapfill_med=NA,
+                                      gapfill_poor=NA, min_yrs=2,
                                       plot=c("annual", "diurnal", "timeseries")) {
     
     library(R.utils)
@@ -91,14 +93,21 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     # Make sure whole number of days in dataset:
     CheckSpreadsheetTiming(DataFromText)
     
-    # Check if variables have gaps in the time series:
+    
+    # Check if variables have gaps in the time series and determine what years to output:
     gaps  <- CheckDataGaps(datain = DataFromText, missing_val = SprdMissingVal,
-                           threshold = gap_threshold, min_yrs=min_yrs,
+                           QCmeasured=QCmeasured, QCgapfilled=QCgapfilled,
+                           missing = missing, gapfill_all=gapfill_all,
+                           gapfill_good=gapfill_good, gapfill_med=gapfill_med,
+                           gapfill_poor=gapfill_poor, min_yrs=min_yrs,
                            essential_met = vars$Output_variable[which(vars$Essential_met)],
                            preferred_eval = vars$Output_variable[which(vars$Preferred_eval)])
     
     
     #Remove evaluation variables that have too many gaps    COMPLETE !!!!!!
+    
+    
+    #Add an option for this
     
     
     
@@ -178,7 +187,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     ConvertedData <- ChangeUnits(DataFromText)
     
     
-    # Check that data are within acceptable ranges:   #FUNCTION WORKS BUT:   FIX Qair and VPD!!!!
+    # Check that data are within acceptable ranges: 
     CheckTextDataRanges(ConvertedData, missingval=NcMissingVal)
     
     
