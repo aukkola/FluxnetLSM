@@ -10,21 +10,78 @@
 #
 
 
-#' Checks for data gaps and determines output years
+#' Checks for missing and gap-filled data and determines output years
+#' @param datain Input data list
+#' @param missing_val Missing value
+#' @param QCmeasured Value of measured qc flag
+#' @param QCgapfilled Values of gap-filled qc flags
+#' @param missing Threshold for missing values per year (as percentage)
+#' @param gapfill_all Threshold for all gap_filling per year (as percentage)
+#' @param gapfill_good Threshold for good quality gap_filling 
+#' per year (as percentage, ignored if gapfill_all set)
+#' @param gapfill_med Threshold for medium quality 
+#' gap_filling per year (as percentage, ignored if gapfill_all set)
+#' @param gapfill_poor Threshold for poor quality gap_filling 
+#' per year (as percentage, ignored if gapfill_all set)
+#' @param min_yrs Minimum number of consecutive years
+#' @param essential_met Names of essential met variables
+#' @param preferred_eval Names of preferred evaluation variables
 #' @return out
 #' @export
-CheckDataGaps <- function(datain, missing_val=SprdMissingVal,
-                          threshold, min_yrs,
-                          essential_met, preferred_eval){
+CheckDataGaps <- function(datain, missing_val, QCmeasured, 
+                          QCgapfilled, missing, gapfill_all, 
+                          gapfill_good, gapfill_med, gapfill_poor,
+                          min_yrs, essential_met, preferred_eval){
     
     #Checks the existence of data gaps and determines which
-    #years should be outputted depending on the percentage of data gaps
-    #(set by thereshold) and the number of consecutive years available
-    #(at least number set by min_yrs)
+    #years should be outputted depending on the percentage of missing
+    #and/or gapfilled data (set by thresholds) and the number of consecutive 
+    #years available (at lseast the number of yrs set by min_yrs)
+  
+    #Years with too many gapfilled/missing values in ANY essential met variables
+    # or ALL preferred evaluation variables will not be processed and outputted.
     
-    library(R.utils)
+    library(R.utils) #seqToIntervals
     
-    gaps_found <- apply(datain$data, MARGIN=2, function(x) any(x==missing_val))
+    
+    # 'Missing' percentage must be set, return
+    # an error if it is not. Cannot check for data 
+    # gaps otherwise as not all variables come with QC flags
+    if(is.na(missing)){
+      CheckError(paste("Cannot check for missing time steps in data,",
+                       "set 'missing' to a value between 0",
+                       "(no missing values allowed) and 100",
+                       "(unlimited missing values allowed)"))
+    }
+        
+    
+    #Determine what gapfilling thresholds to use
+    #If 'gapfill_all' is set, use that
+    #Otherwise, use good/medium/poor thresholds
+    
+    #If gaps_all is set, use that
+    if(!is.na(gapfill_all)){
+      
+      threshold <- gapfill_all
+    
+    #Else use any of good/medium/poor gapfilling thresholds if set
+    } else if(any(!is.na(c(gapfill_good, gapfill_med,
+                           gapfill_poor)))){
+      
+      threshold <- c(gapfill_good, gapfill_med, gapfill_poor)
+      threshold[is.na(threshold)] <- 100 #if any NA, set to 100 (unlimited)
+      
+    #If none of these are set, return a warning      
+    } else {
+      
+      threshold <- NA
+      warning(paste("Cannot check for the percentage of gap-filled data,",
+                    "no thresholds set. Set at least one of",
+                    "'gapfill_all', 'gapfill_good', 'gapfill_med'",
+                    "or 'gapfill_poor' to check for gapfilling"))
+    }
+      
+    
     
     #Find indices for each start and end of year
     secs_per_day   <- 60*60*24
@@ -34,49 +91,133 @@ CheckDataGaps <- function(datain, missing_val=SprdMissingVal,
     end   <- cumsum(tsteps_per_yr)
     start <- end - tsteps_per_yr + 1
     
+
     
-    gap_length <- list()
-    #Check how many missing values per year, per variable
-    for(k in 1:length(gaps_found)){
+    ### Check how many missing and gapfilled values per year, per variable ###
+    
+    perc_missing  <- list()
+    perc_gapfilled <- list()
+    for(k in 1:ncol(datain$data)){
         
         data <- datain$data[,k]
         
+
+        ### Missing ###
         #Calculate the percentage of data missing each year
-        gap_length[[k]] <- sapply(1:length(start), function(x)
-        length( which(data[start[x]:end[x]] == missing_val)) /
-        length(start[x]:end[x]) * 100)
-    }
+        perc_missing[[k]] <- sapply(1:length(start), function(x)
+                                    length( which(data[start[x]:end[x]] == missing_val)) /
+                                    length(start[x]:end[x]) * 100)
+              
+        ### Gap-filled ###
+        #Initialise gapfilled percentage as zeros
+        perc_gapfilled[[k]] <- matrix(0, nrow=length(threshold), ncol=length(start))
+        
+        #If threshold set, check for gap-filling
+        if(any(!is.na(threshold))){
+          
+          #Check if QC variable exists
+          qc_var <- which(datain$vars==paste(datain$vars[k], "qc", sep="_")) 
+          
+          #If found QC variable, calculate percentage of gap-filling
+          if(length(qc_var) > 0){
+            
+            #Extract QC flag data
+            qcdata <- datain$data[,qc_var] 
+            
+            #If using gapfill_all
+            if(length(threshold)==1){  
+              
+              #Find values that are not measured or missing
+              perc_gapfilled[[k]] <- sapply(1:length(start), function(x)
+                                     length( which(qcdata[start[x]:end[x]] != QCmeasured &
+                                                   qcdata[start[x]:end[x]] != missing_val)) /
+                                     length(start[x]:end[x]) * 100)
+              
+              #Convert to matrix so compatible with vars without QC
+              perc_gapfilled[[k]] <- matrix(perc_gapfilled[[k]], nrow=1)
+              
+              
+            #If using gapfill_good/med/poor         
+            } else {
+              
+              #Loop through the three gap-filling flags
+              percs <- matrix(NA, nrow=3, ncol=length(start))
+              for(g in 1:3){
+                percs[g,] <- sapply(1:length(start), function(x)
+                                length( which(qcdata[start[x]:end[x]] == QCgapfilled[g])) /
+                                length(start[x]:end[x]) * 100)
+              }
+              
+              perc_gapfilled[[k]] <- percs
+              
+            } 
+          }
+        }
+        
+     
+    } #variables
     
-    names(gap_length) <- names(gaps_found)
+    #Set names    
+    names(perc_gapfilled) <- colnames(datain$data)
+    names(perc_missing)   <- colnames(datain$data)
     
     
     ### Check that essential variables have at least one common year of data
     ### without too many gaps
     ### and the year has one or more evaluation variables available
     
-    essential_ind <- sapply(essential_met, function(x) which(names(gap_length) == x))
-    preferred_ind <- sapply(preferred_eval, function(x) which(names(gap_length) == x))
+    essential_ind <- sapply(essential_met, function(x) which(names(perc_missing) == x))
+    preferred_ind <- sapply(preferred_eval, function(x) which(names(perc_missing) == x))
     
-    yr_keep <- vector()
+    
+    #Initialise
+    yr_keep <- rep(TRUE, length(start))
     
     #Loop through years
     for(k in 1:length(start)){
         
         #Extract gap lengths for the year
-        gaps <- sapply(gap_length, function(x) x[k])
-        
+        gaps <- sapply(perc_gapfilled, function(x) x[,k])
+        miss <- sapply(perc_missing, function(x) x[k])       
+
         #If any essential variables, or all evaluation variables,
-        #have too many missing values, skip year
-        if(any(gaps[essential_ind] > threshold) | all(gaps[preferred_ind] > threshold))
+        #have too many missing or gapfilled values, skip year
+        
+        #First check if too many missing values
+        if(any(miss[essential_ind] > missing) | all(miss[preferred_ind] > missing))
         {
-            yr_keep[k] <- FALSE
-            
-            #Else, process year
-        } else {
-            yr_keep[k] <- TRUE
+          yr_keep[k] <- FALSE 
         }
         
-    }
+        
+        #If missing value threshold not exceeded, check for gapfilling (if threshold set)
+        if(yr_keep[k] & any(!is.na(threshold))){
+          
+          #Using gapfill_all
+          if(length(threshold)==1){
+               
+            # If ANY essential vars have too many gapfilled or missing values OR 
+            # ALL preferred vars have too many gapfilled or missing values,
+            # don't process year 
+            if(any(gaps[essential_ind] > threshold) | all(gaps[preferred_ind] > threshold)){
+              yr_keep[k] <- FALSE 
+            }
+          
+          #Using gapfill_good/med/poor
+          } else {
+            
+            #As above, but loop through the three thresholds
+            exclude_yr <- sapply(1:length(threshold), function(x) any(gaps[x,essential_ind] > threshold[x]) | 
+                                                                  all(gaps[x,preferred_ind] > threshold[x]))
+                                             
+            if(any(exclude_yr)){
+              yr_keep[k] <- FALSE
+            }
+          }
+          
+        } #gap-filling
+        
+    } #years
     
     
     #Indices of year(s) to keep
@@ -159,7 +300,46 @@ CheckDataGaps <- function(datain, missing_val=SprdMissingVal,
     }
     
     
-    out <- list(gap_length=gap_length, yr_keep=yr_ind, consec=consec, 
+    
+    #Determine overall percentage missing and gap-filled for
+    #output periods (written as a NetCDF attribute for each variable)
+    
+    total_missing   <- list()
+    total_gapfilled <- list()
+    
+    #Loop through output periods
+    for(k in 1:length(unique(consec))){
+      
+      #Calculate % missing for each variable
+      total_missing[[k]] <- apply(datain$data, MARGIN=2, function(x) 
+                            length(which(x[tstart[k]:tend[k]] == missing_val)) 
+                            / length(x[tstart[k]:tend[k]]) *100)
+        
+      #Calculate % gap-filled
+      #Find indices for QC variables (if exist)
+      qc_ind <- sapply(datain$vars, function(x) 
+                          which(datain$vars==paste(x, "_qc", sep="")))
+      
+      total_gapfilled[[k]] <- vector()
+      for(v in 1:length(qc_ind)){
+        if(length(qc_ind[[v]])>0){ #QC var exists
+          
+          data <- datain$data[tstart[k]:tend[k],qc_ind[[v]]]
+          
+          total_gapfilled[[k]][v] <- length(which(data %in% QCgapfilled)) / 
+                                     length(data) *100      
+        } else { #No QC var
+          total_gapfilled[[k]][v] <- 0
+        }
+      }
+      names(total_gapfilled[[k]]) <- colnames(datain$data)
+  
+    }        
+    
+      
+    
+    out <- list(total_missing=total_missing, total_gapfilled=total_gapfilled, 
+                yr_keep=yr_ind, consec=consec, 
                 tseries_start=tstart, tseries_end=tend)
     
     return(out)
