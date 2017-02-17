@@ -74,18 +74,23 @@ site_csv_file <- system.file("data","Fluxnet_site_info.csv",package="FluxnetProc
 #' @export
 get_site_metadata_CSV <- function(metadata) {
 
-    message("Trying to load metadata from csv cache (", site_csv_file, ")")
-
     site_code <- get_site_code(metadata)
 
-    csv_row <- as.list(read.csv(site_csv_file, header = TRUE,
-                                stringsAsFactors = FALSE,
-                                row.names = 1)[site_code, ])
+    message("Loading metadata for ", site_code, " from csv cache (", site_csv_file, ")")
 
-    for (n in names(csv_row)) {
-        if (!is.na(csv_row[n])) {
-            metadata[n] <- csv_row[n]
+    csv <- read.csv(site_csv_file, header = TRUE,
+                    stringsAsFactors = FALSE, row.names = 1)
+
+    if (site_code %in% row.names(csv)) {
+        csv_row <- as.list(csv[site_code, ])
+
+        for (n in names(csv_row)) {
+            if (!is.na(csv_row[n])) {
+                metadata[n] <- csv_row[n]
+            }
         }
+    } else {
+        message("    ", site_code, " not found in CSV file")
     }
 
     return(metadata)
