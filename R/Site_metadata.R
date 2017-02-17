@@ -152,6 +152,8 @@ update_csv_from_ornl <- function() {
 # Web-based metadata
 ################################################
 
+### fluxnet.ornl.gov ###
+
 #' Get all available site codes from site_status table
 #' @export
 get_ornl_site_codes <- function() {
@@ -260,12 +262,75 @@ get_ornl_site_metadata <- function(metadata, site_url=NULL) {
 }
 
 
+### Fluxdata.org ###
+
+#' Get a single fluxdata_org site URL from site_status table
+#' @export
+get_site_fluxdata_org_url <- function(site_code) {
+    fluxdata_org_url <- paste0("http://sites.fluxdata.org/", site_code, "/")
+    return(fluxdata_org_url)
+}
+
+
+#' Get metadata from Fluxdata.org
+#'
+#' @return metadata list
+#' @export
+get_fluxdata_org_site_metadata <- function(metadata, site_url=NULL) {
+    library(rvest)
+
+    site_code <- get_site_code(metadata)
+
+    if (is.null(site_url)) {
+        site_url <- get_site_fluxdata_org_url(site_code)
+        metadata$fluxdata_org_URL <- site_url
+    }
+
+    message("Trying to load metadata for ", site_code, " from Fluxdata.org (", site_url, ")")
+
+    page_html <- read_html(site_url)
+
+    # General info
+    table <- page_html %>% html_node("table.maininfo") %>% html_table()
+    metadata$Fullname <- table[table[1] == "Site Name:"][2]
+    metadata$SiteLatitude <- as.numeric(table[table[1] == "Latitude:"][2])
+    metadata$SiteLongitude <- as.numeric(table[table[1] == "Longitude:"][2])
+
+    elevation_text <- table[table[1] == "Elevation (m):"][2]
+    elevation <- as.numeric(gsub("m", "", elevation_text))
+    if (!is.na(elevation)) {  # lots of Fluxdata.org elevtions are missing, don't overwrite
+    metadata$SiteElevation <- elevation
+    }
+
+    IGBP_text = strsplit(gsub("\\)", "", table[table[1] == "IGBP:"][2]), " \\(")[[1]]
+    metadata$IGBP_vegetation_short <- IGBP_text[1]
+    metadata$IGBP_vegetation_long <- IGBP_text[2]
+
+    # Fluxdata.org doesn't have any of these:
+    #    metadata$Description
+    #    metadata$TowerStatus
+    #    metadata$Country
+    #    metadata$TowerHeight
+    #    metadata$CanopyHeight
+    #    metadata$Tier
+
+    # TODO: fluxdata_org has other potentially useful site information, affiliation info,
+    # and investigator info. Should we use some?
+
+    return(metadata)
+}
+
+
 #' Tries to load metadata from known Fluxnet info sources on the 'web
 #'
 #' @return metadata list
 #' @export
 get_site_metadata_web <- function(metadata) {
-    metadata <- get_ornl_site_metadata(metadata)
+    metadata <- get_fluxdata_org_site_metadata(metadata)
+
+    if (any(check_missing(metadata))) {
+        metadata <- get_ornl_site_metadata(metadata)
+    }
 
     # TODO: Add loaders for OzFlux, AmeriFlux, etc.
 
