@@ -44,7 +44,7 @@ eraname      <- sprintf("FLX_%s_FLUXNET2015_ERAI", site_code)         #append fi
 ERA_file     <- list.files(in_path, pattern=eraname, full.names=TRUE) #find file and full path
 
 #Name and version of dataset being processed (e.g. "FLUXNET2015" and "v1-3")
-#Stripped from file name in this example
+#Stripped from input file name in this example
 vname          <- unlist(strsplit(infile, "_") )
 datasetname    <- vname[[which(vname==site_code)+1]] #FLUXNET2015
 datasetversion <- paste("v", substr(vname[[which(vname==site_code)+5]], 1, 3), sep="") #v1-3
@@ -54,11 +54,11 @@ datasetversion <- paste("v", substr(vname[[which(vname==site_code)+5]], 1, 3), s
 #consecutive years to process
 #Note: Always checks for missing values. If no gapfilling 
 #thresholds set, will not check for gap-filling.
-missing      <- 10 #max. percent missing (must be set)
-gapfill_all  <- NA #max. percent gapfilled
-gapfill_good <- 10 #max. percent good-quality gapfilled (ignored if gapfill_all set)
-gapfill_med  <- 10 #max. percent medium-quality gapfilled (ignored if gapfill_all set)
-gapfill_poor <- 10 #max. percent poor-quality gapfilled (ignored if gapfill_all set)
+missing      <- 15 #max. percent missing (must be set)
+gapfill_all  <- 20 #max. percent gapfilled (optional)
+gapfill_good <- NA #max. percent good-quality gapfilled (optional, ignored if gapfill_all set)
+gapfill_med  <- NA #max. percent medium-quality gapfilled (optional, ignored if gapfill_all set)
+gapfill_poor <- NA #max. percent poor-quality gapfilled (optional, ignored if gapfill_all set)
 min_yrs      <- 2  #min. number of consecutive years
 
 #Should code produce plots to visualise outputs? (set to NA if not desired)
