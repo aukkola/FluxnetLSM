@@ -347,10 +347,12 @@ get_site_metadata_web <- function(metadata) {
 #' @return boolean metadata availability vector
 #' @export
 check_missing <- function(metadata) {
-    missing_data <- is.na(metadata)
-    if (missing_data["Exclude_reason"] & !metadata$Exclude) {
-        missing_data["Exclude_reason"] <- FALSE
-    }
+    key_data = c("SiteCode", "Fullname",
+                 "SiteLatitude", "SiteLongitude", "SiteElevation",
+                 "IGBP_vegetation_short", "IGBP_vegetation_long",
+                 "TowerHeight", "CanopyHeight", "Tier")
+
+    missing_data <- is.na(metadata[key_data])
 
     return(missing_data)
 }
