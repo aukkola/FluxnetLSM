@@ -2,7 +2,7 @@ README for auxiliary data files
 ===============================
 
 
-Fluxnet_site_info.csv
+Site_metadata.csv
 ------------------------
 
 SiteCode
@@ -30,11 +30,11 @@ CanopyHeight
 : Average or maximum canopy height at site. Should be treated STRICTLY AS INDICATIVE only. Some sites report the maximum height and others average height; height measurement is not standardised across sites. Canopy height information was retrieved from site descriptions (or site vegetation descriptions) at https://fluxnet.ornl.gov/ or individual flux tower network websites (such as http://ozflux.org.au/ or http://ameriflux.lbl.gov/).
 
 Tier
-: Tier of flux tower site (refer to http://fluxnet.fluxdata.org/data/data-policy/ for data policy). Only Tier 1 sites of Fluxnet2015 November 2016 release currently provided in this file.
+: Tier of flux tower site (refer to http://fluxnet.fluxdata.org/data/data-policy/ for data policy). Only Tier 1 sites of Fluxnet2015 November 2016 release are currently provided in this file.
 
 
-Fluxnet_variables.csv
--------------
+Output_variables.csv
+---------------------
 
 NB. Variables can be added and removed as per user requirements as long as all fields are provided. Fluxnet variables can be duplicated as per example file (e.g. RH, outputted as two ALMA variables, RH and Qair). However, the following options will not work unless required variables are present in variables.csv:
 
