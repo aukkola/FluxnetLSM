@@ -118,7 +118,7 @@ VPD2RelHum <- function(VPD, airtemp, vpd_units, tair_units){
   if(tair_units=="K"){
     airtemp <- airtemp - 273.15
   }
-    
+   
   #Hectopascal to Pascal
   hPa_2_Pa <- 100
   
@@ -126,7 +126,15 @@ VPD2RelHum <- function(VPD, airtemp, vpd_units, tair_units){
   esat <- calc_esat(airtemp) 
   
   #Relative humidity (%)
-  RelHum <- 100 * (1 - (VPD * hPa_2_Pa) / esat)
+  RelHum <- 100 * (1 - ((VPD * hPa_2_Pa) / esat))
+  
+  #Make sure RH is within [0,100]
+  if(RelHum < 0){
+    RelHum <- 0.01
+  } else if (RelHum > 100){
+    RelHum <- 100
+  }
+  
   
   return(RelHum)
 }
