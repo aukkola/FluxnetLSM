@@ -301,6 +301,8 @@ get_fluxdata_org_site_metadata <- function(metadata, site_url=NULL) {
 
     site_code <- get_site_code(metadata)
 
+    new_metadata = list()
+    
     if (is.null(site_url)) {
         site_url <- get_site_fluxdata_org_url(site_code)
         new_metadata$fluxdata_org_URL <- site_url
