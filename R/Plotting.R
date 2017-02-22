@@ -138,7 +138,7 @@ plot_nc <- function(ncfile, analysis_type, vars, outfile){
                      ytext=paste(data_vars[n], " (", data_units[n], ")", sep=""), 
                      legendtext=data_vars[n], timestepsize=timestepsize,
                      whole=timing$whole, plotcolours="blue",
-                     vqcdata=as.matrix(var_qc),
+                     #vqcdata=as.matrix(var_qc),
                      na.rm=TRUE)  
       }
       
