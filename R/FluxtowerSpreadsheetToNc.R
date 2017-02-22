@@ -138,7 +138,7 @@ CreateFluxNcFile = function(fluxfilename, datain,                 #outfile file 
                            latitude, longitude,                   #lat, lon
                            site_code, long_sitename,              #Fluxnet site code and full site name
                            datasetversion, github_rev,            #Dataset version and github revision
-                           tier,                                  #Fluxnet site tier
+                           tier=NA,                               #Fluxnet site tier
                            ind_start, ind_end,                    #time period indices
                            starttime, timestepsize,               #timing info
                            flux_varname, cf_name,                 #Original Fluxnet variable names and CF_compliant names
@@ -256,11 +256,12 @@ CreateFluxNcFile = function(fluxfilename, datain,                 #outfile file 
             attval=as.character(long_sitename), prec="text")
   ncatt_put(ncid,varid=0,attname='Fluxnet_dataset_version',
             attval=datasetversion, prec="text")	  
-  ncatt_put(ncid,varid=0,attname='Fluxnet site tier',
-            attval=tier)
   ncatt_put(ncid,varid=0,attname='PALS contact',
             attval='palshelp@gmail.com')
-  
+  if(!is.na(tier)) {
+    ncatt_put(ncid,varid=0,attname='Fluxnet site tier',
+              attval=tier) }
+    
   # Add variable data to file:
   ncvar_put(ncid, latdim, vals=latitude)
   ncvar_put(ncid, londim, vals=longitude)
@@ -310,7 +311,7 @@ CreateMetNcFile = function(metfilename, datain,                   #outfile file 
                            latitude, longitude,                   #lat, lon
                            site_code, long_sitename,              #Fluxnet site code and full site name
                            datasetversion, github_rev,            #Dataset version and github revision
-                           tier,                                  #Fluxnet site tier
+                           tier=NA,                                  #Fluxnet site tier
                            ind_start, ind_end,                    #time period indices
                            starttime, timestepsize,               #timing info
                            flux_varname, cf_name,                 #Original Fluxnet variable names and CF_compliant names
@@ -429,11 +430,12 @@ CreateMetNcFile = function(metfilename, datain,                   #outfile file 
           attval=as.character(long_sitename), prec="text")
   ncatt_put(ncid,varid=0,attname='Fluxnet_dataset_version',
 		attval=datasetversion, prec="text")	  
-  ncatt_put(ncid,varid=0,attname='Fluxnet site tier',
-          attval=tier)
 	ncatt_put(ncid,varid=0,attname='PALS contact',
 		attval='palshelp@gmail.com')
-  
+	if(!is.na(tier)) {
+	  ncatt_put(ncid,varid=0,attname='Fluxnet site tier',
+	            attval=tier) }
+	
 	# Add variable data to file:
 	ncvar_put(ncid, latdim, vals=latitude)
 	ncvar_put(ncid, londim, vals=longitude)
