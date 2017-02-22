@@ -1,12 +1,6 @@
 TODO:
 ----
 
-- Currently prints error message on several lines, fix
-
-- Use QC flags in a better way? Good, medium, poor quality gap-fill. Currently only checks if gap-filled or not
-
-- Check if VPD range set appropriately in variables.csv
-
 - Add UTC offset to file attributes?
 
 - Add function to change timestep size?
@@ -17,9 +11,12 @@ TODO:
 
 - Some variables are outside our specified range in the original dataset. E.g. SWup has negative values in Howard Springs. Do we want to  change these to zero or change the range in variables.csv?
 
+-VPD2RH function: RH outside (0,100) range at some sites, setting it to 0.01 and 100, respectively. Do we want a better solution?
+
 - Provide an example code in python? I think it's possible to call R from python??
 
-- Add % gap-filled as a variable attribute
+- Add % gap-filled and missing as a variable attribute
+
 
 
 Some info to create package...
