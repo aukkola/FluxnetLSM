@@ -129,12 +129,8 @@ VPD2RelHum <- function(VPD, airtemp, vpd_units, tair_units){
   RelHum <- 100 * (1 - ((VPD * hPa_2_Pa) / esat))
   
   #Make sure RH is within [0,100]
-  if(RelHum < 0){
-    RelHum <- 0.01
-  } else if (RelHum > 100){
-    RelHum <- 100
-  }
-  
+  RelHum[RelHum < 0]   <- 0.01
+  RelHum[RelHum > 100] <- 100
   
   return(RelHum)
 }
