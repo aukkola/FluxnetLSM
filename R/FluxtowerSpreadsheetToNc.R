@@ -22,7 +22,7 @@ ReadTextFluxData <- function(fileinname, vars, time_vars){
   
   ####### First read available variables, corresponding units and ranges ####
   
-	# Get column names and classes:
+  # Get column names and classes:
   tcol <- findColIndices(fileinname=fileinname, 
                          var_names=vars$Fluxnet_variable, 
                          var_classes=vars$Fluxnet_class, 
@@ -30,8 +30,8 @@ ReadTextFluxData <- function(fileinname, vars, time_vars){
                          preferred_vars=vars$Preferred_eval,
                          time_vars=time_vars)  
   
-	# Read flux tower data (skips unwanted columns):
-	FluxData <- read.csv(file=fileinname, header=TRUE,	colClasses=tcol$classes)  
+  # Read flux tower data (skips unwanted columns):
+  FluxData <- read.csv(file=fileinname, header=TRUE, colClasses=tcol$classes)  
   
 
   #Sanity check, does variable order in file match that specified in tcols?
@@ -51,8 +51,7 @@ ReadTextFluxData <- function(fileinname, vars, time_vars){
   
   #Duplicate Fluxnet data column if the same variable needs to be
   #processed several times (e.g. RH converted to RH and Qair)
-  if(ncol(FluxData) != length(tcol$names))
-  {
+  if(ncol(FluxData) != length(tcol$names)){
     
     FluxData <- duplicate_columns(data=FluxData, vars=tcol$names)
     
@@ -87,28 +86,28 @@ ReadTextFluxData <- function(fileinname, vars, time_vars){
   
   ###### Get time step and date information #######
   
-	# Note number of time steps in data:
-	ntsteps <- nrow(FluxTime)
+  # Note number of time steps in data:
+  ntsteps <- nrow(FluxTime)
   
-	if(!(ntsteps>=12 && ntsteps < 1e9)){
-		CheckError(paste('Unable to determine number of time steps in:',
-			                stripFilename(fileinname)))
-	}
+  if(!(ntsteps>=12 && ntsteps < 1e9)){
+    CheckError(paste('Unable to determine number of time steps in:',
+			         stripFilename(fileinname)))
+  }
   
-	# and time step size (convert to date string)
+  # and time step size (convert to date string)
   start <- strptime(FluxTime$TIMESTAMP_START[1], "%Y%m%d%H%M")
-  end   <- strptime(FluxTime$TIMESTAMP_END[1], "%Y%m%d%H%M")
+  end <- strptime(FluxTime$TIMESTAMP_END[1], "%Y%m%d%H%M")
   
-	timestepsize <- as.numeric(end) - as.numeric(start)
+  timestepsize <- as.numeric(end) - as.numeric(start)
   
-	if( !(timestepsize>=300 && timestepsize<=3600) ){   #DO WE WANT THIS? DOES IT LIMIT tstep TO 1HR ????????????????????
-		CheckError(paste('Unable to ascertain time step size in',
-			               stripFilename(fileinname)))
-	}
+  if( !(timestepsize>=300 && timestepsize<=3600) ){   #DO WE WANT THIS? DOES IT LIMIT tstep TO 1HR ????????????????????
+    CheckError(paste('Unable to ascertain time step size in',
+			         stripFilename(fileinname)))
+  }
   
   # Time steps in a day and number of days in data set
-	tstepinday <- 86400/timestepsize 
-	ndays      <- ntsteps/tstepinday 
+  tstepinday <- 86400/timestepsize 
+  ndays      <- ntsteps/tstepinday 
 
   
   # Find starting date / time:
@@ -117,12 +116,12 @@ ReadTextFluxData <- function(fileinname, vars, time_vars){
   intyears  <- Yeardays(starttime$syear,ndays)
   
   #Create list for function exit:
-	filedata <- list(data=FluxData, vars=tcol$names, era_vars=era_vars, 
-                  attributes=attributes,
-                  units=units, var_ranges=var_ranges, categories=categories,
-                  time=FluxTime, ntsteps=ntsteps, starttime=starttime, 
-                  timestepsize=timestepsize, daysPerYr=intyears$daysperyear,
-                  ndays=ndays, whole=intyears$whole)
+  filedata <- list(data=FluxData, vars=tcol$names, era_vars=era_vars, 
+                   attributes=attributes,
+                   units=units, var_ranges=var_ranges, categories=categories,
+                   time=FluxTime, ntsteps=ntsteps, starttime=starttime, 
+                   timestepsize=timestepsize, daysPerYr=intyears$daysperyear,
+                   ndays=ndays, whole=intyears$whole)
 
   return(filedata)
 
@@ -135,16 +134,16 @@ ReadTextFluxData <- function(fileinname, vars, time_vars){
 #' Creates a netcdf file for flux variables
 #' @export
 CreateFluxNcFile = function(fluxfilename, datain,                 #outfile file and data
-                           latitude, longitude,                   #lat, lon
-                           site_code, long_sitename,              #Fluxnet site code and full site name
-                           datasetversion, github_rev,            #Dataset version and github revision
-                           tier=NA,                               #Fluxnet site tier
-                           ind_start, ind_end,                    #time period indices
-                           starttime, timestepsize,               #timing info
-                           flux_varname, cf_name,                 #Original Fluxnet variable names and CF_compliant names
-                           elevation=NA, towerheight=NA,          #Site elevation and flux tower height
-                           canopyheight=NA,                       #Canopy height
-                           short_veg_type=NA, long_veg_type=NA){  #Long and short IGBP vegetation types
+                            latitude, longitude,                   #lat, lon
+                            site_code, long_sitename,              #Fluxnet site code and full site name
+                            datasetversion, github_rev,            #Dataset version and github revision
+                            tier=NA,                               #Fluxnet site tier
+                            ind_start, ind_end,                    #time period indices
+                            starttime, timestepsize,               #timing info
+                            flux_varname, cf_name,                 #Original Fluxnet variable names and CF_compliant names
+                            elevation=NA, towerheight=NA,          #Site elevation and flux tower height
+                            canopyheight=NA,                       #Canopy height
+                            short_veg_type=NA, long_veg_type=NA){  #Long and short IGBP vegetation types
   
   # load netcdf library
   library(ncdf4) 
@@ -172,8 +171,6 @@ CreateFluxNcFile = function(fluxfilename, datain,                 #outfile file 
   td = ncdim_def('time', unlim=TRUE, units=timeunits, vals=timedata)
   
   # VARIABLE DEFINITIONS ##############################################
-  
-  
   
   #Find met variable indices
   var_ind <- which(datain$categories=="Eval")
@@ -205,6 +202,7 @@ CreateFluxNcFile = function(fluxfilename, datain,                 #outfile file 
     opt_vars[[ctr]] = towheight
     ctr <- ctr + 1
   }  
+  
   # Define site canopy height:
   if(!is.na(canopyheight)){
     canheight=ncvar_def('canopy_height','m',dim=list(xd,yd),
@@ -212,6 +210,7 @@ CreateFluxNcFile = function(fluxfilename, datain,                 #outfile file 
     opt_vars[[ctr]] = canheight
     ctr <- ctr + 1
   }
+  
   #Define site elevation:
   if(!is.na(elevation)){
     elev=ncvar_def('elevation','m',dim=list(xd,yd),
@@ -219,6 +218,7 @@ CreateFluxNcFile = function(fluxfilename, datain,                 #outfile file 
     opt_vars[[ctr]] = elev
     ctr <- ctr + 1
   }
+  
   # Define IGBP short vegetation type:
   if(!is.na(short_veg_type)){
     short_veg=ncvar_def('IGBP_veg_short','-',dim=list(xd,yd), missval=NULL,
@@ -226,6 +226,7 @@ CreateFluxNcFile = function(fluxfilename, datain,                 #outfile file 
     opt_vars[[ctr]] = short_veg
     ctr <- ctr + 1
   }
+  
   # Define IGBP long vegetation type:
   if(!is.na(long_veg_type)){
     long_veg=ncvar_def('IGBP_veg_long','-',dim=list(xd,yd), missval=NULL,
@@ -233,7 +234,6 @@ CreateFluxNcFile = function(fluxfilename, datain,                 #outfile file 
     opt_vars[[ctr]] = long_veg
     ctr <- ctr + 1 
   }
-  
   
   # END VARIABLE DEFINITIONS #########################################
   
@@ -266,7 +266,6 @@ CreateFluxNcFile = function(fluxfilename, datain,                 #outfile file 
   ncvar_put(ncid, latdim, vals=latitude)
   ncvar_put(ncid, londim, vals=longitude)
   
-  
   # Optional meta data for each site:
   if(!is.na(elevation)) {ncvar_put(ncid,elev,vals=elevation)}
   if(!is.na(towerheight)) {ncvar_put(ncid,towheight,vals=towerheight)}
@@ -274,13 +273,10 @@ CreateFluxNcFile = function(fluxfilename, datain,                 #outfile file 
   if(!is.na(short_veg_type)) {ncvar_put(ncid,short_veg,vals=short_veg_type)}
   if(!is.na(long_veg_type)) {ncvar_put(ncid,long_veg,vals=long_veg_type)}
   
-  
-  
   # Time dependent variables:
   lapply(1:length(var_defs), function(x) ncvar_put(nc=ncid, 
                                                    varid=var_defs[[x]], 
                                                    vals=datain$data[,var_ind[x]]))
-  
   
   #Add original Fluxnet variable name to file
   lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]], 
@@ -293,8 +289,6 @@ CreateFluxNcFile = function(fluxfilename, datain,                 #outfile file 
                                                     attname="Standard_name", 
                                                     attval=datain$attributes[var_ind[x],3], 
                                                     prec="text"))
-  
-  
   
   # Close netcdf file:
   nc_close(ncid)
@@ -311,7 +305,7 @@ CreateMetNcFile = function(metfilename, datain,                   #outfile file 
                            latitude, longitude,                   #lat, lon
                            site_code, long_sitename,              #Fluxnet site code and full site name
                            datasetversion, github_rev,            #Dataset version and github revision
-                           tier=NA,                                  #Fluxnet site tier
+                           tier=NA,                               #Fluxnet site tier
                            ind_start, ind_end,                    #time period indices
                            starttime, timestepsize,               #timing info
                            flux_varname, cf_name,                 #Original Fluxnet variable names and CF_compliant names
@@ -320,37 +314,34 @@ CreateMetNcFile = function(metfilename, datain,                   #outfile file 
                            short_veg_type=NA, long_veg_type=NA){  #Long and short IGBP vegetation types
   
   # load netcdf library
-	library(ncdf4) 
+  library(ncdf4) 
   
 
   #Extract time period to be written
   datain$data <- datain$data[ind_start:ind_end,]
   
-	# default missing value for all variables
-	missing_value=NcMissingVal
-  
-	# Define x, y and z dimensions
-	xd = ncdim_def('x',vals=c(1),units='')	
-	yd = ncdim_def('y',vals=c(1),units='')
-	zd = ncdim_def('z',vals=c(1),units='')
-  
-	# Determine data start date and time:
-	timeunits = CreateTimeunits(starttime)
-  
-	# Create time dimension variable:
-	tt=c(0:(length(ind_start:ind_end)-1))
-	timedata = as.double(tt*timestepsize)
-  
-	# Define time dimension:
-	td = ncdim_def('time', unlim=TRUE, units=timeunits, vals=timedata)
-  
-	# VARIABLE DEFINITIONS ##############################################
+  # default missing value for all variables
+  missing_value=NcMissingVal
 
+  # Define x, y and z dimensions
+  xd = ncdim_def('x',vals=c(1),units='')	
+  yd = ncdim_def('y',vals=c(1),units='')
+  zd = ncdim_def('z',vals=c(1),units='')
 
+  # Determine data start date and time:
+  timeunits = CreateTimeunits(starttime)
+
+  # Create time dimension variable:
+  tt = c(0:(length(ind_start:ind_end)-1))
+  timedata = as.double(tt*timestepsize)
+
+  # Define time dimension:
+  td = ncdim_def('time', unlim=TRUE, units=timeunits, vals=timedata)
+  
+  # VARIABLE DEFINITIONS ##############################################
   
   #Find met variable indices
   var_ind <- which(datain$categories=="Met")
-  
   
   #Create variable definitions for time series variables
   var_defs <- lapply(var_ind, function(x) ncvar_def(name=datain$vars[x],
@@ -359,116 +350,128 @@ CreateMetNcFile = function(metfilename, datain,                   #outfile file 
                                                     missval=missing_value, 
                                                     longname=datain$attributes[x,2]))
   
-  
-	# First necessary non-time variables:
-	# Define latitude:
-	latdim <- ncvar_def('latitude','degrees_north',dim=list(xd,yd),
-	                   missval=missing_value, longname='Latitude')  
-	# Define longitude:
-	londim <- ncvar_def('longitude','degrees_east',dim=list(xd,yd),
-	                   missval=missing_value,longname='Longitude')
-  
-  
-	#Then optional non-time variables:
-	opt_vars <- list()
-  ctr <- 1
-	# Define measurement height on tower:
-	if(!is.na(towerheight)){
-	  towheight=ncvar_def('tower_height','m',dim=list(xd,yd),
-	                      missval=missing_value,longname='Height of flux tower')
-	  opt_vars[[ctr]] = towheight
-    ctr <- ctr + 1
-	}  
-  # Define site canopy height:
-	if(!is.na(canopyheight)){
-	  canheight=ncvar_def('canopy_height','m',dim=list(xd,yd),
-	                      missval=missing_value,longname='Canopy height')
-	  opt_vars[[ctr]] = canheight
-	  ctr <- ctr + 1
-	}
-  #Define site elevation:
-	if(!is.na(elevation)){
-	  elev=ncvar_def('elevation','m',dim=list(xd,yd),
-	                      missval=missing_value,longname='Site elevation')
-	  opt_vars[[ctr]] = elev
-	  ctr <- ctr + 1
-	}
-	# Define IGBP short vegetation type:
-	if(!is.na(short_veg_type)){
-	  short_veg=ncvar_def('IGBP_veg_short','-',dim=list(xd,yd), missval=NULL,
-                        longname='IGBP vegetation type (short)', prec="char")
-	  opt_vars[[ctr]] = short_veg
-	  ctr <- ctr + 1
-	}
-	# Define IGBP long vegetation type:
-	if(!is.na(long_veg_type)){
-	  long_veg=ncvar_def('IGBP_veg_long','-',dim=list(xd,yd), missval=NULL,
-                       longname='IGBP vegetation type (long)', prec="char")
-	  opt_vars[[ctr]] = long_veg
-	  ctr <- ctr + 1 
-	}
-	
+  # First necessary non-time variables:
+  # Define latitude:
+  latdim <- ncvar_def('latitude','degrees_north',dim=list(xd,yd),
+	                  missval=missing_value, longname='Latitude')  
 
-	# END VARIABLE DEFINITIONS #########################################
+  # Define longitude:
+  londim <- ncvar_def('longitude','degrees_east',dim=list(xd,yd),
+	                  missval=missing_value,longname='Longitude')
+  
+  #Then optional non-time variables:
+  opt_vars <- list()
+  ctr <- 1
+	
+  # Define measurement height on tower:
+  if(!is.na(towerheight)){
+    towheight=ncvar_def('tower_height','m',dim=list(xd,yd),
+	                    missval=missing_value,longname='Height of flux tower')
+	opt_vars[[ctr]] = towheight
+    ctr <- ctr + 1
+  }  
+  
+  # Define site canopy height:
+  if(!is.na(canopyheight)){
+    canheight=ncvar_def('canopy_height','m',dim=list(xd,yd),
+	                    missval=missing_value,longname='Canopy height')
+	opt_vars[[ctr]] = canheight
+	ctr <- ctr + 1
+  }
+  
+  #Define site elevation:
+  if(!is.na(elevation)){
+    elev=ncvar_def('elevation','m',dim=list(xd,yd),
+	                      missval=missing_value,longname='Site elevation')
+	opt_vars[[ctr]] = elev
+	ctr <- ctr + 1
+  }
+  
+  # Define IGBP short vegetation type:
+  if(!is.na(short_veg_type)){
+    short_veg=ncvar_def('IGBP_veg_short','-',dim=list(xd,yd), missval=NULL,
+                        longname='IGBP vegetation type (short)', prec="char")
+	opt_vars[[ctr]] = short_veg
+	ctr <- ctr + 1
+  }
+  
+  # Define IGBP long vegetation type:
+  if(!is.na(long_veg_type)){
+    long_veg=ncvar_def('IGBP_veg_long','-',dim=list(xd,yd), missval=NULL,
+                       longname='IGBP vegetation type (long)', prec="char")
+	opt_vars[[ctr]] = long_veg
+	ctr <- ctr + 1 
+  }
+	
+  # END VARIABLE DEFINITIONS #########################################
   
   ### Create netcdf file ###
-	if(length(opt_vars)==0) {
+  if(length(opt_vars)==0) {
     ncid = nc_create(metfilename, vars=append(var_defs, c(list(latdim), list(londim))))
-	} else {
-	  ncid = nc_create(metfilename, vars=append(var_defs, c(list(latdim), list(londim), opt_vars)))
-	}
+  } else {
+    ncid = nc_create(metfilename, vars=append(var_defs, c(list(latdim), list(londim), opt_vars)))
+  }
   
-  
-	#### Write global attributes ###
+  #### Write global attributes ###
   ncatt_put(ncid,varid=0,attname='Production_time',
-		attval=as.character(Sys.time()))
-	ncatt_put(ncid,varid=0,attname='Github_revision',  
-		attval=github_rev, prec="text")
-	ncatt_put(ncid,varid=0,attname='site_code',
-		attval=site_code, prec="text")
+		    attval=as.character(Sys.time()))
+  ncatt_put(ncid,varid=0,attname='Github_revision',  
+		    attval=github_rev, prec="text")
+  ncatt_put(ncid,varid=0,attname='site_code',
+		    attval=site_code, prec="text")
   ncatt_put(ncid,varid=0,attname='site_name',
-          attval=as.character(long_sitename), prec="text")
+            attval=as.character(long_sitename), prec="text")
   ncatt_put(ncid,varid=0,attname='Fluxnet_dataset_version',
-		attval=datasetversion, prec="text")	  
-	ncatt_put(ncid,varid=0,attname='PALS contact',
-		attval='palshelp@gmail.com')
-	if(!is.na(tier)) {
-	  ncatt_put(ncid,varid=0,attname='Fluxnet site tier',
-	            attval=tier) }
-	
-	# Add variable data to file:
-	ncvar_put(ncid, latdim, vals=latitude)
-	ncvar_put(ncid, londim, vals=longitude)
-
+		    attval=datasetversion, prec="text")	  
+  ncatt_put(ncid,varid=0,attname='PALS contact',
+		    attval='palshelp@gmail.com')
   
-	# Optional meta data for each site:
-	if(!is.na(elevation)) {ncvar_put(ncid,elev,vals=elevation)}
-	if(!is.na(towerheight)) {ncvar_put(ncid,towheight,vals=towerheight)}
-  if(!is.na(canopyheight)) {ncvar_put(ncid,canheight,vals=canopyheight)}
-	if(!is.na(short_veg_type)) {ncvar_put(ncid,short_veg,vals=short_veg_type)}
-  if(!is.na(long_veg_type)) {ncvar_put(ncid,long_veg,vals=long_veg_type)}
+  if(!is.na(tier)) {
+    ncatt_put(ncid,varid=0,attname='Fluxnet site tier',
+	          attval=tier) 
+  }
+	
+  # Add variable data to file:
+  ncvar_put(ncid, latdim, vals=latitude)
+  ncvar_put(ncid, londim, vals=longitude)
 
+  # Optional meta data for each site:
+  if(!is.na(elevation)) {
+    ncvar_put(ncid,elev,vals=elevation)
+  }
+  
+  if(!is.na(towerheight)) {
+    ncvar_put(ncid,towheight,vals=towerheight)
+  }
+  
+  if(!is.na(canopyheight)) {
+    ncvar_put(ncid,canheight,vals=canopyheight)
+  }
+  
+  if(!is.na(short_veg_type)) {
+    ncvar_put(ncid,short_veg,vals=short_veg_type)
+  }
+  
+  if(!is.na(long_veg_type)) {
+    ncvar_put(ncid,long_veg,vals=long_veg_type)
+  }
 
- 
-	# Time dependent variables:
+  # Time dependent variables:
   lapply(1:length(var_defs), function(x) ncvar_put(nc=ncid, 
                                                    varid=var_defs[[x]], 
                                                    vals=datain$data[,var_ind[x]]))
   
-      	
-	#Add original Fluxnet variable name to file
-	lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]], attname="Fluxnet_name", 
+  # Add original Fluxnet variable name to file
+  lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]], attname="Fluxnet_name", 
                                                    attval=datain$attributes[var_ind[x],1], prec="text"))  
 	
-	#Add CF-compliant name to file (if not missing)
-	lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]], 
+  # Add CF-compliant name to file (if not missing)
+  lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]], 
                                                    attname="Standard_name", 
                                                    attval=datain$attributes[var_ind[x],3], 
                                                    prec="text"))
 	
-	
-
-	# Close netcdf file:
-	nc_close(ncid)
+  # Close netcdf file
+  nc_close(ncid)
 }
 
