@@ -17,6 +17,10 @@ TODO:
 
 - Add % gap-filled and missing as a variable attribute
 
+- Move secs_per_day from Check_and_gapfill to Constants. Also used (as 86400) in FluxTowerSpreadsheetToNc.
+
+- Gap check function is long and needs tidying up
+
 
 
 Some info to create package...
