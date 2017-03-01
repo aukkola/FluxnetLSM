@@ -67,7 +67,7 @@ ChangeUnits = function(datain){
         if(converted[which(datain$vars=="PA")]) {
           psurf_units <- alma_units[which(datain$vars=="PA")]         
         } 
-        if (converted[which(datain$vars=="Tair")]){
+        if (converted[which(datain$vars=="TA_F_MDS")]){
           tair_units <- alma_units[which(datain$vars=="TA_F_MDS")]
         }          
 
