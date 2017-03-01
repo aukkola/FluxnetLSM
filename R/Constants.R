@@ -129,8 +129,8 @@ findTimeInfo <- function(time_vars, headers){
 
 #-----------------------------------------------------------------------------
 
-#' Retrieves original and target variable units
-#' @return original and target units
+#' Retrieves variable information
+#' @return variable information
 #' @export
 retrieve_varinfo <- function(vars_present, all_vars, attribute){
   
