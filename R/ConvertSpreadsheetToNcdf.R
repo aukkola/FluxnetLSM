@@ -406,12 +406,12 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
       if(any(plot=="annual") | any(plot=="diurnal") | any(plot=="timeseries")){
                 
         plot_nc(ncfile=nc_met, analysis_type=plot, 
-                vars=DataFromText$vars[DataFromText$categories=="Met"],
+                vars=DataFromText$out_vars[DataFromText$categories=="Met"],
                 outfile=outfile_met)      
         
         
         plot_nc(ncfile=nc_flux, analysis_type=plot,
-                vars=DataFromText$vars[DataFromText$categories=="Eval"],
+                vars=DataFromText$out_vars[DataFromText$categories=="Eval"],
                 outfile=outfile_flux)
 
 
