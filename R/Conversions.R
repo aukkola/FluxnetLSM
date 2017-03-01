@@ -60,21 +60,21 @@ ChangeUnits = function(datain){
       } else if(datain$vars[k]=="RH" & flx_units[k]=="%" & alma_units[k]=="kg/kg"){  
         
         #Find Tair and PSurf units
-        psurf_units <- flx_units[which(datain$vars=="PSurf")]
-        tair_units  <- flx_units[which(datain$vars=="Tair")]
+        psurf_units <- flx_units[which(datain$vars=="PA")]
+        tair_units  <- flx_units[which(datain$vars=="TA_F_MDS")]
         
         #If already converted, reset units to new converted units
-        if(converted[which(datain$vars=="PSurf")]) {
-          psurf_units <- alma_units[which(datain$vars=="PSurf")]         
+        if(converted[which(datain$vars=="PA")]) {
+          psurf_units <- alma_units[which(datain$vars=="PA")]         
         } 
         if (converted[which(datain$vars=="Tair")]){
-          tair_units <- alma_units[which(datain$vars=="Tair")]
+          tair_units <- alma_units[which(datain$vars=="TA_F_MDS")]
         }          
 
-        datain$data[[k]] <- Rel2SpecHum(relHum=datain$data[[which(datain$vars=="RelH")]], 
-                                        airtemp=datain$data[[which(datain$vars=="Tair")]], 
+        datain$data[[k]] <- Rel2SpecHum(relHum=datain$data[[which(datain$vars=="RH")]], 
+                                        airtemp=datain$data[[which(datain$vars=="TA_F_MDS")]], 
                                         tair_units=tair_units, 
-                                        pressure=datain$data[[which(datain$vars=="PSurf")]], 
+                                        pressure=datain$data[[which(datain$vars=="PA")]], 
                                         psurf_units=psurf_units)
         
         
