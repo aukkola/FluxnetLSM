@@ -83,11 +83,6 @@ ReadTextFluxData <- function(fileinname, vars, time_vars){
   out_vars <- retrieve_outnames(vars_present=tcol$names, all_vars=vars)
   
   
-  #Change column names and tcol$names to match output variable names
-  #tcol$names         <- rename_vars(vars_present=tcol$names, all_vars=vars)
-  colnames(FluxData) <- tcol$names
-  
-  
   ###### Get time step and date information #######
   
 	# Note number of time steps in data:
