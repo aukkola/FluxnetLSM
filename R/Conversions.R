@@ -37,27 +37,27 @@ ChangeUnits = function(datain){
       
       
       ## Air temperature (C to K)
-      if(datain$vars[k]=="Tair" & flx_units[k]=="C" & alma_units[k]=="K"){
+      if(datain$vars[k]=="TA_F_MDS" & flx_units[k]=="C" & alma_units[k]=="K"){
         datain$data[[k]] <- datain$data[[k]] + 273.15
         
         
       ## CO2: different but equivalent units, do nothing
-      } else if(datain$vars[k]=="CO2air" & flx_units[k]=="umolCO2/mol" & alma_units[k]=="ppm"){
+      } else if(datain$vars[k]=="CO2_F_MDS" & flx_units[k]=="umolCO2/mol" & alma_units[k]=="ppm"){
         next
         
         
       ## Rainfall (mm/timestep to mm/s)
-      } else if(datain$vars[k]=="Rainf" & flx_units[k]=="mm" & alma_units[k]=="kg/m2/s"){
+      } else if(datain$vars[k]=="P" & flx_units[k]=="mm" & alma_units[k]=="kg/m2/s"){
         datain$data[[k]] <- datain$data[[k]] / tstep
         
         
       ## Air pressure (kPa to Pa)
-      } else if(datain$vars[k]=="PSurf" & flx_units[k]=="kPa" & alma_units[k]=="Pa"){  
+      } else if(datain$vars[k]=="PA" & flx_units[k]=="kPa" & alma_units[k]=="Pa"){  
         datain$data[[k]] <- datain$data[[k]] * 1000
         
         
-      ## Qair (in kg/kg, calculate from tair, rel humidity and psurf)
-      } else if(datain$vars[k]=="Qair" & flx_units[k]=="%" & alma_units[k]=="kg/kg"){  
+      ## Specific humidity (in kg/kg, calculate from tair, rel humidity and psurf)
+      } else if(datain$vars[k]=="RH" & flx_units[k]=="%" & alma_units[k]=="kg/kg"){  
         
         #Find Tair and PSurf units
         psurf_units <- flx_units[which(datain$vars=="PSurf")]

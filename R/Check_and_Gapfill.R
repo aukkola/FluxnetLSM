@@ -31,7 +31,8 @@
 CheckDataGaps <- function(datain, missing_val, QCmeasured, 
                           QCgapfilled, missing, gapfill_all, 
                           gapfill_good, gapfill_med, gapfill_poor,
-                          min_yrs, essential_met, preferred_eval){
+                          min_yrs, essential_met, preferred_eval,
+                          all_eval){
     
     #Checks the existence of data gaps and determines which
     #years should be outputted depending on the percentage of missing
@@ -116,7 +117,7 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
         if(any(!is.na(threshold))){
           
           #Check if QC variable exists
-          qc_var <- which(datain$vars==paste(datain$vars[k], "qc", sep="_")) 
+          qc_var <- which(datain$vars==paste(datain$vars[k], "QC", sep="_")) 
           
           #If found QC variable, calculate percentage of gap-filling
           if(length(qc_var) > 0){
@@ -165,13 +166,18 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
     ### Check that essential variables have at least one common year of data
     ### without too many gaps
     ### and the year has one or more evaluation variables available
-    
     essential_ind <- sapply(essential_met, function(x) which(names(perc_missing) == x))
     preferred_ind <- sapply(preferred_eval, function(x) which(names(perc_missing) == x))
+    eval_ind      <- sapply(all_eval, function(x) which(names(perc_missing)==x))
+
     
-    
-    #Initialise
+    #Initialise (years to keep)
     yr_keep <- rep(TRUE, length(start))
+    
+    #Also initialise variable to save info about evaluation
+    #variables with gaps exceeding thresholds (used to remove
+    #eval variables if option chosen)
+    eval_remove <- vector()
     
     #Loop through years
     for(k in 1:length(start)){
@@ -190,6 +196,10 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
         }
         
         
+        #Check if any evaluation variables have too many gaps
+        eval_remove <- append(eval_remove, which(miss[eval_ind] > missing))
+        
+        
         #If missing value threshold not exceeded, check for gapfilling (if threshold set)
         if(yr_keep[k] & any(!is.na(threshold))){
           
@@ -203,6 +213,9 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
               yr_keep[k] <- FALSE 
             }
           
+            #Check if any evaluation variables have too much gap-filling
+            eval_remove <- append(eval_remove, which(gaps[eval_ind] > threshold))
+                        
           #Using gapfill_good/med/poor
           } else {
             
@@ -210,6 +223,10 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
             exclude_yr <- sapply(1:length(threshold), function(x) any(gaps[x,essential_ind] > threshold[x]) | 
                                                                   all(gaps[x,preferred_ind] > threshold[x]))
                                              
+            #Check if any evaluation variables have too much gap-filling
+            eval_remove <- append(eval_remove, sapply(1:length(threshold), 
+                                               function (x) which(gaps[x,eval_ind] > threshold[x])))
+            
             if(any(exclude_yr)){
               yr_keep[k] <- FALSE
             }
@@ -222,7 +239,6 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
     
     #Indices of year(s) to keep
     yr_ind <- which(yr_keep)
-    
     
     ### If no years fulfilling criteria, abort. ###
     if(all(!yr_keep) | length(yr_ind) < min_yrs){
@@ -318,7 +334,7 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
       #Calculate % gap-filled
       #Find indices for QC variables (if exist)
       qc_ind <- sapply(datain$vars, function(x) 
-                          which(datain$vars==paste(x, "_qc", sep="")))
+                          which(datain$vars==paste(x, "_QC", sep="")))
       
       total_gapfilled[[k]] <- vector()
       for(v in 1:length(qc_ind)){
@@ -339,6 +355,7 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
       
     
     out <- list(total_missing=total_missing, total_gapfilled=total_gapfilled, 
+                eval_remove=all_eval[unique(eval_remove)],
                 yr_keep=yr_ind, consec=consec, 
                 tseries_start=tstart, tseries_end=tend)
     
@@ -352,9 +369,8 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
 #' Gapfills met data
 #' @return out
 #' @export
-GapfillMet <- function(datain, era_data, era_vars,
-tair_units, vpd_units,
-missing_val){
+GapfillMet <- function(datain, era_data, era_vars, tair_units, vpd_units,
+                       missing_val){
     
     #ERAinterim estimates are provided for TA, SW_in,
     #LW_IN, VPD, PA, P and WS
@@ -398,7 +414,7 @@ missing_val){
             
             ### Relative humidity ###
             #If Flux variable relative humidity, but ERA variable VPD, convert
-            if(avail_flux[k] == "RelH" & era_name=="VPD_ERA"){
+            if(avail_flux[k] == "RH" & era_name=="VPD_ERA"){
                 
                 era_tair_col <- which(colnames(era_data)=="TA_ERA")
                 
@@ -428,7 +444,7 @@ missing_val){
             
             ## Set QC flags to "4" for time steps filled with ERA data ##
             #Find corresponding qc variable, if available
-            qc_col <- which(colnames(datain)==paste(avail_flux[k], "_qc", sep=""))
+            qc_col <- which(colnames(datain)==paste(avail_flux[k], "_QC", sep=""))
             
             
             #Replace era gap-filled time steps with "4"
@@ -467,7 +483,7 @@ missing_val){
 #-----------------------------------------------------------------------------
 
 # TODO: This function exists in palsR/Gab in pals/R/FluxtowerSpreadsheetToNc.R and has a different signature. Merge?
-#' Checks that data within specified ranges
+#' Checks that data are within specified ranges
 #' @export
 CheckTextDataRanges = function(datain, missingval){
     
@@ -545,7 +561,25 @@ create_qc_var <- function(datain, qc_name){
     return(datain)
 }
 
+#-----------------------------------------------------------------------------
 
+
+#' Fills QC flags with 3 (poor gap-filling) when
+#' QC flag missing but data variable available
+#' @return datain
+#' @export
+fill_qcvar_missing <- function(datain){
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+}
 
 
 

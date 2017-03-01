@@ -1,5 +1,4 @@
 # Author: ned haughton
-# Date: 2017-02-17
 
 # Uses rvest library for read_html, html_node, html_attr, html_table
 
@@ -39,6 +38,23 @@ get_site_code <- function(metadata){
 }
 
 
+#' Gets the git version from the installed package
+#' See src/zzz.R for how git revision is discovered
+get_git_version <- function() {
+    desc <- read.dcf(system.file("DESCRIPTION", package = "FluxnetProcessing"))
+    if ("git_revision" %in% colnames(desc)) {
+        git_rev <- desc[1, "git_revision"]
+    } else if ("RemoteSha" %in% colnames(desc)) {
+        git_rev <- desc[1, "RemoteSha"]
+    } else {
+        git_rev <- "UNKNOWN"
+        warning("Unknown git revision of FluxnetProcessing.
+    Please visit https://github.com/aukkola/FLUXNET2015_processing and review the installation procedure")
+    }
+    return(git_rev)
+}
+
+
 #' Adds processor metadata, including processor version
 #'
 #' @return metadata list
@@ -47,8 +63,8 @@ add_processing_metadata <- function(metadata) {
     metadata$Processing <- list(
         processor = "FluxnetProcessing",
         URL = "https://github.com/aukkola/FLUXNET2015_processing",
-        # TODO: add git tags if we start using them.
-        git_rev = system("git rev-parse --verify HEAD", intern = TRUE)
+        version = packageVersion("FluxnetProcessing"),
+        git_rev = get_git_version()
     )
 
     return(metadata)
@@ -88,7 +104,7 @@ update_metadata <- function(metadata, new_metadata, overwrite=TRUE) {
 #Find site info file path (not using data() command directly because reads a CSV with a
 #semicolon separator and this leads to incorrect table headers)
 
-site_csv_file <- system.file("data","Site_metadata.csv",package="FluxnetProcessing")
+site_csv_file <- system.file("data", "Site_metadata.csv", package = "FluxnetProcessing")
 
 #' Tries to gather metadata from the included site CSV
 #'
@@ -153,7 +169,7 @@ save_metadata_list_to_csv <- function(metadata_lists) {
 update_csv_from_ornl <- function() {
     ornl_site_codes <- get_ornl_site_codes()
     ornl_url_list <- get_ornl_site_url_list(ornl_site_codes)
-    message(length(ornl_url_list), ' sites found.')
+    message(length(ornl_url_list), " sites found.")
 
     metadata_lists <- list()
     for (site_code in ornl_site_codes) {

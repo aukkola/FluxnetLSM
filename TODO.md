@@ -21,6 +21,9 @@ TODO:
 
 - Gap check function is long and needs tidying up
 
+- Add a check for gaps in met variables after gap-filling, just to be sure no gaps left in case there are missing values in ERAinterim....
+
+-IMPORTANT: change unit conversions to rely on FLUXNET variable names, not alma so doesn't pose problems if user changes output name
 
 
 Some info to create package...

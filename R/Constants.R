@@ -127,15 +127,13 @@ findTimeInfo <- function(time_vars, headers){
   return(tcols)
 }
 
-  
-
 #-----------------------------------------------------------------------------
 
-#' Renames Fluxnet variables to desired output variable names
-#' @return renamed variables
+#' Retrieves variable information
+#' @return variable information
 #' @export
-rename_vars <- function(vars_present, all_vars){
-
+retrieve_varinfo <- function(vars_present, all_vars, attribute){
+  
   #Find index for fluxnet variables present in file
   ind_present <- sapply(vars_present, function(x) which(all_vars$Fluxnet_variable==x))
   
@@ -144,11 +142,11 @@ rename_vars <- function(vars_present, all_vars){
     ind_present <- unlist(remove_duplicates(ind_present))
   } 
   
-  #Replace names with corresponding output variable names
-  renamed_vars <- all_vars$Output_variable[ind_present]
-
-  return(renamed_vars)
+  col_ind <- which(colnames(all_vars)==attribute)
+  var_info <- all_vars[ind_present, col_ind]
+  names(var_info) <- all_vars$Fluxnet_variable[ind_present]  
   
+  return(var_info)
 }
 
 #-----------------------------------------------------------------------------
@@ -199,47 +197,6 @@ retrieve_atts <- function(vars_present, all_vars){
   return(attributes)
 }
 
-#-----------------------------------------------------------------------------
-
-#' Retrieves variable categories to divide into met and flux data
-#' @return variable categories
-#' @export
-retrieve_categories <- function(vars_present, all_vars){
-  
-  #Find index for fluxnet variables present in file
-  ind_present <- sapply(vars_present, function(x) which(all_vars$Fluxnet_variable==x))
-  
-  #Check for duplicates (if Fluxnet variable being processed more than once)
-  if(any(duplicated(ind_present))){
-    ind_present <- unlist(remove_duplicates(ind_present))
-  } 
-  
-  cat_vars <- all_vars$Category[ind_present]
-  names(cat_vars) <- all_vars$Output_variable[ind_present]
-  
-  return(cat_vars)
-}
-
-#-----------------------------------------------------------------------------
-
-#' Retrieves names of ERAinterim variables
-#' @return ERAinterim variables
-#' @export
-retrieve_ERAvars <- function(vars_present, all_vars){
-  
-  #Find index for fluxnet variables present in file
-  ind_present <- sapply(vars_present, function(x) which(all_vars$Fluxnet_variable==x))
-  
-  #Check for duplicates (if Fluxnet variable being processed more than once)
-  if(any(duplicated(ind_present))){
-    ind_present <- unlist(remove_duplicates(ind_present))
-  } 
-  
-  cat_vars <- all_vars$ERAinterim_variable[ind_present]
-  names(cat_vars) <- all_vars$Output_variable[ind_present]
-  
-  return(cat_vars)
-}
 
 #-----------------------------------------------------------------------------
 
@@ -262,7 +219,7 @@ retrieve_ranges <- function(vars_present, all_vars){
   
   #Combine
   var_ranges <- rbind(range_min, range_max)
-  colnames(var_ranges) <- all_vars$Output_variable[ind_present]  
+  colnames(var_ranges) <- all_vars$Fluxnet_variable[ind_present]  
   
   return(var_ranges)
 }

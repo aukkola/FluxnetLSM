@@ -8,15 +8,33 @@
 #' Main function to convert Fluxnet2015 CSV-files to NetCDF
 #'
 #' @param infile input filename,
-#'   e.g. "FULLSET/FLX_AU-How_FLUXNET2015_FULLSET_HH_2001-2014_1-3.csv"
-#' @param era_file ERA input file (needed if using ERAinterim to gapfill met variables)
-#'   e.g. "FULLSET/FLX_AU-How_FLUXNET2015_ERAI_HH_1989-2014_1-3.csv"
-#' @param threshold How many percent of time steps allowed to be missing in any given year?
-#' @param min_yrs Minimum number of consecutive years to process
-#' @param out_path output path e.g. "./FLUXNET2016_processing/"
+#'        e.g. "FULLSET/FLX_AU-How_FLUXNET2015_FULLSET_HH_2001-2014_1-3.csv"
 #' @param site_code Fluxnet site code e.g. "AU-How"
+#' @param out_path output path e.g. "./FLUXNET2016_processing/"
+#' @param era_file ERA input file (needed if using ERAinterim to gapfill met variables)
+#'        e.g. "FULLSET/FLX_AU-How_FLUXNET2015_ERAI_HH_1989-2014_1-3.csv"
 #' @param ERA_gapfill Gapfill met variables using ERAinterim?
-#' @param plot Should annual, diurnal and/or 14-day running mean plots be produced? Set to NA if not
+#' @param datasetname Name of the dataset, e.g. FLUXNET2015
+#' @param datasetversion Version of the dataset, e.g. "v1-3"
+#' @param missing How many percent of time steps allowed to be missing in any given year?
+#' @param gapfill_all How many percent of time steps allowed to be gap-filled 
+#'        (any quality) in any given year? Note if gapfill_all is set, any thresholds
+#'        for gapfill_good, gapfill_med or gapfill_poor are ignored. Set to NA if not required.
+#' @param gapfill_good How many percent of time steps allowed to be good-quality gap-filled 
+#'        in any given year? Refer to package documentation for information on QC flags.
+#'        Set to NA if not required (default).
+#' @param gapfill_med How many percent of time steps allowed to be medium-quality gap-filled 
+#'        in any given year? Refer to package documentation for information on QC flags.
+#'        Set to NA if not required (default).
+#' @param gapfill_poor How many percent of time steps allowed to be poor-quality gap-filled 
+#'        in any given year? Refer to package documentation for information on QC flags.
+#'        Set to NA if not required (default).
+#' @param min_yrs Minimum number of consecutive years to process
+#' @param include_all_eval Should all evaluation values be included, regardless of data gaps? 
+#'        If set to FALSE, any evaluation variables with missing or gap-filled values in
+#'        excess of the thresholds will be discarded.
+#' @param plot Should annual, diurnal and/or 14-day running mean plots be produced? 
+#'        Set to NA if not required.
 #' 
 #' @export
 #'
@@ -27,6 +45,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                                       missing = 10, gapfill_all=10,
                                       gapfill_good=NA, gapfill_med=NA,
                                       gapfill_poor=NA, min_yrs=2,
+                                      include_all_eval=TRUE,
                                       plot=c("annual", "diurnal", "timeseries")) {
     
     library(R.utils)
@@ -90,9 +109,12 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                                      time_vars=time_vars)
     
     
-    # Make sure whole number of days in dataset:
+    # Make sure whole number of days in dataset:0
     CheckSpreadsheetTiming(DataFromText)
     
+    
+    #Replace vars with those found in file
+    vars <- DataFromText$vars
     
     # Check if variables have gaps in the time series and determine what years to output:
     gaps  <- CheckDataGaps(datain = DataFromText, missing_val = SprdMissingVal,
@@ -100,17 +122,54 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                            missing = missing, gapfill_all=gapfill_all,
                            gapfill_good=gapfill_good, gapfill_med=gapfill_med,
                            gapfill_poor=gapfill_poor, min_yrs=min_yrs,
-                           essential_met = vars$Output_variable[which(vars$Essential_met)],
-                           preferred_eval = vars$Output_variable[which(vars$Preferred_eval)])
+                           essential_met = vars[which(DataFromText$essential_met)],  #FIX MUST NOT BE READ STRAIGHT FROM FILE !!!!!!!!!!!!
+                           preferred_eval = vars[which(DataFromText$preferred_eval)],
+                           all_eval = vars[which(DataFromText$categories=="Eval")])
     
     
-    #Remove evaluation variables that have too many gaps    COMPLETE !!!!!!
+    ### Save info on which evaluation variables have all values missing ###
+
+    #These are excluded when writing NetCDF file
+    #Find variables with all values missing
+    all_missing <- sapply(gaps$total_missing, function(x) names(which(x==100)))
+    
+    exclude_eval <- NA
+    if(length(all_missing) > 0){
+      
+      #Extract names of evaluation variables
+      cats <- DataFromText$categories
+      eval_vars <- names(cats[cats=="Eval"])
+      
+      #Find eval variables with all values missing
+      exclude_eval <- intersect(all_missing, eval_vars)
+      
+      #Only exclude QC variables if corresponding data variable excluded as well. Keep otherwise
+      #Find all QC variables
+      qc_vars <- exclude_eval[grepl("_QC", exclude_eval)]
+      
+      if(length(qc_vars) > 0){
+        
+        #Find QC variables with corresponding data variable
+        remove_qc <-  is.element(gsub("_QC", "", qc_vars), exclude_eval)
+       
+        #If any QC vars without a corresponding data variable, don't include
+        #them in excluded variables
+        if(any(!remove_qc)){
+          exclude_eval <- exclude_eval[-which(exclude_eval==qc_vars[!remove_qc])]      
+          
+        }
+      }
+    }
     
     
-    #Add an option for this
     
-    
-    
+    ### Remove evaluation variables that have too many gaps if option chosen ###
+      
+    if(!include_all_eval){
+      
+      #Add variables with too many gaps/gap-filling to excluded eval variables
+      exclude_eval <- unique(c(exclude_vars, gaps$eval_remove))
+    }
     
     
     
@@ -137,8 +196,8 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
         ind <- which(DataFromText$categories=="Met")
         
         #Retrieve VPD and air temp units. Used to convert ERAinterim VPD to RH in gapfill function
-        tair_units <- DataFromText$units$original_units[which(DataFromText$vars=="Tair")]
-        vpd_units  <- DataFromText$units$original_units[which(DataFromText$vars=="VPD")]
+        tair_units <- DataFromText$units$original_units[which(DataFromText$vars=="TA_F_MDS")]
+        vpd_units  <- DataFromText$units$original_units[which(DataFromText$vars=="VPD_F_MDS")]
         
         #Gapfill met variables
         temp_data <- GapfillMet(datain=DataFromText$data[,ind], era_data=era_data,
@@ -182,6 +241,11 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     
     
     
+    ###########################################
+    ### Convert units and check data ranges ###
+    ###########################################
+    
+    
     # Convert data units from original Fluxnet units
     # to desired units as set in variables.csv
     ConvertedData <- ChangeUnits(DataFromText)
@@ -195,14 +259,11 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     DataFromText <- ConvertedData
     
     
-    #Determine number of files to be written (split site according to data gaps if necessary)
+    #Determine number of files to be written 
     no_files <- length(unique(gaps$consec))
     
     
-    
-    
-    #write github revision number in netcdf attributes
-    
+        
     ####################################################
     ###--- Write output met and flux NetCDF files ---###
     ####################################################
@@ -235,8 +296,14 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
             
         }
         
+                  
         
-        ### Create netcdf met driving file ###
+        ###--- Create netcdf met driving file ---###
+        
+        #Find met variable indices
+        met_ind <- which(datain$categories=="Met")
+        
+        #Write met file
         CreateMetNcFile( metfilename=metfilename, 
                          datain=DataFromText,
                          latitude=site_info$SiteLatitude,
@@ -254,11 +321,37 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                          towerheight=site_info$TowerHeight,
                          canopyheight=site_info$CanopyHeight,
                          short_veg_type=site_info$IGBP_vegetation_short,
-                         long_veg_type=site_info$IGBP_vegetation_long)
+                         long_veg_type=site_info$IGBP_vegetation_long,
+                         missing=missing, gapfill_all=gapfill_all, 
+                         gapfill_good=gapfill_good, gapfill_med=gapfill_med, 
+                         gapfill_poor=gapfill_poor, min_yrs=min_yrs,
+                         total_missing=gaps$total_missing[[k]][met_ind],
+                         total_gapfilled=gaps$total_gapfilled[[k]][met_ind],
+                         infile=infile,
+                         var_ind=met_ind)
         
         
         
-        ### Create netcdf flux data file ###
+        ###--- Create netcdf flux data file ---###
+        
+        #Find eval variable indices
+        flux_ind <- which(DataFromText$categories=="Eval")
+        
+        #If eval variables to exclude, remove these now
+        if(any(!is.na(exclude_eval))){    
+          rm_ind    <- sapply(1:length(exclude_eval), function(x) 
+                             which(DataFromText$vars[flux_ind]==exclude_eval[x]))
+          flux_ind  <- flux_ind[-rm_ind]
+        }        
+        
+        if(length(flux_ind)==0){
+          CheckError("No evaluation variables to process, all variables have",
+                     "too many missing values or gap-filling. Set",
+                     "include_all_eval to TRUE to process variables.")
+        }
+        
+        
+        #Write flux file
         CreateFluxNcFile(fluxfilename=fluxfilename, datain=DataFromText,
                          latitude=site_info$SiteLatitude,
                          longitude=site_info$SiteLongitude,
@@ -275,18 +368,23 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                          towerheight=site_info$TowerHeight,
                          canopyheight=site_info$CanopyHeight,
                          short_veg_type=site_info$IGBP_vegetation_short,
-                         long_veg_type=site_info$IGBP_vegetation_long)
-        
+                         long_veg_type=site_info$IGBP_vegetation_long,
+                         missing=missing, gapfill_all=gapfill_all, 
+                         gapfill_good=gapfill_good, gapfill_med=gapfill_med, 
+                         gapfill_poor=gapfill_poor, min_yrs=min_yrs,
+                         total_missing=gaps$total_missing[[k]][flux_ind],
+                         total_gapfilled=gaps$total_gapfilled[[k]][flux_ind],
+                         infile=infile,
+                         var_ind=flux_ind)
         
     }
     
+      
     
     
-    
-    
-    #################################
-    ### Plotting analysis outputs ###
-    ################################# 
+    #############################
+    ### Plot analysis outputs ###
+    ############################# 
     
     #Plots annual and diurnal cycle plots, as well
     #as a 14-day running mean time series depending on
@@ -332,8 +430,25 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     
     
     
+    #################################################
+    ### Collate processing information into a log ###
+    #################################################
+            
+    #Include:
+    # - site code
+    # - met output file
+    # - flux output file
+    # - excluded evaluation variables
     
     
+    site_log <- cat("Site processed successfully.",
+                    "\nSite code:", site_code,
+                    "\nOutput met file:", metfilename,
+                    "\nOutput flux file:", fluxfilename,
+                    "\nExcluded eval variables:",  paste(exclude_eval, collapse=", "),
+                    "\n==============================================================")
     
+    
+    return(site_log)
     
 } #function

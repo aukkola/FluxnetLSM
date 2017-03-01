@@ -74,15 +74,19 @@ ReadTextFluxData <- function(fileinname, vars, time_vars){
   attributes <- retrieve_atts(vars_present=tcol$names, all_vars=vars)
   
   #Retrieve variable categories (met/eval):
-  categories <- retrieve_categories(vars_present=tcol$names, all_vars=vars)
+  categories <- retrieve_varinfo(vars_present=tcol$names, all_vars=vars, attribute="Category")
   
   #Retrieve names of ERAinterim variables
-  era_vars <- retrieve_ERAvars(vars_present=tcol$names, all_vars=vars)
+  era_vars <- retrieve_varinfo(vars_present=tcol$names, all_vars=vars, attribute="ERAinterim_variable")
   
-  
-  #Change column names and tcol$names to match output variable names
-  tcol$names         <- rename_vars(vars_present=tcol$names, all_vars=vars)
-  colnames(FluxData) <- tcol$names
+  #Retrieve output variable names
+  out_vars <- retrieve_varinfo(vars_present=tcol$names, all_vars=vars, attribute="Output_variable")
+   
+  #Retrieve output variable names
+  ess_met <- retrieve_varinfo(vars_present=tcol$names, all_vars=vars, attribute="Essential_met")
+
+  #Retrieve output variable names
+  pref_eval <- retrieve_varinfo(vars_present=tcol$names, all_vars=vars, attribute="Preferred_eval")
   
   
   ###### Get time step and date information #######
@@ -101,9 +105,10 @@ ReadTextFluxData <- function(fileinname, vars, time_vars){
   
 	timestepsize <- as.numeric(end) - as.numeric(start)
   
-	if( !(timestepsize>=300 && timestepsize<=3600) ){   #DO WE WANT THIS? DOES IT LIMIT tstep TO 1HR ????????????????????
-		CheckError(paste('Unable to ascertain time step size in',
-			               stripFilename(fileinname)))
+	if( !(timestepsize>=300 && timestepsize<=3600) ){
+		CheckError(paste("Time step size must be between
+                     300 and 3600 seconds. Time step size",
+                     timestepsize, "found in file"))
 	}
   
   # Time steps in a day and number of days in data set
@@ -118,7 +123,8 @@ ReadTextFluxData <- function(fileinname, vars, time_vars){
   
   #Create list for function exit:
 	filedata <- list(data=FluxData, vars=tcol$names, era_vars=era_vars, 
-                  attributes=attributes,
+                  attributes=attributes, out_vars=out_vars,
+                  essential_met=ess_met, preferred_eval=pref_eval,
                   units=units, var_ranges=var_ranges, categories=categories,
                   time=FluxTime, ntsteps=ntsteps, starttime=starttime, 
                   timestepsize=timestepsize, daysPerYr=intyears$daysperyear,
@@ -144,7 +150,14 @@ CreateFluxNcFile = function(fluxfilename, datain,                 #outfile file 
                            flux_varname, cf_name,                 #Original Fluxnet variable names and CF_compliant names
                            elevation=NA, towerheight=NA,          #Site elevation and flux tower height
                            canopyheight=NA,                       #Canopy height
-                           short_veg_type=NA, long_veg_type=NA){  #Long and short IGBP vegetation types
+                           short_veg_type=NA, long_veg_type=NA,   #Long and short IGBP vegetation types
+                           missing, gapfill_all, gapfill_good,    #thresholds used in processing
+                           gapfill_med, gapfill_poor, min_yrs, 
+                           total_missing, total_gapfilled,        #Percentage missing and gap-filled
+                           infile,                                #Input file name
+                           var_ind){                              #Indices to extract variables to be written
+    
+  
   
   # load netcdf library
   library(ncdf4) 
@@ -171,15 +184,10 @@ CreateFluxNcFile = function(fluxfilename, datain,                 #outfile file 
   # Define time dimension:
   td = ncdim_def('time', unlim=TRUE, units=timeunits, vals=timedata)
   
-  # VARIABLE DEFINITIONS ##############################################
-  
-  
-  
-  #Find met variable indices
-  var_ind <- which(datain$categories=="Eval")
+  # VARIABLE DEFINITIONS ##############################################  
   
   #Create variable definitions for time series variables
-  var_defs <- lapply(var_ind, function(x) ncvar_def(name=datain$vars[x],
+  var_defs <- lapply(var_ind, function(x) ncvar_def(name=datain$out_vars[x],
                                                     units=datain$units$target_units[x], 
                                                     dim=list(xd,yd,zd,td), 
                                                     missval=missing_value, 
@@ -255,7 +263,26 @@ CreateFluxNcFile = function(fluxfilename, datain,                 #outfile file 
   ncatt_put(ncid,varid=0,attname='site_name',
             attval=as.character(long_sitename), prec="text")
   ncatt_put(ncid,varid=0,attname='Fluxnet_dataset_version',
-            attval=datasetversion, prec="text")	  
+            attval=datasetversion, prec="text")
+  ncatt_put(ncid,varid=0,attname='Input_file',
+            attval=infile, prec="text")
+  ncatt_put(ncid,varid=0,attname='Processing_thresholds(%)',
+            attval=paste("missing: ", missing,
+                         ", gapfill_all: ", gapfill_all,
+                         ", gapfill_good: ", gapfill_good,
+                         ", gapfill_med: ", gapfill_med,
+                         ", gapfill_poor: ", gapfill_poor,
+                         ", min_yrs: ", min_yrs,
+                         sep=""), prec="text")
+  ncatt_put(ncid,varid=0,attname='QC_flag_descriptions',
+            attval=paste("Measured: ", QCmeasured, 
+                         ", Good-quality gapfilled: ", QCgapfilled[1], 
+                         ", Medium-quality gapfilled: ", QCgapfilled[2], 
+                         ", Poor-quality gapfilled: ", QCgapfilled[3], 
+                         ", ERA-Interim gapfilled: ", QCgapfilled[4], 
+                         sep=""), prec="text")  
+  ncatt_put(ncid,varid=0,attname='Package contact',
+            attval='a.ukkola@unsw.edu.au')
   ncatt_put(ncid,varid=0,attname='PALS contact',
             attval='palshelp@gmail.com')
   if(!is.na(tier)) {
@@ -295,6 +322,19 @@ CreateFluxNcFile = function(fluxfilename, datain,                 #outfile file 
                                                     prec="text"))
   
   
+  #Add missing percentage to file
+  lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]], 
+                                                   attname="Missing (%)", 
+                                                   attval=total_missing))  
+  
+  #Add gap-filled percentage to file
+  lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]], 
+                                                   attname="Gap-filled (%)", 
+                                                   attval=total_gapfilled))  
+  
+  
+  
+  
   
   # Close netcdf file:
   nc_close(ncid)
@@ -317,7 +357,13 @@ CreateMetNcFile = function(metfilename, datain,                   #outfile file 
                            flux_varname, cf_name,                 #Original Fluxnet variable names and CF_compliant names
                            elevation=NA, towerheight=NA,          #Site elevation and flux tower height
                            canopyheight=NA,                       #Canopy height
-                           short_veg_type=NA, long_veg_type=NA){  #Long and short IGBP vegetation types
+                           short_veg_type=NA, long_veg_type=NA,   #Long and short IGBP vegetation types
+                           missing, gapfill_all, gapfill_good,    #thresholds used in processing
+                           gapfill_med, gapfill_poor, min_yrs,
+                           total_missing, total_gapfilled,        #Percentage missing and gap-filled
+                           infile,                                #Input file name
+                           var_ind){                              #Indices to extract variables to be written
+    
   
   # load netcdf library
 	library(ncdf4) 
@@ -346,14 +392,9 @@ CreateMetNcFile = function(metfilename, datain,                   #outfile file 
   
 	# VARIABLE DEFINITIONS ##############################################
 
-
-  
-  #Find met variable indices
-  var_ind <- which(datain$categories=="Met")
-  
   
   #Create variable definitions for time series variables
-  var_defs <- lapply(var_ind, function(x) ncvar_def(name=datain$vars[x],
+  var_defs <- lapply(var_ind, function(x) ncvar_def(name=datain$out_vars[x],
                                                     units=datain$units$target_units[x], 
                                                     dim=list(xd,yd,zd,td), 
                                                     missval=missing_value, 
@@ -429,7 +470,26 @@ CreateMetNcFile = function(metfilename, datain,                   #outfile file 
   ncatt_put(ncid,varid=0,attname='site_name',
           attval=as.character(long_sitename), prec="text")
   ncatt_put(ncid,varid=0,attname='Fluxnet_dataset_version',
-		attval=datasetversion, prec="text")	  
+		attval=datasetversion, prec="text")	 
+	ncatt_put(ncid,varid=0,attname='Input_file',
+	          attval=infile, prec="text")
+	ncatt_put(ncid,varid=0,attname='Processing_thresholds(%)',
+	          attval=paste("missing: ", missing,
+	                       ", gapfill_all: ", gapfill_all,
+	                       ", gapfill_good: ", gapfill_good,
+	                       ", gapfill_med: ", gapfill_med,
+	                       ", gapfill_poor: ", gapfill_poor,
+	                       ", min_yrs: ", min_yrs,
+	                       sep=""), prec="text")
+	ncatt_put(ncid,varid=0,attname='QC_flag_descriptions',
+	          attval=paste("Measured: ", QCmeasured, 
+                         ", Good-quality gapfilled: ",QCgapfilled[1], 
+                         ", Medium-quality gapfilled: ", QCgapfilled[2], 
+                         ", Poor-quality gapfilled: ", QCgapfilled[3], 
+                         ", ERA-Interim gapfilled: ", QCgapfilled[4], 
+                         sep=""), prec="text")  
+	ncatt_put(ncid,varid=0,attname='Package contact',
+	          attval='a.ukkola@unsw.edu.au')
 	ncatt_put(ncid,varid=0,attname='PALS contact',
 		attval='palshelp@gmail.com')
 	if(!is.na(tier)) {
@@ -465,6 +525,16 @@ CreateMetNcFile = function(metfilename, datain,                   #outfile file 
                                                    attname="Standard_name", 
                                                    attval=datain$attributes[var_ind[x],3], 
                                                    prec="text"))
+	
+	#Add missing percentage to file
+	lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]], 
+	                                                 attname="Missing (%)", 
+	                                                 attval=total_missing))  
+	
+	#Add gap-filled percentage to file
+	lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]], 
+	                                                 attname="Gap-filled (%)", 
+	                                                 attval=total_gapfilled))  
 	
 	
 
