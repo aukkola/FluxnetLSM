@@ -131,11 +131,33 @@ findTimeInfo <- function(time_vars, headers){
 
 #-----------------------------------------------------------------------------
 
-#' Renames Fluxnet variables to desired output variable names
-#' @return renamed variables
-#' @export
-rename_vars <- function(vars_present, all_vars){
+# #' Renames Fluxnet variables to desired output variable names
+# #' @return renamed variables
+# #' @export
+# rename_vars <- function(vars_present, all_vars){
+# 
+#   #Find index for fluxnet variables present in file
+#   ind_present <- sapply(vars_present, function(x) which(all_vars$Fluxnet_variable==x))
+#   
+#   #Check for duplicates (if Fluxnet variable being processed more than once)
+#   if(any(duplicated(ind_present))){
+#     ind_present <- unlist(remove_duplicates(ind_present))
+#   } 
+#   
+#   #Replace names with corresponding output variable names
+#   renamed_vars <- all_vars$Output_variable[ind_present]
+# 
+#   return(renamed_vars)
+#   
+# }
 
+#-----------------------------------------------------------------------------
+
+#' Retrieves original and target variable units
+#' @return original and target units
+#' @export
+retrieve_outnames <- function(vars_present, all_vars){
+  
   #Find index for fluxnet variables present in file
   ind_present <- sapply(vars_present, function(x) which(all_vars$Fluxnet_variable==x))
   
@@ -144,13 +166,11 @@ rename_vars <- function(vars_present, all_vars){
     ind_present <- unlist(remove_duplicates(ind_present))
   } 
   
-  #Replace names with corresponding output variable names
-  renamed_vars <- all_vars$Output_variable[ind_present]
-
-  return(renamed_vars)
+  out_vars <- all_vars$Output_variable[ind_present]
+  colnames(out_vars) <- all_vars$Fluxnet_variable[ind_present]  
   
+  return(out_vars)
 }
-
 #-----------------------------------------------------------------------------
 
 #' Retrieves original and target variable units
@@ -215,7 +235,7 @@ retrieve_categories <- function(vars_present, all_vars){
   } 
   
   cat_vars <- all_vars$Category[ind_present]
-  names(cat_vars) <- all_vars$Output_variable[ind_present]
+  names(cat_vars) <- all_vars$Fluxnet_variable[ind_present]
   
   return(cat_vars)
 }
@@ -235,10 +255,10 @@ retrieve_ERAvars <- function(vars_present, all_vars){
     ind_present <- unlist(remove_duplicates(ind_present))
   } 
   
-  cat_vars <- all_vars$ERAinterim_variable[ind_present]
-  names(cat_vars) <- all_vars$Output_variable[ind_present]
+  era_vars <- all_vars$ERAinterim_variable[ind_present]
+  names(era_vars) <- all_vars$Fluxnet_variable[ind_present]
   
-  return(cat_vars)
+  return(era_vars)
 }
 
 #-----------------------------------------------------------------------------
@@ -262,7 +282,7 @@ retrieve_ranges <- function(vars_present, all_vars){
   
   #Combine
   var_ranges <- rbind(range_min, range_max)
-  colnames(var_ranges) <- all_vars$Output_variable[ind_present]  
+  colnames(var_ranges) <- all_vars$Fluxnet_variable[ind_present]  
   
   return(var_ranges)
 }

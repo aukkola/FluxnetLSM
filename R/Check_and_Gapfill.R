@@ -116,7 +116,7 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
         if(any(!is.na(threshold))){
           
           #Check if QC variable exists
-          qc_var <- which(datain$vars==paste(datain$vars[k], "qc", sep="_")) 
+          qc_var <- which(datain$vars==paste(datain$vars[k], "QC", sep="_")) 
           
           #If found QC variable, calculate percentage of gap-filling
           if(length(qc_var) > 0){
@@ -317,7 +317,7 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
       #Calculate % gap-filled
       #Find indices for QC variables (if exist)
       qc_ind <- sapply(datain$vars, function(x) 
-                          which(datain$vars==paste(x, "_qc", sep="")))
+                          which(datain$vars==paste(x, "_QC", sep="")))
       
       total_gapfilled[[k]] <- vector()
       for(v in 1:length(qc_ind)){
@@ -397,7 +397,7 @@ missing_val){
             
             ### Relative humidity ###
             #If Flux variable relative humidity, but ERA variable VPD, convert
-            if(avail_flux[k] == "RelH" & era_name=="VPD_ERA"){
+            if(avail_flux[k] == "RH" & era_name=="VPD_ERA"){
                 
                 era_tair_col <- which(colnames(era_data)=="TA_ERA")
                 
@@ -427,7 +427,7 @@ missing_val){
             
             ## Set QC flags to "4" for time steps filled with ERA data ##
             #Find corresponding qc variable, if available
-            qc_col <- which(colnames(datain)==paste(avail_flux[k], "_qc", sep=""))
+            qc_col <- which(colnames(datain)==paste(avail_flux[k], "_QC", sep=""))
             
             
             #Replace era gap-filled time steps with "4"
@@ -544,7 +544,25 @@ create_qc_var <- function(datain, qc_name){
     return(datain)
 }
 
+#-----------------------------------------------------------------------------
 
+
+#' Fills QC flags with 3 (poor gap-filling) when
+#' QC flag missing but data variable available
+#' @return datain
+#' @export
+fill_qcvar_missing <- function(datain){
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+}
 
 
 
