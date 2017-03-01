@@ -370,7 +370,7 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
 #' @return out
 #' @export
 GapfillMet <- function(datain, era_data, era_vars, tair_units, vpd_units,
-                       missing_val){
+                       missing_val, out_vars){
     
     #ERAinterim estimates are provided for TA, SW_in,
     #LW_IN, VPD, PA, P and WS
@@ -459,8 +459,8 @@ GapfillMet <- function(datain, era_data, era_vars, tair_units, vpd_units,
                 qc_var[missing] <- 4
                 
                 #Create name for QC variable and save data and name to data.frame
-                qc_names <- cbind(qc_names, paste(avail_flux[k],
-                "_qc", sep=""))
+                #Use output variable name to create qc flag name
+                qc_names <- cbind(qc_names, paste(out_vars[avail_flux[k]],"_qc", sep=""))
                 new_qc <- cbind(new_qc, qc_var)
                 
             }
@@ -468,6 +468,7 @@ GapfillMet <- function(datain, era_data, era_vars, tair_units, vpd_units,
             
         } #if
     } #vars
+    
     
     #Assign new QC variable names to data frame column names
     if(length(new_qc) > 0){ colnames(new_qc) <- qc_names}

@@ -181,7 +181,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     if(ERA_gapfill){
         
         era_data <- read.csv(ERA_file, header=TRUE, colClasses=c("character", "character",
-        rep("numeric", 7)))
+                                                                 rep("numeric", 7)))
         
         #ERAinterim data provided for 1989-2014, need to extract common years with flux obs
         #Find start and end
@@ -196,18 +196,19 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
         ind <- which(DataFromText$categories=="Met")
         
         #Retrieve VPD and air temp units. Used to convert ERAinterim VPD to RH in gapfill function
-        tair_units <- DataFromText$units$original_units[which(DataFromText$vars=="TA_F_MDS")]
-        vpd_units  <- DataFromText$units$original_units[which(DataFromText$vars=="VPD_F_MDS")]
+        tair_units <- DataFromText$units$original_units[which(vars=="TA_F_MDS")]
+        vpd_units  <- DataFromText$units$original_units[which(vars=="VPD_F_MDS")]
         
         #Gapfill met variables
         temp_data <- GapfillMet(datain=DataFromText$data[,ind], era_data=era_data,
-        era_vars=DataFromText$era_vars[ind],
-        tair_units=tair_units, vpd_units=vpd_units,
-        missing_val=SprdMissingVal)
+                                era_vars=DataFromText$era_vars[ind],
+                                tair_units=tair_units, vpd_units=vpd_units,
+                                missing_val=SprdMissingVal,
+                                out_vars=DataFromText$out_vars[ind])
         
         
         #Check that column names of temp_data and data to be replaced match. Stop if not
-        if(!all(colnames(temp_data)==colnames(DataFromText$data[,ind]))){
+        if(!all(colnames(temp_data$datain)==colnames(DataFromText$data[,ind]))){
             CheckError(paste("Error gap-filling met data with ERAinterim.", 
                              "Column names of data to be replaced do not match"))
         }
@@ -215,7 +216,6 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
         
         #Replace original met variables with gap-filled variables
         DataFromText$data[,ind] <- temp_data$datain
-        
         
         #If new QC variables were created, create and append
         #variable attributes to data frame
@@ -443,8 +443,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     
     site_log <- cat("Site processed successfully.",
                     "\nSite code:", site_code,
-                    "\nOutput met file:", metfilename,
-                    "\nOutput flux file:", fluxfilename,
+                    "\nCreated", no_files, "met and flux output files",
                     "\nExcluded eval variables:",  paste(exclude_eval, collapse=", "),
                     "\n==============================================================")
     
