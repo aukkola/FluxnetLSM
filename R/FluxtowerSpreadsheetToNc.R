@@ -325,12 +325,12 @@ CreateFluxNcFile = function(fluxfilename, datain,                  #outfile file
   #Add missing percentage to file
   lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]], 
                                                    attname="Missing (%)", 
-                                                   attval=total_missing))  
+                                                   attval=round(total_missing[x],1)))  
   
   #Add gap-filled percentage to file
   lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]], 
                                                    attname="Gap-filled (%)", 
-                                                   attval=total_gapfilled))  
+                                                   attval=round(total_gapfilled[x],1)))  
   
   
   
@@ -539,12 +539,12 @@ CreateMetNcFile = function(metfilename, datain,                   #outfile file 
 	#Add missing percentage to file
 	lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]], 
 	                                                 attname="Missing (%)", 
-	                                                 attval=total_missing))  
+	                                                 attval=round(total_missing[x],1)))  
 	
 	#Add gap-filled percentage to file
 	lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]], 
 	                                                 attname="Gap-filled (%)", 
-	                                                 attval=total_gapfilled))  
+	                                                 attval=round(total_gapfilled[x],1)))  
 	
 	
 
