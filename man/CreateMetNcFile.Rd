@@ -5,7 +5,7 @@
 \title{Creates a netcdf file for met variables}
 \usage{
 CreateMetNcFile(metfilename, datain, latitude, longitude, site_code,
-  long_sitename, datasetversion, github_rev, tier, ind_start, ind_end,
+  long_sitename, datasetversion, github_rev, tier = NA, ind_start, ind_end,
   starttime, timestepsize, flux_varname, cf_name, elevation = NA,
   towerheight = NA, canopyheight = NA, short_veg_type = NA,
   long_veg_type = NA)

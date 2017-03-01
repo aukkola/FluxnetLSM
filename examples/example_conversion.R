@@ -21,18 +21,22 @@ rm(list=ls(all=TRUE))
 
 # This directory should contain appropriate data from 
 # http://fluxnet.fluxdata.org/data/fluxnet2015-dataset/
-in_path <- "~/Documents/FLUXNET2016_processing/Inputs/"
-
-# Input Fluxnet data file (using FULLSET in this example)
-fname  <- sprintf("FLX_%s_FLUXNET2015_FULLSET", site_code)    #append file name and site code
-infile <- list.files(in_path, pattern=fname, full.names=TRUE) #find input file and full path
+in_path <- "~/phd/data/Fluxnet2015/FULLSET/AU-How/"
 
 #Outputs will be saved to this directory
-out_path <- "~/Documents/FLUXNET2016_processing/Outputs/"
+out_path <- "~/phd/data/Fluxnet2015/processed/"
 
 #Fluxnet site ID (see http://fluxnet.fluxdata.org/sites/site-list-and-pages/)
 site_code <- "AU-How"
 
+# Name and version of dataset being processed (e.g. "FLUXNET2015" and "1.3")
+datasetname="FLUXNET2015"
+datasetversion="1.3"
+
+# Input Fluxnet data file (using FULLSET in this example, se R/Helpers.R for details)
+infile <- get_fluxnet_files(in_path, site_code,
+                            datasetname=datasetname,
+                            datasetversion=datasetversion)
 
 ###############################
 ###--- Optional settings ---###
@@ -40,14 +44,9 @@ site_code <- "AU-How"
 
 # ERAinterim meteo file for gap-filling met data (set to FALSE if not desired)
 ERA_gapfill  <- TRUE
-eraname      <- sprintf("FLX_%s_FLUXNET2015_ERAI", site_code)         #append file name and site code
-ERA_file     <- list.files(in_path, pattern=eraname, full.names=TRUE) #find file and full path
-
-#Name and version of dataset being processed (e.g. "FLUXNET2015" and "v1-3")
-#Stripped from input file name in this example
-vname          <- unlist(strsplit(infile, "_") )
-datasetname    <- vname[[which(vname==site_code)+1]] #FLUXNET2015
-datasetversion <- paste("v", substr(vname[[which(vname==site_code)+5]], 1, 3), sep="") #v1-3
+ERA_file <- get_fluxnet_erai_files(in_path, site_code,
+                                   datasetname = datasetname,
+                                   datasetversion = datasetversion)
 
 #What percentage of time steps allowed to be missing
 #or gap-filled in any given year? And minimum number of 
@@ -65,7 +64,6 @@ min_yrs      <- 2  #min. number of consecutive years
 #(annual: average monthly cycle; diurnal: average diurnal cycle by season;
 #timeseries: 14-day running mean time series)
 plot <- c("annual", "diurnal","timeseries")
-
 
 
 ##########################

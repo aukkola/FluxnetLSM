@@ -5,8 +5,9 @@
 \title{ConvertSpreadsheetToNcdf.R}
 \usage{
 convert_fluxnet_to_netcdf(infile, site_code, out_path, ERA_file = NA,
-  ERA_gapfill = FALSE, datasetname = "Fluxnet2015",
-  datasetversion = "Nov16", gap_threshold = 20, min_yrs = 2,
+  ERA_gapfill = FALSE, datasetname = "FLUXNET2015",
+  datasetversion = "v1-3", missing = 10, gapfill_all = 10,
+  gapfill_good = NA, gapfill_med = NA, gapfill_poor = NA, min_yrs = 2,
   plot = c("annual", "diurnal", "timeseries"))
 }
 \arguments{
