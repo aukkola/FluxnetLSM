@@ -153,7 +153,9 @@ CreateFluxNcFile = function(fluxfilename, datain,                 #outfile file 
                            short_veg_type=NA, long_veg_type=NA,   #Long and short IGBP vegetation types
                            missing, gapfill_all, gapfill_good,    #thresholds used in processing
                            gapfill_med, gapfill_poor, min_yrs, 
-                           infile){                               #Input file name
+                           total_missing, total_gapfilled,        #Percentage missing and gap-filled
+                           infile,                                #Input file name
+                           var_ind){                              #Indices to extract variables to be written
     
   
   
@@ -182,12 +184,7 @@ CreateFluxNcFile = function(fluxfilename, datain,                 #outfile file 
   # Define time dimension:
   td = ncdim_def('time', unlim=TRUE, units=timeunits, vals=timedata)
   
-  # VARIABLE DEFINITIONS ##############################################
-  
-  
-  
-  #Find met variable indices
-  var_ind <- which(datain$categories=="Eval")
+  # VARIABLE DEFINITIONS ##############################################  
   
   #Create variable definitions for time series variables
   var_defs <- lapply(var_ind, function(x) ncvar_def(name=datain$out_vars[x],
@@ -325,6 +322,19 @@ CreateFluxNcFile = function(fluxfilename, datain,                 #outfile file 
                                                     prec="text"))
   
   
+  #Add missing percentage to file
+  lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]], 
+                                                   attname="Missing (%)", 
+                                                   attval=total_missing))  
+  
+  #Add gap-filled percentage to file
+  lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]], 
+                                                   attname="Gap-filled (%)", 
+                                                   attval=total_gapfilled))  
+  
+  
+  
+  
   
   # Close netcdf file:
   nc_close(ncid)
@@ -350,7 +360,9 @@ CreateMetNcFile = function(metfilename, datain,                   #outfile file 
                            short_veg_type=NA, long_veg_type=NA,   #Long and short IGBP vegetation types
                            missing, gapfill_all, gapfill_good,    #thresholds used in processing
                            gapfill_med, gapfill_poor, min_yrs,
-                           infile){                               #Input file name
+                           total_missing, total_gapfilled,        #Percentage missing and gap-filled
+                           infile,                                #Input file name
+                           var_ind){                              #Indices to extract variables to be written
     
   
   # load netcdf library
@@ -380,11 +392,6 @@ CreateMetNcFile = function(metfilename, datain,                   #outfile file 
   
 	# VARIABLE DEFINITIONS ##############################################
 
-
-  
-  #Find met variable indices
-  var_ind <- which(datain$categories=="Met")
-  
   
   #Create variable definitions for time series variables
   var_defs <- lapply(var_ind, function(x) ncvar_def(name=datain$out_vars[x],
@@ -518,6 +525,16 @@ CreateMetNcFile = function(metfilename, datain,                   #outfile file 
                                                    attname="Standard_name", 
                                                    attval=datain$attributes[var_ind[x],3], 
                                                    prec="text"))
+	
+	#Add missing percentage to file
+	lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]], 
+	                                                 attname="Missing (%)", 
+	                                                 attval=total_missing))  
+	
+	#Add gap-filled percentage to file
+	lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]], 
+	                                                 attname="Gap-filled (%)", 
+	                                                 attval=total_gapfilled))  
 	
 	
 
