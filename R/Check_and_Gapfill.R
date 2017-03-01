@@ -471,7 +471,7 @@ GapfillMet <- function(datain, era_data, era_vars, tair_units, vpd_units,
         } #if
     } #vars
     
-    browser()
+
     #Assign new QC variable names to data frame column names
     if(length(new_qc) > 0){ colnames(new_qc) <- qc_names}
     
