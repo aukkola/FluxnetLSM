@@ -144,7 +144,12 @@ CreateFluxNcFile = function(fluxfilename, datain,                 #outfile file 
                            flux_varname, cf_name,                 #Original Fluxnet variable names and CF_compliant names
                            elevation=NA, towerheight=NA,          #Site elevation and flux tower height
                            canopyheight=NA,                       #Canopy height
-                           short_veg_type=NA, long_veg_type=NA){  #Long and short IGBP vegetation types
+                           short_veg_type=NA, long_veg_type=NA,   #Long and short IGBP vegetation types
+                           missing, gapfill_all, gapfill_good,    #thresholds used in processing
+                           gapfill_med, gapfill_poor, min_yrs, 
+                           infile){                               #Input file name
+    
+  
   
   # load netcdf library
   library(ncdf4) 
@@ -255,7 +260,26 @@ CreateFluxNcFile = function(fluxfilename, datain,                 #outfile file 
   ncatt_put(ncid,varid=0,attname='site_name',
             attval=as.character(long_sitename), prec="text")
   ncatt_put(ncid,varid=0,attname='Fluxnet_dataset_version',
-            attval=datasetversion, prec="text")	  
+            attval=datasetversion, prec="text")
+  ncatt_put(ncid,varid=0,attname='Input_file',
+            attval=infile, prec="text")
+  ncatt_put(ncid,varid=0,attname='Processing_thresholds(%)',
+            attval=paste("missing: ", missing,
+                         ", gapfill_all: ", gapfill_all,
+                         ", gapfill_good: ", gapfill_good,
+                         ", gapfill_med: ", gapfill_med,
+                         ", gapfill_poor: ", gapfill_poor,
+                         ", min_yrs: ", min_yrs,
+                         sep=""), prec="text")
+  ncatt_put(ncid,varid=0,attname='QC_flag_descriptions',
+            attval=paste("Measured: ", QCmeasured, 
+                         ", Good-quality gapfilled: ", QCgapfilled[1], 
+                         ", Medium-quality gapfilled: ", QCgapfilled[2], 
+                         ", Poor-quality gapfilled: ", QCgapfilled[3], 
+                         ", ERA-Interim gapfilled: ", QCgapfilled[4], 
+                         sep=""), prec="text")  
+  ncatt_put(ncid,varid=0,attname='Package contact',
+            attval='a.ukkola@unsw.edu.au')
   ncatt_put(ncid,varid=0,attname='PALS contact',
             attval='palshelp@gmail.com')
   if(!is.na(tier)) {
@@ -317,7 +341,11 @@ CreateMetNcFile = function(metfilename, datain,                   #outfile file 
                            flux_varname, cf_name,                 #Original Fluxnet variable names and CF_compliant names
                            elevation=NA, towerheight=NA,          #Site elevation and flux tower height
                            canopyheight=NA,                       #Canopy height
-                           short_veg_type=NA, long_veg_type=NA){  #Long and short IGBP vegetation types
+                           short_veg_type=NA, long_veg_type=NA,   #Long and short IGBP vegetation types
+                           missing, gapfill_all, gapfill_good,    #thresholds used in processing
+                           gapfill_med, gapfill_poor, min_yrs,
+                           infile){                               #Input file name
+    
   
   # load netcdf library
 	library(ncdf4) 
@@ -429,7 +457,26 @@ CreateMetNcFile = function(metfilename, datain,                   #outfile file 
   ncatt_put(ncid,varid=0,attname='site_name',
           attval=as.character(long_sitename), prec="text")
   ncatt_put(ncid,varid=0,attname='Fluxnet_dataset_version',
-		attval=datasetversion, prec="text")	  
+		attval=datasetversion, prec="text")	 
+	ncatt_put(ncid,varid=0,attname='Input_file',
+	          attval=infile, prec="text")
+	ncatt_put(ncid,varid=0,attname='Processing_thresholds(%)',
+	          attval=paste("missing: ", missing,
+	                       ", gapfill_all: ", gapfill_all,
+	                       ", gapfill_good: ", gapfill_good,
+	                       ", gapfill_med: ", gapfill_med,
+	                       ", gapfill_poor: ", gapfill_poor,
+	                       ", min_yrs: ", min_yrs,
+	                       sep=""), prec="text")
+	ncatt_put(ncid,varid=0,attname='QC_flag_descriptions',
+	          attval=paste("Measured: ", QCmeasured, 
+                         ", Good-quality gapfilled: ",QCgapfilled[1], 
+                         ", Medium-quality gapfilled: ", QCgapfilled[2], 
+                         ", Poor-quality gapfilled: ", QCgapfilled[3], 
+                         ", ERA-Interim gapfilled: ", QCgapfilled[4], 
+                         sep=""), prec="text")  
+	ncatt_put(ncid,varid=0,attname='Package contact',
+	          attval='a.ukkola@unsw.edu.au')
 	ncatt_put(ncid,varid=0,attname='PALS contact',
 		attval='palshelp@gmail.com')
 	if(!is.na(tier)) {

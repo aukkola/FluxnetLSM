@@ -223,7 +223,6 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
     #Indices of year(s) to keep
     yr_ind <- which(yr_keep)
     
-    
     ### If no years fulfilling criteria, abort. ###
     if(all(!yr_keep) | length(yr_ind) < min_yrs){
         CheckError(paste("No years to process, too many gaps present or",
@@ -467,7 +466,7 @@ missing_val){
 #-----------------------------------------------------------------------------
 
 # TODO: This function exists in palsR/Gab in pals/R/FluxtowerSpreadsheetToNc.R and has a different signature. Merge?
-#' Checks that data within specified ranges
+#' Checks that data are within specified ranges
 #' @export
 CheckTextDataRanges = function(datain, missingval){
     

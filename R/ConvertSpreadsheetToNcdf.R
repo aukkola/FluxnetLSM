@@ -8,15 +8,33 @@
 #' Main function to convert Fluxnet2015 CSV-files to NetCDF
 #'
 #' @param infile input filename,
-#'   e.g. "FULLSET/FLX_AU-How_FLUXNET2015_FULLSET_HH_2001-2014_1-3.csv"
-#' @param era_file ERA input file (needed if using ERAinterim to gapfill met variables)
-#'   e.g. "FULLSET/FLX_AU-How_FLUXNET2015_ERAI_HH_1989-2014_1-3.csv"
-#' @param threshold How many percent of time steps allowed to be missing in any given year?
-#' @param min_yrs Minimum number of consecutive years to process
-#' @param out_path output path e.g. "./FLUXNET2016_processing/"
+#'        e.g. "FULLSET/FLX_AU-How_FLUXNET2015_FULLSET_HH_2001-2014_1-3.csv"
 #' @param site_code Fluxnet site code e.g. "AU-How"
+#' @param out_path output path e.g. "./FLUXNET2016_processing/"
+#' @param era_file ERA input file (needed if using ERAinterim to gapfill met variables)
+#'        e.g. "FULLSET/FLX_AU-How_FLUXNET2015_ERAI_HH_1989-2014_1-3.csv"
 #' @param ERA_gapfill Gapfill met variables using ERAinterim?
-#' @param plot Should annual, diurnal and/or 14-day running mean plots be produced? Set to NA if not
+#' @param datasetname Name of the dataset, e.g. FLUXNET2015
+#' @param datasetversion Version of the dataset, e.g. "v1-3"
+#' @param missing How many percent of time steps allowed to be missing in any given year?
+#' @param gapfill_all How many percent of time steps allowed to be gap-filled 
+#'        (any quality) in any given year? Note if gapfill_all is set, any thresholds
+#'        for gapfill_good, gapfill_med or gapfill_poor are ignored. Set to NA if not required.
+#' @param gapfill_good How many percent of time steps allowed to be good-quality gap-filled 
+#'        in any given year? Refer to package documentation for information on QC flags.
+#'        Set to NA if not required (default).
+#' @param gapfill_med How many percent of time steps allowed to be medium-quality gap-filled 
+#'        in any given year? Refer to package documentation for information on QC flags.
+#'        Set to NA if not required (default).
+#' @param gapfill_poor How many percent of time steps allowed to be poor-quality gap-filled 
+#'        in any given year? Refer to package documentation for information on QC flags.
+#'        Set to NA if not required (default).
+#' @param min_yrs Minimum number of consecutive years to process
+#' @param include_all_eval Should all evaluation values be included, regardless of data gaps? 
+#'        If set to FALSE, any evaluation variables with missing or gap-filled values in
+#'        excess of the thresholds will be discarded.
+#' @param plot Should annual, diurnal and/or 14-day running mean plots be produced? 
+#'        Set to NA if not required.
 #' 
 #' @export
 #'
@@ -27,6 +45,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                                       missing = 10, gapfill_all=10,
                                       gapfill_good=NA, gapfill_med=NA,
                                       gapfill_poor=NA, min_yrs=2,
+                                      include_all_eval=TRUE,
                                       plot=c("annual", "diurnal", "timeseries")) {
     
     library(R.utils)
@@ -104,10 +123,43 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                            preferred_eval = vars$Output_variable[which(vars$Preferred_eval)])
     
     
-    #Remove evaluation variables that have too many gaps    COMPLETE !!!!!!
+    ### Save info on which evaluation variables have all values missing ###
+
+    #These are excluded when writing NetCDF file
+    #All values missing
+    all_missing <- lapply(gaps$total_missing, function(x) names(which(x==100)))
     
+    #Extract names of evaluation variables
+    cats <- DataFromText$categories
+    eval_vars <- names(cats[cats=="Eval"])
+    
+    #Find eval variables with all values missing
+    exclude_vars <- lapply(all_missing, intersect, eval_vars)
+    
+    #Only exclude QC variables if corresponding data variable excluded as well. Keep otherwise
+    #Find qc variables
+    qc_vars <- lapply(exclude_vars, function(x) x[grepl("_qc", x)])
+        
+    remove_qc <- mapply(function(x,y) intersect(x, gsub("_qc", "", y)), x=exclude_vars, y=qc_vars,
+                        SIMPLIFY=FALSE)
+    
+    
+    
+    #### COMPLETE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    
+    
+    ### Remove evaluation variables that have too many gaps if option chosen ###    COMPLETE !!!!!!
     
     #Add an option for this
+    
+    if(!include_all_eval){
+      
+      
+      
+      
+      
+      
+    }
     
     
     
@@ -182,6 +234,11 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     
     
     
+    ###########################################
+    ### Convert units and check data ranges ###
+    ###########################################
+    
+    
     # Convert data units from original Fluxnet units
     # to desired units as set in variables.csv
     ConvertedData <- ChangeUnits(DataFromText)
@@ -254,7 +311,11 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                          towerheight=site_info$TowerHeight,
                          canopyheight=site_info$CanopyHeight,
                          short_veg_type=site_info$IGBP_vegetation_short,
-                         long_veg_type=site_info$IGBP_vegetation_long)
+                         long_veg_type=site_info$IGBP_vegetation_long,
+                         missing=missing, gapfill_all=gapfill_all, 
+                         gapfill_good=gapfill_good, gapfill_med=gapfill_med, 
+                         gapfill_poor=gapfill_poor, min_yrs=min_yrs,
+                         infile=infile)
         
         
         
@@ -275,7 +336,11 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                          towerheight=site_info$TowerHeight,
                          canopyheight=site_info$CanopyHeight,
                          short_veg_type=site_info$IGBP_vegetation_short,
-                         long_veg_type=site_info$IGBP_vegetation_long)
+                         long_veg_type=site_info$IGBP_vegetation_long,
+                         missing=missing, gapfill_all=gapfill_all, 
+                         gapfill_good=gapfill_good, gapfill_med=gapfill_med, 
+                         gapfill_poor=gapfill_poor, min_yrs=min_yrs,
+                         infile=infile)
         
         
     }

@@ -19,6 +19,10 @@ rm(list=ls(all=TRUE))
 ###--- Required inputs ---###
 #############################
 
+#Fluxnet site ID (see http://fluxnet.fluxdata.org/sites/site-list-and-pages/)
+site_code <- "AU-How"
+
+
 # This directory should contain appropriate data from 
 # http://fluxnet.fluxdata.org/data/fluxnet2015-dataset/
 in_path <- "~/Documents/FLUXNET2016_processing/Inputs/"
@@ -30,8 +34,6 @@ infile <- list.files(in_path, pattern=fname, full.names=TRUE) #find input file a
 #Outputs will be saved to this directory
 out_path <- "~/Documents/FLUXNET2016_processing/Outputs/"
 
-#Fluxnet site ID (see http://fluxnet.fluxdata.org/sites/site-list-and-pages/)
-site_code <- "AU-How"
 
 
 ###############################
@@ -78,4 +80,10 @@ convert_fluxnet_to_netcdf(infile=infile, site_code=site_code, out_path=out_path,
                           gapfill_all=gapfill_all, gapfill_good=gapfill_good, 
                           gapfill_med=gapfill_med, gapfill_poor=gapfill_poor,
                           min_yrs=min_yrs, plot=plot)
+
+
+#Save warnings and errors to a log COPMLETE !!!!!!!!!!!!!!!
+warnings()
+
+
 
