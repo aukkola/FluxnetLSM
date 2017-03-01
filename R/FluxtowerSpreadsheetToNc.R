@@ -79,9 +79,12 @@ ReadTextFluxData <- function(fileinname, vars, time_vars){
   #Retrieve names of ERAinterim variables
   era_vars <- retrieve_ERAvars(vars_present=tcol$names, all_vars=vars)
   
+  #Retrieve output variable names
+  out_vars <- retrieve_outnames(vars_present=tcol$names, all_vars=vars)
+  
   
   #Change column names and tcol$names to match output variable names
-  tcol$names         <- rename_vars(vars_present=tcol$names, all_vars=vars)
+  #tcol$names         <- rename_vars(vars_present=tcol$names, all_vars=vars)
   colnames(FluxData) <- tcol$names
   
   
@@ -118,7 +121,7 @@ ReadTextFluxData <- function(fileinname, vars, time_vars){
   
   #Create list for function exit:
 	filedata <- list(data=FluxData, vars=tcol$names, era_vars=era_vars, 
-                  attributes=attributes,
+                  attributes=attributes, out_vars=out_vars,
                   units=units, var_ranges=var_ranges, categories=categories,
                   time=FluxTime, ntsteps=ntsteps, starttime=starttime, 
                   timestepsize=timestepsize, daysPerYr=intyears$daysperyear,
@@ -184,7 +187,7 @@ CreateFluxNcFile = function(fluxfilename, datain,                 #outfile file 
   var_ind <- which(datain$categories=="Eval")
   
   #Create variable definitions for time series variables
-  var_defs <- lapply(var_ind, function(x) ncvar_def(name=datain$vars[x],
+  var_defs <- lapply(var_ind, function(x) ncvar_def(name=datain$out_vars[x],
                                                     units=datain$units$target_units[x], 
                                                     dim=list(xd,yd,zd,td), 
                                                     missval=missing_value, 
@@ -381,7 +384,7 @@ CreateMetNcFile = function(metfilename, datain,                   #outfile file 
   
   
   #Create variable definitions for time series variables
-  var_defs <- lapply(var_ind, function(x) ncvar_def(name=datain$vars[x],
+  var_defs <- lapply(var_ind, function(x) ncvar_def(name=datain$out_vars[x],
                                                     units=datain$units$target_units[x], 
                                                     dim=list(xd,yd,zd,td), 
                                                     missval=missing_value, 
