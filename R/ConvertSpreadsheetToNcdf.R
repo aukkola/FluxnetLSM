@@ -301,7 +301,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
         ###--- Create netcdf met driving file ---###
         
         #Find met variable indices
-        met_ind <- which(datain$categories=="Met")
+        met_ind <- which(DataFromText$categories=="Met")
         
         #Write met file
         CreateMetNcFile( metfilename=metfilename, 
