@@ -361,6 +361,7 @@ CreateMetNcFile = function(metfilename, datain,                   #outfile file 
                            missing, gapfill_all, gapfill_good,    #thresholds used in processing
                            gapfill_med, gapfill_poor, min_yrs,
                            total_missing, total_gapfilled,        #Percentage missing and gap-filled
+                           ERA_gapfill=ERA_gapfill,               #Was ERA gapfilling used
                            infile,                                #Input file name
                            var_ind){                              #Indices to extract variables to be written
     
@@ -525,7 +526,16 @@ CreateMetNcFile = function(metfilename, datain,                   #outfile file 
                                                    attname="Standard_name", 
                                                    attval=datain$attributes[var_ind[x],3], 
                                                    prec="text"))
-	
+
+	#Add ERA-Interim name to file when available (if used)
+  if(ERA_gapfill){
+    lapply(1:length(var_defs), function(x) if(!is.na(datain$era_vars[var_ind[x]])){ 
+                                           ncatt_put(nc=ncid, varid=var_defs[[x]], 
+                                           attname="ERA-Interim variable used in gapfilling", 
+                                           attval=datain$era_vars[var_ind[x]], 
+                                           prec="text")})    
+  }
+ 
 	#Add missing percentage to file
 	lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]], 
 	                                                 attname="Missing (%)", 

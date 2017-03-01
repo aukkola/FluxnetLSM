@@ -327,6 +327,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                          gapfill_poor=gapfill_poor, min_yrs=min_yrs,
                          total_missing=gaps$total_missing[[k]][met_ind],
                          total_gapfilled=gaps$total_gapfilled[[k]][met_ind],
+                         ERA_gapfill=ERA_gapfill,
                          infile=infile,
                          var_ind=met_ind)
         
