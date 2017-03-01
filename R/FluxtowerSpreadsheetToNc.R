@@ -140,22 +140,22 @@ ReadTextFluxData <- function(fileinname, vars, time_vars){
 # TODO: This function exists in palsR/Gab and has a different signature. Merge?
 #' Creates a netcdf file for flux variables
 #' @export
-CreateFluxNcFile = function(fluxfilename, datain,                 #outfile file and data
-                           latitude, longitude,                   #lat, lon
-                           site_code, long_sitename,              #Fluxnet site code and full site name
-                           datasetversion, github_rev,            #Dataset version and github revision
-                           tier=NA,                               #Fluxnet site tier
-                           ind_start, ind_end,                    #time period indices
-                           starttime, timestepsize,               #timing info
-                           flux_varname, cf_name,                 #Original Fluxnet variable names and CF_compliant names
-                           elevation=NA, towerheight=NA,          #Site elevation and flux tower height
-                           canopyheight=NA,                       #Canopy height
-                           short_veg_type=NA, long_veg_type=NA,   #Long and short IGBP vegetation types
-                           missing, gapfill_all, gapfill_good,    #thresholds used in processing
-                           gapfill_med, gapfill_poor, min_yrs, 
-                           total_missing, total_gapfilled,        #Percentage missing and gap-filled
-                           infile,                                #Input file name
-                           var_ind){                              #Indices to extract variables to be written
+CreateFluxNcFile = function(fluxfilename, datain,                  #outfile file and data
+                            latitude, longitude,                   #lat, lon
+                            site_code, long_sitename,              #Fluxnet site code and full site name
+                            datasetversion, github_rev,            #Dataset version and github revision
+                            tier=NA,                               #Fluxnet site tier
+                            ind_start, ind_end,                    #time period indices
+                            starttime, timestepsize,               #timing info
+                            flux_varname, cf_name,                 #Original Fluxnet variable names and CF_compliant names
+                            elevation=NA, towerheight=NA,          #Site elevation and flux tower height
+                            canopyheight=NA,                       #Canopy height
+                            short_veg_type=NA, long_veg_type=NA,   #Long and short IGBP vegetation types
+                            missing, gapfill_all, gapfill_good,    #thresholds used in processing
+                            gapfill_med, gapfill_poor, min_yrs, 
+                            total_missing, total_gapfilled,        #Percentage missing and gap-filled
+                            infile,                                #Input file name
+                            var_ind){                              #Indices to extract variables to be written
     
   
   
