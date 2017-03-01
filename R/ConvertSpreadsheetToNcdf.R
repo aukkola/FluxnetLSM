@@ -233,8 +233,8 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
         }
         
         
-        #Sanity check
-        if(!all(colnames(DataFromText$data)==DataFromText$vars)){
+        #Basic sanity check
+        if(ncol(DataFromText$data)!=length(DataFromText$vars)){
           CheckError("Error creating new QC flags")
         }
     }
