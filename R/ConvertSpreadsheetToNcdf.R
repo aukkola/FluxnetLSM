@@ -119,8 +119,8 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                            missing = missing, gapfill_all=gapfill_all,
                            gapfill_good=gapfill_good, gapfill_med=gapfill_med,
                            gapfill_poor=gapfill_poor, min_yrs=min_yrs,
-                           essential_met = vars$Output_variable[which(vars$Essential_met)],
-                           preferred_eval = vars$Output_variable[which(vars$Preferred_eval)])
+                           essential_met = vars$Fluxnet_variable[which(vars$Essential_met)],
+                           preferred_eval = vars$Fluxnet_variable[which(vars$Preferred_eval)])
     
     
     ### Save info on which evaluation variables have all values missing ###
@@ -138,9 +138,9 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     
     #Only exclude QC variables if corresponding data variable excluded as well. Keep otherwise
     #Find qc variables
-    qc_vars <- lapply(exclude_vars, function(x) x[grepl("_qc", x)])
+    qc_vars <- lapply(exclude_vars, function(x) x[grepl("_QC", x)])
         
-    remove_qc <- mapply(function(x,y) intersect(x, gsub("_qc", "", y)), x=exclude_vars, y=qc_vars,
+    remove_qc <- mapply(function(x,y) intersect(x, gsub("_QC", "", y)), x=exclude_vars, y=qc_vars,
                         SIMPLIFY=FALSE)
     
     
