@@ -402,8 +402,7 @@ GapfillMet <- function(datain, era_data, era_vars, tair_units, vpd_units,
         #for variable being processed
         flx_col <- which(colnames(datain)==avail_flux[k])
         
-        era_name <- era_vars[which(names(era_vars)==avail_flux[k])] #corresponding ERA variable name
-        era_col <- which(colnames(era_data)==era_name)
+        era_col <- which(colnames(era_data)==avail_era[k])
         
         #If gaps in met data variable, gapfill
         if(any(datain[,flx_col]==missing_val)){
@@ -414,7 +413,7 @@ GapfillMet <- function(datain, era_data, era_vars, tair_units, vpd_units,
             
             ### Relative humidity ###
             #If Flux variable relative humidity, but ERA variable VPD, convert
-            if(avail_flux[k] == "RH" & era_name=="VPD_ERA"){
+            if(avail_flux[k] == "RH" & avail_era[k]=="VPD_ERA"){
                 
                 era_tair_col <- which(colnames(era_data)=="TA_ERA")
                 
@@ -541,8 +540,7 @@ create_qc_var <- function(datain, qc_name){
     Fluxnet_var <- NULL
     Longname <- paste(strsplit(qc_name, "_qc"), "quality control flag")
     CF_name <- NULL
-    datain$attributes <- rbind(datain$attributes, 
-    c(Fluxnet_var, Longname, CF_name))  
+    datain$attributes <- rbind(datain$attributes, c(Fluxnet_var, Longname, CF_name))  
     
     
     #units
