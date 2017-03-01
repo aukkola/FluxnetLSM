@@ -74,13 +74,19 @@ ReadTextFluxData <- function(fileinname, vars, time_vars){
   attributes <- retrieve_atts(vars_present=tcol$names, all_vars=vars)
   
   #Retrieve variable categories (met/eval):
-  categories <- retrieve_categories(vars_present=tcol$names, all_vars=vars)
+  categories <- retrieve_varinfo(vars_present=tcol$names, all_vars=vars, attribute="Category")
   
   #Retrieve names of ERAinterim variables
-  era_vars <- retrieve_ERAvars(vars_present=tcol$names, all_vars=vars)
+  era_vars <- retrieve_varinfo(vars_present=tcol$names, all_vars=vars, attribute="ERAinterim_variable")
   
   #Retrieve output variable names
-  out_vars <- retrieve_outnames(vars_present=tcol$names, all_vars=vars)
+  out_vars <- retrieve_varinfo(vars_present=tcol$names, all_vars=vars, attribute="Output_variable")
+   
+  #Retrieve output variable names
+  ess_met <- retrieve_varinfo(vars_present=tcol$names, all_vars=vars, attribute="Essential_met")
+
+  #Retrieve output variable names
+  pref_eval <- retrieve_varinfo(vars_present=tcol$names, all_vars=vars, attribute="Preferred_eval")
   
   
   ###### Get time step and date information #######
@@ -99,9 +105,10 @@ ReadTextFluxData <- function(fileinname, vars, time_vars){
   
 	timestepsize <- as.numeric(end) - as.numeric(start)
   
-	if( !(timestepsize>=300 && timestepsize<=3600) ){   #DO WE WANT THIS? DOES IT LIMIT tstep TO 1HR ????????????????????
-		CheckError(paste('Unable to ascertain time step size in',
-			               stripFilename(fileinname)))
+	if( !(timestepsize>=300 && timestepsize<=3600) ){
+		CheckError(paste("Time step size must be between
+                     300 and 3600 seconds. Time step size",
+                     timestepsize, "found in file"))
 	}
   
   # Time steps in a day and number of days in data set
@@ -117,6 +124,7 @@ ReadTextFluxData <- function(fileinname, vars, time_vars){
   #Create list for function exit:
 	filedata <- list(data=FluxData, vars=tcol$names, era_vars=era_vars, 
                   attributes=attributes, out_vars=out_vars,
+                  essential_met=ess_met, preferred_eval=pref_eval,
                   units=units, var_ranges=var_ranges, categories=categories,
                   time=FluxTime, ntsteps=ntsteps, starttime=starttime, 
                   timestepsize=timestepsize, daysPerYr=intyears$daysperyear,
