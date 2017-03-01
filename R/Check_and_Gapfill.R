@@ -386,10 +386,12 @@ GapfillMet <- function(datain, era_data, era_vars, tair_units, vpd_units,
     
     
     #List available ERA variables
-    avail_era  <- era_vars[which(!is.na(era_vars))]
-    avail_flux <- names(avail_era)
+    ind  <- which(!is.na(era_vars))
     
-    
+    avail_era  <- era_vars[ind]
+    avail_flux <- colnames(datain)[ind]
+    avail_out  <- out_vars[ind]
+
     #Initialise list for new QC variables
     #created if no existing QC flags for a variable
     new_qc   <- vector()
@@ -460,7 +462,7 @@ GapfillMet <- function(datain, era_data, era_vars, tair_units, vpd_units,
                 
                 #Create name for QC variable and save data and name to data.frame
                 #Use output variable name to create qc flag name
-                qc_names <- cbind(qc_names, paste(out_vars[avail_flux[k]],"_qc", sep=""))
+                qc_names <- cbind(qc_names, paste(avail_out[k],"_qc", sep=""))
                 new_qc <- cbind(new_qc, qc_var)
                 
             }
@@ -469,7 +471,7 @@ GapfillMet <- function(datain, era_data, era_vars, tair_units, vpd_units,
         } #if
     } #vars
     
-    
+    browser()
     #Assign new QC variable names to data frame column names
     if(length(new_qc) > 0){ colnames(new_qc) <- qc_names}
     
