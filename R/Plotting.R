@@ -188,7 +188,7 @@ plot_nc <- function(ncfile, analysis_type, vars, outfile){
                    ytext=paste(data_vars[n], " (", data_units[n], ")", sep=""), 
                    legendtext=data_vars[n],
                    plotcex=1.5, timing=timing, 
-                   smoothed = TRUE, winsize = 14, 
+                   smoothed = FALSE, winsize = 1, 
                    plotcolours="blue", 
                    vqcdata = as.matrix(var_qc),
                    na.rm=TRUE)
