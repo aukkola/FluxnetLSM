@@ -127,30 +127,6 @@ findTimeInfo <- function(time_vars, headers){
   return(tcols)
 }
 
-  
-
-#-----------------------------------------------------------------------------
-
-# #' Renames Fluxnet variables to desired output variable names
-# #' @return renamed variables
-# #' @export
-# rename_vars <- function(vars_present, all_vars){
-# 
-#   #Find index for fluxnet variables present in file
-#   ind_present <- sapply(vars_present, function(x) which(all_vars$Fluxnet_variable==x))
-#   
-#   #Check for duplicates (if Fluxnet variable being processed more than once)
-#   if(any(duplicated(ind_present))){
-#     ind_present <- unlist(remove_duplicates(ind_present))
-#   } 
-#   
-#   #Replace names with corresponding output variable names
-#   renamed_vars <- all_vars$Output_variable[ind_present]
-# 
-#   return(renamed_vars)
-#   
-# }
-
 #-----------------------------------------------------------------------------
 
 #' Retrieves original and target variable units
@@ -167,10 +143,11 @@ retrieve_outnames <- function(vars_present, all_vars){
   } 
   
   out_vars <- all_vars$Output_variable[ind_present]
-  colnames(out_vars) <- all_vars$Fluxnet_variable[ind_present]  
+  names(out_vars) <- all_vars$Fluxnet_variable[ind_present]  
   
   return(out_vars)
 }
+
 #-----------------------------------------------------------------------------
 
 #' Retrieves original and target variable units
