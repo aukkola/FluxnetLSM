@@ -535,6 +535,9 @@ create_qc_var <- function(datain, qc_name){
     #vars
     datain$vars <- append(datain$vars, qc_name)
     
+    #output vars
+    datain$out_vars <- append(datain$out_vars, qc_name)
+    
     #era_vars
     datain$era_vars <- append(datain$era_vars, NA)
     names(datain$era_vars)[length(datain$era_vars)] <- qc_name
@@ -544,8 +547,7 @@ create_qc_var <- function(datain, qc_name){
     Longname <- paste(strsplit(qc_name, "_qc"), "quality control flag")
     CF_name <- NULL
     datain$attributes <- rbind(datain$attributes, c(Fluxnet_var, Longname, CF_name))  
-    
-    
+       
     #units
     datain$units$original_units <- append(datain$units$original_units, "-")
     datain$units$target_units   <- append(datain$units$target_units, "-")
