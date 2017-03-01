@@ -41,7 +41,7 @@
 #'
 convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                                       ERA_file=NA, ERA_gapfill=FALSE,
-                                      datasetname="FLUXNET2015", datasetversion="v1-3",
+                                      datasetname="FLUXNET2015", datasetversion="1-3",
                                       missing = 10, gapfill_all=10,
                                       gapfill_good=NA, gapfill_med=NA,
                                       gapfill_poor=NA, min_yrs=2,
@@ -252,7 +252,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     
     
     # Check that data are within acceptable ranges: 
-    CheckTextDataRanges(ConvertedData, missingval=NcMissingVal)
+    CheckDataRanges(ConvertedData, missingval=NcMissingVal)
     
     
     #Replace original data with converted data

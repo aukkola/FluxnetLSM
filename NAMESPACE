@@ -2,7 +2,7 @@
 
 export(ChangeUnits)
 export(CheckDataGaps)
-export(CheckTextDataRanges)
+export(CheckDataRanges)
 export(CreateFluxNcFile)
 export(CreateMetNcFile)
 export(GapfillMet)

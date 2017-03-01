@@ -485,7 +485,7 @@ GapfillMet <- function(datain, era_data, era_vars, tair_units, vpd_units,
 # TODO: This function exists in palsR/Gab in pals/R/FluxtowerSpreadsheetToNc.R and has a different signature. Merge?
 #' Checks that data are within specified ranges
 #' @export
-CheckTextDataRanges = function(datain, missingval){
+CheckDataRanges = function(datain, missingval){
     
     #Checks that variables are within acceptable ranges
     # as set in the "variables" auxiliary file
