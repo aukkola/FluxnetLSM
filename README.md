@@ -32,4 +32,10 @@ If you downloaded the zip file from Github, unzip the archive first. Next using 
 
 
 ### Usage
-See `tests/ConvertSpreadsheetToNcdf_AU-How.R` for example usage.
+See `examples` for example usage. Three examples are provided
+
+single site
+
+multiple sites
+
+multiple sites using parallel programming
