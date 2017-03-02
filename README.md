@@ -9,12 +9,28 @@ Maintainer: [Anna Ukkola] (<a.ukkola@unsw.edu.au>)
 Contributors: Anna Ukkola, Ned Haughton and Martin De Kauwe
 
 
+
 ### Installation
 
 
-Package managed with [`devtools`](https://github.com/hadley/devtools).
+The package is managed with [`devtools`](https://github.com/hadley/devtools).
 
-To install within R software:
+The package relies on the PALS R package. Please install it first before proceeding to install FluxnetLSM.
+
+
+# 1. Installing PALS
+
+To install PALS within R software:
+
+```{r}
+# install.packages("devtools")
+devtools::install_github('dudek313/palsR')
+```
+
+
+# 2. Installing FluxnetLSM
+
+To install FluxnetLSM within R software:
 
 ```{r}
 # install.packages("devtools")
