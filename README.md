@@ -19,13 +19,13 @@ To install within R software:
 ```{r}
 # install.packages("devtools")
 devtools::install_github("aukkola/FLUXNET2015_processing")
-``
+```
 
 Alternatively you can download the source files directly from this website or by cloning the repository with the command
 
 ```{r}
 $ git clone https://github.com/aukkola/FLUXNET2015_processing.git
-``
+```
 
 Then navigate to the repository directory on your local machine and install using the command:
 
@@ -33,7 +33,7 @@ Then navigate to the repository directory on your local machine and install usin
 $ cd /wherever/you/downloaded/the/repo/to
 $ R CMD INSTALL XXXXXXX.gz
 
-``
+```
 
 
 ### Usage
