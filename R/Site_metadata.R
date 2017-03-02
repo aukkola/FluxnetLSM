@@ -41,7 +41,7 @@ get_site_code <- function(metadata){
 #' Gets the git version from the installed package
 #' See src/zzz.R for how git revision is discovered
 get_git_version <- function() {
-    desc <- read.dcf(system.file("DESCRIPTION", package = "FluxnetProcessing"))
+    desc <- read.dcf(system.file("DESCRIPTION", package = "FluxnetLSM"))
     if ("git_revision" %in% colnames(desc)) {
         git_rev <- desc[1, "git_revision"]
     } else if ("RemoteSha" %in% colnames(desc)) {
@@ -49,7 +49,7 @@ get_git_version <- function() {
     } else {
         git_rev <- "UNKNOWN"
                 
-        warning_message <- paste("Unknown git revision of FluxnetProcessing. Please",
+        warning_message <- paste("Unknown git revision of FluxnetLSM. Please",
                                  "visit https://github.com/aukkola/FluxnetLSM and",
                                  "review the installation procedure")
         site_log["Warnings"] <- paste(site_log["Warnings"], warning_message, sep=" ##### ")
@@ -66,9 +66,9 @@ get_git_version <- function() {
 #' @export
 add_processing_metadata <- function(metadata) {
     metadata$Processing <- list(
-        processor = "FluxnetProcessing",
-        URL = "https://github.com/aukkola/FLUXNET2015_processing",
-        version = packageVersion("FluxnetProcessing"),
+        processor = "FluxnetLSM",
+        URL = "https://github.com/aukkola/FluxnetLSM",
+        version = packageVersion("FluxnetLSM"),
         git_rev = get_git_version()
     )
 
@@ -106,14 +106,14 @@ update_metadata <- function(metadata, new_metadata, overwrite=TRUE) {
 # CSV-stored metadata
 ################################################
 
-# TODO: use system.file("help", "aliases.rds", package="FLUXNETProcessing")
+# TODO: use system.file("help", "aliases.rds", package="FluxnetLSM")
 # when this is a proper package.
 # https://stackoverflow.com/questions/3433603/parsing-command-line-arguments-in-r-scripts
 
 #Find site info file path (not using data() command directly because reads a CSV with a
 #semicolon separator and this leads to incorrect table headers)
 
-site_csv_file <- system.file("data", "Site_metadata.csv", package = "FluxnetProcessing")
+site_csv_file <- system.file("data", "Site_metadata.csv", package = "FluxnetLSM")
 
 #' Tries to gather metadata from the included site CSV
 #'

@@ -1,4 +1,4 @@
 library(testthat)
-library(FluxnetProcessing)
+library(FluxnetLSM)
 
-test_check("FluxnetProcessing")
+test_check("FluxnetLSM")
