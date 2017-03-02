@@ -21,19 +21,14 @@ To install within R software:
 devtools::install_github("aukkola/FluxnetLSM")
 ```
 
-Alternatively you can download the source files directly from this website or by cloning the repository with the command
+If this fails, you can download the source files directly from this website or by cloning the repository with the command:
 
 ```{r}
 $ git clone https://github.com/aukkola/FluxnetLSM.git
 ```
 
-Then navigate to the repository directory on your local machine and install using the command:
+If you downloaded the zip file from Github, unzip the archive first. Next using R software, click on Packages & Data > Package Installer (alternatively Tools > Install Packages... depending on your R version). From the drop-down menu, change CRAN (binaries) to Local Source Package (alternatively Repository (CRAN) to Package Archive File (.tgz; tar.gz)). Navigate to the directory where you downloaded the package files and select FluxnetLSM.tar.gz. R will then proceed to install the package.
 
-```{r}
-$ cd /wherever/you/downloaded/the/repo/to
-$ R CMD INSTALL XXXXXXX.gz
-
-```
 
 
 ### Usage
