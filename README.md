@@ -2,7 +2,7 @@ FluxnetLSM
 =================
 R package for post-processing FLUXNET datasets for use in land surface modelling. Performs quality control and data conversion of FLUXNET data and collated site metadata.
 
-URL: https://github.com/aukkola/FLUXNET2015_processing
+URL: https://github.com/aukkola/FluxnetLSM
 
 Maintainer: [Anna Ukkola] (<a.ukkola@unsw.edu.au>)
 
