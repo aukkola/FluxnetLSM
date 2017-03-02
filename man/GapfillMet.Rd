@@ -4,7 +4,8 @@
 \alias{GapfillMet}
 \title{Gapfills met data}
 \usage{
-GapfillMet(datain, era_data, era_vars, tair_units, vpd_units, missing_val)
+GapfillMet(datain, era_data, era_vars, tair_units, vpd_units, missing_val,
+  out_vars)
 }
 \value{
 out
