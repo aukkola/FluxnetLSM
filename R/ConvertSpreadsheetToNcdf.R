@@ -464,7 +464,10 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     site_log["No_files"]      <- no_files
     site_log["Met_files"]     <- paste(met_files, collapse=", ")
     site_log["Flux_files"]    <- paste(flux_files, collapse=", ")
-    site_log["Excluded_eval"] <- paste(exclude_eval, collapse=", ")
+    site_log["Excluded_eval"] <- paste(sapply(1:length(exclude_eval), function(x)
+                                 paste("File ", x, ": ", paste(exclude_eval[[x]], 
+                                 collapse=","), sep="")), collapse="; ")
+      paste(exclude_eval, collapse=", ")
     
 
     return(site_log)
