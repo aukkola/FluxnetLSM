@@ -48,3 +48,14 @@ get_fluxnet_erai_files <- function(path, site_code = "??-???", ...) {
 
     return(files)
 }
+
+
+
+#' Gets Fluxnet dataset version from Fluxnet file
+#'
+#' @export
+get_fluxnet_version_no <- function(file, ...) {
+  #assumes a FLUXNET2015 file, e.g FLX_US-Ha1_FLUXNET2015_FULLSET_HR_1991-2012_1-3.csv
+  version <- substr(file, start=nchar(file)-6, stop=nchar(file)-4) 
+  return(version)
+}
