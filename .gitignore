@@ -8,3 +8,4 @@
 
 # R specific
 *.RData
+.Rproj.user
