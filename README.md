@@ -18,13 +18,13 @@ To install within R software:
 
 ```{r}
 # install.packages("devtools")
-devtools::install_github("aukkola/FLUXNET2015_processing")
+devtools::install_github("aukkola/FluxnetLSM")
 ```
 
 Alternatively you can download the source files directly from this website or by cloning the repository with the command
 
 ```{r}
-$ git clone https://github.com/aukkola/FLUXNET2015_processing.git
+$ git clone https://github.com/aukkola/FluxnetLSM.git
 ```
 
 Then navigate to the repository directory on your local machine and install using the command:
