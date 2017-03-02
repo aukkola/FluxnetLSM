@@ -12,19 +12,6 @@ Nc_MissingVal = -9999 # missing value in created netcdf files
 QC_measured = 0
 QC_gapfilled = c(1, 2, 3, 4)  #1: good quality gapfill, 2: medium, 3: poor, 4: ERA gapfilled
 
-
-
-#Initialise site log
-site_log <- vector(length=8)
-names(site_log) <- c("Site_code", "Processed", "Errors", 
-                     "Warnings", "No_files", "Met_files", "Flux_files", 
-                     "Excluded_eval")
-
-site_log["Site_code"] <- site_code
-site_log["Warnings"]  <- ''
-site_log[c(3, 5:8)]  <- NA
-
-
 #-----------------------------------------------------------------------------
 
 #' Finds variables present in input file
