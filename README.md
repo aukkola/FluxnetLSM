@@ -18,7 +18,7 @@ The package is managed with [`devtools`](https://github.com/hadley/devtools).
 The package relies on the PALS R package. Please install it first before proceeding to install FluxnetLSM.
 
 
-# 1. Installing PALS
+#### 1. Installing PALS
 
 To install PALS within R software:
 
@@ -28,7 +28,7 @@ devtools::install_github('dudek313/palsR')
 ```
 
 
-# 2. Installing FluxnetLSM
+#### 2. Installing FluxnetLSM
 
 To install FluxnetLSM within R software:
 
