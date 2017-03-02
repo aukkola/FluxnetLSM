@@ -67,15 +67,15 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
 
     
     
-    #Initialise site log
-    site_log <- vector(length=8)
-    names(site_log) <- c("Site_code", "Processed", "Errors", 
-                         "Warnings", "No_files", "Met_files", "Flux_files", 
-                         "Excluded_eval")
-    
-    site_log["Site_code"] <- site_code
-    site_log["Warnings"]  <- ''
-    site_log[c(3, 5:8)]  <- NA
+#     #Initialise site log
+#     site_log <- vector(length=8)
+#     names(site_log) <- c("Site_code", "Processed", "Errors", 
+#                          "Warnings", "No_files", "Met_files", "Flux_files", 
+#                          "Excluded_eval")
+#     
+#     site_log["Site_code"] <- site_code
+#     site_log["Warnings"]  <- ''
+#     site_log[c(3, 5:8)]  <- NA
     
     
     ################################
@@ -117,7 +117,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     
     
     # Read text file containing flux data:
-    DataFromText <- ReadTextFluxData(fileinname=infile, vars=vars,
+    DataFromText <- ReadCSVFluxData(fileinname=infile, vars=vars,
                                      time_vars=time_vars)
     
     

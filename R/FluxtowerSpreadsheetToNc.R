@@ -18,7 +18,7 @@
 #' @param time_vars vector of time variables
 #' @return list of flux data, variables and timing information
 #' @export
-ReadTextFluxData <- function(fileinname, vars, time_vars){
+ReadCSVFluxData <- function(fileinname, vars, time_vars){
   
   ####### First read available variables, corresponding units and ranges ####
   
