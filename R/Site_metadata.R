@@ -48,8 +48,13 @@ get_git_version <- function() {
         git_rev <- desc[1, "RemoteSha"]
     } else {
         git_rev <- "UNKNOWN"
-        warning("Unknown git revision of FluxnetProcessing.
-    Please visit https://github.com/aukkola/FLUXNET2015_processing and review the installation procedure")
+                
+        warning_message <- paste("Unknown git revision of FluxnetProcessing. Please",
+                                 "visit https://github.com/aukkola/FluxnetLSM and",
+                                 "review the installation procedure")
+        site_log["Warnings"] <- paste(site_log["Warnings"], warning_message, sep=" ##### ")
+        
+        warning(warning_message)
     }
     return(git_rev)
 }
@@ -81,9 +86,13 @@ update_metadata <- function(metadata, new_metadata, overwrite=TRUE) {
             if (n %in% names(metadata) && !is.na(metadata[[n]]) &&
                 new_metadata[[n]] != metadata[[n]]) {
                 overwrite_text = if (overwrite) "Overwriting" else "Not overwriting"
-                message("New metadata for ", n, " has different values! ",
-                        overwrite_text, ".\n",
-                        "  old: ", metadata[n], ", new: ", new_metadata[n])
+                
+                warning_message <- paste("New metadata for ", n, " has different values! ",
+                                         overwrite_text, ".\n", "  old: ", metadata[n], 
+                                         ", new: ", new_metadata[n], sep="")
+                #Append to log
+                site_log["Warnings"] <- paste(site_log["Warnings"], warning_message, sep=" ##### ")                
+                message(warning_message)
             }
             metadata[n] <- new_metadata[n]
         }

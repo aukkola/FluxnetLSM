@@ -203,10 +203,14 @@ plot_nc <- function(ncfile, analysis_type, vars, outfile){
     ## Else: Analysis type not known, return warning ##
     ###################################################
     } else {
-      warning(paste("Attempted to produce output plot but analysis
-              type not known. Accepted types are 'annual', 'diurnal'
-              and 'timeseries' but ", "'", analysis_type[k], "' was 
-              passed to function.", sep=""))
+      
+      warning_message <- paste("Attempted to produce output plot but analysis
+                               type not known. Accepted types are 'annual', 'diurnal'
+                               and 'timeseries' but ", "'", analysis_type[k], "' was 
+                               passed to function.", sep="")
+      site_log["Warnings"] <- paste(site_log["Warnings"], warning_message, sep=" ##### ")
+      
+      warning(warning_message)
     }
     
     

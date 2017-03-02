@@ -66,6 +66,18 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     }
 
     
+    
+    #Initialise site log
+    site_log <- vector(length=8)
+    names(site_log) <- c("Site_code", "Processed", "Errors", 
+                         "Warnings", "No_files", "Met_files", "Flux_files", 
+                         "Excluded_eval")
+    
+    site_log["Site_code"] <- site_code
+    site_log["Warnings"]  <- ''
+    site_log[c(3, 5:8)]  <- NA
+    
+    
     ################################
     ###--- Read variable data ---###
     ################################
@@ -269,6 +281,10 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     ###--- Write output met and flux NetCDF files ---###
     ####################################################
     
+    #Initialise variables to save output file names (used to write log)
+    met_files <- vector()
+    flux_files <- vector()
+    
     for(k in 1:no_files){
         
         
@@ -297,6 +313,9 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
             
         }
         
+        #Save file names
+        met_files[k]  <- metfilename
+        flux_files[k] <- fluxfilename
                   
         
         ###--- Create netcdf met driving file ---###
@@ -420,9 +439,12 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
 
       #Analysis type doesn't match options, return warning
       } else {
-        warning(paste("Could not produce output plots. Analysis type not",
-                "recognised, choose all or any of 'annual',", 
-                "'diurnal' and 'timeseries'."))
+        warning_message <- paste("Could not produce output plots. Analysis type not",
+                                 "recognised, choose all or any of 'annual',", 
+                                 "'diurnal' and 'timeseries'.")
+        #Append to log
+        site_log["Warnings"] <- paste(site_log["Warnings"], warning_message, sep=" ##### ")
+        warning(warning_message)
       }
       
       
@@ -438,20 +460,14 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     ### Collate processing information into a log ###
     #################################################
             
-    #Include:
-    # - site code
-    # - met output file
-    # - flux output file
-    # - excluded evaluation variables
+    site_log["Processed"]     <- "TRUE"
+    site_log["Warnings"]      <-
+    site_log["No_files"]      <- no_files
+    site_log["Met_files"]     <- paste(met_files, collapse=", ")
+    site_log("Flux_files")    <- paste(flux_files, collapse=", ")
+    site_log["Excluded_eval"] <-paste(exclude_eval, collapse=", ")
     
-    
-    site_log <- cat("Site processed successfully.",
-                    "\nSite code:", site_code,
-                    "\nCreated", no_files, "met and flux output files",
-                    "\nExcluded eval variables:",  paste(exclude_eval, collapse=", "),
-                    "\n==============================================================")
-    
-    
+
     return(site_log)
     
 } #function

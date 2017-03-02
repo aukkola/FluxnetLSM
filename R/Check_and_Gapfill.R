@@ -76,10 +76,13 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
     } else {
       
       threshold <- NA
-      warning(paste("Cannot check for the percentage of gap-filled data,",
-                    "no thresholds set. Set at least one of",
-                    "'gapfill_all', 'gapfill_good', 'gapfill_med'",
-                    "or 'gapfill_poor' to check for gapfilling"))
+      warning_message <- paste("Cannot check for the percentage of gap-filled data,",
+                              "no thresholds set. Set at least one of",
+                              "'gapfill_all', 'gapfill_good', 'gapfill_med'",
+                              "or 'gapfill_poor' to check for gapfilling")
+      #Append to log
+      site_log["Warnings"] <- paste(site_log["Warnings"], warning_message, sep=" ##### ")
+      warning(warning_message)
     }
       
     
