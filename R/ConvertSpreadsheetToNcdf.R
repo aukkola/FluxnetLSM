@@ -394,7 +394,6 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     #as a 14-day running mean time series depending on
     #analysis choices (separate figures for Met and Flux vars)
         
-    source("~/Documents/FLUXNET2016_processing/PALS_anna/palsR/R/1DTimeseries.R")
     if(!any(is.na(plot))){
       
       #Open met and flux NetCDF file handles
