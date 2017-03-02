@@ -9,7 +9,8 @@ CreateFluxNcFile(fluxfilename, datain, latitude, longitude, site_code,
   starttime, timestepsize, flux_varname, cf_name, elevation = NA,
   towerheight = NA, canopyheight = NA, short_veg_type = NA,
   long_veg_type = NA, missing, gapfill_all, gapfill_good, gapfill_med,
-  gapfill_poor, min_yrs, total_missing, total_gapfilled, infile, var_ind)
+  gapfill_poor, min_yrs, total_missing, total_gapfilled, QCmeasured,
+  QCgapfilled, infile, var_ind)
 }
 \description{
 Creates a netcdf file for flux variables
