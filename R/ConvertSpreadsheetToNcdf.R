@@ -117,8 +117,8 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     vars <- DataFromText$vars
     
     # Check if variables have gaps in the time series and determine what years to output:
-    gaps  <- CheckDataGaps(datain = DataFromText, missing_val = SprdMissingVal,
-                           QCmeasured=QCmeasured, QCgapfilled=QCgapfilled,
+    gaps  <- CheckDataGaps(datain = DataFromText, missing_val = Sprd_MissingVal,
+                           QCmeasured=QC_measured, QCgapfilled=QC_gapfilled,
                            missing = missing, gapfill_all=gapfill_all,
                            gapfill_good=gapfill_good, gapfill_med=gapfill_med,
                            gapfill_poor=gapfill_poor, min_yrs=min_yrs,
@@ -131,32 +131,33 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
 
     #These are excluded when writing NetCDF file
     #Find variables with all values missing
-    all_missing <- sapply(gaps$total_missing, function(x) names(which(x==100)))
+    all_missing <- lapply(gaps$total_missing, function(x) names(which(x==100)))
     
-    exclude_eval <- NA
-    if(length(all_missing) > 0){
+    exclude_eval <- rep(NA, length(all_missing))
+    if(any(sapply(all_missing, length) > 0)){
       
       #Extract names of evaluation variables
       cats <- DataFromText$categories
       eval_vars <- names(cats[cats=="Eval"])
       
       #Find eval variables with all values missing
-      exclude_eval <- intersect(all_missing, eval_vars)
+      exclude_eval <- lapply(all_missing, intersect, eval_vars)
       
       #Only exclude QC variables if corresponding data variable excluded as well. Keep otherwise
       #Find all QC variables
-      qc_vars <- exclude_eval[grepl("_QC", exclude_eval)]
+      qc_vars <- lapply(exclude_eval, function(x) x[grepl("_QC", x)])
       
-      if(length(qc_vars) > 0){
+      if(any(sapply(qc_vars, length) > 0)){
         
         #Find QC variables with corresponding data variable
-        remove_qc <-  is.element(gsub("_QC", "", qc_vars), exclude_eval)
+        remove_qc <-  mapply(function(x,y) is.element(gsub("_QC", "", y), x), x=exclude_eval, y=qc_vars)
        
         #If any QC vars without a corresponding data variable, don't include
         #them in excluded variables
-        if(any(!remove_qc)){
-          exclude_eval <- exclude_eval[-which(exclude_eval==qc_vars[!remove_qc])]      
-          
+        for(k in 1:length(remove_qc)){
+          if(any(!remove_qc[[k]])){
+            exclude_eval[[k]] <- exclude_eval[[k]][-which(exclude_eval[[k]]==qc_vars[[k]][!remove_qc[[k]]])] 
+          }          
         }
       }
     }
@@ -168,7 +169,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     if(!include_all_eval){
       
       #Add variables with too many gaps/gap-filling to excluded eval variables
-      exclude_eval <- unique(c(exclude_vars, gaps$eval_remove))
+      exclude_eval <- mapply(function(x,y) unique(c(x, y)), x=exclude_eval, y=gaps$eval_remove)
     }
     
     
@@ -203,7 +204,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
         temp_data <- GapfillMet(datain=DataFromText$data[,ind], era_data=era_data,
                                 era_vars=DataFromText$era_vars[ind],
                                 tair_units=tair_units, vpd_units=vpd_units,
-                                missing_val=SprdMissingVal,
+                                missing_val=Sprd_MissingVal,
                                 out_vars=DataFromText$out_vars[ind])
         
         
@@ -252,7 +253,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     
     
     # Check that data are within acceptable ranges: 
-    CheckDataRanges(ConvertedData, missingval=NcMissingVal)
+    CheckDataRanges(ConvertedData, missingval=Nc_MissingVal)
     
     
     #Replace original data with converted data
@@ -327,6 +328,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                          gapfill_poor=gapfill_poor, min_yrs=min_yrs,
                          total_missing=gaps$total_missing[[k]][met_ind],
                          total_gapfilled=gaps$total_gapfilled[[k]][met_ind],
+                         QCmeasured=QC_measured, QCgapfilled=QC_gapfilled,
                          ERA_gapfill=ERA_gapfill,
                          infile=infile,
                          var_ind=met_ind)
@@ -339,9 +341,9 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
         flux_ind <- which(DataFromText$categories=="Eval")
         
         #If eval variables to exclude, remove these now
-        if(any(!is.na(exclude_eval))){    
-          rm_ind    <- sapply(1:length(exclude_eval), function(x) 
-                             which(DataFromText$vars[flux_ind]==exclude_eval[x]))
+        if(any(!is.na(exclude_eval[[k]]))){    
+          rm_ind    <- sapply(1:length(exclude_eval[[k]]), function(x) 
+                             which(DataFromText$vars[flux_ind]==exclude_eval[[k]][x]))
           flux_ind  <- flux_ind[-rm_ind]
         }        
         
@@ -375,6 +377,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                          gapfill_poor=gapfill_poor, min_yrs=min_yrs,
                          total_missing=gaps$total_missing[[k]][flux_ind],
                          total_gapfilled=gaps$total_gapfilled[[k]][flux_ind],
+                         QCmeasured=QC_measured, QCgapfilled=QC_gapfilled,
                          infile=infile,
                          var_ind=flux_ind)
         
@@ -391,6 +394,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     #as a 14-day running mean time series depending on
     #analysis choices (separate figures for Met and Flux vars)
         
+    source("~/Documents/FLUXNET2016_processing/PALS_anna/palsR/R/1DTimeseries.R")
     if(!any(is.na(plot))){
       
       #Open met and flux NetCDF file handles

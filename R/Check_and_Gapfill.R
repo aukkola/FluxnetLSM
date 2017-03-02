@@ -177,7 +177,7 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
     #Also initialise variable to save info about evaluation
     #variables with gaps exceeding thresholds (used to remove
     #eval variables if option chosen)
-    eval_remove <- vector()
+    eval_remove <- list()
     
     #Loop through years
     for(k in 1:length(start)){
@@ -197,7 +197,8 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
         
         
         #Check if any evaluation variables have too many gaps
-        eval_remove <- append(eval_remove, which(miss[eval_ind] > missing))
+        eval_remove[[k]] <- vector() #initialise
+        eval_remove[[k]] <- append(eval_remove[[k]], which(miss[eval_ind] > missing))
         
         
         #If missing value threshold not exceeded, check for gapfilling (if threshold set)
@@ -214,7 +215,7 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
             }
           
             #Check if any evaluation variables have too much gap-filling
-            eval_remove <- append(eval_remove, which(gaps[eval_ind] > threshold))
+            eval_remove[[k]] <- append(eval_remove[[k]], which(gaps[eval_ind] > threshold))
                         
           #Using gapfill_good/med/poor
           } else {
@@ -224,7 +225,7 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
                                                                   all(gaps[x,preferred_ind] > threshold[x]))
                                              
             #Check if any evaluation variables have too much gap-filling
-            eval_remove <- append(eval_remove, sapply(1:length(threshold), 
+            eval_remove[[k]] <- append(eval_remove[[k]], sapply(1:length(threshold), 
                                                function (x) which(gaps[x,eval_ind] > threshold[x])))
             
             if(any(exclude_yr)){
@@ -261,7 +262,7 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
         tstart <- start[yr_ind]
         tend   <- start[yr_ind]
         
-        ## two or more years that are not consecutive
+    ## two or more years that are not consecutive
     } else if (any(diff(yr_ind) > 1)) {
         
         #Find non-consecutive instances
@@ -292,7 +293,7 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
                 }
                 
                 
-                #At least min_yrs number of available years
+            #At least min_yrs number of available years
             } else {
                 
                 consec <- append(consec, ind_consec)
@@ -304,7 +305,7 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
         }
         
         
-        ## multiple years but all consecutive
+    ## multiple years but all consecutive
     } else {
         
         consec <- rep(1, length(yr_ind))
@@ -315,6 +316,12 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
         
     }
     
+    
+    #Find eval variables to be removed for final output years
+    ints <- unique(consec) #time periods
+    #Need to find separately for each output period
+    eval_rm <- lapply(1:length(ints), function(x) unique(unlist(eval_remove[yr_ind[consec==ints[x]]])))
+    eval_remove <- lapply(eval_rm, function(x) all_eval[x])
     
     
     #Determine overall percentage missing and gap-filled for
@@ -353,9 +360,9 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
     }        
     
       
-    
+    #Collate outputs
     out <- list(total_missing=total_missing, total_gapfilled=total_gapfilled, 
-                eval_remove=all_eval[unique(eval_remove)],
+                eval_remove=eval_remove,
                 yr_keep=yr_ind, consec=consec, 
                 tseries_start=tstart, tseries_end=tend)
     
