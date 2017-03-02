@@ -154,6 +154,7 @@ CreateFluxNcFile = function(fluxfilename, datain,                  #outfile file
                             missing, gapfill_all, gapfill_good,    #thresholds used in processing
                             gapfill_med, gapfill_poor, min_yrs, 
                             total_missing, total_gapfilled,        #Percentage missing and gap-filled
+                            QCmeasured, QCgapfilled,               #QC flag values
                             infile,                                #Input file name
                             var_ind){                              #Indices to extract variables to be written
     
@@ -324,12 +325,12 @@ CreateFluxNcFile = function(fluxfilename, datain,                  #outfile file
   
   #Add missing percentage to file
   lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]], 
-                                                   attname="Missing (%)", 
+                                                   attname="Missing_%", 
                                                    attval=round(total_missing[x],1)))  
   
   #Add gap-filled percentage to file
   lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]], 
-                                                   attname="Gap-filled (%)", 
+                                                   attname="Gap-filled_%", 
                                                    attval=round(total_gapfilled[x],1)))  
   
   
@@ -361,6 +362,7 @@ CreateMetNcFile = function(metfilename, datain,                   #outfile file 
                            missing, gapfill_all, gapfill_good,    #thresholds used in processing
                            gapfill_med, gapfill_poor, min_yrs,
                            total_missing, total_gapfilled,        #Percentage missing and gap-filled
+                           QCmeasured, QCgapfilled,               #QC flag values
                            ERA_gapfill=ERA_gapfill,               #Was ERA gapfilling used
                            infile,                                #Input file name
                            var_ind){                              #Indices to extract variables to be written
@@ -538,12 +540,12 @@ CreateMetNcFile = function(metfilename, datain,                   #outfile file 
  
 	#Add missing percentage to file
 	lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]], 
-	                                                 attname="Missing (%)", 
+	                                                 attname="Missing_%", 
 	                                                 attval=round(total_missing[x],1)))  
 	
 	#Add gap-filled percentage to file
 	lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]], 
-	                                                 attname="Gap-filled (%)", 
+	                                                 attname="Gap-filled_%", 
 	                                                 attval=round(total_gapfilled[x],1)))  
 	
 	
