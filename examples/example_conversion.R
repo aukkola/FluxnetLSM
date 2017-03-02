@@ -9,7 +9,7 @@
 #' example.
 #' 
 
-library(FluxnetProcessing)  # convert_fluxnet_to_netcdf
+library(FluxnetLSM)  # convert_fluxnet_to_netcdf
 
 #clear R environment
 rm(list=ls(all=TRUE))
@@ -25,20 +25,25 @@ site_code <- "AU-How"
 
 # This directory should contain appropriate data from 
 # http://fluxnet.fluxdata.org/data/fluxnet2015-dataset/
-in_path <- "~/phd/data/Fluxnet2015/FULLSET/AU-How/"
+in_path <- "~/Documents/FLUXNET2016_processing/Inputs"
 
 #Outputs will be saved to this directory
-out_path <- "~/phd/data/Fluxnet2015/processed/"
+out_path <- "~/Documents/FLUXNET2016_processing/Outputs"
 
 
-# Name and version of dataset being processed (e.g. "FLUXNET2015" and "1.3")
+# Name and version of dataset being processed (e.g. "FLUXNET2015")
 datasetname="FLUXNET2015"
-datasetversion="1.3"
+#datasetversion="1-3"
+
 
 # Input Fluxnet data file (using FULLSET in this example, se R/Helpers.R for details)
 infile <- get_fluxnet_files(in_path, site_code,
                             datasetname=datasetname,
                             datasetversion=datasetversion)
+
+#Retrieve dataset version
+datasetversion <- get_fluxnet_version_no(infile)
+  
 
 ###############################
 ###--- Optional settings ---###
@@ -72,13 +77,18 @@ plot <- c("annual", "diurnal","timeseries")
 ###--- Run analysis ---###
 ##########################
 
-convert_fluxnet_to_netcdf(infile=infile, site_code=site_code, out_path=out_path,
-                          ERA_file=ERA_file, ERA_gapfill=ERA_gapfill, datasetname=datasetname, 
-                          datasetversion=datasetversion, missing = missing, 
-                          gapfill_all=gapfill_all, gapfill_good=gapfill_good, 
-                          gapfill_med=gapfill_med, gapfill_poor=gapfill_poor,
-                          min_yrs=min_yrs, plot=plot)
+site_log <- convert_fluxnet_to_netcdf(infile=infile, site_code=site_code, out_path=out_path,
+                                     ERA_file=ERA_file, ERA_gapfill=ERA_gapfill, datasetname=datasetname, 
+                                     datasetversion=datasetversion, missing = missing, 
+                                     gapfill_all=gapfill_all, gapfill_good=gapfill_good, 
+                                     gapfill_med=gapfill_med, gapfill_poor=gapfill_poor,
+                                     min_yrs=min_yrs, plot=plot)
 
 
-#Save warnings and errors to a log COPMLETE !!!!!!!!!!!!!!!
-warnings()
+#Save log to file
+write.csv(t(as.matrix(site_log)), paste(out_path, "/", site_code, 
+                                        "_FluxnetLSM_processing_log_",  
+                                        Sys.Date(), ".csv", sep=""))
+
+
+
