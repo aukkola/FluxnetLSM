@@ -394,7 +394,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                              "time periods. Site not processed."))           
           } else {
             #Return warning and skip time period
-            warning(paste("File ", k, ": No evaluation variables to process, "
+            warning(paste("File ", k, ": No evaluation variables to process, ",
                           "all variables have too many missing values or gap-filling. Try",
                           "setting include_all_eval to TRUE to process variables. Skipping ",
                           "time period", sep="")
