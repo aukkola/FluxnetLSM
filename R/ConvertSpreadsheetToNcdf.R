@@ -306,17 +306,17 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
         
         #Create output file names
         #If only one year, only write start year, else write time period
-        if(start_yr==end_yr){
-            metfilename  <- paste(outpath_nc, "/", site_code, "_", start_yr, 
+        if(start_yr[k]==end_yr[k]){
+            metfilename  <- paste(outpath_nc, "/", site_code, "_", start_yr[k], 
                                   "_", datasetname, "_Met.nc", sep="")
-            fluxfilename <- paste(outpath_nc, "/", site_code, "_", start_yr, 
+            fluxfilename <- paste(outpath_nc, "/", site_code, "_", start_yr[k], 
                                   "_", datasetname, "_Flux.nc", sep="")
             
         } else {
-            metfilename  <- paste(outpath_nc, "/", site_code, "_", start_yr, 
-                                  "-", end_yr, "_", datasetname, "_Met.nc", sep="")
-            fluxfilename <- paste(outpath_nc, "/", site_code, "_", start_yr, 
-                                  "-", end_yr, "_", datasetname, "_Flux.nc", sep="")
+            metfilename  <- paste(outpath_nc, "/", site_code, "_", start_yr[k], 
+                                  "-", end_yr[k], "_", datasetname, "_Met.nc", sep="")
+            fluxfilename <- paste(outpath_nc, "/", site_code, "_", start_yr[k], 
+                                  "-", end_yr[k], "_", datasetname, "_Flux.nc", sep="")
             
         }
         
@@ -485,6 +485,6 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                                             "_FluxnetLSM_processing_log_",  
                                             Sys.Date(), ".csv", sep=""))
     
-    return(site_log)
+    return(cat(site_log))
     
 } #function
