@@ -465,7 +465,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                   outfile=outfile_met)      
           
           plot_nc(ncfile=nc_flux, analysis_type=plot,
-                  vars=DataFromText$out_vars[flux_ind[k]],
+                  vars=DataFromText$out_vars[flux_ind[[k]]],
                   outfile=outfile_flux)
           
           
