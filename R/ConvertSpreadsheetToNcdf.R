@@ -132,6 +132,18 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     #Replace vars with those found in file
     vars <- DataFromText$vars
     
+    
+    #Check for missing values in QC flags when data available
+    #In FLUXNET2015 Nov 16 release, QC flags are missing in some
+    #cases even when data is available. This is because the flags 
+    #apply to both LE_F_MDS and LE_CORR (and similarly H) but are
+    #only reported when LE_CORR is available
+    #(pers. comm. with D. Papale, Fluxnet)
+    
+    #Set these time steps to 3 (poor gap-filling)
+    
+    
+    
     # Check if variables have gaps in the time series and determine what years to output:
     gaps  <- CheckDataGaps(datain = DataFromText, missing_val = Sprd_MissingVal,
                            QCmeasured=QC_measured, QCgapfilled=QC_gapfilled,
@@ -290,7 +302,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     flux_files <- vector()
     start_yr   <- vector()
     end_yr     <- vector()
-    
+    flux_ind   <  list()
     
     for(k in 1:no_files){
         
@@ -364,19 +376,30 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
         ###--- Create netcdf flux data file ---###
         
         #Find eval variable indices
-        flux_ind <- which(DataFromText$categories=="Eval")
+        flux_ind[[k]] <- which(DataFromText$categories=="Eval")
         
         #If eval variables to exclude, remove these now
         if(any(!is.na(exclude_eval[[k]]))){    
-          rm_ind    <- sapply(1:length(exclude_eval[[k]]), function(x) 
-                             which(DataFromText$vars[flux_ind]==exclude_eval[[k]][x]))
-          flux_ind  <- flux_ind[-rm_ind]
+          rm_ind         <- sapply(1:length(exclude_eval[[k]]), function(x) 
+                                   which(DataFromText$vars[flux_ind]==exclude_eval[[k]][x]))
+          flux_ind[[k]]  <- flux_ind[[k]][-rm_ind]
         }        
+                
         
-        if(length(flux_ind)==0){
-          CheckError("No evaluation variables to process, all variables have",
-                     "too many missing values or gap-filling. Set",
-                     "include_all_eval to TRUE to process variables.")
+        #Check that have at least one eval variable to write, skip time period if not
+        if(length(flux_ind[[k]])==0){
+          #If no eval vars for any time period, abort
+          if(k k==no_files & all(sapply(flux_ind[[k]], length)==0)){
+            CheckError(paste("No evaluation variables to process for any output",
+                             "time periods. Site not processed."))           
+          } else {
+            #Return warning and skip time period
+            warning(paste("File ", k, ": No evaluation variables to process, "
+                          "all variables have too many missing values or gap-filling. Try",
+                          "setting include_all_eval to TRUE to process variables. Skipping ",
+                          "time period", sep="")
+            next  
+          }          
         }
         
         
@@ -422,6 +445,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
         
     if(!any(is.na(plot))){
       
+      #Loop through output periods
       for(k in 1:length(met_files)){
         
         #Open met and flux NetCDF file handles
@@ -440,9 +464,8 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                   vars=DataFromText$out_vars[DataFromText$categories=="Met"],
                   outfile=outfile_met)      
           
-          
           plot_nc(ncfile=nc_flux, analysis_type=plot,
-                  vars=DataFromText$out_vars[DataFromText$categories=="Eval"],
+                  vars=DataFromText$out_vars[flux_ind[k]],
                   outfile=outfile_flux)
           
           
