@@ -162,7 +162,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                            missing = missing, gapfill_all=gapfill_all,
                            gapfill_good=gapfill_good, gapfill_med=gapfill_med,
                            gapfill_poor=gapfill_poor, min_yrs=min_yrs,
-                           essential_met = vars[which(DataFromText$essential_met)],  #FIX MUST NOT BE READ STRAIGHT FROM FILE !!!!!!!!!!!!
+                           essential_met = vars[which(DataFromText$essential_met)], 
                            preferred_eval = vars[which(DataFromText$preferred_eval)],
                            all_eval = vars[which(DataFromText$categories=="Eval")])
     
@@ -209,7 +209,8 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     if(!include_all_eval){
       
       #Add variables with too many gaps/gap-filling to excluded eval variables
-      exclude_eval <- mapply(function(x,y) unique(c(x, y)), x=exclude_eval, y=gaps$eval_remove)
+      exclude_eval <- mapply(function(x,y) unique(c(x, y)), x=exclude_eval, 
+                             y=gaps$eval_remove, SIMPLIFY=FALSE)
     }
     
     
@@ -522,6 +523,6 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     
     
     #TODO: change return statement once error handling addded
-    return(paste("Site", site_code, "processed successfully. Refer to log file for details"))
+    return(cat("Site", site_code, "processed successfully. Refer to log file for details"))
     
 } #function
