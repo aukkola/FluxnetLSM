@@ -4,7 +4,7 @@
 #' Converts useful variables from a Fluxnet 2015 spreatsheet format into two
 #' netcdf files, one for fluxes, and one for met forcings.
 
-library(FluxnetProcessing)  # convert_fluxnet_to_netcdf
+library(FluxnetLSM)  # convert_fluxnet_to_netcdf
 library(parallel)
 
 # initial garbage collection
@@ -74,7 +74,7 @@ if(exists("datasetname"))    {clusterExport(cl, 'datasetname')}
 if(exists("datasetversion")) {clusterExport(cl, 'datasetversion')}
 
 
-clusterMap(cl=cl, function(x,y,z) {library(FluxnetProcessing) 
+clusterMap(cl=cl, function(x,y,z) {library(FluxnetLSM) 
                                    convert_fluxnet_to_netcdf(infile=x, site_code=y, ERA_file=z,
                                    out_path=out_path, ERA_gapfill=ERA_gapfill,
                                    datasetname=datasetname, datasetversion=datasetversion,
