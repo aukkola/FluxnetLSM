@@ -397,7 +397,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
             warning(paste("File ", k, ": No evaluation variables to process, ",
                           "all variables have too many missing values or gap-filling. Try",
                           "setting include_all_eval to TRUE to process variables. Skipping ",
-                          "time period", sep="")
+                          "time period", sep=""))
             next  
           }          
         }
