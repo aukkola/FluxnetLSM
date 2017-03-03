@@ -2,8 +2,8 @@
 #'
 #' @export
 get_fluxnet_file_template <- function(site_code = "??-???", datasetname = "FLUXNET2015",
-                                     subset = "FULLSET", resolution = "HH",
-                                     years = "[0-9]{4}-[0-9]{4}", datasetversion = "1.3",
+                                     subset = "FULLSET", resolution = "[A-Z]{2}",
+                                     years = "[0-9]{4}-[0-9]{4}", datasetversion = "[0-9]{1}-[0-9]{1}",
                                      extension=".csv") {
     version <- gsub("\\.", "-", datasetversion)
     if (is.character(resolution) & nchar(resolution) > 0) {
