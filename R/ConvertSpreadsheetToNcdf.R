@@ -125,7 +125,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                                      time_vars=time_vars)
     
     
-    # Make sure whole number of days in dataset:0
+    # Make sure whole number of days in dataset:
     CheckSpreadsheetTiming(DataFromText)
     
     
@@ -141,7 +141,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     #(pers. comm. with D. Papale, Fluxnet)
     
     #Set these time steps to 3 (poor gap-filling)
-    
+    DataFromText <- fill_qcvar_missing(datain=DataFromText)
     
     
     # Check if variables have gaps in the time series and determine what years to output:
@@ -507,6 +507,8 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     write.csv(t(as.matrix(site_log)), paste(outpath_log, "/", site_code, 
                                             "_FluxnetLSM_processing_log_",  
                                             Sys.Date(), ".csv", sep=""))
-    return(cat(site_log, sep="\n"))
+    
+    
+    return(paste("Site", site_code, "processed successfully. Refer to log file for details"))
     
 } #function
