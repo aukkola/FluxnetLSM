@@ -5,7 +5,7 @@
 \title{Gets Fluxnet site_code from Fluxnet file.
 Useful when processing multiple files}
 \usage{
-get_fluxnet_site_code(path, file, ...)
+get_fluxnet_site_code(file)
 }
 \description{
 Gets Fluxnet site_code from Fluxnet file.

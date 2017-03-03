@@ -4,7 +4,7 @@
 \alias{get_fluxnet_version_no}
 \title{Gets Fluxnet dataset version from Fluxnet file}
 \usage{
-get_fluxnet_version_no(file, ...)
+get_fluxnet_version_no(file)
 }
 \description{
 Gets Fluxnet dataset version from Fluxnet file
