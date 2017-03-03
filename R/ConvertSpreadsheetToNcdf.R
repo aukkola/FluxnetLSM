@@ -381,7 +381,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
         #If eval variables to exclude, remove these now
         if(any(!is.na(exclude_eval[[k]]))){    
           rm_ind         <- sapply(1:length(exclude_eval[[k]]), function(x) 
-                                   which(DataFromText$vars[flux_ind]==exclude_eval[[k]][x]))
+                                   which(DataFromText$vars[flux_ind[[k]]]==exclude_eval[[k]][x]))
           flux_ind[[k]]  <- flux_ind[[k]][-rm_ind]
         }        
                 
@@ -424,11 +424,11 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                          missing=missing, gapfill_all=gapfill_all, 
                          gapfill_good=gapfill_good, gapfill_med=gapfill_med, 
                          gapfill_poor=gapfill_poor, min_yrs=min_yrs,
-                         total_missing=gaps$total_missing[[k]][flux_ind],
-                         total_gapfilled=gaps$total_gapfilled[[k]][flux_ind],
+                         total_missing=gaps$total_missing[[k]][flux_ind[[k]]],
+                         total_gapfilled=gaps$total_gapfilled[[k]][flux_ind[[k]]],
                          QCmeasured=QC_measured, QCgapfilled=QC_gapfilled,
                          infile=infile,
-                         var_ind=flux_ind)
+                         var_ind=flux_ind[[k]])
         
     }
     
