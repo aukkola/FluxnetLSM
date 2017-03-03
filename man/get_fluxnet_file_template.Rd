@@ -4,9 +4,10 @@
 \alias{get_fluxnet_file_template}
 \title{Gets a Fluxnet file template (or full file name if site codes and years are specified)}
 \usage{
-get_fluxnet_file_template(site_code = "??-???", datasetname = "FLUXNET2015",
-  subset = "FULLSET", resolution = "HH", years = "[0-9]{4}-[0-9]{4}",
-  datasetversion = "1.3", extension = ".csv")
+get_fluxnet_file_template(site_code = "[A-Z]{2}-[A-Z]{3}",
+  datasetname = "FLUXNET2015", subset = "FULLSET",
+  resolution = "[A-Z]{2}", years = "[0-9]{4}-[0-9]{4}",
+  datasetversion = "[0-9]{1}-[0-9]{1}", extension = ".csv")
 }
 \description{
 Gets a Fluxnet file template (or full file name if site codes and years are specified)

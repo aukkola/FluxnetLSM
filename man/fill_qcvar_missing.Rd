@@ -5,7 +5,7 @@
 \title{Fills QC flags with 3 (poor gap-filling) when
 QC flag missing but data variable available}
 \usage{
-fill_qcvar_missing(datain)
+fill_qcvar_missing(datain, missingVal, gapfillVal)
 }
 \value{
 datain
