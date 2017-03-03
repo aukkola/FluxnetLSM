@@ -1,10 +1,9 @@
 #' ConvertSpreadsheetToNcdf.R
 #'
-#' Converts data from a PALS formatted spreadhseet to
-#' netcdf.
+#' Converts data from a FLUXNET2015 formatted spreadsheet to
+#' NetCDF.
 #'
-#' author: Anna Ukkola UNSW 2017
-
+#' author: Anna Ukkola UNSW 2017.
 #' Main function to convert Fluxnet2015 CSV-files to NetCDF
 #'
 #' @param infile input filename,
@@ -15,19 +14,19 @@
 #'        e.g. "FULLSET/FLX_AU-How_FLUXNET2015_ERAI_HH_1989-2014_1-3.csv"
 #' @param ERA_gapfill Gapfill met variables using ERAinterim?
 #' @param datasetname Name of the dataset, e.g. FLUXNET2015
-#' @param datasetversion Version of the dataset, e.g. "v1-3"
-#' @param missing How many percent of time steps allowed to be missing in any given year?
-#' @param gapfill_all How many percent of time steps allowed to be gap-filled 
-#'        (any quality) in any given year? Note if gapfill_all is set, any thresholds
+#' @param datasetversion Version of the dataset, e.g. "1-3"
+#' @param missing Maximum percentage of time steps allowed to be missing in any given year
+#' @param gapfill_all Maximum percentage of time steps allowed to be gap-filled 
+#'        (any quality) in any given year. Note if gapfill_all is set, any thresholds
 #'        for gapfill_good, gapfill_med or gapfill_poor are ignored. Set to NA if not required.
-#' @param gapfill_good How many percent of time steps allowed to be good-quality gap-filled 
-#'        in any given year? Refer to package documentation for information on QC flags.
+#' @param gapfill_good Maximum percentage of time steps allowed to be good-quality gap-filled 
+#'        in any given year. Refer to package documentation for information on QC flags.
 #'        Set to NA if not required (default).
-#' @param gapfill_med How many percent of time steps allowed to be medium-quality gap-filled 
-#'        in any given year? Refer to package documentation for information on QC flags.
+#' @param gapfill_med Maximum percentage of time steps allowed to be medium-quality gap-filled 
+#'        in any given year. Refer to package documentation for information on QC flags.
 #'        Set to NA if not required (default).
-#' @param gapfill_poor How many percent of time steps allowed to be poor-quality gap-filled 
-#'        in any given year? Refer to package documentation for information on QC flags.
+#' @param gapfill_poor Maximum percentage of time steps allowed to be poor-quality gap-filled 
+#'        in any given year. Refer to package documentation for information on QC flags.
 #'        Set to NA if not required (default).
 #' @param min_yrs Minimum number of consecutive years to process
 #' @param include_all_eval Should all evaluation values be included, regardless of data gaps? 
@@ -42,7 +41,7 @@
 convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                                       ERA_file=NA, ERA_gapfill=FALSE,
                                       datasetname="FLUXNET2015", datasetversion="1-3",
-                                      missing = 10, gapfill_all=10,
+                                      missing = 15, gapfill_all=20,
                                       gapfill_good=NA, gapfill_med=NA,
                                       gapfill_poor=NA, min_yrs=2,
                                       include_all_eval=TRUE,
@@ -80,9 +79,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     site_log["Site_code"] <- site_code
     site_log["Warnings"]  <- ''
     site_log[c(3, 5:8)]  <- NA
-    
-    
-    
+      
     
     ### Set expected values for missing and gap-filled values ###
     
