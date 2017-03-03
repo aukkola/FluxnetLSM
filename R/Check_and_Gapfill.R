@@ -80,8 +80,6 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
                               "no thresholds set. Set at least one of",
                               "'gapfill_all', 'gapfill_good', 'gapfill_med'",
                               "or 'gapfill_poor' to check for gapfilling")
-      #Append to log
-      site_log["Warnings"] <- paste(site_log["Warnings"], warning_message, sep=" ##### ")
       warning(warning_message)
     }
       

@@ -59,6 +59,10 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     outpath_nc <- paste(out_path, "/Nc_files", sep="")
     dir.create(outpath_nc, showWarnings = FALSE, recursive=TRUE)
     
+    #Log 
+    outpath_log <- paste(out_path, "/Logs", sep="")
+    dir.create(outpath_log, showWarnings = FALSE, recursive=TRUE)
+    
     #Plots (if code set to plot)
     if(!any(is.na(plot))){
       outpath_plot <- paste(out_path, "/Figures", sep="")
@@ -68,7 +72,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     
     
      #Initialise site log
-     site_log <<- vector(length=8)
+     site_log <- vector(length=8)
      names(site_log) <- c("Site_code", "Processed", "Errors", 
                           "Warnings", "No_files", "Met_files", "Flux_files", 
                           "Excluded_eval")
@@ -281,9 +285,12 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     ###--- Write output met and flux NetCDF files ---###
     ####################################################
     
-    #Initialise variables to save output file names (used to write log)
-    met_files <- vector()
+    #Initialise variables to save output file names (used to write log and for plotting)
+    met_files  <- vector()
     flux_files <- vector()
+    start_yr   <- vector()
+    end_yr     <- vector()
+    
     
     for(k in 1:no_files){
         
@@ -293,8 +300,8 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
         
         
         #Extract start and end years
-        start_yr <- substring(DataFromText$time[gaps$tseries_start[k],1], 1, 4)
-        end_yr   <- substring(DataFromText$time[gaps$tseries_end[k],1], 1, 4)
+        start_yr[k] <- substring(DataFromText$time[gaps$tseries_start[k],1], 1, 4)
+        end_yr[k]   <- substring(DataFromText$time[gaps$tseries_end[k],1], 1, 4)
         
         
         #Create output file names
@@ -415,42 +422,46 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
         
     if(!any(is.na(plot))){
       
-      #Open met and flux NetCDF file handles
-      nc_met <- nc_open(metfilename)
-      nc_flux <- nc_open(fluxfilename)
-      
-      #Initialise output file names (completed in plotting code)
-      outfile_met  <- paste(outpath_plot, "/", site_code, "_plot_Met_", sep="")
-      outfile_flux <- paste(outpath_plot, "/", site_code, "_plot_Flux_", sep="")
-      
-   
-      ## Plotting ##
-      if(any(plot=="annual") | any(plot=="diurnal") | any(plot=="timeseries")){
-                
-        plot_nc(ncfile=nc_met, analysis_type=plot, 
-                vars=DataFromText$out_vars[DataFromText$categories=="Met"],
-                outfile=outfile_met)      
+      for(k in 1:length(met_files)){
+        
+        #Open met and flux NetCDF file handles
+        nc_met <- nc_open(met_files[k])
+        nc_flux <- nc_open(flux_files[k])
+        
+        #Initialise output file names (completed in plotting code)
+        outfile_met  <- paste(outpath_plot, "/", site_code, "_", start_yr[k], "_", end_yr[k], "_plot_Met_", sep="")
+        outfile_flux <- paste(outpath_plot, "/", site_code, "_", start_yr[k], "_", end_yr[k], "_plot_Flux_", sep="")
         
         
-        plot_nc(ncfile=nc_flux, analysis_type=plot,
-                vars=DataFromText$out_vars[DataFromText$categories=="Eval"],
-                outfile=outfile_flux)
-
-
-      #Analysis type doesn't match options, return warning
-      } else {
-        warning_message <- paste("Could not produce output plots. Analysis type not",
-                                 "recognised, choose all or any of 'annual',", 
-                                 "'diurnal' and 'timeseries'.")
-        #Append to log
-        site_log["Warnings"] <- paste(site_log["Warnings"], warning_message, sep=" ##### ")
-        warning(warning_message)
+        ## Plotting ##
+        if(any(plot=="annual") | any(plot=="diurnal") | any(plot=="timeseries")){
+          
+          plot_nc(ncfile=nc_met, analysis_type=plot, 
+                  vars=DataFromText$out_vars[DataFromText$categories=="Met"],
+                  outfile=outfile_met)      
+          
+          
+          plot_nc(ncfile=nc_flux, analysis_type=plot,
+                  vars=DataFromText$out_vars[DataFromText$categories=="Eval"],
+                  outfile=outfile_flux)
+          
+          
+          #Analysis type doesn't match options, return warning
+        } else {
+          warning_message <- paste("Could not produce output plots. Analysis type not",
+                                   "recognised, choose all or any of 'annual',", 
+                                   "'diurnal' and 'timeseries'.")
+          #Append to log
+          site_log["Warnings"] <- paste(site_log["Warnings"], warning_message, sep=" ##### ")
+          warning(warning_message)
+        }
+        
+        
+        #Close file handles
+        nc_close(nc_met)
+        nc_close(nc_flux)  
+        
       }
-      
-      
-      #Close file handles
-      nc_close(nc_met)
-      nc_close(nc_flux)  
       
     } #plotting
     
@@ -467,7 +478,6 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     site_log["Excluded_eval"] <- paste(sapply(1:length(exclude_eval), function(x)
                                  paste("File ", x, ": ", paste(exclude_eval[[x]], 
                                  collapse=","), sep="")), collapse="; ")
-      paste(exclude_eval, collapse=", ")
     
 
     return(site_log)

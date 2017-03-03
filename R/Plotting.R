@@ -208,7 +208,6 @@ plot_nc <- function(ncfile, analysis_type, vars, outfile){
                                type not known. Accepted types are 'annual', 'diurnal'
                                and 'timeseries' but ", "'", analysis_type[k], "' was 
                                passed to function.", sep="")
-      site_log["Warnings"] <- paste(site_log["Warnings"], warning_message, sep=" ##### ")
       
       warning(warning_message)
     }
