@@ -44,9 +44,10 @@ ReadCSVFluxData <- function(fileinname, vars, time_vars){
 
   #Split time variables from other variables
   #Extract time stamp data
-  FluxTime <- FluxData[,which(colnames(FluxData)==time_vars)]
+  time_ind <- sapply(time_vars, function(x) which(colnames(FluxData)==x))
+  FluxTime <- FluxData[,time_ind]
   #Remove time stamp variables from Data variable
-  FluxData <- FluxData[,-which(colnames(FluxData)==time_vars)]
+  FluxData <- FluxData[,-time_ind]
   
   
   #Duplicate Fluxnet data column if the same variable needs to be
