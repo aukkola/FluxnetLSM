@@ -389,7 +389,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
         #Check that have at least one eval variable to write, skip time period if not
         if(length(flux_ind[[k]])==0){
           #If no eval vars for any time period, abort
-          if(k k==no_files & all(sapply(flux_ind[[k]], length)==0)){
+          if(k==no_files & all(sapply(flux_ind[[k]], length)==0)){
             CheckError(paste("No evaluation variables to process for any output",
                              "time periods. Site not processed."))           
           } else {
