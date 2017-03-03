@@ -579,18 +579,39 @@ create_qc_var <- function(datain, qc_name){
 #' QC flag missing but data variable available
 #' @return datain
 #' @export
-fill_qcvar_missing <- function(datain){
+fill_qcvar_missing <- function(datain, missingVal, gapfillVal){
+  
+  #Find QC variables and corresponding data variables
+  qc_ind  <- which(grepl("_QC", datain$vars))  
+  qc_vars <- datain$vars[qc_ind]
+  data_vars <- unlist(strsplit(qc_vars, "_QC"))
   
   
+  #Check when flag missing but data available
+  for(k in 1:length(data_vars)){
+    
+    #Find these instances
+    ind <- which(datain$data[data_vars[k]]!=missingVal & 
+                   datain$data[qc_vars[k]]==missingVal)
+    
+    #If they exists, replace missing QC flag with poor gapfilling
+    if(length(ind) > 0){
+      
+      datain$data[qc_vars[k]][ind,1] <- gapfillVal[3]
+    
+    }  
+  }
   
-  
-  
-  
-  
-  
-  
+  return(datain)
   
 }
+
+
+
+
+
+
+
 
 
 

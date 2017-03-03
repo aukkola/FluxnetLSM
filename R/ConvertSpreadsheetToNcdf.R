@@ -71,15 +71,26 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
 
     
     
-     #Initialise site log
-     site_log <- vector(length=8)
-     names(site_log) <- c("Site_code", "Processed", "Errors", 
-                          "Warnings", "No_files", "Met_files", "Flux_files", 
-                          "Excluded_eval")
+    #Initialise site log
+    site_log <- vector(length=8)
+    names(site_log) <- c("Site_code", "Processed", "Errors", 
+                         "Warnings", "No_files", "Met_files", "Flux_files", 
+                         "Excluded_eval")
      
-     site_log["Site_code"] <- site_code
-     site_log["Warnings"]  <- ''
-     site_log[c(3, 5:8)]  <- NA
+    site_log["Site_code"] <- site_code
+    site_log["Warnings"]  <- ''
+    site_log[c(3, 5:8)]  <- NA
+    
+    
+    
+    
+    ### Set expected values for missing and gap-filled values ###
+    
+    Sprd_MissingVal = -9999 # missing value in spreadsheet
+    Nc_MissingVal = -9999 # missing value in created netcdf files
+    QC_measured = 0
+    QC_gapfilled = c(1, 2, 3, 4)  #1: good quality gapfill, 2: medium, 3: poor, 4: ERA gapfilled
+    
     
     
     ################################
@@ -141,7 +152,8 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     #(pers. comm. with D. Papale, Fluxnet)
     
     #Set these time steps to 3 (poor gap-filling)
-    DataFromText <- fill_qcvar_missing(datain=DataFromText)
+    DataFromText <- fill_qcvar_missing(datain=DataFromText, missingVal=Sprd_MissingVal,
+                                       gapfillVal=QC_gapfilled)
     
     
     # Check if variables have gaps in the time series and determine what years to output:
@@ -509,6 +521,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                                             Sys.Date(), ".csv", sep=""))
     
     
+    #TODO: change return statement once error handling addded
     return(paste("Site", site_code, "processed successfully. Refer to log file for details"))
     
 } #function

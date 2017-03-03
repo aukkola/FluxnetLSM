@@ -7,11 +7,6 @@
 #
 # TODO: Check and merge back in to palsR
 
-Sprd_MissingVal = -9999 # missing value in spreadsheet
-Nc_MissingVal = -9999 # missing value in created netcdf files
-QC_measured = 0
-QC_gapfilled = c(1, 2, 3, 4)  #1: good quality gapfill, 2: medium, 3: poor, 4: ERA gapfilled
-
 #-----------------------------------------------------------------------------
 
 #' Finds variables present in input file
