@@ -507,7 +507,6 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     write.csv(t(as.matrix(site_log)), paste(outpath_log, "/", site_code, 
                                             "_FluxnetLSM_processing_log_",  
                                             Sys.Date(), ".csv", sep=""))
-    
-    return(cat(site_log))
+    return(cat(site_log, sep="\n"))
     
 } #function
