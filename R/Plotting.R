@@ -177,6 +177,11 @@ plot_nc <- function(ncfile, analysis_type, vars, outfile){
           var_qc[var_qc == 0] <- 1 #set measured to 1
           var_qc[var_qc == 2] <- 0 #set gap-filled to 0
           
+          #If first value missing, set to measured (to avoid an error when PALS
+          #checks if first value -1)
+          if(is.na(var_qc[1])){ var_qc[1] <- 0}
+          
+          
           #Else set to PALS option corresponding to no QC data
         } else {
           var_qc <- matrix(-1, nrow = 1, ncol = 1)
