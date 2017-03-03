@@ -294,7 +294,9 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     
     
     # Check that data are within acceptable ranges: 
-    CheckDataRanges(ConvertedData, missingval=Nc_MissingVal)
+    # don't check eval vars to be excluded for all time periods (avoids warnings to be produced)
+    ignore_eval <- unlist(exclude_eval)[duplicated(unlist(exclude_eval))]
+    CheckDataRanges(ConvertedData, missingval=Nc_MissingVal, ignore_eval=ignore_eval)
     
     
     #Replace original data with converted data
