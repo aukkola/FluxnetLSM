@@ -302,7 +302,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     flux_files <- vector()
     start_yr   <- vector()
     end_yr     <- vector()
-    flux_ind   <  list()
+    flux_ind   <- list()
     
     for(k in 1:no_files){
         
