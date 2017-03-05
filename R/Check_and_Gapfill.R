@@ -32,7 +32,7 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
                           QCgapfilled, missing, gapfill_all, 
                           gapfill_good, gapfill_med, gapfill_poor,
                           min_yrs, essential_met, preferred_eval,
-                          all_eval){
+                          all_eval, ...){
     
     #Checks the existence of data gaps and determines which
     #years should be outputted depending on the percentage of missing
@@ -49,10 +49,12 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
     # an error if it is not. Cannot check for data 
     # gaps otherwise as not all variables come with QC flags
     if(is.na(missing)){
-      CheckError(paste("Cannot check for missing time steps in data,",
+      error <- paste("Cannot check for missing time steps in data,",
                        "set 'missing' to a value between 0",
                        "(no missing values allowed) and 100",
-                       "(unlimited missing values allowed)"))
+                       "(unlimited missing values allowed)")
+      site_log <- log_error(error, site_log)
+      return(site_log)
     }
         
     
@@ -92,9 +94,7 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
     
     end   <- cumsum(tsteps_per_yr)
     start <- end - tsteps_per_yr + 1
-    
-
-    
+        
     ### Check how many missing and gapfilled values per year, per variable ###
     
     perc_missing  <- list()
@@ -244,8 +244,10 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
     
     ### If no years fulfilling criteria, abort. ###
     if(all(!yr_keep) | length(yr_ind) < min_yrs){
-        CheckError(paste("No years to process, too many gaps present or",
-                   "available time period too short. Aborting."))
+      error <- paste("No years to process, too many gaps present or",
+                   "available time period too short. Aborting.")
+      site_log <- log_error(error, site_log)
+      return(site_log)
     }
     
     
@@ -261,7 +263,7 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
         
         #determine start and end of time series
         tstart <- start[yr_ind]
-        tend   <- start[yr_ind]
+        tend   <- end[yr_ind]
         
     ## two or more years that are not consecutive
     } else if (any(diff(yr_ind) > 1)) {
@@ -288,9 +290,11 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
                 
                 #If all years removed because all available periods shorter than min_yrs, abort
                 if(length(yr_ind)==0){
-                    CheckError(paste("No years to process, all available time",
-                                     "period too short (as set by min_yrs).",
-                                      "Aborting [ function:", match.call()[[1]], "]"))
+                  error <- paste("No years to process, all available time",
+                                 "period too short (as set by min_yrs).",
+                                  "Aborting [ function:", match.call()[[1]], "]")
+                  site_log <- log_error(error, site_log)
+                  return(site_log)
                 }
                 
                 
@@ -313,7 +317,7 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
         
         #determine start and end of time series
         tstart <- start[yr_ind[1]]
-        tend   <- start[yr_ind[length(yr_ind)]]
+        tend   <- end[yr_ind[length(yr_ind)]]
         
     }
     
@@ -388,8 +392,10 @@ GapfillMet <- function(datain, era_data, era_vars, tair_units, vpd_units,
     
     #Check that Fluxnet and ERA data dimensions agree
     if(nrow(datain) != nrow(era_data)) {
-        CheckError(paste("Observed flux data and ERAinterim data dimensions",
-                         "do not match, aborting [ function:", match.call()[[1]], "]"))
+        error <- (paste("Observed flux data and ERAinterim data dimensions",
+                        "do not match, aborting [ function:", match.call()[[1]], "]")
+        site_log <- log_error(error, site_log)
+        return(site_log)
     }
     
     
@@ -428,8 +434,10 @@ GapfillMet <- function(datain, era_data, era_vars, tair_units, vpd_units,
                 era_tair_col <- which(colnames(era_data)=="TA_ERA")
                 
                 if(length(era_tair_col) == 0){
-                    CheckError(paste("Cannot find ERAinterim air temperature data.",
-                               "Cannot convert ERA VPD to relative humidity"))
+                  error <- paste("Cannot find ERAinterim air temperature data.",
+                                 "Cannot convert ERA VPD to relative humidity")
+                  site_log <- log_error(error, site_log)
+                  return(site_log)
                 }
                 
                 # Convert ERAinterim VPD to relative humidity
@@ -521,13 +529,14 @@ CheckDataRanges = function(datain, missingval){
         
         #Return error if variable outside specified range
         if(data_range[1] < valid_range[1] | data_range[2] > valid_range[2]){
-            
-            CheckError(paste("Variable outside expected ranges. Check variable ",
+            error <- (paste("Variable outside expected ranges. Check variable ",
                              datain$vars[k], "; data range is [", data_range[1], 
                              ", ", data_range[2], "], valid range is [", 
                              valid_range[1], ", ", valid_range[2],
                              "]. Check data or change data range in variables auxiliary file",
-                              sep=""))
+                              sep="")
+            site_log <- log_error(error, site_log)
+            return(site_log)
         }
         
         
