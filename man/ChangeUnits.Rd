@@ -4,7 +4,7 @@
 \alias{ChangeUnits}
 \title{Converts units from original Fluxnet to target ALMA units}
 \usage{
-ChangeUnits(datain)
+ChangeUnits(datain, site_log)
 }
 \value{
 datain

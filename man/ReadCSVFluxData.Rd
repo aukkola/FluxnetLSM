@@ -4,7 +4,7 @@
 \alias{ReadCSVFluxData}
 \title{Reads comma-delimited text files containing Fluxnet2015 data}
 \usage{
-ReadCSVFluxData(fileinname, vars, time_vars)
+ReadCSVFluxData(fileinname, vars, time_vars, site_log)
 }
 \arguments{
 \item{fileinname}{fluxnet data file, including directory}

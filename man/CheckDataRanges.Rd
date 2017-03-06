@@ -4,7 +4,7 @@
 \alias{CheckDataRanges}
 \title{Checks that data are within specified ranges}
 \usage{
-CheckDataRanges(datain, missingval)
+CheckDataRanges(datain, missingval, site_log)
 }
 \description{
 Checks that data are within specified ranges

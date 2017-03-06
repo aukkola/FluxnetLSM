@@ -4,7 +4,7 @@
 \alias{findTimeInfo}
 \title{Extract time stamp information}
 \usage{
-findTimeInfo(time_vars, headers)
+findTimeInfo(time_vars, headers, site_log)
 }
 \value{
 time stamp variables

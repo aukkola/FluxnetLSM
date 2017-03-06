@@ -4,7 +4,7 @@
 \alias{VPD2RelHum}
 \title{Converts VPD (hPa) to relative humidity (percentage)}
 \usage{
-VPD2RelHum(VPD, airtemp, vpd_units, tair_units)
+VPD2RelHum(VPD, airtemp, vpd_units, tair_units, site_log)
 }
 \value{
 relative humidity as percentage
