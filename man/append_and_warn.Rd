@@ -4,7 +4,7 @@
 \alias{append_and_warn}
 \title{Appends warning message and calls warning}
 \usage{
-append_and_warn(warn_message, warnings)
+append_and_warn(warn, warnings, call = TRUE)
 }
 \description{
 Appends warning message and calls warning

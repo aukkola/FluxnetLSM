@@ -4,7 +4,7 @@
 \alias{is_whole_yrs}
 \title{Checks that whole years were extracted}
 \usage{
-is_whole_yrs(gaps, site_log)
+is_whole_yrs(datain, gaps, site_log)
 }
 \description{
 Checks that whole years were extracted
