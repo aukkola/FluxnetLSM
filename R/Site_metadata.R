@@ -56,7 +56,7 @@ get_git_version <- function() {
         warn <- paste("Unknown git revision of FluxnetLSM. Please",
                       "visit https://github.com/aukkola/FluxnetLSM and",
                       "review the installation procedure")        
-        warnings <- append_and_warn(warn_message=warn, warnings)
+        warnings <- append_and_warn(warn=warn, warnings)
     }
     return(list(git_rev=git_rev, warn=warnings))
 }
@@ -450,7 +450,7 @@ get_site_metadata <- function(site_code, incl_processing=TRUE,
 
     if (incl_processing) {
         metadata <- add_processing_metadata(metadata)
-        warnings <- append_and_warn(warn_message=metadata$warn, warnings)
+        warnings <- append_and_warn(warn=metadata$warn, warnings, call=FALSE)
         metadata <- metadata$out
     }
 

@@ -42,7 +42,7 @@ plot_nc <- function(ncfile, analysis_type, vars, outfile){
     warn <- paste("Unknown time units, unable to produce",
                      "output plots. Expects time in seconds,",
                      "currently in units of", time_units)
-    warnings <- append_and_warn(warn_message=warn, warnings)
+    warnings <- append_and_warn(warn=warn, warnings)
   }
   
   
@@ -217,7 +217,7 @@ plot_nc <- function(ncfile, analysis_type, vars, outfile){
                     and 'timeseries' but ", "'", analysis_type[k], "' was 
                     passed to function.", sep="")
       
-      warnings <- append_and_warn(warn_message=warn, warnings)
+      warnings <- append_and_warn(warn=warn, warnings)
     }
     
     

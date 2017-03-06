@@ -86,7 +86,7 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
                      "'gapfill_good', 'gapfill_med' or",
                      "'gapfill_poor' to check for gapfilling")
       
-      warnings <- append_and_warn(warn_message=warn, warnings)
+      warnings <- append_and_warn(warn=warn, warnings)
     }
       
     
@@ -710,7 +710,7 @@ find_flux_ind <- function(datain, exclude_eval, k, site_log){
                      "all variables have too many missing values or gap-filling. Try",
                      "setting include_all_eval to TRUE to process variables. Skipping ",
                      "time period", sep=""))
-      warnings <- append_and_warn(warn_message=warn, warnings)
+      warnings <- append_and_warn(warn=warn, warnings)
       next  
     }          
   }

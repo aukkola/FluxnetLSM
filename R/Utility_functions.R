@@ -20,7 +20,12 @@ log_error <- function(errtext, site_log){
 log_warning <- function(warn, site_log){
   
   if(nchar(warn) > 0){
-    site_log["Warnings"] <- paste(site_log["Warnings"], warn, sep=" ##### ")
+    if(nchar(site_log["Warnings"]) > 0) {
+      site_log["Warnings"] <- paste(site_log["Warnings"], warn, sep=" ##### ")
+    } else {
+      site_log["Warnings"] <- warn
+    }
+    
   }
   return(site_log)
   
@@ -80,10 +85,17 @@ warn_and_log <- function(warn, site_log){
 
 #' Appends warning message and calls warning
 #' @export
-append_and_warn <- function(warn_message, warnings){
-  if(nchar(warn_message > 0)){ 
-    warnings <- paste(warnings, warn_message, sep=" ##### ")
-    warning(warn_message, call.=FALSE) 
+append_and_warn <- function(warn, warnings, call=TRUE){
+  if(nchar(warn) > 0){ 
+    
+    if(nchar(warnings) > 0) {
+      warnings <- paste(warnings, warn, sep=" ##### ")
+    } else {
+      warnings <- warn
+    }
+    
+    if(call) { warning(warn, call.=FALSE) }
+  
   }
   return(warnings)
 }
