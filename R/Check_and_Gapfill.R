@@ -688,7 +688,7 @@ find_flux_ind <- function(datain, exclude_eval, k, site_log){
   if(any(!is.na(exclude_eval))){    
     
     rm_ind   <- sapply(1:length(exclude_eval), function(x) 
-                       which(DataFromText$vars[flux_ind]==exclude_eval[x]))
+                       which(datain$vars[flux_ind]==exclude_eval[x]))
     flux_ind <- flux_ind[-rm_ind]
     
   }        

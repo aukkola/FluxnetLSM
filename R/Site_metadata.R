@@ -75,7 +75,7 @@ add_processing_metadata <- function(metadata) {
         processor = "FluxnetLSM",
         URL = "https://github.com/aukkola/FluxnetLSM",
         version = packageVersion("FluxnetLSM"),
-        git_rev = git_rev$out
+        git_rev = git_rev$git_rev
     )
 
     return(list(out=metadata,warn=git_rev$warn))
