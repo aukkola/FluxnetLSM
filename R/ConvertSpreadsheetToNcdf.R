@@ -403,7 +403,17 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
         site_log <- log_warning(warn=flux_ind[[k]]$warn, site_log)
         flux_ind[[k]] <- flux_ind[[k]]$out
         
-        
+        #If no eval vars for any time period, abort        
+        if(k==no_files & all(sapply(flux_ind, length)==0)){       
+          error <- paste("No evaluation variables to process for any output",
+                         "time periods. Site not processed.")       
+          stop_and_log(error, site_log)
+          
+        #If no eval variables for this loop, skip to next
+        } else if(length(flux_ind[[k]]) > 0) {
+          next
+        }
+                
         #Write flux file
         CreateFluxNcFile(fluxfilename=fluxfilename, datain=DataFromText,
                          latitude=site_info$SiteLatitude,

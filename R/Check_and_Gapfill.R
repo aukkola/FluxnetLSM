@@ -695,24 +695,14 @@ find_flux_ind <- function(datain, exclude_eval, k, site_log){
   
   
   #Check that have at least one eval variable to write, skip time period if not
-  if(length(flux_ind[[k]])==0){
+  if(length(flux_ind)==0){
     
-    #If no eval vars for any time period, abort
-    if(k==no_files & all(sapply(flux_ind, length)==0)){
-      
-      error <- paste("No evaluation variables to process for any output",
-                     "time periods. Site not processed.")       
-      stop_and_log(error, site_log)
-      
-    } else {
       #Return warning and skip time period
       warn <- (paste("File ", k, ": No evaluation variables to process, ",
                      "all variables have too many missing values or gap-filling. Try",
                      "setting include_all_eval to TRUE to process variables. Skipping ",
                      "time period", sep=""))
-      warnings <- append_and_warn(warn=warn, warnings)
-      next  
-    }          
+      warnings <- append_and_warn(warn=warn, warnings)          
   }
   
   return(list(out=flux_ind, warn=warnings))
