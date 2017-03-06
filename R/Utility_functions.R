@@ -80,7 +80,9 @@ warn_and_log <- function(warn, site_log){
 #' @export
 append_and_warn <- function(warn_message, warnings){
   warnings <- paste(warnings, warn, sep=" ##### ")
-  warning(warn, call.=FALSE)
+  if(nchar(warn_message > 0)){ 
+    warning(warn_message, call.=FALSE) 
+  }
   return(warnings)
 }
 
