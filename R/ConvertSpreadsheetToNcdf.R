@@ -410,7 +410,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
           stop_and_log(error, site_log)
           
         #If no eval variables for this loop, skip to next
-        } else if(length(flux_ind[[k]]) > 0) {
+        } else if(length(flux_ind[[k]]) == 0) {
           next
         }
                 
