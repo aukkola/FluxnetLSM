@@ -659,11 +659,11 @@ calc_avPrecip <- function(datain, gaps){
 
 #' Checks that whole years were extracted
 #' @export
-is_whole_yrs <- function(gaps, site_log){
+is_whole_yrs <- function(datain, gaps, site_log){
   
-  start_times <- sapply(gaps$tseries_start, function(x) format(strptime(DataFromText$time[x,1], 
+  start_times <- sapply(gaps$tseries_start, function(x) format(strptime(datain$time[x,1], 
                                                                         "%Y%m%d%H%M"), "%m%d"))
-  end_times   <- sapply(gaps$tseries_end, function(x) format(strptime(DataFromText$time[x,1], 
+  end_times   <- sapply(gaps$tseries_end, function(x) format(strptime(datain$time[x,1], 
                                                                       "%Y%m%d%H%M"), "%m%d"))
   if(any(start_times != "0101") | any(end_times != "1231")){
     error <- paste("Gap check did not return whole years, aborting.")    

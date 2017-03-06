@@ -180,7 +180,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     
     
     ## Check that gap check found whole years ##
-    is_whole_yrs(gaps, site_log)
+    is_whole_yrs(datain, gaps, site_log)
     
     
     ### Save info on which evaluation variables have all values missing ###
