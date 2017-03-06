@@ -28,7 +28,7 @@ ReadCSVFluxData <- function(fileinname, vars, time_vars, site_log){
                          var_classes=vars$Fluxnet_class, 
                          essential_vars=vars$Essential_met,
                          preferred_vars=vars$Preferred_eval,
-                         time_vars=time_vars)  
+                         time_vars=time_vars, site_log)  
   
 	# Read flux tower data (skips unwanted columns):
 	FluxData <- read.csv(file=fileinname, header=TRUE,	colClasses=tcol$classes)  
@@ -487,7 +487,7 @@ CreateMetNcFile = function(metfilename, datain,                   #outfile file 
 	}
   #Define AvPrecip (average annual precip) if outputting rainfall
 	if(!is.na(av_precip)){
-	  av_rain=ncvar_def('AvPrecip','mm yr-1',dim=list(xd,yd), missval=NA,
+	  av_rain=ncvar_def('avPrecip','mm yr-1',dim=list(xd,yd), missval=NA,
 	                     longname='Mean annual precipitation')
 	  opt_vars[[ctr]] = av_rain
 	  ctr <- ctr + 1  

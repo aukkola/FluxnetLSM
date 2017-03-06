@@ -119,6 +119,11 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     #Read site information (lon, lat, elevation)
     site_info <- get_site_metadata(site_code)
     
+    #Log possible warnings and remove warnings from output var
+    site_log <- log_warning(warn=site_info$warn, site_log)
+    site_info <- site_info$out
+    
+    
     #Should site be excluded? If so, abort and print reason.
     #This option is set in the site info file (inside data folder)
     #Mainly excludes sites with mean annual ET excluding P, implying
@@ -169,6 +174,9 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                            all_eval = vars[which(DataFromText$categories=="Eval")],
                            site_log)
  
+    #Log possible warnings and remove warnings from output var
+    site_log <- log_warning(warn=gaps$warn, site_log)
+    gaps <- gaps$out
     
     
     ## Check that gap check found whole years ##
@@ -391,6 +399,10 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                                        exclude_eval=exclude_eval[[k]], 
                                        k, site_log)
         
+        #Log possible warnings and remove warnings from output var
+        site_log <- log_warning(warn=flux_ind[[k]]$warn, site_log)
+        flux_ind[[k]] <- flux_ind[[k]]$out
+        
         
         #Write flux file
         CreateFluxNcFile(fluxfilename=fluxfilename, datain=DataFromText,
@@ -449,13 +461,17 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
         ## Plotting ##
         if(any(plot=="annual") | any(plot=="diurnal") | any(plot=="timeseries")){
           
-          plot_nc(ncfile=nc_met, analysis_type=plot, 
-                  vars=DataFromText$out_vars[DataFromText$categories=="Met"],
-                  outfile=outfile_met)      
+          out1 <- plot_nc(ncfile=nc_met, analysis_type=plot, 
+                         vars=DataFromText$out_vars[DataFromText$categories=="Met"],
+                         outfile=outfile_met)      
           
-          plot_nc(ncfile=nc_flux, analysis_type=plot,
-                  vars=DataFromText$out_vars[flux_ind[[k]]],
-                  outfile=outfile_flux)
+          out2 <- plot_nc(ncfile=nc_flux, analysis_type=plot,
+                         vars=DataFromText$out_vars[flux_ind[[k]]],
+                         outfile=outfile_flux)
+          
+          #Log possible warnings
+          site_log <- log_warning(warn=out1, site_log)
+          site_log <- log_warning(warn=out2, site_log)
           
           
           #Analysis type doesn't match options, return warning

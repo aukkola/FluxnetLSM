@@ -14,6 +14,8 @@
 #' 
 plot_nc <- function(ncfile, analysis_type, vars, outfile){
   
+  #Initialise warnings
+  warnings <- ""
   
   #Separate data and QC variables
   data_vars <- vars[!grepl("_qc", vars)]
@@ -37,9 +39,10 @@ plot_nc <- function(ncfile, analysis_type, vars, outfile){
   
   #Abort if time unit not in seconds
   if(!grepl("seconds since", time_units)){
-    CheckError(paste("Unknown time units, unable to produce",
+    warn <- paste("Unknown time units, unable to produce",
                      "output plots. Expects time in seconds,",
-                     "currently in units of", time_units))
+                     "currently in units of", time_units)
+    warnings <- append_and_warn(warn_message=warn, warnings)
   }
   
   
@@ -209,15 +212,18 @@ plot_nc <- function(ncfile, analysis_type, vars, outfile){
     ###################################################
     } else {
       
-      warning_message <- paste("Attempted to produce output plot but analysis
-                               type not known. Accepted types are 'annual', 'diurnal'
-                               and 'timeseries' but ", "'", analysis_type[k], "' was 
-                               passed to function.", sep="")
+      warn <- paste("Attempted to produce output plot but analysis
+                    type not known. Accepted types are 'annual', 'diurnal'
+                    and 'timeseries' but ", "'", analysis_type[k], "' was 
+                    passed to function.", sep="")
       
-      warning(warning_message)
+      warnings <- append_and_warn(warn_message=warn, warnings)
     }
     
     
     
   } #analyses
+  
+  return(warnings)
+  
 } #function

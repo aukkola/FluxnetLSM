@@ -41,6 +41,10 @@ get_site_code <- function(metadata){
 #' Gets the git version from the installed package
 #' See src/zzz.R for how git revision is discovered
 get_git_version <- function() {
+  
+    #Initialise warnings
+    warnings <- ""
+    
     desc <- read.dcf(system.file("DESCRIPTION", package = "FluxnetLSM"))
     if ("git_revision" %in% colnames(desc)) {
         git_rev <- desc[1, "git_revision"]
@@ -49,12 +53,12 @@ get_git_version <- function() {
     } else {
         git_rev <- "UNKNOWN"
                 
-        warning_message <- paste("Unknown git revision of FluxnetLSM. Please",
-                                 "visit https://github.com/aukkola/FluxnetLSM and",
-                                 "review the installation procedure")        
-        warning(warning_message)
+        warn <- paste("Unknown git revision of FluxnetLSM. Please",
+                      "visit https://github.com/aukkola/FluxnetLSM and",
+                      "review the installation procedure")        
+        warnings <- append_and_warn(warn_message=warn, warnings)
     }
-    return(git_rev=git_rev)
+    return(list(git_rev=git_rev, warn=warnings))
 }
 
 
@@ -63,14 +67,18 @@ get_git_version <- function() {
 #' @return metadata list
 #' @export
 add_processing_metadata <- function(metadata) {
+   
+    #return git revision and warning if revision found
+    git_rev = get_git_version()
+  
     metadata$Processing <- list(
         processor = "FluxnetLSM",
         URL = "https://github.com/aukkola/FluxnetLSM",
         version = packageVersion("FluxnetLSM"),
-        git_rev = get_git_version()
+        git_rev = git_rev$out
     )
 
-    return(metadata)
+    return(list(out=metadata,warn=git_rev$warn))
 }
 
 
@@ -78,17 +86,17 @@ add_processing_metadata <- function(metadata) {
 #'
 #' @return metadata list
 #' @export
-update_metadata <- function(metadata, new_metadata, overwrite=TRUE) {
+update_metadata <- function(metadata, new_metadata, overwrite=TRUE) {    
     for (n in names(new_metadata)) {
         if (!is.na(new_metadata[[n]])) {
             if (n %in% names(metadata) && !is.na(metadata[[n]]) &&
                 new_metadata[[n]] != metadata[[n]]) {
                 overwrite_text = if (overwrite) "Overwriting" else "Not overwriting"
                 
-                warning_message <- paste("New metadata for ", n, " has different values! ",
-                                         overwrite_text, ".\n", "  old: ", metadata[n], 
-                                         ", new: ", new_metadata[n], sep="")
-                message(warning_message)
+                warn <- paste("New metadata for ", n, " has different values! ",
+                              overwrite_text, ".\n", "  old: ", metadata[n], 
+                              ", new: ", new_metadata[n], sep="")
+                message(warn)
             }
             metadata[n] <- new_metadata[n]
         }
@@ -425,6 +433,9 @@ warn_missing_metadata <- function(metadata) {
 #' @export
 get_site_metadata <- function(site_code, incl_processing=TRUE,
                               use_csv=TRUE, update_csv=FALSE) {
+    #Initialise warnings
+    warnings <- ""
+  
     metadata <- site_metadata_template(site_code)
 
     if (use_csv) {
@@ -439,11 +450,13 @@ get_site_metadata <- function(site_code, incl_processing=TRUE,
 
     if (incl_processing) {
         metadata <- add_processing_metadata(metadata)
+        warnings <- append_and_warn(warn_message=metadata$warn, warnings)
+        metadata <- metadata$out
     }
 
     if (update_csv) {
         save_metadata_to_csv(metadata)
     }
 
-    return(metadata)
+    return(list(out=metadata,warn=warnings))
 }

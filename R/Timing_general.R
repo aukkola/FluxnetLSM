@@ -23,4 +23,26 @@ findStartTime <- function(start){
 
 }
 
+#-----------------------------------------------------------------------------
+
+#' Checks that have whole number of days in dataset
+#' @export
+CheckTiming <- function(datain, site_log) 
+{
+  #This is equivalent to PALS CheckSpreadsheetTiming function
+  #but reproduced here to allow different error handling
+  
+  tstepinday = 86400/datain$timestepsize
+  ndays = datain$ntsteps/tstepinday
+  if ((ndays - round(ndays)) != 0) {
+    error <- paste("S2: Spreadsheet does not appear to contain a", 
+                     "whole number of days of data. Please amend.")
+    stop_and_log(error, site_log)
+  }
+  if ((datain$starttime$sday != 1) | (datain$starttime$smonth != 1)) {
+    error <- paste("S2: Spreadsheet data does not appear to begin", 
+                     "on 1st January. Please amend.")
+    stop_and_log(error, site_log)
+  }
+}
 

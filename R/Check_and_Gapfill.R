@@ -44,6 +44,8 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
     
     library(R.utils) #seqToIntervals
     
+    #initialise warning messages
+    warnings <- ""
     
     # 'Missing' percentage must be set, return
     # an error if it is not. Cannot check for data 
@@ -78,11 +80,13 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
     } else {
       
       threshold <- NA
-      warn <- paste("Cannot check for the percentage of gap-filled data,",
-                              "no thresholds set. Set at least one of",
-                              "'gapfill_all', 'gapfill_good', 'gapfill_med'",
-                              "or 'gapfill_poor' to check for gapfilling")
-      warning(warn)
+      warn <-  paste("Cannot check for the percentage of",
+                     "gap-filled data, no thresholds set.",
+                     "Set at least one of 'gapfill_all',",
+                     "'gapfill_good', 'gapfill_med' or",
+                     "'gapfill_poor' to check for gapfilling")
+      
+      warnings <- append_and_warn(warn_message=warn, warnings)
     }
       
     
@@ -371,7 +375,7 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
                 yr_keep=yr_ind, consec=consec, 
                 tseries_start=tstart, tseries_end=tend)
     
-    return(out)
+    return(list(out=out, warn=warnings))
 }
 
 
@@ -674,6 +678,9 @@ is_whole_yrs <- function(gaps, site_log){
 #' @export
 find_flux_ind <- function(datain, exclude_eval, k, site_log){
   
+  #initialise warnings
+  warnings <- ""
+  
   #Find eval variable indices
   flux_ind <- which(datain$categories=="Eval")
   
@@ -703,12 +710,12 @@ find_flux_ind <- function(datain, exclude_eval, k, site_log){
                      "all variables have too many missing values or gap-filling. Try",
                      "setting include_all_eval to TRUE to process variables. Skipping ",
                      "time period", sep=""))
-      site_log <- warn_and_log(warn, site_log)
+      warnings <- append_and_warn(warn_message=warn, warnings)
       next  
     }          
   }
   
-  return(flux_ind)
+  return(list(out=flux_ind, warn=warnings))
   
 }
 

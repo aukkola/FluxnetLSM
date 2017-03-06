@@ -47,7 +47,7 @@ findColIndices = function(fileinname, var_names, var_classes,
   if(all(preferred_vars[failed_ind])){
     error <- paste("Cannot find any evaluation variables in input file (missing: ", 
                    paste(var_names[failed_ind[which(essential_vars[failed_ind])]], collapse=","),
-                   "), aborting", sep=""))
+                   "), aborting", sep="")
     stop_and_log(error, site_log)
   }
   
@@ -257,7 +257,6 @@ remove_duplicates <- function(indices){
 #' Duplicates columns in Fluxnet data if a variable is being processes multiple times
 #' @return data with duplicated columns
 #' @export
-
 duplicate_columns <- function(data, vars){
   
   #Find variables that are duplicated
