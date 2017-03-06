@@ -71,14 +71,16 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     
     
     #Initialise site log
-    site_log <- vector(length=8)
+    site_log <- vector(length=9)
     names(site_log) <- c("Site_code", "Processed", "Errors", 
                          "Warnings", "No_files", "Met_files", "Flux_files", 
-                         "Excluded_eval")
+                         "Excluded_eval", "log_path")
      
     site_log["Site_code"] <- site_code
+    site_log["Errors"]    <- ''
     site_log["Warnings"]  <- ''
-    site_log[c(3, 5:8)]  <- NA
+    site_log[c(5:8)]  <- NA
+    site_log["log_path"] <- outpath_log #removed when writing log to file
       
     
     ### Set expected values for missing and gap-filled values ###
@@ -99,7 +101,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     
     #Find variable file path (not using data() command directly because reads a CSV with a
     #semicolon separator and this leads to incorrect table headers)
-    var_file <- system.file("data","Output_variables.csv",package="FluxnetLSM")
+    var_file <- system.file("data","Output_variables.csv", package="FluxnetLSM")
     
     vars <- read.csv(var_file, header=TRUE,
     colClasses=c("character", "character", "character",
@@ -122,19 +124,22 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     #Mainly excludes sites with mean annual ET excluding P, implying
     #irrigation or other additional water source.
     if(site_info$Exclude){
-        CheckError(paste("Site not processed. Reason:", site_info$Exclude_reason,
+
+        error <- paste("Site not processed. Reason:", site_info$Exclude_reason,
                          ". This is set in site info file, change >Exclude< options",
-                         "in the file to process site"))
+                         "in the file to process site")
+        stop_and_log(error, site_log)
+        
     }
     
     
     # Read text file containing flux data:
     DataFromText <- ReadCSVFluxData(fileinname=infile, vars=vars,
-                                     time_vars=time_vars)
+                                     time_vars=time_vars, site_log)
     
     
     # Make sure whole number of days in dataset:
-    CheckSpreadsheetTiming(DataFromText)
+    CheckTiming(DataFromText, site_log)
     
     
     #Replace vars with those found in file
@@ -161,7 +166,13 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                            gapfill_poor=gapfill_poor, min_yrs=min_yrs,
                            essential_met = vars[which(DataFromText$essential_met)], 
                            preferred_eval = vars[which(DataFromText$preferred_eval)],
-                           all_eval = vars[which(DataFromText$categories=="Eval")])
+                           all_eval = vars[which(DataFromText$categories=="Eval")],
+                           site_log)
+ 
+    
+    
+    ## Check that gap check found whole years ##
+    is_whole_yrs(gaps, site_log)
     
     
     ### Save info on which evaluation variables have all values missing ###
@@ -171,38 +182,16 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     all_missing <- lapply(gaps$total_missing, function(x) names(which(x==100)))
     
     exclude_eval <- rep(NA, length(all_missing))
+
     if(any(sapply(all_missing, length) > 0)){
+     
+      #Find variables to exclude
+      exclude_eval <- find_exclude_eval(datain=DataFromText, all_missing=all_missing)
       
-      #Extract names of evaluation variables
-      cats <- DataFromText$categories
-      eval_vars <- names(cats[cats=="Eval"])
-      
-      #Find eval variables with all values missing
-      exclude_eval <- lapply(all_missing, intersect, eval_vars)
-      
-      #Only exclude QC variables if corresponding data variable excluded as well. Keep otherwise
-      #Find all QC variables
-      qc_vars <- lapply(exclude_eval, function(x) x[grepl("_QC", x)])
-      
-      if(any(sapply(qc_vars, length) > 0)){
-        
-        #Find QC variables with corresponding data variable
-        remove_qc <-  mapply(function(x,y) is.element(gsub("_QC", "", y), x), x=exclude_eval, y=qc_vars)
-       
-        #If any QC vars without a corresponding data variable, don't include
-        #them in excluded variables
-        for(k in 1:length(remove_qc)){
-          if(any(!remove_qc[[k]])){
-            exclude_eval[[k]] <- exclude_eval[[k]][-which(exclude_eval[[k]]==qc_vars[[k]][!remove_qc[[k]]])] 
-          }          
-        }
-      }
     }
     
     
-    
-    ### Remove evaluation variables that have too many gaps if option chosen ###
-      
+    #Remove evaluation variables that have too many gaps if option chosen  
     if(!include_all_eval){
       
       #Add variables with too many gaps/gap-filling to excluded eval variables
@@ -219,18 +208,9 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     # gapfill using ERA-interim data provided as part of FLUXNET2015
     if(ERA_gapfill){
         
-        era_data <- read.csv(ERA_file, header=TRUE, colClasses=c("character", "character",
-                                                                 rep("numeric", 7)))
-        
-        #ERAinterim data provided for 1989-2014, need to extract common years with flux obs
-        #Find start and end
-        obs_start <- DataFromText$time$TIMESTAMP_START
-        start_era <- which(era_data$TIMESTAMP_START == obs_start[1])
-        end_era   <- which(era_data$TIMESTAMP_START == obs_start[length(obs_start)])
-        
-        #Extract correct time steps
-        era_data  <- era_data[start_era:end_era,]
-        
+        #Read ERA data and extract time steps corresponding to obs
+        era_data <- rear_era(ERA_file=ERA_file, datain=DataFromText)
+  
         #Find indices for met variables to be gapfilled
         ind <- which(DataFromText$categories=="Met")
         
@@ -243,13 +223,15 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                                 era_vars=DataFromText$era_vars[ind],
                                 tair_units=tair_units, vpd_units=vpd_units,
                                 missing_val=Sprd_MissingVal,
-                                out_vars=DataFromText$out_vars[ind])
+                                out_vars=DataFromText$out_vars[ind],
+                                site_log)
         
         
         #Check that column names of temp_data and data to be replaced match. Stop if not
         if(!all(colnames(temp_data$datain)==colnames(DataFromText$data[,ind]))){
-            CheckError(paste("Error gap-filling met data with ERAinterim.", 
-                             "Column names of data to be replaced do not match"))
+            error <- paste("Error gap-filling met data with ERAinterim.", 
+                             "Column names of data to be replaced do not match")
+            stop_and_log(error, site_log)
         }
         
         
@@ -259,8 +241,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
         #If new QC variables were created, create and append
         #variable attributes to data frame
         if(length(temp_data$new_qc) > 0){
-            
-                    
+                              
             #Append qc time series to data
             DataFromText$data <- cbind(DataFromText$data, temp_data$new_qc)
             
@@ -270,14 +251,37 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                 DataFromText <- create_qc_var(DataFromText, qc_name=qc_vars[k])
             }
         }
-        
-        
+                
         #Basic sanity check
         if(ncol(DataFromText$data)!=length(DataFromText$vars)){
-          CheckError("Error creating new QC flags")
+          error <- "Error creating new QC flags"
+          stop_and_log(error, site_log)
         }
     }
     
+    
+    
+    ### Calculate average annual precip if outputting precip ###
+    # Written as an attribute to file. Calculated before converting
+    # data units, i.e. assumes rainfall units mm/timestep
+        
+    if(any(DataFromText$attributes[,1]=="P")){
+      
+      #Check that units in mm
+      if(DataFromText$units$original_units["P"] == "mm"){
+        
+        av_precip <- calc_avPrecip(datain=DataFromText, gaps=gaps)
+        
+      } else{
+        warn = paste("Cannot ascertain P units, expecting 'mm'.", 
+                     "Not outputting average precip as a netcdf attribute")
+        site_log <- warn_and_log(warn, site_log)
+      }
+      
+    } else {
+      av_precip=NA
+    }
+        
     
     
     ###########################################
@@ -287,11 +291,11 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     
     # Convert data units from original Fluxnet units
     # to desired units as set in variables.csv
-    ConvertedData <- ChangeUnits(DataFromText)
+    ConvertedData <- ChangeUnits(DataFromText, site_log)
     
     
     # Check that data are within acceptable ranges: 
-    CheckDataRanges(ConvertedData, missingval=Nc_MissingVal)
+    CheckDataRanges(ConvertedData, missingval=Nc_MissingVal, site_log)
     
     
     #Replace original data with converted data
@@ -316,15 +320,12 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     
     for(k in 1:no_files){
         
-        
         #Find start year, day and hour
         nc_starttime <- findStartTime(start = strptime(DataFromText$time[gaps$tseries_start[k],1], "%Y%m%d%H%M"))
-        
-        
+                
         #Extract start and end years
         start_yr[k] <- substring(DataFromText$time[gaps$tseries_start[k],1], 1, 4)
         end_yr[k]   <- substring(DataFromText$time[gaps$tseries_end[k],1], 1, 4)
-        
         
         #Create output file names
         #If only one year, only write start year, else write time period
@@ -338,8 +339,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
             metfilename  <- paste(outpath_nc, "/", site_code, "_", start_yr[k], 
                                   "-", end_yr[k], "_", datasetname, "_Met.nc", sep="")
             fluxfilename <- paste(outpath_nc, "/", site_code, "_", start_yr[k], 
-                                  "-", end_yr[k], "_", datasetname, "_Flux.nc", sep="")
-            
+                                  "-", end_yr[k], "_", datasetname, "_Flux.nc", sep="")           
         }
         
         #Save file names
@@ -371,6 +371,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                          canopyheight=site_info$CanopyHeight,
                          short_veg_type=site_info$IGBP_vegetation_short,
                          long_veg_type=site_info$IGBP_vegetation_long,
+                         av_precip=av_precip[[k]],
                          missing=missing, gapfill_all=gapfill_all, 
                          gapfill_good=gapfill_good, gapfill_med=gapfill_med, 
                          gapfill_poor=gapfill_poor, min_yrs=min_yrs,
@@ -386,31 +387,9 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
         ###--- Create netcdf flux data file ---###
         
         #Find eval variable indices
-        flux_ind[[k]] <- which(DataFromText$categories=="Eval")
-        
-        #If eval variables to exclude, remove these now
-        if(any(!is.na(exclude_eval[[k]]))){    
-          rm_ind         <- sapply(1:length(exclude_eval[[k]]), function(x) 
-                                   which(DataFromText$vars[flux_ind[[k]]]==exclude_eval[[k]][x]))
-          flux_ind[[k]]  <- flux_ind[[k]][-rm_ind]
-        }        
-                
-        
-        #Check that have at least one eval variable to write, skip time period if not
-        if(length(flux_ind[[k]])==0){
-          #If no eval vars for any time period, abort
-          if(k==no_files & all(sapply(flux_ind[[k]], length)==0)){
-            CheckError(paste("No evaluation variables to process for any output",
-                             "time periods. Site not processed."))           
-          } else {
-            #Return warning and skip time period
-            warning(paste("File ", k, ": No evaluation variables to process, ",
-                          "all variables have too many missing values or gap-filling. Try",
-                          "setting include_all_eval to TRUE to process variables. Skipping ",
-                          "time period", sep=""))
-            next  
-          }          
-        }
+        flux_ind[[k]] <- find_flux_ind(datain=DataFromText,
+                                       exclude_eval=exclude_eval[[k]], 
+                                       k, site_log)
         
         
         #Write flux file
@@ -481,12 +460,10 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
           
           #Analysis type doesn't match options, return warning
         } else {
-          warning_message <- paste("Could not produce output plots. Analysis type not",
-                                   "recognised, choose all or any of 'annual',", 
-                                   "'diurnal' and 'timeseries'.")
-          #Append to log
-          site_log["Warnings"] <- paste(site_log["Warnings"], warning_message, sep=" ##### ")
-          warning(warning_message)
+          warn <- paste("Could not produce output plots. Analysis type not",
+                        "recognised, choose all or any of 'annual',", 
+                        "'diurnal' and 'timeseries'.")
+          site_log <- warn_and_log(warn, site_log)
         }
         
         
@@ -504,22 +481,20 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     ### Collate processing information into a log ###
     #################################################
             
-    site_log["Processed"]     <- "TRUE"
-    site_log["No_files"]      <- no_files
-    site_log["Met_files"]     <- paste(met_files, collapse=", ")
-    site_log["Flux_files"]    <- paste(flux_files, collapse=", ")
-    site_log["Excluded_eval"] <- paste(sapply(1:length(exclude_eval), function(x)
-                                 paste("File ", x, ": ", paste(exclude_eval[[x]], 
-                                 collapse=","), sep="")), collapse="; ")
+    if(no_error(site_log)){
+      
+      site_log["Processed"]     <- "TRUE"
+      site_log["No_files"]      <- no_files
+      site_log["Met_files"]     <- paste(met_files, collapse=", ")
+      site_log["Flux_files"]    <- paste(flux_files, collapse=", ")
+      site_log["Excluded_eval"] <- paste(sapply(1:length(exclude_eval), function(x)
+        paste("File ", x, ": ", paste(exclude_eval[[x]], 
+                                      collapse=","), sep="")), collapse="; ")    
+     }
     
+    #Write log to file
+    write_log(site_log)
     
-    #Save log to CSV file
-    write.csv(t(as.matrix(site_log)), paste(outpath_log, "/", site_code, 
-                                            "_FluxnetLSM_processing_log_",  
-                                            Sys.Date(), ".csv", sep=""))
-    
-    
-    #TODO: change return statement once error handling addded
     return(cat("Site", site_code, "processed successfully. Refer to log file for details"))
     
 } #function

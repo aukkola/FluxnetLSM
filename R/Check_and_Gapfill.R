@@ -32,7 +32,7 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
                           QCgapfilled, missing, gapfill_all, 
                           gapfill_good, gapfill_med, gapfill_poor,
                           min_yrs, essential_met, preferred_eval,
-                          all_eval, ...){
+                          all_eval, site_log){
     
     #Checks the existence of data gaps and determines which
     #years should be outputted depending on the percentage of missing
@@ -53,7 +53,7 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
                        "set 'missing' to a value between 0",
                        "(no missing values allowed) and 100",
                        "(unlimited missing values allowed)")
-      site_log <- log_error(error, site_log)
+      stop_and_log(error, site_log)
       return(site_log)
     }
         
@@ -78,11 +78,11 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
     } else {
       
       threshold <- NA
-      warning_message <- paste("Cannot check for the percentage of gap-filled data,",
+      warn <- paste("Cannot check for the percentage of gap-filled data,",
                               "no thresholds set. Set at least one of",
                               "'gapfill_all', 'gapfill_good', 'gapfill_med'",
                               "or 'gapfill_poor' to check for gapfilling")
-      warning(warning_message)
+      warning(warn)
     }
       
     
@@ -246,7 +246,7 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
     if(all(!yr_keep) | length(yr_ind) < min_yrs){
       error <- paste("No years to process, too many gaps present or",
                    "available time period too short. Aborting.")
-      site_log <- log_error(error, site_log)
+      stop_and_log(error, site_log)
       return(site_log)
     }
     
@@ -293,7 +293,7 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
                   error <- paste("No years to process, all available time",
                                  "period too short (as set by min_yrs).",
                                   "Aborting [ function:", match.call()[[1]], "]")
-                  site_log <- log_error(error, site_log)
+                  stop_and_log(error, site_log)
                   return(site_log)
                 }
                 
@@ -382,7 +382,7 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
 #' @return out
 #' @export
 GapfillMet <- function(datain, era_data, era_vars, tair_units, vpd_units,
-                       missing_val, out_vars){
+                       missing_val, out_vars, site_log){
     
     #ERAinterim estimates are provided for TA, SW_in,
     #LW_IN, VPD, PA, P and WS
@@ -392,9 +392,9 @@ GapfillMet <- function(datain, era_data, era_vars, tair_units, vpd_units,
     
     #Check that Fluxnet and ERA data dimensions agree
     if(nrow(datain) != nrow(era_data)) {
-        error <- (paste("Observed flux data and ERAinterim data dimensions",
+        error <- paste("Observed flux data and ERAinterim data dimensions",
                         "do not match, aborting [ function:", match.call()[[1]], "]")
-        site_log <- log_error(error, site_log)
+        stop_and_log(error, site_log)
         return(site_log)
     }
     
@@ -436,14 +436,14 @@ GapfillMet <- function(datain, era_data, era_vars, tair_units, vpd_units,
                 if(length(era_tair_col) == 0){
                   error <- paste("Cannot find ERAinterim air temperature data.",
                                  "Cannot convert ERA VPD to relative humidity")
-                  site_log <- log_error(error, site_log)
+                  stop_and_log(error, site_log)
                   return(site_log)
                 }
                 
                 # Convert ERAinterim VPD to relative humidity
                 # Assuming that ERA vpd and tair units the same as observed units
                 era_rh <-  VPD2RelHum(VPD=era_data[,era_col], airtemp=era_data[,era_tair_col],
-                vpd_units=vpd_units, tair_units=tair_units)
+                                      vpd_units=vpd_units, tair_units=tair_units, site_log)
                 
                 #Gapfill
                 datain[missing,flx_col] <- era_rh[missing]
@@ -503,7 +503,7 @@ GapfillMet <- function(datain, era_data, era_vars, tair_units, vpd_units,
 # TODO: This function exists in palsR/Gab in pals/R/FluxtowerSpreadsheetToNc.R and has a different signature. Merge?
 #' Checks that data are within specified ranges
 #' @export
-CheckDataRanges = function(datain, missingval){
+CheckDataRanges = function(datain, missingval, site_log){
     
     #Checks that variables are within acceptable ranges
     # as set in the "variables" auxiliary file
@@ -529,13 +529,13 @@ CheckDataRanges = function(datain, missingval){
         
         #Return error if variable outside specified range
         if(data_range[1] < valid_range[1] | data_range[2] > valid_range[2]){
-            error <- (paste("Variable outside expected ranges. Check variable ",
-                             datain$vars[k], "; data range is [", data_range[1], 
-                             ", ", data_range[2], "], valid range is [", 
-                             valid_range[1], ", ", valid_range[2],
-                             "]. Check data or change data range in variables auxiliary file",
-                              sep="")
-            site_log <- log_error(error, site_log)
+            error <- paste("Variable outside expected ranges. Check variable ",
+                           datain$vars[k], "; data range is [", data_range[1], 
+                           ", ", data_range[2], "], valid range is [", 
+                           valid_range[1], ", ", valid_range[2],
+                           "]. Check data or change data range in variables auxiliary file",
+                           sep="")
+            stop_and_log(error, site_log)
             return(site_log)
         }
         
@@ -621,13 +621,130 @@ fill_qcvar_missing <- function(datain, missingVal, gapfillVal){
   
 }
 
+#-----------------------------------------------------------------------------
+
+#' Calculates mean annual precipitation
+#' @export
+calc_avPrecip <- function(datain, gaps){
+  
+  ind_start <- gaps$tseries_start
+  ind_end   <- gaps$tseries_end
+  
+  av_precip <- list()
+  
+  #Find unique time perios
+  no_periods <- unique(gaps$consec)
+  
+  for(k in 1:length(no_periods)){
+    
+    #total of all years
+    total <- sum(datain$data$P[ind_start[k]:ind_end[k]])
+    
+    #no years
+    no_yrs <- length(which(gaps$consec==no_periods[k]))
+      
+    #average annual
+    av_precip[[k]] <- total / no_yrs
+  }
+  
+  return(av_precip)
+}
 
 
+#-----------------------------------------------------------------------------
 
+#' Checks that whole years were extracted
+#' @export
+is_whole_yrs <- function(gaps, site_log){
+  
+  start_times <- sapply(gaps$tseries_start, function(x) format(strptime(DataFromText$time[x,1], 
+                                                                        "%Y%m%d%H%M"), "%m%d"))
+  end_times   <- sapply(gaps$tseries_end, function(x) format(strptime(DataFromText$time[x,1], 
+                                                                      "%Y%m%d%H%M"), "%m%d"))
+  if(any(start_times != "0101") | any(end_times != "1231")){
+    error <- paste("Gap check did not return whole years, aborting.")    
+    stop_and_log(error, site_log)
+  }
+  
+}
 
+#-----------------------------------------------------------------------------
 
+#' Finds indices for flux variables to be outputted
+#' @export
+find_flux_ind <- function(datain, exclude_eval, k, site_log){
+  
+  #Find eval variable indices
+  flux_ind <- which(datain$categories=="Eval")
+  
+  #If eval variables to exclude, remove these now
+  if(any(!is.na(exclude_eval))){    
+    
+    rm_ind   <- sapply(1:length(exclude_eval), function(x) 
+                       which(DataFromText$vars[flux_ind]==exclude_eval[x]))
+    flux_ind <- flux_ind[-rm_ind]
+    
+  }        
+  
+  
+  #Check that have at least one eval variable to write, skip time period if not
+  if(length(flux_ind[[k]])==0){
+    
+    #If no eval vars for any time period, abort
+    if(k==no_files & all(sapply(flux_ind, length)==0)){
+      
+      error <- paste("No evaluation variables to process for any output",
+                     "time periods. Site not processed.")       
+      stop_and_log(error, site_log)
+      
+    } else {
+      #Return warning and skip time period
+      warn <- (paste("File ", k, ": No evaluation variables to process, ",
+                     "all variables have too many missing values or gap-filling. Try",
+                     "setting include_all_eval to TRUE to process variables. Skipping ",
+                     "time period", sep=""))
+      site_log <- warn_and_log(warn, site_log)
+      next  
+    }          
+  }
+  
+  return(flux_ind)
+  
+}
 
+#-----------------------------------------------------------------------------
 
-
+#' Finds evaluation variables to exlude
+#' @export
+find_exclude_eval <- function(datain, all_missing){
+  
+  #Extract names of evaluation variables
+  cats <- datain$categories
+  eval_vars <- names(cats[cats=="Eval"])
+  
+  #Find eval variables with all values missing
+  exclude_eval <- lapply(all_missing, intersect, eval_vars)
+  
+  #Only exclude QC variables if corresponding data variable excluded as well. Keep otherwise
+  #Find all QC variables
+  qc_vars <- lapply(exclude_eval, function(x) x[grepl("_QC", x)])
+  
+  if(any(sapply(qc_vars, length) > 0)){
+    
+    #Find QC variables with corresponding data variable
+    remove_qc <-  mapply(function(x,y) is.element(gsub("_QC", "", y), x), x=exclude_eval, y=qc_vars)
+    
+    #If any QC vars without a corresponding data variable, don't include
+    #them in excluded variables
+    for(k in 1:length(remove_qc)){
+      if(any(!remove_qc[[k]])){
+        exclude_eval[[k]] <- exclude_eval[[k]][-which(exclude_eval[[k]]==qc_vars[[k]][!remove_qc[[k]]])] 
+      }          
+    }
+  }
+  
+  return(exclude_eval)
+}
+  
 
 

@@ -15,7 +15,7 @@
 # Variable names in spreadsheet to be processed:
 findColIndices = function(fileinname, var_names, var_classes, 
                           essential_vars, preferred_vars,
-                          time_vars) {
+                          time_vars, site_log) {
   
   #CSV files in Fluxnet2015 Nov '16 release do not follow a set template
   #and not all files include all variables
@@ -37,16 +37,18 @@ findColIndices = function(fileinname, var_names, var_classes,
 
   #Check if any essential meteorological variables missing, abort if so
   if(any(essential_vars[failed_ind])){
-    CheckError(paste("Cannot find all essential variables in input file (missing: ", 
-                     paste(var_names[failed_ind[which(essential_vars[failed_ind])]], collapse=","),
-                     "), aborting", sep=""))
+    error <- paste("Cannot find all essential variables in input file (missing: ", 
+                   paste(var_names[failed_ind[which(essential_vars[failed_ind])]], collapse=","),
+                   "), aborting", sep="")
+    stop_and_log(error, site_log)
   }
   
   #Check if no desired evaluation variables present, abort if so
   if(all(preferred_vars[failed_ind])){
-    CheckError(paste("Cannot find any evaluation variables in input file (missing: ", 
-                     paste(var_names[failed_ind[which(essential_vars[failed_ind])]], collapse=","),
-                     "), aborting", sep=""))
+    error <- paste("Cannot find any evaluation variables in input file (missing: ", 
+                   paste(var_names[failed_ind[which(essential_vars[failed_ind])]], collapse=","),
+                   "), aborting", sep=""))
+    stop_and_log(error, site_log)
   }
   
   
@@ -59,12 +61,14 @@ findColIndices = function(fileinname, var_names, var_classes,
   
   #Find time information
   #Returns time variables and column classes
-  time_info <- findTimeInfo(time_vars, headers)
+  time_info <- findTimeInfo(time_vars, headers, site_log)
   
   #Check that column indices for time and other variables don't overlap
   if(length(intersect(time_info$ind, ind)) > 0){
-    CheckError(paste("Error determining column indices for time and other", 
-               "variables, two or more variables overlap [ function:", match.call()[[1]], "]"))
+    error <- paste("Error determining column indices for time and other", 
+                   "variables, two or more variables overlap [ function:", 
+                   match.call()[[1]], "]")
+    stop_and_log(error, site_log)
   }
   
   #Combine column classes for time and other variables
@@ -95,13 +99,14 @@ findColIndices = function(fileinname, var_names, var_classes,
 #' Extract time stamp information
 #' @return time stamp variables
 #' @export
-findTimeInfo <- function(time_vars, headers){
+findTimeInfo <- function(time_vars, headers, site_log){
     
   ind <- sapply(time_vars, function(x) which(headers==x))
   
   if(length(ind)!=2) {
-    CheckError(paste("Cannot find time stamp variables in input file. Looking for variables", 
-                     paste(time_vars, collapse=" and ")))
+    error <- paste("Cannot find time stamp variables in input file.",
+                    "Looking for variables", paste(time_vars, collapse=" and "))
+    stop_and_log(error, site_log)
   }
   
   #Initialise column class vector (sets class to NULL unless overwritten below)
@@ -160,6 +165,10 @@ retrieve_units <- function(vars_present, all_vars){
   #Retrieve original and taret units, and list
   original_units <- all_vars$Fluxnet_unit[ind_present]
   target_units   <- all_vars$Output_unit[ind_present]
+  
+  #Set names
+  names(original_units) <- all_vars$Fluxnet_variable[ind_present]  
+  names(target_units) <- all_vars$Fluxnet_variable[ind_present]  
   
   units <- list(original_units=original_units, target_units=target_units)
   
