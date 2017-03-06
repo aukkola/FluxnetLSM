@@ -326,16 +326,50 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     end_yr     <- vector()
     flux_ind   <- list()
     
-    for(k in 1:no_files){
+    #save to loops so no_files can be amended below
+    loops <- no_files
+    
+    for(k in 1:loops){        
+        
+        ### First check that there are evalution variables to output ##
+        
+        #If not, skip this file
+        #Find eval variable indices
+        flux_ind[[k]] <- find_flux_ind(datain=DataFromText,
+                                       exclude_eval=exclude_eval[[k]], 
+                                       k, site_log)
+        
+        #Log possible warnings and remove warnings from output var
+        site_log <- log_warning(warn=flux_ind[[k]]$warn, site_log)
+        flux_ind[[k]] <- flux_ind[[k]]$out
+        
+        #If no eval vars for any time period, abort        
+        if(k==no_files & all(sapply(flux_ind, length)==0)){       
+          error <- paste("No evaluation variables to process for any output",
+                         "time periods. Site not processed.")       
+          stop_and_log(error, site_log)
+          
+          #If no eval variables for this loop, skip to next
+        } else if(length(flux_ind[[k]]) == 0) {
+          no_files <- no_files-1
+          next
+        }
+        
+        
+        
+        ### Find start and end time ###
         
         #Find start year, day and hour
         nc_starttime <- findStartTime(start = strptime(DataFromText$time[gaps$tseries_start[k],1], "%Y%m%d%H%M"))
-                
+        
         #Extract start and end years
         start_yr[k] <- substring(DataFromText$time[gaps$tseries_start[k],1], 1, 4)
         end_yr[k]   <- substring(DataFromText$time[gaps$tseries_end[k],1], 1, 4)
         
-        #Create output file names
+        
+        
+        ### Create output file names ###
+        
         #If only one year, only write start year, else write time period
         if(start_yr[k]==end_yr[k]){
             metfilename  <- paste(outpath_nc, "/", site_code, "_", start_yr[k], 
@@ -394,26 +428,6 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
         
         ###--- Create netcdf flux data file ---###
         
-        #Find eval variable indices
-        flux_ind[[k]] <- find_flux_ind(datain=DataFromText,
-                                       exclude_eval=exclude_eval[[k]], 
-                                       k, site_log)
-        
-        #Log possible warnings and remove warnings from output var
-        site_log <- log_warning(warn=flux_ind[[k]]$warn, site_log)
-        flux_ind[[k]] <- flux_ind[[k]]$out
-        
-        #If no eval vars for any time period, abort        
-        if(k==no_files & all(sapply(flux_ind, length)==0)){       
-          error <- paste("No evaluation variables to process for any output",
-                         "time periods. Site not processed.")       
-          stop_and_log(error, site_log)
-          
-        #If no eval variables for this loop, skip to next
-        } else if(length(flux_ind[[k]]) == 0) {
-          next
-        }
-                
         #Write flux file
         CreateFluxNcFile(fluxfilename=fluxfilename, datain=DataFromText,
                          latitude=site_info$SiteLatitude,
