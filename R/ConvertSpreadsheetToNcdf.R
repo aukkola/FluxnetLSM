@@ -217,7 +217,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     if(ERA_gapfill){
         
         #Read ERA data and extract time steps corresponding to obs
-        era_data <- rear_era(ERA_file=ERA_file, datain=DataFromText)
+        era_data <- read_era(ERA_file=ERA_file, datain=DataFromText)
   
         #Find indices for met variables to be gapfilled
         ind <- which(DataFromText$categories=="Met")

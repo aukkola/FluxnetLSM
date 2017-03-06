@@ -69,8 +69,8 @@ stop_and_log <- function(error, site_log){
 #' Writes site log and then aborts, reporting error
 #' @export
 warn_and_log <- function(warn, site_log){
-  site_log <- log_warning(warn, site_log)
   if(nchar(warn) > 0){
+    site_log <- log_warning(warn, site_log)
     warning(warn, call.=FALSE)
   }
   return(site_log)
@@ -81,8 +81,8 @@ warn_and_log <- function(warn, site_log){
 #' Appends warning message and calls warning
 #' @export
 append_and_warn <- function(warn_message, warnings){
-  warnings <- paste(warnings, warn_message, sep=" ##### ")
   if(nchar(warn_message > 0)){ 
+    warnings <- paste(warnings, warn_message, sep=" ##### ")
     warning(warn_message, call.=FALSE) 
   }
   return(warnings)
