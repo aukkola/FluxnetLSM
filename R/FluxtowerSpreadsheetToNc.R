@@ -18,7 +18,7 @@
 #' @param time_vars vector of time variables
 #' @return list of flux data, variables and timing information
 #' @export
-ReadCSVFluxData <- function(fileinname, vars, time_vars){
+ReadCSVFluxData <- function(fileinname, vars, time_vars, site_log){
   
   ####### First read available variables, corresponding units and ranges ####
   
@@ -37,8 +37,10 @@ ReadCSVFluxData <- function(fileinname, vars, time_vars){
   #Sanity check, does variable order in file match that specified in tcols?
   #Ignore any possible duplicates in tcol$all_names before check
   if(any(colnames(FluxData) != unique(tcol$all_names))) {
-    CheckError(paste("Check variable ordering, variables don't match data", 
-               "retrieved from file [ function:", match.call()[[1]], "]"))
+    error <- paste("Check variable ordering, variables don't match data", 
+               "retrieved from file [ function:", match.call()[[1]], "]")
+    stop_and_log(error, site_log)
+    return(site_log)
   }
   
 
@@ -59,8 +61,11 @@ ReadCSVFluxData <- function(fileinname, vars, time_vars){
     
     #Make sure FluxData now has correct no. of columns
     if(ncol(FluxData) != length(tcol$names)){
-      CheckError(paste("Duplicate variable names exist but columns could", 
-                 "not be be duplicated correctly [ function:", match.call()[[1]], "]"))
+      error <- paste("Duplicate variable names exist but columns could", 
+                     "not be be duplicated correctly [ function:", 
+                     match.call()[[1]], "]")
+      stop_and_log(error, site_log)
+      return(site_log)
     }
     
   }
@@ -96,8 +101,10 @@ ReadCSVFluxData <- function(fileinname, vars, time_vars){
 	ntsteps <- nrow(FluxTime)
   
 	if(!(ntsteps>=12 && ntsteps < 1e9)){
-		CheckError(paste('Unable to determine number of time steps in:',
-			                stripFilename(fileinname)))
+    error <- paste('Unable to determine number of time steps in:',
+			                stripFilename(fileinname))
+    stop_and_log(error, site_log)
+    return(site_log)
 	}
   
 	# and time step size (convert to date string)
@@ -107,9 +114,11 @@ ReadCSVFluxData <- function(fileinname, vars, time_vars){
 	timestepsize <- as.numeric(end) - as.numeric(start)
   
 	if( !(timestepsize>=300 && timestepsize<=3600) ){
-		CheckError(paste("Time step size must be between
-                     300 and 3600 seconds. Time step size",
-                     timestepsize, "found in file"))
+    error <- paste("Time step size must be between",
+                   "300 and 3600 seconds. Time step size",
+                   timestepsize, "found in file")
+    stop_and_log(error, site_log)
+    return(site_log)
 	}
   
   # Time steps in a day and number of days in data set
@@ -133,6 +142,29 @@ ReadCSVFluxData <- function(fileinname, vars, time_vars){
 
   return(filedata)
 
+}
+
+#-----------------------------------------------------------------------------
+
+#' Reads ERA data and extracts time steps corresponding to obs
+#' @export
+read_era <- function(ERA_file, datain){
+  
+  #read data
+  era_data <- read.csv(ERA_file, header=TRUE, colClasses=c("character", "character",
+                                                           rep("numeric", 7)))
+  
+  #ERAinterim data provided for 1989-2014, need to extract common years with flux obs
+  #Find start and end
+  obs_start <- datain$time$TIMESTAMP_START
+  start_era <- which(era_data$TIMESTAMP_START == obs_start[1])
+  end_era   <- which(era_data$TIMESTAMP_START == obs_start[length(obs_start)])
+  
+  #Extract correct time steps
+  era_data  <- era_data[start_era:end_era,]
+  
+  return(era_data)
+  
 }
 
 #-----------------------------------------------------------------------------
@@ -353,13 +385,14 @@ CreateMetNcFile = function(metfilename, datain,                   #outfile file 
                            latitude, longitude,                   #lat, lon
                            site_code, long_sitename,              #Fluxnet site code and full site name
                            datasetversion, github_rev,            #Dataset version and github revision
-                           tier=NA,                                  #Fluxnet site tier
+                           tier=NA,                               #Fluxnet site tier
                            ind_start, ind_end,                    #time period indices
                            starttime, timestepsize,               #timing info
                            flux_varname, cf_name,                 #Original Fluxnet variable names and CF_compliant names
                            elevation=NA, towerheight=NA,          #Site elevation and flux tower height
                            canopyheight=NA,                       #Canopy height
                            short_veg_type=NA, long_veg_type=NA,   #Long and short IGBP vegetation types
+                           av_precip=NA,                          #average annual rainfall
                            missing, gapfill_all, gapfill_good,    #thresholds used in processing
                            gapfill_med, gapfill_poor, min_yrs,
                            total_missing, total_gapfilled,        #Percentage missing and gap-filled
@@ -452,6 +485,13 @@ CreateMetNcFile = function(metfilename, datain,                   #outfile file 
 	  opt_vars[[ctr]] = long_veg
 	  ctr <- ctr + 1 
 	}
+  #Define AvPrecip (average annual precip) if outputting rainfall
+	if(!is.na(av_precip)){
+	  av_rain=ncvar_def('AvPrecip','mm yr-1',dim=list(xd,yd), missval=NA,
+	                     longname='Mean annual precipitation')
+	  opt_vars[[ctr]] = av_rain
+	  ctr <- ctr + 1  
+	}
 	
 
 	# END VARIABLE DEFINITIONS #########################################
@@ -511,7 +551,7 @@ CreateMetNcFile = function(metfilename, datain,                   #outfile file 
   if(!is.na(canopyheight)) {ncvar_put(ncid,canheight,vals=canopyheight)}
 	if(!is.na(short_veg_type)) {ncvar_put(ncid,short_veg,vals=short_veg_type)}
   if(!is.na(long_veg_type)) {ncvar_put(ncid,long_veg,vals=long_veg_type)}
-
+	if(!is.na(av_precip)) {ncvar_put(ncid,av_rain,vals=av_precip)}
 
  
 	# Time dependent variables:
