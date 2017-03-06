@@ -70,7 +70,9 @@ stop_and_log <- function(error, site_log){
 #' @export
 warn_and_log <- function(warn, site_log){
   site_log <- log_warning(warn, site_log)
-  warning(warn, call.=FALSE)
+  if(nchar(warn) > 0){
+    warning(warn, call.=FALSE)
+  }
   return(site_log)
 }
 
