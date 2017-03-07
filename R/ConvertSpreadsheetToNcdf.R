@@ -217,6 +217,10 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
         tair_units <- DataFromText$units$original_units[which(vars=="TA_F_MDS")]
         vpd_units  <- DataFromText$units$original_units[which(vars=="VPD_F_MDS")]
         
+        #If not found, set to unknown
+        if(length(tair_units)==0){ tair_units = "UNKNOWN" } 
+        if(length(vpd_units)==0){ vpd_units = "UNKNOWN" }
+        
         #Gapfill met variables
         temp_data <- GapfillMet(datain=DataFromText$data[,ind], era_data=era_data,
                                 era_vars=DataFromText$era_vars[ind],
