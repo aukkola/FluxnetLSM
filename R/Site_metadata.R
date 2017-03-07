@@ -240,12 +240,14 @@ get_ornl_site_url_list <- function(site_code_list) {
     for (site_code in site_code_list) {
         # looks for table cell with site code as contents, then looks up the parent
         # row, and finds the href of the first link.
-        xpath =  paste0("//td[text()='", site_code, "']/..")
-        ornl_rel_url <- page_html %>% html_node(xpath = xpath) %>%
-            html_node("a") %>%
-            html_attr("href")
-
-        ornl_url_list[[site_code]] <- paste0("https://fluxnet.ornl.gov/", ornl_rel_url)
+        xpath <- paste0("//td[text()='", site_code, "']/..")
+        trow <- page_html %>% html_node(xpath = xpath)
+        if (class(trow) == "xml_node") {
+            ornl_rel_url <- trow %>% html_node("a") %>% html_attr("href")
+            ornl_url_list[[site_code]] <- paste0("https://fluxnet.ornl.gov/", ornl_rel_url)
+        } else {
+            message(site_code, " not found in table at https://fluxnet.ornl.gov/site_status")
+        }
     }
 
     return(ornl_url_list)
@@ -263,6 +265,10 @@ get_ornl_site_metadata <- function(metadata, site_url=NULL, overwrite=TRUE) {
 
     if (is.null(site_url)) {
         site_url <- get_site_ornl_url(site_code)
+        if (is.null(site_url)) {
+            # site not found at ORNL
+            return(metadata)
+        }
         metadata$ORNL_URL <- site_url
     }
 
