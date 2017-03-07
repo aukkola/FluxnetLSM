@@ -26,6 +26,9 @@ plot_nc <- function(ncfile, analysis_type, vars, outfile){
   data        <- lapply(data_vars, ncvar_get, nc=ncfile)
   data_units  <- lapply(data_vars, function(x) ncatt_get(nc=ncfile, varid=x, 
                                                         attname="units")$value)
+  #fluxnet_names
+  fluxnet_names  <- lapply(data_vars, function(x) ncatt_get(nc=ncfile, varid=x, 
+                                                         attname="Fluxnet_name")$value)
   names(data)       <- data_vars
   names(data_units) <- data_vars
   
@@ -43,6 +46,7 @@ plot_nc <- function(ncfile, analysis_type, vars, outfile){
                      "output plots. Expects time in seconds,",
                      "currently in units of", time_units)
     warnings <- append_and_warn(warn=warn, warnings)
+    return(warnings)
   }
   
   
@@ -54,14 +58,38 @@ plot_nc <- function(ncfile, analysis_type, vars, outfile){
   syear     <- as.numeric(format(startdate, "%Y"))
   
   
-  #Load qc variables if available
+  ## If rainfall (P) and air temp (TA_F_MDS) being plotted, ##
+  ## convert to units mm/timestepsize and deg C             ##
+  if(any(fluxnet_names=="P")){
+    ind <- which(fluxnet_names=="P")
+    
+    #If recognised units, convert to mm/timestep
+    if(data_units[[ind]]=="mm/s" | data_units[[ind]]=="mm s-1" | 
+       data_units[[ind]]=="kg/m2/s" | data_units[[ind]]=="kg m-2 s-1"){
+      
+      data[[ind]] <- data[[ind]] * timestepsize
+      data_units[[ind]] <- paste("mm/", timestepsize/60, "min", sep="")
+    }
+  }
+  if(any(fluxnet_names=="TA_F_MDS")){
+    ind <- which(fluxnet_names=="TA_F_MDS")
+    
+    #If recognised units, convert to mm/timestep
+    if(data_units[[ind]]=="K"){
+      data[[ind]] <- data[[ind]] - 273.15
+      data_units[[ind]] <- paste("C")
+    }
+  }
+  
+  
+  ## Load qc variables if available ##
   if(length(qc_vars) > 0) {
     qc_data <- lapply(qc_vars, ncvar_get, nc=ncfile)
     names(qc_data) <- qc_vars  
   }
 
   
-  #Number of variables to plot
+  ## Number of variables to plot ##
   no_vars <- length(data_vars)
  
   
