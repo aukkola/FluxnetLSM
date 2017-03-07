@@ -1,4 +1,4 @@
-#' Example data conversion for multiple sites using parallel .
+#' Example data conversion for multiple sites using parallel programming.
 #'
 #' Converts useful variables from a Fluxnet 2015 spreatsheet format into two
 #' netcdf files, one for fluxes, and one for met forcings.

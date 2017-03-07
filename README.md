@@ -51,10 +51,10 @@ If you downloaded the zip file from Github, unzip the archive first. Next using 
 ### Usage
 See `examples` for example usage. Three examples are provided for processing a single site or multiple sites:
 
-single site (`examples/example_conversion_single_site.R`)
+- single site (`examples/example_conversion_single_site.R`)
 
-multiple sites (`examples/example_conversion_multiple_sites.R`)
+- multiple sites (`examples/example_conversion_multiple_sites.R`)
 
-multiple sites using parallel programming (`example_conversion_multiple_sites_parallel.R`)
+- multiple sites using parallel programming (`examples/example_conversion_multiple_sites_parallel.R`)
 
 
