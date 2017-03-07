@@ -10,6 +10,7 @@
 #' 
 
 library(FluxnetLSM)  # convert_fluxnet_to_netcdf
+library(parallel)
 
 #clear R environment
 rm(list=ls(all=TRUE))
@@ -43,7 +44,7 @@ datasetversions <- sapply(infiles, get_fluxnet_version_no)
 #Retrieve site codes
 site_codes <- sapply(infiles, get_fluxnet_site_code)
 
-                                         
+
 ###############################
 ###--- Optional settings ---###
 ###############################
@@ -52,7 +53,7 @@ site_codes <- sapply(infiles, get_fluxnet_site_code)
 # Find ERA-files corresponding to site codes
 ERA_gapfill  <- TRUE
 ERA_files <- sapply(site_codes, function(x) get_fluxnet_erai_files(in_path, site_code=x, 
-                                                                  datasetname = datasetname))
+                                                                   datasetname = datasetname))
 
 
 #Thresholds for missing and gap-filled time steps
@@ -79,15 +80,31 @@ include_all_eval <- TRUE
 ###--- Run analysis ---###
 ##########################
 
-#Loops through sites
-mapply(function(w,x,y,z) try(convert_fluxnet_to_netcdf(infile=w, site_code=x, out_path=out_path,
-                          ERA_file=y, ERA_gapfill=ERA_gapfill, datasetname=datasetname, 
-                          datasetversion=z, missing = missing, 
-                          gapfill_all=gapfill_all, gapfill_good=gapfill_good, 
-                          gapfill_med=gapfill_med, gapfill_poor=gapfill_poor,
-                          include_all_eval=include_all_eval,
-                          min_yrs=min_yrs, plot=plot)),
-                          w=infiles, x=site_codes, 
-                          y=ERA_files, z=datasetversions)
+#Initialise clusters (using 2 cores here)
+cl <- makeCluster(getOption('cl.cores', 2))
 
+#Import variables to cluster
+clusterExport(cl, 'out_path')
+if(exists("gap_threshold"))  {clusterExport(cl, 'gap_threshold')}
+if(exists("min_yrs"))        {clusterExport(cl, 'min_yrs')}
+if(exists("plot"))           {clusterExport(cl, 'plot')}
+if(exists("ERA_gapfill"))    {clusterExport(cl, 'ERA_gapfill')}
+if(exists("datasetname"))    {clusterExport(cl, 'datasetname')}
+if(exists("datasetversion")) {clusterExport(cl, 'datasetversion')}
+
+
+#Loops through sites
+clusterMap(cl=cl, function(w,x,y,z) { library(FluxnetLSM) 
+                                    try(convert_fluxnet_to_netcdf(infile=w, site_code=x, out_path=out_path,
+                                        ERA_file=y, ERA_gapfill=ERA_gapfill, datasetname=datasetname, 
+                                        datasetversion=z, missing = missing, 
+                                        gapfill_all=gapfill_all, gapfill_good=gapfill_good, 
+                                        gapfill_med=gapfill_med, gapfill_poor=gapfill_poor,
+                                        include_all_eval=include_all_eval,
+                                        min_yrs=min_yrs, plot=plot)) },
+                                        w=infiles, x=site_codes, 
+                                        y=ERA_files, z=datasetversions)
+
+
+stopCluster(cl)
 

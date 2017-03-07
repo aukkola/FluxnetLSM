@@ -20,7 +20,7 @@ rm(list=ls(all=TRUE))
 #############################
 
 #Fluxnet site ID (see http://fluxnet.fluxdata.org/sites/site-list-and-pages/)
-site_code <- "AU-Ync"
+site_code <- "AU-How"
 
 
 # This directory should contain appropriate data from 
@@ -79,7 +79,7 @@ convert_fluxnet_to_netcdf(infile=infile, site_code=site_code, out_path=out_path,
                           datasetversion=datasetversion, missing = missing, 
                           gapfill_all=gapfill_all, gapfill_good=gapfill_good, 
                           gapfill_med=gapfill_med, gapfill_poor=gapfill_poor,
-                          include_all_eval=FALSE,
+                          include_all_eval=TRUE,
                           min_yrs=min_yrs, plot=plot)
 
 
