@@ -249,7 +249,7 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
     ### If no years fulfilling criteria, abort. ###
     if(all(!yr_keep) | length(yr_ind) < min_yrs){
       error <- paste("No years to process, too many gaps present or",
-                   "available time period too short. Aborting.")
+                   "available time period too short.")
       stop_and_log(error, site_log)
       return(site_log)
     }
@@ -295,8 +295,7 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
                 #If all years removed because all available periods shorter than min_yrs, abort
                 if(length(yr_ind)==0){
                   error <- paste("No years to process, all available time",
-                                 "period too short (as set by min_yrs).",
-                                  "Aborting [ function:", match.call()[[1]], "]")
+                                 "periods too short (as set by min_yrs).")
                   stop_and_log(error, site_log)
                   return(site_log)
                 }
