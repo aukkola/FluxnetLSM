@@ -64,7 +64,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     
     #Plots (if code set to plot)
     if(!any(is.na(plot))){
-      outpath_plot <- paste(out_path, "/Figures", sep="")
+      outpath_plot <- paste(out_path, "/Figures/", site_code, sep="")
       dir.create(outpath_plot, showWarnings = FALSE, recursive=TRUE)
     }
 
