@@ -209,9 +209,9 @@ get_ornl_site_codes <- function() {
 
     page_html <- read_html(status_table_url)
 
-    table <- page_html %>% html_node("#historical_site_list") %>% html_table()
+    table_data <- page_html %>% html_node("#historical_site_list") %>% html_table()
 
-    site_codes <- sort(table[["FLUXNET ID"]])
+    site_codes <- sort(table_data[["FLUXNET ID"]])
 
     return(site_codes)
 
@@ -229,7 +229,7 @@ get_site_ornl_url <- function(site_code) {
 #' Get a list of ORNL site URLs from site_status table
 #' @export
 get_ornl_site_url_list <- function(site_code_list) {
- 
+
     library(rvest)
     status_table_url <- "https://fluxnet.ornl.gov/site_status"
 
@@ -272,24 +272,24 @@ get_ornl_site_metadata <- function(metadata, site_url=NULL, overwrite=TRUE) {
 
     new_metadata = list()
     # General info
-    table <- page_html %>% html_node("table#fluxnet_site_information") %>% html_table()
-    new_metadata$Fullname <- table[table[1] == "Site Name:"][2]
-    new_metadata$Description <- table[table[1] == "Description:"][2]
-    new_metadata$TowerStatus <- table[table[1] == "Tower Status:"][2]
+    table_data <- page_html %>% html_node("table#fluxnet_site_information") %>% html_table()
+    new_metadata$Fullname <- table_data[table_data[1] == "Site Name:"][2]
+    new_metadata$Description <- table_data[table_data[1] == "Description:"][2]
+    new_metadata$TowerStatus <- table_data[table_data[1] == "Tower Status:"][2]
 
     # Location Information
-    table <- page_html %>% html_node("table#fluxnet_site_location_information") %>% html_table()
-    new_metadata$Country <- table[table[1] == "Country:"][2]
-    lat_lon <- strsplit(table[table[1] == "Coordinates:(Lat, Long)"][2], ", ")[[1]]
+    table_data <- page_html %>% html_node("table#fluxnet_site_location_information") %>% html_table()
+    new_metadata$Country <- table_data[table_data[1] == "Country:"][2]
+    lat_lon <- strsplit(table_data[table_data[1] == "Coordinates:(Lat, Long)"][2], ", ")[[1]]
     new_metadata$SiteLatitude <- as.numeric(lat_lon[1])
     new_metadata$SiteLongitude <- as.numeric(lat_lon[2])
 
     # Site Characteristics
     tryCatch({
-        table <- page_html %>% html_node("table#fluxnet_site_characteristics") %>% html_table()
-        elevation_text <- table[table[1] == "GTOPO30 Elevation:"][2]
+        table_data <- page_html %>% html_node("table#fluxnet_site_characteristics") %>% html_table()
+        elevation_text <- table_data[table_data[1] == "GTOPO30 Elevation:"][2]
         new_metadata$SiteElevation <- as.numeric(gsub("m", "", elevation_text))
-        new_metadata$IGBP_vegetation_long <- table[table[1] == "IGBP Land Cover:"][2]
+        new_metadata$IGBP_vegetation_long <- table_data[table_data[1] == "IGBP Land Cover:"][2]
     }, error = function(cond) {
         message(site_code, " doesn't have a Site Characteristics table at ", site_url)
     })
@@ -342,18 +342,18 @@ get_fluxdata_org_site_metadata <- function(metadata, site_url=NULL) {
     page_html <- read_html(site_url)
 
     # General info
-    table <- page_html %>% html_node("table.maininfo") %>% html_table()
-    new_metadata$Fullname <- table[table[1] == "Site Name:"][2]
-    new_metadata$SiteLatitude <- as.numeric(table[table[1] == "Latitude:"][2])
-    new_metadata$SiteLongitude <- as.numeric(table[table[1] == "Longitude:"][2])
+    table_data <- page_html %>% html_node("table.maininfo") %>% html_table()
+    new_metadata$Fullname <- table_data[table_data[1] == "Site Name:"][2]
+    new_metadata$SiteLatitude <- as.numeric(table_data[table_data[1] == "Latitude:"][2])
+    new_metadata$SiteLongitude <- as.numeric(table_data[table_data[1] == "Longitude:"][2])
 
-    elevation_text <- table[table[1] == "Elevation (m):"][2]
+    elevation_text <- table_data[table_data[1] == "Elevation (m):"][2]
     elevation <- as.numeric(gsub("m", "", elevation_text))
     if (!is.na(elevation)) {  # lots of Fluxdata.org elevtions are missing, don't overwrite
     new_metadata$SiteElevation <- elevation
     }
 
-    IGBP_text = strsplit(gsub("\\)", "", table[table[1] == "IGBP:"][2]), " \\(")[[1]]
+    IGBP_text = strsplit(gsub("\\)", "", table_data[table_data[1] == "IGBP:"][2]), " \\(")[[1]]
     new_metadata$IGBP_vegetation_short <- IGBP_text[1]
     new_metadata$IGBP_vegetation_long <- IGBP_text[2]
 
