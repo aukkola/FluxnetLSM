@@ -1,7 +1,7 @@
 #' Gets a Fluxnet file template (or full file name if site codes and years are specified)
 #'
 #' @export
-get_fluxnet_file_template <- function(site_code = "[A-Z]{2}-[A-Z]{3}", datasetname = "FLUXNET2015",
+get_fluxnet_file_template <- function(site_code = "[A-Z]{2}-[A-Z|0-9]{3}", datasetname = "FLUXNET2015",
                                      subset = "FULLSET", resolution = "[A-Z]{2}",
                                      years = "[0-9]{4}-[0-9]{4}", datasetversion = "[0-9]{1}-[0-9]{1}",
                                      extension=".csv") {
@@ -30,7 +30,7 @@ get_fluxnet_erai_template <- function(site_code, ...) {
 #' Gets Fluxnet file(s) available at a given path
 #'
 #' @export
-get_fluxnet_files <- function(path, site_code = "[A-Z]{2}-[A-Z]{3}", ...) {
+get_fluxnet_files <- function(path, site_code = "[A-Z]{2}-[A-Z|0-9]{3}", ...) {
     template <- get_fluxnet_file_template(site_code = site_code, ...)
     files <- list.files(path, template, full.names = TRUE, ignore.case=TRUE)
 
@@ -41,7 +41,7 @@ get_fluxnet_files <- function(path, site_code = "[A-Z]{2}-[A-Z]{3}", ...) {
 #' Gets Fluxnet ERA Interim file(s) available at a given path
 #'
 #' @export
-get_fluxnet_erai_files <- function(path, site_code = "[A-Z]{2}-[A-Z]{3}", ...) {
+get_fluxnet_erai_files <- function(path, site_code = "[A-Z]{2}-[A-Z|0-9]{3}", ...) {
   template <- get_fluxnet_erai_template(site_code = site_code, ...)
   files <- list.files(path, template, full.names = TRUE, ignore.case=TRUE)
   
