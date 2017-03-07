@@ -4,7 +4,7 @@ R package for post-processing FLUXNET datasets for use in land surface modelling
 
 URL: https://github.com/aukkola/FluxnetLSM
 
-Maintainer: [Anna Ukkola] (<a.ukkola@unsw.edu.au>)
+Maintainer: [Anna Ukkola] (<https://www.climatescience.org.au/staff/profile/aukkola>)
 
 Contributors: Anna Ukkola, Ned Haughton and Martin De Kauwe
 
@@ -49,10 +49,12 @@ If you downloaded the zip file from Github, unzip the archive first. Next using 
 
 
 ### Usage
-See `examples` for example usage. Three examples are provided
+See `examples` for example usage. Three examples are provided for processing a single site or multiple sites:
 
-single site
+single site (`examples/example_conversion_single_site.R`)
 
-multiple sites
+multiple sites (`examples/example_conversion_multiple_sites.R`)
 
-multiple sites using parallel programming
+multiple sites using parallel programming (`example_conversion_multiple_sites_parallel.R`)
+
+
