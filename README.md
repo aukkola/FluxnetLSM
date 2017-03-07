@@ -8,6 +8,7 @@ Maintainer: [Anna Ukkola] (<a.ukkola@unsw.edu.au>)
 
 Contributors: Anna Ukkola, Ned Haughton and Martin De Kauwe
 
+Requires: R ≥ 3.1.0
 
 
 ### Installation
