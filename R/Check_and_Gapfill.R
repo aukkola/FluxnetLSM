@@ -598,7 +598,7 @@ create_qc_var <- function(datain, qc_name){
 #' QC flag missing but data variable available
 #' @return datain
 #' @export
-fill_qcvar_missing <- function(datain, missingVal, gapfillVal){
+FillQCvarMissing <- function(datain, missingVal, gapfillVal){
   
   #Find QC variables and corresponding data variables
   qc_ind  <- which(grepl("_QC", datain$vars))  
@@ -659,7 +659,7 @@ calc_avPrecip <- function(datain, gaps){
 
 #' Checks that whole years were extracted
 #' @export
-is_whole_yrs <- function(datain, gaps, site_log){
+IsWholeYrs <- function(datain, gaps, site_log){
   
   start_times <- sapply(gaps$tseries_start, function(x) format(strptime(datain$time[x,1], 
                                                                         "%Y%m%d%H%M"), "%m%d"))
@@ -676,7 +676,7 @@ is_whole_yrs <- function(datain, gaps, site_log){
 
 #' Finds indices for flux variables to be outputted
 #' @export
-find_flux_ind <- function(datain, exclude_eval, k, site_log){
+FindFluxInd <- function(datain, exclude_eval, k, site_log){
   
   #initialise warnings
   warnings <- ""
@@ -713,7 +713,7 @@ find_flux_ind <- function(datain, exclude_eval, k, site_log){
 
 #' Finds evaluation variables to exlude
 #' @export
-find_exclude_eval <- function(datain, all_missing){
+FindExcludeEval <- function(datain, all_missing, gaps, include_all){
   
   #Extract names of evaluation variables
   cats <- datain$categories
@@ -721,6 +721,14 @@ find_exclude_eval <- function(datain, all_missing){
   
   #Find eval variables with all values missing
   exclude_eval <- lapply(all_missing, intersect, eval_vars)
+  
+  
+  if(!include_all){
+    exclude_eval <- mapply(function(x,y) unique(c(x, y)), x=exclude_eval, 
+                           y=gaps$eval_remove, SIMPLIFY=FALSE)
+
+  }
+  
   
   #Only exclude QC variables if corresponding data variable excluded as well. Keep otherwise
   #Find all QC variables

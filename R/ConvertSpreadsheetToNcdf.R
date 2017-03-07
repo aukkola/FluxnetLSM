@@ -159,7 +159,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     #(pers. comm. with D. Papale, Fluxnet)
     
     #Set these time steps to 3 (poor gap-filling)
-    DataFromText <- fill_qcvar_missing(datain=DataFromText, missingVal=Sprd_MissingVal,
+    DataFromText <- FillQCvarMissing(datain=DataFromText, missingVal=Sprd_MissingVal,
                                        gapfillVal=QC_gapfilled)
     
     
@@ -180,7 +180,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     
     
     ## Check that gap check found whole years ##
-    is_whole_yrs(datain=DataFromText, gaps, site_log)
+    IsWholeYrs(datain=DataFromText, gaps, site_log)
     
     
     ### Save info on which evaluation variables have all values missing ###
@@ -191,22 +191,13 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     
     exclude_eval <- rep(NA, length(all_missing))
 
-    if(any(sapply(all_missing, length) > 0)){
+    if(any(sapply(all_missing, length) > 0) | !include_all_eval){
      
       #Find variables to exclude
-      exclude_eval <- find_exclude_eval(datain=DataFromText, all_missing=all_missing)
+      exclude_eval <- FindExcludeEval(datain=DataFromText, all_missing=all_missing, 
+                                        gaps=gaps, include_all=include_all_eval)
       
     }
-    
-    
-    #Remove evaluation variables that have too many gaps if option chosen  
-    if(!include_all_eval){
-      
-      #Add variables with too many gaps/gap-filling to excluded eval variables
-      exclude_eval <- mapply(function(x,y) unique(c(x, y)), x=exclude_eval, 
-                             y=gaps$eval_remove, SIMPLIFY=FALSE)
-    }
-    
     
     
     ##############################################
@@ -301,7 +292,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     # to desired units as set in variables.csv
     ConvertedData <- ChangeUnits(DataFromText, site_log)
     
-    
+
     # Check that data are within acceptable ranges: 
     CheckDataRanges(ConvertedData, missingval=Nc_MissingVal, site_log)
     
@@ -335,7 +326,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
         
         #If not, skip this file
         #Find eval variable indices
-        flux_ind[[k]] <- find_flux_ind(datain=DataFromText,
+        flux_ind[[k]] <- FindFluxInd(datain=DataFromText,
                                        exclude_eval=exclude_eval[[k]], 
                                        k, site_log)
         
@@ -344,7 +335,8 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
         flux_ind[[k]] <- flux_ind[[k]]$out
         
         #If no eval vars for any time period, abort        
-        if(k==no_files & all(sapply(flux_ind, length)==0)){       
+        if(k==no_files & all(sapply(flux_ind, length)==0)){   
+          
           error <- paste("No evaluation variables to process for any output",
                          "time periods. Site not processed.")       
           stop_and_log(error, site_log)
