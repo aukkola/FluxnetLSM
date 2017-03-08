@@ -55,6 +55,11 @@ ERA_gapfill  <- TRUE
 ERA_files <- sapply(site_codes, function(x) get_fluxnet_erai_files(in_path, site_code=x, 
                                                                    datasetname = datasetname))
 
+#Stop if didn't find ERA files
+if(any(sapply(ERA_files, length)==0) & ERA_gapfill==TRUE){
+  stop("No ERA files found, amend input path")
+}
+
 
 #Thresholds for missing and gap-filled time steps
 #Note: Always checks for missing values. If no gapfilling 
@@ -85,23 +90,31 @@ cl <- makeCluster(getOption('cl.cores', 2))
 
 #Import variables to cluster
 clusterExport(cl, 'out_path')
-if(exists("gap_threshold"))  {clusterExport(cl, 'gap_threshold')}
-if(exists("min_yrs"))        {clusterExport(cl, 'min_yrs')}
-if(exists("plot"))           {clusterExport(cl, 'plot')}
-if(exists("ERA_gapfill"))    {clusterExport(cl, 'ERA_gapfill')}
-if(exists("datasetname"))    {clusterExport(cl, 'datasetname')}
-if(exists("datasetversion")) {clusterExport(cl, 'datasetversion')}
+if(exists("ERA_gapfill"))      {clusterExport(cl, 'ERA_gapfill')}
+if(exists("datasetname"))      {clusterExport(cl, 'datasetname')}
+if(exists("datasetversion"))   {clusterExport(cl, 'datasetversion')}
+if(exists("missing"))          {clusterExport(cl, 'missing')}
+if(exists("gapfill_all"))      {clusterExport(cl, 'gapfill_all')}
+if(exists("gapfill_good"))     {clusterExport(cl, 'gapfill_good')}
+if(exists("gapfill_med"))      {clusterExport(cl, 'gapfill_med')}
+if(exists("gapfill_poor"))     {clusterExport(cl, 'gapfill_poor')}
+if(exists("min_yrs"))          {clusterExport(cl, 'min_yrs')}
+if(exists("plot"))             {clusterExport(cl, 'plot')}
+if(exists("include_all_eval")) {clusterExport(cl, 'include_all_eval')}
+
+
 
 
 #Loops through sites
 clusterMap(cl=cl, function(w,x,y,z) { library(FluxnetLSM) 
-                                    try(convert_fluxnet_to_netcdf(infile=w, site_code=x, out_path=out_path,
+                                    tryCatch(convert_fluxnet_to_netcdf(infile=w, site_code=x, out_path=out_path,
                                         ERA_file=y, ERA_gapfill=ERA_gapfill, datasetname=datasetname, 
                                         datasetversion=z, missing = missing, 
                                         gapfill_all=gapfill_all, gapfill_good=gapfill_good, 
                                         gapfill_med=gapfill_med, gapfill_poor=gapfill_poor,
                                         include_all_eval=include_all_eval,
-                                        min_yrs=min_yrs, plot=plot)) },
+                                        min_yrs=min_yrs, plot=plot) , 
+                                        error=function(e) NULL) },
                                         w=infiles, x=site_codes, 
                                         y=ERA_files, z=datasetversions)
 

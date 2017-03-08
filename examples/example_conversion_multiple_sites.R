@@ -54,6 +54,10 @@ ERA_gapfill  <- TRUE
 ERA_files <- sapply(site_codes, function(x) get_fluxnet_erai_files(in_path, site_code=x, 
                                                                   datasetname = datasetname))
 
+#Stop if didn't find ERA files
+if(any(sapply(ERA_files, length)==0) & ERA_gapfill==TRUE){
+  stop("No ERA files found, amend input path")
+}
 
 #Thresholds for missing and gap-filled time steps
 #Note: Always checks for missing values. If no gapfilling 
