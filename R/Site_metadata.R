@@ -241,7 +241,7 @@ get_ornl_site_url_list <- function(site_code_list) {
         # looks for table cell with site code as contents, then looks up the parent
         # row, and finds the href of the first link.
         xpath <- paste0("//td[text()='", site_code, "']/..")
-        trow <- tryCatch(page_html %>% html_node(xpath = xpath), error=function(e) NULL))
+        trow <- tryCatch(page_html %>% html_node(xpath = xpath), error=function(e) NULL)
         if (class(trow) == "xml_node") {
             ornl_rel_url <- trow %>% html_node("a") %>% html_attr("href")
             ornl_url_list[[site_code]] <- paste0("https://fluxnet.ornl.gov/", ornl_rel_url)
