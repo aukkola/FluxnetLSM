@@ -27,7 +27,7 @@ findStartTime <- function(start){
 
 #' Checks that have whole number of days in dataset
 #' @export
-CheckTiming <- function(datain, site_log) 
+CheckCSVTiming <- function(datain, site_log) 
 {
   #This is equivalent to PALS CheckSpreadsheetTiming function
   #but reproduced here to allow different error handling

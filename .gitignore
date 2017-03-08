@@ -9,3 +9,6 @@
 # R specific
 *.RData
 .Rproj.user
+FluxnetProcessing.Rproj
+FluxnetLSM.Rproj
+.Rhistory

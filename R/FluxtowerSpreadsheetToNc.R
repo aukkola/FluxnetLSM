@@ -173,7 +173,7 @@ read_era <- function(ERA_file, datain){
 # TODO: This function exists in palsR/Gab and has a different signature. Merge?
 #' Creates a netcdf file for flux variables
 #' @export
-CreateFluxNcFile = function(fluxfilename, datain,                  #outfile file and data
+CreateFluxNetcdfFile = function(fluxfilename, datain,                  #outfile file and data
                             latitude, longitude,                   #lat, lon
                             site_code, long_sitename,              #Fluxnet site code and full site name
                             datasetversion, github_rev,            #Dataset version and github revision
@@ -381,7 +381,7 @@ CreateFluxNcFile = function(fluxfilename, datain,                  #outfile file
 # TODO: This function exists in palsR/Gab and has a different signature. Merge?
 #' Creates a netcdf file for met variables
 #' @export
-CreateMetNcFile = function(metfilename, datain,                   #outfile file and data
+CreateMetNetcdfFile = function(metfilename, datain,                   #outfile file and data
                            latitude, longitude,                   #lat, lon
                            site_code, long_sitename,              #Fluxnet site code and full site name
                            datasetversion, github_rev,            #Dataset version and github revision

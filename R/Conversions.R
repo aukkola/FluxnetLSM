@@ -71,12 +71,12 @@ ChangeUnits = function(datain, site_log){
           tair_units <- alma_units[which(datain$vars=="TA_F_MDS")]
         }          
 
-        datain$data[[k]] <- Rel2SpecHum(relHum=datain$data[[which(datain$vars=="RH")]], 
-                                        airtemp=datain$data[[which(datain$vars=="TA_F_MDS")]], 
-                                        tair_units=tair_units, 
-                                        pressure=datain$data[[which(datain$vars=="PA")]], 
-                                        psurf_units=psurf_units,
-                                        site_log)
+        datain$data[[k]] <- Rel2SpecHumidity(relHum=datain$data[[which(datain$vars=="RH")]], 
+                                             airtemp=datain$data[[which(datain$vars=="TA_F_MDS")]], 
+                                             tair_units=tair_units, 
+                                             pressure=datain$data[[which(datain$vars=="PA")]], 
+                                             psurf_units=psurf_units,
+                                             site_log)
         
         
       ## If cannot find conversion, abort  
@@ -142,8 +142,8 @@ VPD2RelHum <- function(VPD, airtemp, vpd_units, tair_units, site_log){
 #' Converts relative humidity to specific humidity.
 #' @return specific humidity in kg/kg
 #' @export
-Rel2SpecHum <- function(relHum, airtemp, tair_units, 
-                        pressure, psurf_units, site_log){
+Rel2SpecHumidity <- function(relHum, airtemp, tair_units, 
+                             pressure, psurf_units, site_log){
   
   # required units: airtemp - temp in C; pressure in Pa; relHum as %
   

@@ -19,8 +19,6 @@ TODO:
 
 - Add a check for gaps in met variables after gap-filling, just to be sure no gaps left in case there are missing values in ERAinterim....
 
-- Fix how eval variable excluded if too many gaps
-
 - Add a compressed tar.gz file to repo once package finished, so can be installed using that
 
 
@@ -29,8 +27,6 @@ TODO:
 Some info to create package...
 
 package depends on: rvest, R.utils, pals.R
-
-- Either move all functions from R/functions into R/, or merge back into palsR, and depend on that.
 
 - Document undocumented functions
 - Fill out documentation in /man/FluxnetProcessing-package.Rd ?
