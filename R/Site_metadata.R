@@ -153,6 +153,21 @@ save_metadata_to_csv <- function(metadata) {
 #' Write multiple site metadata to list at once
 #' @export
 save_metadata_list_to_csv <- function(metadata_lists) {
+    old_csv_data <- read.csv(site_csv_file, header = TRUE,
+                         stringsAsFactors = FALSE,
+                         row.names = 1)
+
+    new_csv_data <- metadata_list_to_dataframe(metadata_lists)
+
+    csv_data <- merge(old_csv_data, new_metadata, key="SiteCode")
+
+    write.csv(csv_data, site_csv_file)
+}
+
+
+#' Convert a list of metadata lists to a dataframe
+#' @export
+metadata_list_to_dataframe <- function(metadata_lists) {
 
     to_save <- list("SiteCode", "Fullname", "Description", "TowerStatus",
                     "Country", "SiteLatitude", "SiteLongitude", "SiteElevation",
@@ -160,20 +175,18 @@ save_metadata_list_to_csv <- function(metadata_lists) {
                     "TowerHeight", "CanopyHeight", "Tier"
                     )
 
-    csv_data <- read.csv(site_csv_file, header = TRUE,
-                         stringsAsFactors = FALSE,
-                         row.names = 1)
+    csv_data <- data.frame()
 
     for (metadata in metadata_lists) {
         site_code <- metadata$SiteCode
         for (v in to_save) {
-            if (v %in% names(metadata) & !is.na(metadata[[v]])) {
+            if (v %in% names(metadata) && !is.na(metadata[[v]])) {
                 csv_data[site_code, v] <- metadata[[v]]
             }
         }
     }
 
-    write.csv(csv_data, site_csv_file)
+    return(csv_data)
 }
 
 
