@@ -348,7 +348,13 @@ get_fluxdata_org_site_metadata <- function(metadata, site_url=NULL) {
     page_html <- read_html(site_url)
 
     # General info
-    table_data <- page_html %>% html_node("table.maininfo") %>% html_table()
+    table_data <- tryCatch(page_html %>% html_node("table.maininfo") %>% html_table(),
+                           error = function(e) NULL)
+    if (class(table_data) != 'data.frame') {
+        message("No data available at ", site_url, " (", class(table_data), ")")
+        return(metadata)
+    }
+
     new_metadata$Fullname <- table_data[table_data[1] == "Site Name:"][2]
     new_metadata$SiteLatitude <- as.numeric(table_data[table_data[1] == "Latitude:"][2])
     new_metadata$SiteLongitude <- as.numeric(table_data[table_data[1] == "Longitude:"][2])
