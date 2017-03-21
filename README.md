@@ -4,7 +4,7 @@ R package for post-processing FLUXNET datasets for use in land surface modelling
 
 URL: https://github.com/aukkola/FluxnetLSM
 
-Maintainer: [Anna Ukkola] (<https://www.climatescience.org.au/staff/profile/aukkola>)
+Maintainer: [Anna Ukkola](<https://www.climatescience.org.au/staff/profile/aukkola>)
 
 Contributors: Anna Ukkola, Ned Haughton and Martin De Kauwe
 
