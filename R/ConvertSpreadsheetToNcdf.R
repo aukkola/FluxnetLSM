@@ -268,7 +268,6 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     # Written as an attribute to file. Calculated before converting
     # data units, i.e. assumes rainfall units mm/timestep
         
-    browser()
     if(any(DataFromText$attributes[,1]=="P")){
       
       #Check that units in mm
