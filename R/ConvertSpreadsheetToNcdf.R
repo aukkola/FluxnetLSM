@@ -282,10 +282,10 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
       }
       
     } else {
-      av_precip=NA
+      #Set to NA, repeat to match no. of output files 
+      av_precip=rep(NA, length(unique(gaps$consec)))
     }
         
-    
     
     ###########################################
     ### Convert units and check data ranges ###

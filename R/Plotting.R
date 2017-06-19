@@ -92,23 +92,21 @@ plot_nc <- function(ncfile, analysis_type, vars, outfile){
   ## Number of variables to plot ##
   no_vars <- length(data_vars)
  
-  
   ### Loop through analysis types ###
   for(k in 1:length(analysis_type)){
     
-    
-    
+
     ##################
     ## Annual cycle ##
     ##################
     if(analysis_type[k]=="annual"){
       
       #Initialise file
-      pdf(paste(outfile, "AnnualCycle.pdf", sep=""), height=no_vars,
-          width=no_vars)
+      pdf(paste(outfile, "AnnualCycle.pdf", sep=""), height=no_vars*5,
+          width=no_vars*5)
       
       par(mai=c(0.6,0.7,0.7,0.2))
-      par(omi=c(0.2,0.2,0.2,0.1))
+      par(omi=c(0.4,0.2,0.2,0.1))
       par(mfrow=c(ceiling(sqrt(no_vars)), ceiling(sqrt(no_vars))))
       
       #Plot
@@ -135,8 +133,8 @@ plot_nc <- function(ncfile, analysis_type, vars, outfile){
       
       
       #Initialise file
-      pdf(paste(outfile, "DiurnalCycle.pdf", sep=""), height=no_vars,
-          width=no_vars)
+      pdf(paste(outfile, "DiurnalCycle.pdf", sep=""), height=no_vars*10,
+          width=no_vars*10)
       
       par(mai=c(0.6,0.7,0.7,0.2))
       par(omi=c(0.2,0.2,0.2,0.1))
@@ -184,7 +182,7 @@ plot_nc <- function(ncfile, analysis_type, vars, outfile){
     } else if(analysis_type[k]=="timeseries"){
 
       #Initialise file
-      pdf(paste(outfile, "Timeseries.pdf", sep=""), height=no_vars*2.2, width=no_vars*1.4)
+      pdf(paste(outfile, "Timeseries.pdf", sep=""), height=no_vars*2.2*5, width=no_vars*1.4*5)
       
       par(mai=c(0.6,0.6,0.4,0.2))
       par(omi=c(0.2,0.2,0.2,0.1))
