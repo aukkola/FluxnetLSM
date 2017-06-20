@@ -13,10 +13,11 @@
 #' @param era_file ERA input file (needed if using ERAinterim to gapfill met variables)
 #'        e.g. "FULLSET/FLX_AU-How_FLUXNET2015_ERAI_HH_1989-2014_1-3.csv"
 #' @param ERA_gapfill Gapfill met variables using ERAinterim?
-#' @param datasetname Name of the dataset, e.g. FLUXNET2015
+#' @param datasetname Name of the dataset, e.g. FLUXNET2015 or La Thuile. Defaults to FLUXNET2015,
+#'        and thus must be set if processing a dataset not compliant with FLUXNET2015 format.
 #' @param datasetversion Version of the dataset, e.g. "1-3"
 #' @param fair_use Fair Use policy that data should comply with, e.g. "Tier1" for FLUXNET2015 or 
-#'        "LaThuile" or "Fair_Use" for LaThuile Synthesis. Can be a single entry or vector of several policies. 
+#'        "LaThuile" or "Fair_Use" for LaThuile Synthesis. Can be a single entry or a vector of several policies. 
 #'        If this is set, code will only extract years that comply with the required policy/policies. Must provide
 #'        fair_use_vec to use this functionality. 
 #' @param fair_use_vec A vector of Data Use policy for each year in the data file, e.g. "LaThuile" or "Fair_Use".
@@ -135,9 +136,9 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     
     #Set QC flag variable name (differs for Fluxnet2015 and LaThuile)
     if(datasetname=="LaThuile"){
-      qc_name <- "fqc"
+      qc_name <- "qc"
     } else {
-      qc_name <- "QC"
+      qc_name <- "_QC"
     }
     
     
@@ -187,7 +188,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     
     #Set these time steps to 3 (poor gap-filling)
     DataFromText <- FillQCvarMissing(datain=DataFromText, missingVal=Sprd_MissingVal,
-                                       gapfillVal=QC_gapfilled)
+                                       gapfillVal=QC_gapfilled, qc_name=qc_name)
     
     
     # Check if variables have gaps in the time series and determine what years to output:

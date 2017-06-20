@@ -122,7 +122,7 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
         if(any(!is.na(threshold))){
           
           #Check if QC variable exists
-          qc_var <- which(datain$vars==paste(datain$vars[k], qc_name, sep="_")) 
+          qc_var <- which(datain$vars==paste(datain$vars[k], qc_name, sep="")) 
           
           #If found QC variable, calculate percentage of gap-filling
           if(length(qc_var) > 0){
@@ -200,7 +200,7 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
           yr_keep[k] <- FALSE 
         }
         
-        
+
         #Check if any evaluation variables have too many gaps
         eval_remove[[k]] <- vector() #initialise
         eval_remove[[k]] <- append(eval_remove[[k]], which(miss[eval_ind] > missing))
@@ -349,7 +349,7 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
       #Calculate % gap-filled
       #Find indices for QC variables (if exist)
       qc_ind <- sapply(datain$vars, function(x) 
-                          which(datain$vars==paste(x, "_", qc_name, sep="")))
+                          which(datain$vars==paste(x, qc_name, sep="")))
       
       total_gapfilled[[k]] <- vector()
       for(v in 1:length(qc_ind)){
@@ -464,7 +464,7 @@ GapfillMet <- function(datain, era_data, era_vars, tair_units, vpd_units,
             
             ## Set QC flags to "4" for time steps filled with ERA data ##
             #Find corresponding qc variable, if available
-            qc_col <- which(colnames(datain)==paste(avail_flux[k], "_", qc_name, sep=""))
+            qc_col <- which(colnames(datain)==paste(avail_flux[k], qc_name, sep=""))
             
             
             #Replace era gap-filled time steps with "4"
@@ -597,12 +597,13 @@ create_qc_var <- function(datain, qc_name){
 #' QC flag missing but data variable available
 #' @return datain
 #' @export
-FillQCvarMissing <- function(datain, missingVal, gapfillVal){
+FillQCvarMissing <- function(datain, missingVal, 
+                             gapfillVal, qc_name){
   
   #Find QC variables and corresponding data variables
-  qc_ind  <- which(grepl("_QC", datain$vars))  
+  qc_ind  <- which(grepl(qc_name, datain$vars))  
   qc_vars <- datain$vars[qc_ind]
-  data_vars <- unlist(strsplit(qc_vars, "_QC"))
+  data_vars <- unlist(strsplit(qc_vars, qc_name))
   
   
   #Check when flag missing but data available
