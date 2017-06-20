@@ -162,8 +162,8 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
         stop_and_log(error, site_log)
         
     }
-    
-    
+        
+
     # Read text file containing flux data:
     DataFromText <- ReadCSVFluxData(fileinname=infile, vars=vars, 
                                     datasetname=datasetname,

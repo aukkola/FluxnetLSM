@@ -309,8 +309,8 @@ convert_LaThuile <- function(infiles, fair_use=NA, fair_use_vec=NA,
         #Create time information
         time_vec <- create_dummy_year(year=tperiod[y], tstep=tstep_per_day, time_vars=time_vars)
         
-        #Set other variables to NA (set colnames to row-binding works)
-        dummy_mat <- matrix(data=NA, nrow=nrow(time_vec), ncol=ncol(data)-length(time_vars))
+        #Set other variables to missing value (set colnames to row-binding works)
+        dummy_mat <- matrix(data=Sprd_MissingVal, nrow=nrow(time_vec), ncol=ncol(data)-length(time_vars))
         colnames(dummy_mat) <- colnames(data)[(length(time_vars)+1):ncol(data)]
         
         #Append to data frame
