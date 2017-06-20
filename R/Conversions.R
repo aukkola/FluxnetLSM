@@ -31,6 +31,7 @@ ChangeUnits = function(datain, site_log){
   
   for(k in 1:length(flx_units)){
     
+    missing_ind <- which(datain$data[[k]] == Nc_MissingVal)
     
     #Check if units match, convert if not
     if(flx_units[k] != alma_units[k]){
@@ -65,6 +66,9 @@ ChangeUnits = function(datain, site_log){
         
         #Conversion following Monteith & Unsworth (1990), Principles of Environmental Physics
         datain$data[[k]] <- datain$data[[k]] * (1 / 2.3)
+        
+        #Set negative values to zero
+        datain$data[[k]][datain$data[[k]] < 0] <- 0
         
         
       ## Specific humidity (in kg/kg, calculate from tair, rel humidity and psurf)
@@ -106,6 +110,12 @@ ChangeUnits = function(datain, site_log){
       converted[k] <- TRUE
       
     }
+    
+    
+    #Set missing values back to missing
+    datain$data[[k]][missing_ind] <- Nc_MissingVal
+    
+    
   } #variables
   
   
