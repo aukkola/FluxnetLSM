@@ -58,6 +58,13 @@ ChangeUnits = function(datain, site_log){
       ## Air pressure (kPa to Pa) (Not in La Thuile dataset)
       } else if(datain$vars[k]=="PA" & flx_units[k]=="kPa" & alma_units[k]=="Pa"){  
         datain$data[[k]] <- datain$data[[k]] * 1000
+      
+        
+      ## Photosynthetically Active Radiation (PAR) to SWdown
+      } else if(datain$vars[k]=="PPFD_f" & flx_units[k]=="umol/m2/s" & alma_units[k]=="W/m2"){  
+        
+        #Conversion following Monteith & Unsworth (1990), Principles of Environmental Physics
+        datain$data[[k]] <- datain$data[[k]] * (1 / 2.3)
         
         
       ## Specific humidity (in kg/kg, calculate from tair, rel humidity and psurf)
