@@ -46,3 +46,117 @@ CheckCSVTiming <- function(datain, site_log)
   }
 }
 
+
+
+#-----------------------------------------------------------------------------
+
+
+#' Utility function to convert minutes to HHMM format
+#' @export
+convertToHoursMins <- function(time, format = '%02d%02d') 
+{
+  hours  <-  floor(time / 60)
+  minutes <-  (time %% 60)
+  return(sprintf(format, hours, minutes))
+}
+
+#-----------------------------------------------------------------------------
+
+
+#' Converts La Thuile time format to Fluxnet2015 time format
+#' @export
+convert_LaThuile_time <- function(timestep){
+  
+  library(pals)
+          
+  #Last time step of each year uses the next year, fix this
+  if( timestep["DoY"] > 364 & timestep["Time"] == 0){
+    timestep["Year"] <- timestep["Year"] - 1 
+  }
+  
+  #Last time step of each day needs fixing
+  #(change to 24:00 hrs on the day, instead of 00:00 hours next day)
+  if(timestep["Time"] == 0){
+    
+    timestep["DoY"] <-  timestep["DoY"] - 1
+    timestep["Time"] <-  timestep["Time"] + 24
+    
+  } 
+  
+  
+  #Extract time info
+  year <- timestep["Year"]
+  doy  <- doydate(doy=timestep["DoY"], leap=is.leap(timestep["Year"]))
+  
+  hod  <-  convertToHoursMins((timestep["Time"] * 60) - tstepsize)
+  
+  
+  #Create string in format YYYYMMDDHHMM
+  starttime <- paste(year, Create2Uchar(doy$month), Create2Uchar(doy$day), 
+                     hod, sep="")
+  
+  
+  #Add time step size to create end time.
+  #strptime changes time zone in some cases, resulting in wrong time stampe
+  #maybe trying to convert between summer and standard time, not sure? 
+  #Fixing this by setting time zone to GMT
+  endtime <- strptime(starttime, "%Y%m%d%H%M", tz="GMT") + tstepsize * 60
+  endtime <- format(endtime, "%Y%m%d%H%M")
+  
+  
+  #Some sanity checks
+  #Check that no NAs and endtime is greater than starttime
+  if((is.na(starttime) | is.na(endtime)) | 
+    (strptime(endtime,  "%Y%m%d%H%M", tz="GMT") <
+    strptime(starttime,  "%Y%m%d%H%M", tz="GMT"))){
+    
+    stop("Cannot convert La Thuile time stamps correctly")
+    
+  }
+  
+  return(cbind(starttime, endtime))
+  
+}
+
+
+#-----------------------------------------------------------------------------
+#' Function for filling missing years in La Thuile dataframe
+#' @export
+create_dummy_year <- function(year, tstep, time_vars){
+  
+  #Create a matrix for elements Year, DoY, Time and DTIME
+  
+  #Days (repeat tstep number of times)
+  yr_days <- 1 : sum(getMonthDays(is.leap(year))$length)
+
+  rep_days <- rep(yr_days, each=tstep)
+  
+  #Daily time steps (repeat yr_days number of times)
+  tsteps_day <- seq(24/tstep, by=24/tstep, length.out=tstep)
+  tsteps_day <- rep(tsteps_day, times=length(yr_days))
+  
+  
+  #If lengths don't match, stop
+  if(length(tsteps_day) != length(rep_days)){
+    stop("Error creating time steps in create_dummy_year")
+  }
+  
+  
+  #Repeat year
+  rep_year <- rep(year, times=length(yr_days))
+  
+  #Repeat DTIME (not used for anything so just use NA)
+  dtime <- rep(NA, times=length(yr_days))
+  
+  #Collate to a matrix 
+  time <- cbind(rep_year, rep_days, tsteps_day, dtime)
+    
+  #Set column names
+  colnames(time) <- time_vars
+
+  return(time)
+
+}
+
+
+
