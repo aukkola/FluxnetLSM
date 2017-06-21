@@ -37,12 +37,11 @@ ReadCSVFluxData <- function(fileinname, vars, datasetname, time_vars, site_log, 
   if(datasetname=="LaThuile"){
     
     FluxData <- convert_LaThuile(infiles=fileinname, 
-                                 fair_usage=fair_use,
-                                 fair_use_vec=fair_use_vec,
+                               #  fair_usage=fair_use,
+                                # fair_usage_vec=fair_use_vec,
                                  min_yrs=min_yrs,
                                  tcol=tcol,
-                                 site_log=site_log,
-                                 time_vars=time_vars)    
+                                 site_log=site_log, ...)    
     
     #Rename time vars and column names to match new structure
     time_vars <- c("TIMESTAMP_START", "TIMESTAMP_END")
@@ -206,8 +205,8 @@ read_era <- function(ERA_file, datain){
 
 #' Converts La Thuile files to FLUXNET2015 format
 #' @export
-convert_LaThuile <- function(infiles, fair_usage=NA, fair_use_vec=NA, 
-                             min_yrs, tcol, site_log, ...){
+convert_LaThuile <- function(infiles, fair_usage=NA, fair_usage_vec=NA, 
+                             min_yrs, tcol, site_log){
   
   library(R.utils) #seqToIntervals
   library(pals)
@@ -218,19 +217,27 @@ convert_LaThuile <- function(infiles, fair_usage=NA, fair_use_vec=NA,
   all_years <- sapply(infiles, function(x) strsplit(x, "[.]")[[1]][2])
   
   #Find Fair Use years if applicable
-  if(!is.na(fair_use)){
+  if(!is.na(fair_usage)){
     
     #Find indices for years that comply with fair use policy
-    fair_ind <- unlist(sapply(fair_use, function(x) which(fair_use_vec==x)))
+    fair_ind <- unlist(sapply(fair_usage, function(x) which(fair_usage_vec==x)))
     
     #Extract years
-    fair_use_years <- names(fair_use_vec)[fair_ind]
+    fair_use_years <- names(fair_usage_vec)[fair_ind]
+    
+    #Find years that are fair use and have files for
+    years <- as.numeric(intersect(all_years,fair_use_years))
+    
+  } else {
+    
+    warning("Not using Fair Use policy to extract years")
+    
+    #Find years that are fair use and have files for
+    years <- as.numeric(all_years)
     
   }
   
-  #Find years that are fair use and have files for
-  years <- as.numeric(intersect(all_years,fair_use_years))
-   
+
   #Check what years are consecutive
   consec <- seqToIntervals(years)
   
@@ -308,11 +315,11 @@ convert_LaThuile <- function(infiles, fair_usage=NA, fair_use_vec=NA,
       } else {
         
         #Create time information
-        time_vec <- create_dummy_year(year=tperiod[y], tstep=tstep_per_day, time_vars=time_vars)
+        time_vec <- create_dummy_year(year=tperiod[y], tstep=tstep_per_day, time=tcol$time_names)
         
         #Set other variables to missing value (set colnames to row-binding works)
-        dummy_mat <- matrix(data=Sprd_MissingVal, nrow=nrow(time_vec), ncol=ncol(data)-length(time_vars))
-        colnames(dummy_mat) <- colnames(data)[(length(time_vars)+1):ncol(data)]
+        dummy_mat <- matrix(data=SprdMissingVal, nrow=nrow(time_vec), ncol=ncol(data)-length(tcol$time_names))
+        colnames(dummy_mat) <- colnames(data)[(length(tcol$time_names)+1):ncol(data)]
         
         #Append to data frame
         data <- rbind(data, cbind(time_vec, dummy_mat))  
@@ -326,9 +333,14 @@ convert_LaThuile <- function(infiles, fair_usage=NA, fair_use_vec=NA,
 
   #### Convert time stamps to Fluxnet2015 format ####
   
-  time_cols <- sapply(time_vars, function(x) which(colnames(data)==x))
+  #Define timestep size. Maybe already done, in which case can pass it to function?
+  tstepsize <- (data$Time[2] * 60) - (data$Time[1] * 60)
+
+  #Find which columns have time info
+  time_cols <- sapply(tcol$time_names, function(x) which(colnames(data)==x))
     
-  new_time <- t(apply(data[,time_cols], MARGIN=1, function(x) convert_LaThuile_time(x)))
+  #Convert time
+  new_time <- t(apply(data[,time_cols], MARGIN=1, function(x) convert_LaThuile_time(x, tstepsize=tstepsize)))
   
   
   #Check that time and data matrices have same dimensions

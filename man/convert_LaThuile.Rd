@@ -4,8 +4,8 @@
 \alias{convert_LaThuile}
 \title{Converts La Thuile files to FLUXNET2015 format}
 \usage{
-convert_LaThuile(infiles, fair_use = NA, fair_use_vec = NA, min_yrs, tcol,
-  site_log, ...)
+convert_LaThuile(infiles, fair_usage = NA, fair_usage_vec = NA, min_yrs,
+  tcol, time, site_log)
 }
 \description{
 Converts La Thuile files to FLUXNET2015 format

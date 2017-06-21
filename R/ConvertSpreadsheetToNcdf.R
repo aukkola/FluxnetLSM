@@ -170,9 +170,8 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     # Read text file containing flux data:
     DataFromText <- ReadCSVFluxData(fileinname=infile, vars=vars, 
                                     datasetname=datasetname,
-                                    time_vars=time_vars, site_log, 
-                                    min_yrs=min_yrs,
-                                    fair_usage=fair_use)
+                                    time_vars=time_vars, site_log,
+                                    fair_usage=fair_use, fair_usage_vec=fair_use_vec)
     
     
     # Make sure whole number of days in dataset:
