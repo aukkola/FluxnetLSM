@@ -36,14 +36,12 @@ ReadCSVFluxData <- function(fileinname, vars, datasetname, time_vars, site_log, 
   # If using La Thuile dataset, convert to Fluxnet2015 format
   if(datasetname=="LaThuile"){
     
-    
     FluxData <- convert_LaThuile(infiles=fileinname, 
                                  fair_usage=fair_use,
                                  fair_usage_vec=fair_use_vec,
                                  min_yrs=min_yrs,
                                  tcol=tcol,
-                                 time=time_vars,
-                                 site_log=site_log)    
+                                 site_log=site_log, ...)    
     
     #Rename time vars and column names to match new structure
     time_vars <- c("TIMESTAMP_START", "TIMESTAMP_END")
@@ -208,7 +206,7 @@ read_era <- function(ERA_file, datain){
 #' Converts La Thuile files to FLUXNET2015 format
 #' @export
 convert_LaThuile <- function(infiles, fair_usage=NA, fair_usage_vec=NA, 
-                             min_yrs, tcol, time, site_log){
+                             min_yrs, tcol, site_log){
   
   library(R.utils) #seqToIntervals
   library(pals)
@@ -317,11 +315,11 @@ convert_LaThuile <- function(infiles, fair_usage=NA, fair_usage_vec=NA,
       } else {
         
         #Create time information
-        time_vec <- create_dummy_year(year=tperiod[y], tstep=tstep_per_day, time=time)
+        time_vec <- create_dummy_year(year=tperiod[y], tstep=tstep_per_day, time=tcol$time_names)
         
         #Set other variables to missing value (set colnames to row-binding works)
-        dummy_mat <- matrix(data=Sprd_MissingVal, nrow=nrow(time_vec), ncol=ncol(data)-length(time_vars))
-        colnames(dummy_mat) <- colnames(data)[(length(time_vars)+1):ncol(data)]
+        dummy_mat <- matrix(data=SprdMissingVal, nrow=nrow(time_vec), ncol=ncol(data)-length(tcol$time_names))
+        colnames(dummy_mat) <- colnames(data)[(length(tcol$time_names)+1):ncol(data)]
         
         #Append to data frame
         data <- rbind(data, cbind(time_vec, dummy_mat))  
@@ -335,9 +333,14 @@ convert_LaThuile <- function(infiles, fair_usage=NA, fair_usage_vec=NA,
 
   #### Convert time stamps to Fluxnet2015 format ####
   
-  time_cols <- sapply(time, function(x) which(colnames(data)==x))
+  #Define timestep size. Maybe already done, in which case can pass it to function?
+  tstepsize <- (data$Time[2] * 60) - (data$Time[1] * 60)
+
+  #Find which columns have time info
+  time_cols <- sapply(tcol$time_names, function(x) which(colnames(data)==x))
     
-  new_time <- t(apply(data[,time_cols], MARGIN=1, function(x) convert_LaThuile_time(x)))
+  #Convert time
+  new_time <- t(apply(data[,time_cols], MARGIN=1, function(x) convert_LaThuile_time(x, tstepsize=tstepsize)))
   
   
   #Check that time and data matrices have same dimensions

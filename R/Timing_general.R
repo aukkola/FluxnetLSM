@@ -65,7 +65,7 @@ convertToHoursMins <- function(time, format = '%02d%02d')
 
 #' Converts La Thuile time format to Fluxnet2015 time format
 #' @export
-convert_LaThuile_time <- function(timestep){
+convert_LaThuile_time <- function(timestep, tstepsize){
   
   library(pals)
           
@@ -94,7 +94,6 @@ convert_LaThuile_time <- function(timestep){
   #Create string in format YYYYMMDDHHMM
   starttime <- paste(year, Create2Uchar(doy$month), Create2Uchar(doy$day), 
                      hod, sep="")
-  
   
   #Add time step size to create end time.
   #strptime changes time zone in some cases, resulting in wrong time stampe

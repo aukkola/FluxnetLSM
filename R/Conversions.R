@@ -113,7 +113,7 @@ ChangeUnits = function(datain, site_log){
     
     
     #Set missing values back to missing
-    datain$data[[k]][missing_ind] <- Nc_MissingVal
+    datain$data[[k]][missing_ind] <- NcMissingVal
     
     
   } #variables
