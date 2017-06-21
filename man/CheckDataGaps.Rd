@@ -6,7 +6,7 @@
 \usage{
 CheckDataGaps(datain, missing_val, QCmeasured, QCgapfilled, missing,
   gapfill_all, gapfill_good, gapfill_med, gapfill_poor, min_yrs, essential_met,
-  preferred_eval, all_eval, site_log)
+  preferred_eval, all_eval, qc_name, site_log)
 }
 \arguments{
 \item{datain}{Input data list}

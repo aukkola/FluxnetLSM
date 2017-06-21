@@ -13,8 +13,14 @@
 #' @param era_file ERA input file (needed if using ERAinterim to gapfill met variables)
 #'        e.g. "FULLSET/FLX_AU-How_FLUXNET2015_ERAI_HH_1989-2014_1-3.csv"
 #' @param ERA_gapfill Gapfill met variables using ERAinterim?
-#' @param datasetname Name of the dataset, e.g. FLUXNET2015
+#' @param datasetname Name of the dataset, e.g. FLUXNET2015 or La Thuile. Defaults to FLUXNET2015,
+#'        and thus must be set if processing a dataset not compliant with FLUXNET2015 format.
 #' @param datasetversion Version of the dataset, e.g. "1-3"
+#' @param fair_use Fair Use policy that data should comply with, e.g. "Tier1" for FLUXNET2015 or 
+#'        "LaThuile" or "Fair_Use" for LaThuile Synthesis. Can be a single entry or a vector of several policies. 
+#'        If this is set, code will only extract years that comply with the required policy/policies. Must provide
+#'        fair_use_vec to use this functionality. 
+#' @param fair_use_vec A vector of Data Use policy for each year in the data file, e.g. "LaThuile" or "Fair_Use".
 #' @param missing Maximum percentage of time steps allowed to be missing in any given year
 #' @param gapfill_all Maximum percentage of time steps allowed to be gap-filled 
 #'        (any quality) in any given year. Note if gapfill_all is set, any thresholds
@@ -41,6 +47,7 @@
 convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                                       ERA_file=NA, ERA_gapfill=FALSE,
                                       datasetname="FLUXNET2015", datasetversion="1-3",
+                                      fair_use=NA, fair_use_vec=NA,
                                       missing = 15, gapfill_all=20,
                                       gapfill_good=NA, gapfill_med=NA,
                                       gapfill_poor=NA, min_yrs=2,
@@ -98,10 +105,17 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     
     #File contains desired variables (refer to Fluxnet2015 documentation for full variable descriptions;
     #http://fluxnet.fluxdata.org/data/fluxnet2015-dataset/fullset-data-product/)
+    #Separate file available for La Thuile synthesis as variable names differ 
+    #(see http://fluxnet.fluxdata.org/data/la-thuile-dataset/)
     
     #Find variable file path (not using data() command directly because reads a CSV with a
     #semicolon separator and this leads to incorrect table headers)
-    var_file <- system.file("data","Output_variables.csv", package="FluxnetLSM")
+    
+    if(datasetname=="LaThuile"){
+      var_file <- system.file("data","Output_variables_LaThuile.csv", package="FluxnetLSM")
+    } else {
+      var_file <- system.file("data","Output_variables_Default_FLUXNET2015.csv", package="FluxnetLSM")
+    }
     
     vars <- read.csv(var_file, header=TRUE,
     colClasses=c("character", "character", "character",
@@ -113,7 +127,19 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     
     
     #Name of time stamp variables
-    time_vars <- c("TIMESTAMP_START", "TIMESTAMP_END")
+    if(datasetname=="LaThuile"){
+      time_vars <- c("Year", "DoY", "Time", "DTIME")
+    } else {
+      time_vars <- c("TIMESTAMP_START", "TIMESTAMP_END")
+    }
+    
+    
+    #Set QC flag variable name (differs for Fluxnet2015 and LaThuile)
+    if(datasetname=="LaThuile"){
+      qc_name <- "qc"
+    } else {
+      qc_name <- "_QC"
+    }
     
     
     #Read site information (lon, lat, elevation)
@@ -136,11 +162,13 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
         stop_and_log(error, site_log)
         
     }
-    
-    
+        
+
     # Read text file containing flux data:
-    DataFromText <- ReadCSVFluxData(fileinname=infile, vars=vars,
-                                     time_vars=time_vars, site_log)
+    DataFromText <- ReadCSVFluxData(fileinname=infile, vars=vars, 
+                                    datasetname=datasetname,
+                                    time_vars=time_vars, site_log, 
+                                    min_yrs=min_yrs)
     
     
     # Make sure whole number of days in dataset:
@@ -160,7 +188,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     
     #Set these time steps to 3 (poor gap-filling)
     DataFromText <- FillQCvarMissing(datain=DataFromText, missingVal=Sprd_MissingVal,
-                                       gapfillVal=QC_gapfilled)
+                                       gapfillVal=QC_gapfilled, qc_name=qc_name)
     
     
     # Check if variables have gaps in the time series and determine what years to output:
@@ -172,7 +200,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                            essential_met = vars[which(DataFromText$essential_met)], 
                            preferred_eval = vars[which(DataFromText$preferred_eval)],
                            all_eval = vars[which(DataFromText$categories=="Eval")],
-                           site_log)
+                           qc_name=qc_name, site_log)
  
     #Log possible warnings and remove warnings from output var
     site_log <- log_warning(warn=gaps$warn, site_log)
@@ -227,7 +255,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                                 tair_units=tair_units, vpd_units=vpd_units,
                                 missing_val=Sprd_MissingVal,
                                 out_vars=DataFromText$out_vars[ind],
-                                site_log)
+                                qc_name=qc_name, site_log)
         
         
         #Check that column names of temp_data and data to be replaced match. Stop if not

@@ -5,7 +5,7 @@
 \title{Gapfills met data}
 \usage{
 GapfillMet(datain, era_data, era_vars, tair_units, vpd_units, missing_val,
-  out_vars, site_log)
+  out_vars, qc_name, site_log)
 }
 \value{
 out

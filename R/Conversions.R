@@ -31,48 +31,64 @@ ChangeUnits = function(datain, site_log){
   
   for(k in 1:length(flx_units)){
     
+    missing_ind <- which(datain$data[[k]] == Nc_MissingVal)
     
     #Check if units match, convert if not
     if(flx_units[k] != alma_units[k]){
       
+      #Recognises original FLUXNET2015 and LaThuile variable names
       
       ## Air temperature (C to K)
-      if(datain$vars[k]=="TA_F_MDS" & flx_units[k]=="C" & alma_units[k]=="K"){
+      if((datain$vars[k]=="TA_F_MDS" | datain$vars[k]=="Ta_f") &
+          flx_units[k]=="C" & alma_units[k]=="K"){
         datain$data[[k]] <- datain$data[[k]] + 273.15
         
         
       ## CO2: different but equivalent units, do nothing
-      } else if(datain$vars[k]=="CO2_F_MDS" & flx_units[k]=="umolCO2/mol" & alma_units[k]=="ppm"){
+      } else if((datain$vars[k]=="CO2_F_MDS" | datain$vars[k]=="CO2") &
+                 flx_units[k]=="umolCO2/mol" & alma_units[k]=="ppm"){
         next
         
         
       ## Rainfall (mm/timestep to mm/s)
-      } else if(datain$vars[k]=="P" & flx_units[k]=="mm" & alma_units[k]=="kg/m2/s"){
+      } else if((datain$vars[k]=="P" | datain$vars[k]=="Precip_f") & 
+                 flx_units[k]=="mm" & alma_units[k]=="kg/m2/s"){
         datain$data[[k]] <- datain$data[[k]] / tstep
         
         
-      ## Air pressure (kPa to Pa)
+      ## Air pressure (kPa to Pa) (Not in La Thuile dataset)
       } else if(datain$vars[k]=="PA" & flx_units[k]=="kPa" & alma_units[k]=="Pa"){  
         datain$data[[k]] <- datain$data[[k]] * 1000
+      
+        
+      ## Photosynthetically Active Radiation (PAR) to SWdown
+      } else if(datain$vars[k]=="PPFD_f" & flx_units[k]=="umol/m2/s" & alma_units[k]=="W/m2"){  
+        
+        #Conversion following Monteith & Unsworth (1990), Principles of Environmental Physics
+        datain$data[[k]] <- datain$data[[k]] * (1 / 2.3)
+        
+        #Negative PAR values present, set these to PAR = 5 umol m-2 s-1, converted to SWdown
+        datain$data[[k]][datain$data[[k]] < 0] <- 5 * (1 / 2.3)
         
         
       ## Specific humidity (in kg/kg, calculate from tair, rel humidity and psurf)
-      } else if(datain$vars[k]=="RH" & flx_units[k]=="%" & alma_units[k]=="kg/kg"){  
+      } else if((datain$vars[k]=="RH" | datain$vars[k]=="Rh") & 
+                 flx_units[k]=="%" & alma_units[k]=="kg/kg"){  
         
         #Find Tair and PSurf units
         psurf_units <- flx_units[which(datain$vars=="PA")]
-        tair_units  <- flx_units[which(datain$vars=="TA_F_MDS")]
+        tair_units  <- flx_units[which(datain$vars=="TA_F_MDS" | datain$vars=="Ta_f")]
         
         #If already converted, reset units to new converted units
         if(converted[which(datain$vars=="PA")]) {
           psurf_units <- alma_units[which(datain$vars=="PA")]         
         } 
-        if (converted[which(datain$vars=="TA_F_MDS")]){
-          tair_units <- alma_units[which(datain$vars=="TA_F_MDS")]
+        if (converted[which(datain$vars=="TA_F_MDS" | datain$vars=="Ta_f")]){
+          tair_units <- alma_units[which(datain$vars=="TA_F_MDS" | datain$vars=="Ta_f")]
         }          
 
-        datain$data[[k]] <- Rel2SpecHumidity(relHum=datain$data[[which(datain$vars=="RH")]], 
-                                             airtemp=datain$data[[which(datain$vars=="TA_F_MDS")]], 
+        datain$data[[k]] <- Rel2SpecHumidity(relHum=datain$data[[which(datain$vars=="RH" | datain$vars=="Rh")]], 
+                                             airtemp=datain$data[[which(datain$vars=="TA_F_MDS" | datain$vars=="Ta_f")]], 
                                              tair_units=tair_units, 
                                              pressure=datain$data[[which(datain$vars=="PA")]], 
                                              psurf_units=psurf_units,
@@ -94,6 +110,12 @@ ChangeUnits = function(datain, site_log){
       converted[k] <- TRUE
       
     }
+    
+    
+    #Set missing values back to missing
+    datain$data[[k]][missing_ind] <- Nc_MissingVal
+    
+    
   } #variables
   
   

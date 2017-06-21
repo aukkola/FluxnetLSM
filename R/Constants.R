@@ -15,7 +15,7 @@
 # Variable names in spreadsheet to be processed:
 findColIndices = function(fileinname, var_names, var_classes, 
                           essential_vars, preferred_vars,
-                          time_vars, site_log) {
+                          time_vars, site_log, ...) {
   
   #CSV files in Fluxnet2015 Nov '16 release do not follow a set template
   #and not all files include all variables
@@ -64,7 +64,7 @@ findColIndices = function(fileinname, var_names, var_classes,
   
   #Find time information
   #Returns time variables and column classes
-  time_info <- findTimeInfo(time_vars, headers, site_log)
+  time_info <- findTimeInfo(time_vars, headers, site_log, datasetname)
   
   #Check that column indices for time and other variables don't overlap
   if(length(intersect(time_info$ind, ind)) > 0){
@@ -102,11 +102,11 @@ findColIndices = function(fileinname, var_names, var_classes,
 #' Extract time stamp information
 #' @return time stamp variables
 #' @export
-findTimeInfo <- function(time_vars, headers, site_log){
+findTimeInfo <- function(time_vars, headers, site_log, datasetname=NA){
     
   ind <- sapply(time_vars, function(x) which(headers==x))
   
-  if(length(ind)!=2) {
+  if(length(ind)!=length(time_vars)) {
     error <- paste("Cannot find time stamp variables in input file.",
                     "Looking for variables", paste(time_vars, collapse=" and "))
     stop_and_log(error, site_log)
@@ -117,7 +117,12 @@ findTimeInfo <- function(time_vars, headers, site_log){
   columnclasses <- rep(list(NULL), length(headers))
   
   #Replace with correct variable class if found variables
-  columnclasses[unlist(ind)] <- "character"
+  
+  if(datasetname=="LaThuile"){
+    columnclasses[unlist(ind)] <- "numeric"
+  } else {
+    columnclasses[unlist(ind)] <- "character"
+  }
   
   #Reorder var_names and var_classes so matches the order in CSV file
   time_vars <- time_vars[order(unlist(ind), time_vars)]

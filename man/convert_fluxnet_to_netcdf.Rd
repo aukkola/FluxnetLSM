@@ -6,9 +6,10 @@
 \usage{
 convert_fluxnet_to_netcdf(infile, site_code, out_path, ERA_file = NA,
   ERA_gapfill = FALSE, datasetname = "FLUXNET2015",
-  datasetversion = "1-3", missing = 15, gapfill_all = 20,
-  gapfill_good = NA, gapfill_med = NA, gapfill_poor = NA, min_yrs = 2,
-  include_all_eval = TRUE, plot = c("annual", "diurnal", "timeseries"))
+  datasetversion = "1-3", fair_use = NA, fair_use_vec = NA,
+  missing = 15, gapfill_all = 20, gapfill_good = NA, gapfill_med = NA,
+  gapfill_poor = NA, min_yrs = 2, include_all_eval = TRUE,
+  plot = c("annual", "diurnal", "timeseries"))
 }
 \arguments{
 \item{infile}{input filename,
@@ -20,9 +21,17 @@ e.g. "FULLSET/FLX_AU-How_FLUXNET2015_FULLSET_HH_2001-2014_1-3.csv"}
 
 \item{ERA_gapfill}{Gapfill met variables using ERAinterim?}
 
-\item{datasetname}{Name of the dataset, e.g. FLUXNET2015}
+\item{datasetname}{Name of the dataset, e.g. FLUXNET2015 or La Thuile. Defaults to FLUXNET2015,
+and thus must be set if processing a dataset not compliant with FLUXNET2015 format.}
 
 \item{datasetversion}{Version of the dataset, e.g. "1-3"}
+
+\item{fair_use}{Fair Use policy that data should comply with, e.g. "Tier1" for FLUXNET2015 or
+"LaThuile" or "Fair_Use" for LaThuile Synthesis. Can be a single entry or a vector of several policies.
+If this is set, code will only extract years that comply with the required policy/policies. Must provide
+fair_use_vec to use this functionality.}
+
+\item{fair_use_vec}{A vector of Data Use policy for each year in the data file, e.g. "LaThuile" or "Fair_Use".}
 
 \item{missing}{Maximum percentage of time steps allowed to be missing in any given year}
 
