@@ -13,7 +13,9 @@ convert_fluxnet_to_netcdf(infile, site_code, out_path, ERA_file = NA,
 }
 \arguments{
 \item{infile}{input filename,
-e.g. "FULLSET/FLX_AU-How_FLUXNET2015_FULLSET_HH_2001-2014_1-3.csv"}
+e.g. "FULLSET/FLX_AU-How_FLUXNET2015_FULLSET_HH_2001-2014_1-3.csv".
+La Thuile data is expected to be in the format sitecode.year.xxxx.csv,
+e.g. "AU-How.2001.synth.hourly.allvars.csv".}
 
 \item{site_code}{Fluxnet site code e.g. "AU-How"}
 
@@ -26,12 +28,13 @@ and thus must be set if processing a dataset not compliant with FLUXNET2015 form
 
 \item{datasetversion}{Version of the dataset, e.g. "1-3"}
 
-\item{fair_use}{Fair Use policy that data should comply with, e.g. "Tier1" for FLUXNET2015 or
-"LaThuile" or "Fair_Use" for LaThuile Synthesis. Can be a single entry or a vector of several policies.
-If this is set, code will only extract years that comply with the required policy/policies. Must provide
-fair_use_vec to use this functionality.}
+\item{fair_use}{La Thuile Fair Use policy that data should comply with, e.g. "LaThuile" or "Fair_Use".
+Can be a single entry or a vector of several policies. If this is set, code will only extract
+years that comply with the required policy/policies. Must provide fair_use_vec to use this
+functionality.}
 
-\item{fair_use_vec}{A vector of Data Use policy for each year in the data file, e.g. "LaThuile" or "Fair_Use".}
+\item{fair_use_vec}{A vector of Data Use policy for each year in the data file, e.g. "LaThuile" or "Fair_Use".
+Should have years as vector column names.}
 
 \item{missing}{Maximum percentage of time steps allowed to be missing in any given year}
 
