@@ -38,12 +38,12 @@ ReadCSVFluxData <- function(fileinname, vars, datasetname, time_vars, site_log, 
     
     
     FluxData <- convert_LaThuile(infiles=fileinname, 
-                                 fair_use=fair_use,
-                                 fair_use_vec=fair_use_vec,
+                                 fair_usage=fair_usage,
+                                 fair_usage_vec=fair_usage_vec,
                                  min_yrs=min_yrs,
                                  tcol=tcol,
-                                 site_log=site_log,
-                                 time_vars=time_vars)    
+                                 time=time_vars,
+                                 site_log=site_log)    
     
     #Rename time vars and column names to match new structure
     time_vars <- c("TIMESTAMP_START", "TIMESTAMP_END")
@@ -207,8 +207,8 @@ read_era <- function(ERA_file, datain){
 
 #' Converts La Thuile files to FLUXNET2015 format
 #' @export
-convert_LaThuile <- function(infiles, fair_use=NA, fair_use_vec=NA, 
-                             min_yrs, tcol, site_log, ...){
+convert_LaThuile <- function(infiles, fair_usage=NA, fair_usage_vec=NA, 
+                             min_yrs, tcol, time, site_log){
   
   library(R.utils) #seqToIntervals
   library(pals)
@@ -219,16 +219,16 @@ convert_LaThuile <- function(infiles, fair_use=NA, fair_use_vec=NA,
   all_years <- sapply(infiles, function(x) strsplit(x, "[.]")[[1]][2])
   
   #Find Fair Use years if applicable
-  if(!is.na(fair_use)){
+  if(!is.na(fair_usage)){
     
     #Find indices for years that comply with fair use policy
-    fair_ind <- unlist(sapply(fair_use, function(x) which(fair_use_vec==x)))
+    fair_ind <- unlist(sapply(fair_usage, function(x) which(fair_usage_vec==x)))
     
     #Extract years
-    fair_use_years <- names(fair_use_vec)[fair_ind]
+    fair_use_years <- names(fair_usage_vec)[fair_ind]
     
     #Find years that are fair use and have files for
-    years <- as.numeric(intersect(all_years,fair_use_years))
+    years <- as.numeric(intersect(all_years,fair_usage_years))
     
   } else {
     
@@ -319,7 +319,7 @@ convert_LaThuile <- function(infiles, fair_use=NA, fair_use_vec=NA,
       } else {
         
         #Create time information
-        time_vec <- create_dummy_year(year=tperiod[y], tstep=tstep_per_day, time_vars=time_vars)
+        time_vec <- create_dummy_year(year=tperiod[y], tstep=tstep_per_day, time=time)
         
         #Set other variables to missing value (set colnames to row-binding works)
         dummy_mat <- matrix(data=Sprd_MissingVal, nrow=nrow(time_vec), ncol=ncol(data)-length(time_vars))
@@ -337,7 +337,7 @@ convert_LaThuile <- function(infiles, fair_use=NA, fair_use_vec=NA,
 
   #### Convert time stamps to Fluxnet2015 format ####
   
-  time_cols <- sapply(time_vars, function(x) which(colnames(data)==x))
+  time_cols <- sapply(time, function(x) which(colnames(data)==x))
     
   new_time <- t(apply(data[,time_cols], MARGIN=1, function(x) convert_LaThuile_time(x)))
   
