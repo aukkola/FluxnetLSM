@@ -38,8 +38,8 @@ ReadCSVFluxData <- function(fileinname, vars, datasetname, time_vars, site_log, 
     
     
     FluxData <- convert_LaThuile(infiles=fileinname, 
-                                 fair_usage=fair_usage,
-                                 fair_usage_vec=fair_usage_vec,
+                                 fair_usage=fair_use,
+                                 fair_usage_vec=fair_use_vec,
                                  min_yrs=min_yrs,
                                  tcol=tcol,
                                  time=time_vars,
@@ -228,20 +228,18 @@ convert_LaThuile <- function(infiles, fair_usage=NA, fair_usage_vec=NA,
     fair_use_years <- names(fair_usage_vec)[fair_ind]
     
     #Find years that are fair use and have files for
-    years <- as.numeric(intersect(all_years,fair_usage_years))
+    years <- as.numeric(intersect(all_years,fair_use_years))
     
   } else {
     
     warning("Not using Fair Use policy to extract years")
     
     #Find years that are fair use and have files for
-    years <- as.numeric(all_years,fair_use_years)
+    years <- as.numeric(all_years)
     
   }
   
-  #Find years that are fair use and have files for
-  years <- as.numeric(intersect(all_years,fair_use_years))
-   
+
   #Check what years are consecutive
   consec <- seqToIntervals(years)
   
