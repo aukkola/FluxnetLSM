@@ -172,7 +172,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                                     datasetname=datasetname,
                                     time_vars=time_vars, site_log, 
                                     min_yrs=min_yrs,
-                                    fair_use=fair_use,
+                                    fair_usage=fair_use,
                                     fair_use_vec=fair_use_vec)
     
     
