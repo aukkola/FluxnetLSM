@@ -31,7 +31,7 @@ ChangeUnits = function(datain, site_log){
   
   for(k in 1:length(flx_units)){
     
-    missing_ind <- which(datain$data[[k]] == Nc_MissingVal)
+    missing_ind <- which(datain$data[[k]] == NcMissingVal)
     
     #Check if units match, convert if not
     if(flx_units[k] != alma_units[k]){
