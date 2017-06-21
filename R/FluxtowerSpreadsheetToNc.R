@@ -36,7 +36,8 @@ ReadCSVFluxData <- function(fileinname, vars, datasetname, time_vars, site_log, 
   # If using La Thuile dataset, convert to Fluxnet2015 format
   if(datasetname=="LaThuile"){
     
-    FluxData <- convert_LaThuile(infiles=fileinname, fair_use=fair_use,
+    FluxData <- convert_LaThuile(infiles=fileinname, 
+                                 fair_usage=fair_use,
                                  fair_use_vec=fair_use_vec,
                                  min_yrs=min_yrs,
                                  tcol=tcol,
@@ -205,7 +206,7 @@ read_era <- function(ERA_file, datain){
 
 #' Converts La Thuile files to FLUXNET2015 format
 #' @export
-convert_LaThuile <- function(infiles, fair_use=NA, fair_use_vec=NA, 
+convert_LaThuile <- function(infiles, fair_usage=NA, fair_use_vec=NA, 
                              min_yrs, tcol, site_log, ...){
   
   library(R.utils) #seqToIntervals
