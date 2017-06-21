@@ -37,8 +37,8 @@ ReadCSVFluxData <- function(fileinname, vars, datasetname, time_vars, site_log, 
   if(datasetname=="LaThuile"){
     
     FluxData <- convert_LaThuile(infiles=fileinname, 
-                                 fair_usage=fair_use,
-                                 fair_usage_vec=fair_use_vec,
+                               #  fair_usage=fair_use,
+                                # fair_usage_vec=fair_use_vec,
                                  min_yrs=min_yrs,
                                  tcol=tcol,
                                  site_log=site_log, ...)    
