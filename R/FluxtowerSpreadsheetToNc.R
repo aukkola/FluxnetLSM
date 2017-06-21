@@ -295,7 +295,7 @@ convert_LaThuile <- function(infiles, fair_usage=NA, fair_usage_vec=NA,
     #First, remove path from file names. This is in case the file path
     #contains the same string as the year(s). This could lead to wrong file
     #being read
-    infile_short <- sapply(infile, function(x) strsplit(x, site_code)[[1]][2])
+    infile_short <- sapply(infiles, function(x) strsplit(x, site_code)[[1]][2])
 
     for(y in 1:length(tperiod)){
       
