@@ -218,10 +218,10 @@ convert_LaThuile <- function(infiles, fair_usage=NA, fair_use_vec=NA,
   all_years <- sapply(infiles, function(x) strsplit(x, "[.]")[[1]][2])
   
   #Find Fair Use years if applicable
-  if(!is.na(fair_use)){
+  if(!is.na(fair_usage)){
     
     #Find indices for years that comply with fair use policy
-    fair_ind <- unlist(sapply(fair_use, function(x) which(fair_use_vec==x)))
+    fair_ind <- unlist(sapply(fair_usage, function(x) which(fair_use_vec==x)))
     
     #Extract years
     fair_use_years <- names(fair_use_vec)[fair_ind]
