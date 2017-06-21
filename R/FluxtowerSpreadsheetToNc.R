@@ -38,7 +38,7 @@ ReadCSVFluxData <- function(fileinname, vars, datasetname, time_vars, site_log, 
     
     
     FluxData <- convert_LaThuile(infiles=fileinname, 
-                                 fair_usage=fair_usage,
+                                 fair_use=fair_use,
                                  fair_use_vec=fair_use_vec,
                                  min_yrs=min_yrs,
                                  tcol=tcol,
@@ -207,7 +207,7 @@ read_era <- function(ERA_file, datain){
 
 #' Converts La Thuile files to FLUXNET2015 format
 #' @export
-convert_LaThuile <- function(infiles, fair_usage=NA, fair_use_vec=NA, 
+convert_LaThuile <- function(infiles, fair_use=NA, fair_use_vec=NA, 
                              min_yrs, tcol, site_log, ...){
   
   library(R.utils) #seqToIntervals
@@ -219,10 +219,10 @@ convert_LaThuile <- function(infiles, fair_usage=NA, fair_use_vec=NA,
   all_years <- sapply(infiles, function(x) strsplit(x, "[.]")[[1]][2])
   
   #Find Fair Use years if applicable
-  if(!is.na(fair_usage)){
+  if(!is.na(fair_use)){
     
     #Find indices for years that comply with fair use policy
-    fair_ind <- unlist(sapply(fair_usage, function(x) which(fair_use_vec==x)))
+    fair_ind <- unlist(sapply(fair_use, function(x) which(fair_use_vec==x)))
     
     #Extract years
     fair_use_years <- names(fair_use_vec)[fair_ind]
@@ -231,6 +231,8 @@ convert_LaThuile <- function(infiles, fair_usage=NA, fair_use_vec=NA,
     years <- as.numeric(intersect(all_years,fair_use_years))
     
   } else {
+    
+    warning("Not using Fair Use policy to extract years")
     
     #Find years that are fair use and have files for
     years <- as.numeric(all_years,fair_use_years)
