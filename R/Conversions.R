@@ -67,8 +67,8 @@ ChangeUnits = function(datain, site_log){
         #Conversion following Monteith & Unsworth (1990), Principles of Environmental Physics
         datain$data[[k]] <- datain$data[[k]] * (1 / 2.3)
         
-        #Set negative values to zero
-        datain$data[[k]][datain$data[[k]] < 0] <- 0
+        #Negative PAR values present, set these to PAR = 5 umol m-2 s-1, converted to SWdown
+        datain$data[[k]][datain$data[[k]] < 0] <- 5 * (1 / 2.3)
         
         
       ## Specific humidity (in kg/kg, calculate from tair, rel humidity and psurf)
