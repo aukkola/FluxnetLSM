@@ -36,8 +36,9 @@ ReadCSVFluxData <- function(fileinname, vars, datasetname, time_vars, site_log, 
   # If using La Thuile dataset, convert to Fluxnet2015 format
   if(datasetname=="LaThuile"){
     
+    
     FluxData <- convert_LaThuile(infiles=fileinname, 
-                                 fair_use=fair_use,
+                                 fair_usage=fair_use,
                                  fair_use_vec=fair_use_vec,
                                  min_yrs=min_yrs,
                                  tcol=tcol,
@@ -225,6 +226,14 @@ convert_LaThuile <- function(infiles, fair_usage=NA, fair_use_vec=NA,
     
     #Extract years
     fair_use_years <- names(fair_use_vec)[fair_ind]
+    
+    #Find years that are fair use and have files for
+    years <- as.numeric(intersect(all_years,fair_use_years))
+    
+  } else {
+    
+    #Find years that are fair use and have files for
+    years <- as.numeric(all_years,fair_use_years)
     
   }
   
