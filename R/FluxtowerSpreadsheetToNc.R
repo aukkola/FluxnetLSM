@@ -363,17 +363,13 @@ convert_LaThuile <- function(infiles, fair_usage=NA, fair_usage_vec=NA,
 # TODO: This function exists in palsR/Gab and has a different signature. Merge?
 #' Creates a netcdf file for flux variables
 #' @export
-CreateFluxNetcdfFile = function(fluxfilename, datain,                  #outfile file and data
-                            latitude, longitude,                   #lat, lon
-                            site_code, long_sitename,              #Fluxnet site code and full site name
-                            datasetversion, github_rev,            #Dataset version and github revision
-                            tier=NA,                               #Fluxnet site tier
+CreateFluxNetcdfFile = function(fluxfilename, datain,              #outfile file and data
+                            site_code,                             #Fluxnet site code
+                            siteInfo,                              #Site attributes
+                            datasetversion,                        #Dataset version
                             ind_start, ind_end,                    #time period indices
                             starttime, timestepsize,               #timing info
                             flux_varname, cf_name,                 #Original Fluxnet variable names and CF_compliant names
-                            elevation=NA, towerheight=NA,          #Site elevation and flux tower height
-                            canopyheight=NA,                       #Canopy height
-                            short_veg_type=NA, long_veg_type=NA,   #Long and short IGBP vegetation types
                             missing, gapfill_all, gapfill_good,    #thresholds used in processing
                             gapfill_med, gapfill_poor, min_yrs, 
                             total_missing, total_gapfilled,        #Percentage missing and gap-filled
@@ -431,35 +427,35 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,                  #outfile 
   opt_vars <- list()
   ctr <- 1
   # Define measurement height on tower:
-  if(!is.na(towerheight)){
+  if(!is.na(siteInfo$TowerHeight)){
     towheight=ncvar_def('tower_height','m',dim=list(xd,yd),
                         missval=missing_value,longname='Height of flux tower')
     opt_vars[[ctr]] = towheight
     ctr <- ctr + 1
   }  
   # Define site canopy height:
-  if(!is.na(canopyheight)){
+  if(!is.na(siteInfo$CanopyHeight)){
     canheight=ncvar_def('canopy_height','m',dim=list(xd,yd),
                         missval=missing_value,longname='Canopy height')
     opt_vars[[ctr]] = canheight
     ctr <- ctr + 1
   }
   #Define site elevation:
-  if(!is.na(elevation)){
+  if(!is.na(siteInfo$SiteElevation)){
     elev=ncvar_def('elevation','m',dim=list(xd,yd),
                    missval=missing_value,longname='Site elevation')
     opt_vars[[ctr]] = elev
     ctr <- ctr + 1
   }
   # Define IGBP short vegetation type:
-  if(!is.na(short_veg_type)){
+  if(!is.na(siteInfo$IGBP_vegetation_short)){
     short_veg=ncvar_def('IGBP_veg_short','-',dim=list(xd,yd), missval=NULL,
                         longname='IGBP vegetation type (short)', prec="char")
     opt_vars[[ctr]] = short_veg
     ctr <- ctr + 1
   }
   # Define IGBP long vegetation type:
-  if(!is.na(long_veg_type)){
+  if(!is.na(siteInfo$IGBP_vegetation_long)){
     long_veg=ncvar_def('IGBP_veg_long','-',dim=list(xd,yd), missval=NULL,
                        longname='IGBP vegetation type (long)', prec="char")
     opt_vars[[ctr]] = long_veg
@@ -481,11 +477,11 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,                  #outfile 
   ncatt_put(ncid,varid=0,attname='Production_time',
             attval=as.character(Sys.time()))
   ncatt_put(ncid,varid=0,attname='Github_revision',  
-            attval=github_rev, prec="text")
+            attval=siteInfo$Processing$git_rev, prec="text")
   ncatt_put(ncid,varid=0,attname='site_code',
             attval=site_code, prec="text")
   ncatt_put(ncid,varid=0,attname='site_name',
-            attval=as.character(long_sitename), prec="text")
+            attval=as.character(siteInfo$Fullname), prec="text")
   ncatt_put(ncid,varid=0,attname='Fluxnet_dataset_version',
             attval=datasetversion, prec="text")
   ncatt_put(ncid,varid=0,attname='Input_file',
@@ -511,11 +507,11 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,                  #outfile 
             attval='palshelp@gmail.com')
   if(!is.na(tier)) {
     ncatt_put(ncid,varid=0,attname='Fluxnet site tier',
-              attval=tier) }
+              attval=siteInfo$Tier) }
     
   # Add variable data to file:
-  ncvar_put(ncid, latdim, vals=latitude)
-  ncvar_put(ncid, londim, vals=longitude)
+  ncvar_put(ncid, latdim, vals=siteInfo$SiteLatitude)
+  ncvar_put(ncid, londim, vals=siteInfo$SiteLongitude)
   
   
   # Optional meta data for each site:
@@ -571,17 +567,13 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,                  #outfile 
 # TODO: This function exists in palsR/Gab and has a different signature. Merge?
 #' Creates a netcdf file for met variables
 #' @export
-CreateMetNetcdfFile = function(metfilename, datain,                   #outfile file and data
-                           latitude, longitude,                   #lat, lon
-                           site_code, long_sitename,              #Fluxnet site code and full site name
-                           datasetversion, github_rev,            #Dataset version and github revision
-                           tier=NA,                               #Fluxnet site tier
+CreateMetNetcdfFile = function(metfilename, datain,               #outfile file and data
+                           site_code,                             #Fluxnet site code 
+                           siteInfo,                              #Site attributes
+                           datasetversion,                        #Dataset version 
                            ind_start, ind_end,                    #time period indices
                            starttime, timestepsize,               #timing info
                            flux_varname, cf_name,                 #Original Fluxnet variable names and CF_compliant names
-                           elevation=NA, towerheight=NA,          #Site elevation and flux tower height
-                           canopyheight=NA,                       #Canopy height
-                           short_veg_type=NA, long_veg_type=NA,   #Long and short IGBP vegetation types
                            av_precip=NA,                          #average annual rainfall
                            missing, gapfill_all, gapfill_good,    #thresholds used in processing
                            gapfill_med, gapfill_poor, min_yrs,
@@ -641,46 +633,39 @@ CreateMetNetcdfFile = function(metfilename, datain,                   #outfile f
 	opt_vars <- list()
   ctr <- 1
 	# Define measurement height on tower:
-	if(!is.na(towerheight)){
+	if(!is.na(siteInfo$TowerHeight)){
 	  towheight=ncvar_def('tower_height','m',dim=list(xd,yd),
 	                      missval=missing_value,longname='Height of flux tower')
 	  opt_vars[[ctr]] = towheight
-    ctr <- ctr + 1
+	  ctr <- ctr + 1
 	}  
-  # Define site canopy height:
-	if(!is.na(canopyheight)){
+	# Define site canopy height:
+	if(!is.na(siteInfo$CanopyHeight)){
 	  canheight=ncvar_def('canopy_height','m',dim=list(xd,yd),
 	                      missval=missing_value,longname='Canopy height')
 	  opt_vars[[ctr]] = canheight
 	  ctr <- ctr + 1
 	}
-  #Define site elevation:
-	if(!is.na(elevation)){
+	#Define site elevation:
+	if(!is.na(siteInfo$SiteElevation)){
 	  elev=ncvar_def('elevation','m',dim=list(xd,yd),
-	                      missval=missing_value,longname='Site elevation')
+	                 missval=missing_value,longname='Site elevation')
 	  opt_vars[[ctr]] = elev
 	  ctr <- ctr + 1
 	}
 	# Define IGBP short vegetation type:
-	if(!is.na(short_veg_type)){
+	if(!is.na(siteInfo$IGBP_vegetation_short)){
 	  short_veg=ncvar_def('IGBP_veg_short','-',dim=list(xd,yd), missval=NULL,
-                        longname='IGBP vegetation type (short)', prec="char")
+	                      longname='IGBP vegetation type (short)', prec="char")
 	  opt_vars[[ctr]] = short_veg
 	  ctr <- ctr + 1
 	}
 	# Define IGBP long vegetation type:
-	if(!is.na(long_veg_type)){
+	if(!is.na(siteInfo$IGBP_vegetation_long)){
 	  long_veg=ncvar_def('IGBP_veg_long','-',dim=list(xd,yd), missval=NULL,
-                       longname='IGBP vegetation type (long)', prec="char")
+	                     longname='IGBP vegetation type (long)', prec="char")
 	  opt_vars[[ctr]] = long_veg
 	  ctr <- ctr + 1 
-	}
-  #Define AvPrecip (average annual precip) if outputting rainfall
-	if(!is.na(av_precip)){
-	  av_rain=ncvar_def('avPrecip','mm yr-1',dim=list(xd,yd), missval=NA,
-	                     longname='Mean annual precipitation')
-	  opt_vars[[ctr]] = av_rain
-	  ctr <- ctr + 1  
 	}
 	
 
@@ -698,11 +683,11 @@ CreateMetNetcdfFile = function(metfilename, datain,                   #outfile f
   ncatt_put(ncid,varid=0,attname='Production_time',
 		attval=as.character(Sys.time()))
 	ncatt_put(ncid,varid=0,attname='Github_revision',  
-		attval=github_rev, prec="text")
+		attval=siteInfo$Processing$git_rev, prec="text")
 	ncatt_put(ncid,varid=0,attname='site_code',
 		attval=site_code, prec="text")
   ncatt_put(ncid,varid=0,attname='site_name',
-          attval=as.character(long_sitename), prec="text")
+          attval=as.character(siteInfo$Fullname), prec="text")
   ncatt_put(ncid,varid=0,attname='Fluxnet_dataset_version',
 		attval=datasetversion, prec="text")	 
 	ncatt_put(ncid,varid=0,attname='Input_file',
@@ -728,11 +713,11 @@ CreateMetNetcdfFile = function(metfilename, datain,                   #outfile f
 		attval='palshelp@gmail.com')
 	if(!is.na(tier)) {
 	  ncatt_put(ncid,varid=0,attname='Fluxnet site tier',
-	            attval=tier) }
+	            attval=siteInfo$Tier) }
 	
 	# Add variable data to file:
-	ncvar_put(ncid, latdim, vals=latitude)
-	ncvar_put(ncid, londim, vals=longitude)
+	ncvar_put(ncid, latdim, vals=siteInfo$SiteLatitude)
+	ncvar_put(ncid, londim, vals=siteInfo$SiteLongitude)
 
   
 	# Optional meta data for each site:
