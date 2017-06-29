@@ -5,28 +5,33 @@
 \title{ConvertSpreadsheetToNcdf.R}
 \usage{
 convert_fluxnet_to_netcdf(infile, site_code, out_path, ERA_file = NA,
-  ERA_gapfill = FALSE, datasetname = "FLUXNET2015",
+  met_gapfill = NA, flux_gapfill = NA, datasetname = "FLUXNET2015",
   datasetversion = "1-3", fair_use = NA, fair_use_vec = NA,
   missing = 15, gapfill_all = 20, gapfill_good = NA, gapfill_med = NA,
   gapfill_poor = NA, min_yrs = 2, include_all_eval = TRUE,
   plot = c("annual", "diurnal", "timeseries"))
 }
 \arguments{
-\item{infile}{input filename,
-e.g. "FULLSET/FLX_AU-How_FLUXNET2015_FULLSET_HH_2001-2014_1-3.csv".
+\item{infile}{Input filename,
+e.g. "FLX_AU-How_FLUXNET2015_FULLSET_HH_2001-2014_1-3.csv".
 La Thuile data is expected to be in the format sitecode.year.xxxx.csv,
 e.g. "AU-How.2001.synth.hourly.allvars.csv".}
 
-\item{site_code}{Fluxnet site code e.g. "AU-How"}
+\item{site_code}{Fluxnet site code, e.g. "AU-How"}
 
 \item{out_path}{output path e.g. "./FLUXNET2016_processing/"}
 
-\item{ERA_gapfill}{Gapfill met variables using ERAinterim?}
+\item{ERA_file}{[Optional] ERA input file (required if using ERAinterim to gapfill met variables)
+e.g. "FLX_AU-How_FLUXNET2015_ERAI_HH_1989-2014_1-3.csv"}
 
-\item{datasetname}{Name of the dataset, e.g. FLUXNET2015 or La Thuile. Defaults to FLUXNET2015,
-and thus must be set if processing a dataset not compliant with FLUXNET2015 format.}
+\item{met_gapfill}{Gapfill met variables? Select one of "statistical" and "ERAinterim". Defaults to NA (no gapfilling).}
 
-\item{datasetversion}{Version of the dataset, e.g. "1-3"}
+\item{flux_gapfill}{Gapfill flux variables? Select "statistical" or NA (default; no gapfilling).}
+
+\item{datasetname}{Name of the dataset, e.g. FLUXNET2015 or La Thuile. Defaults to FLUXNET2015.
+Must be set to "LaThuile" when processing the La Thuile synthesis data in its original format.}
+
+\item{datasetversion}{Dataset version, e.g. "1-3"}
 
 \item{fair_use}{La Thuile Fair Use policy that data should comply with, e.g. "LaThuile" or "Fair_Use".
 Can be a single entry or a vector of several policies. If this is set, code will only extract
@@ -62,9 +67,6 @@ excess of the thresholds will be discarded.}
 
 \item{plot}{Should annual, diurnal and/or 14-day running mean plots be produced?
        Set to NA if not required.}
-
-\item{era_file}{ERA input file (needed if using ERAinterim to gapfill met variables)
-e.g. "FULLSET/FLX_AU-How_FLUXNET2015_ERAI_HH_1989-2014_1-3.csv"}
 }
 \description{
 Converts data from a FLUXNET2015 formatted spreadsheet to

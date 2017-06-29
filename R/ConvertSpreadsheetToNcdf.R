@@ -6,18 +6,20 @@
 #' author: Anna Ukkola UNSW 2017.
 #' Main function to convert Fluxnet2015 CSV-files to NetCDF
 #'
-#' @param infile input filename,
-#'        e.g. "FULLSET/FLX_AU-How_FLUXNET2015_FULLSET_HH_2001-2014_1-3.csv". 
+#'
+#' @param infile Input filename,
+#'        e.g. "FLX_AU-How_FLUXNET2015_FULLSET_HH_2001-2014_1-3.csv". 
 #'        La Thuile data is expected to be in the format sitecode.year.xxxx.csv,
 #'        e.g. "AU-How.2001.synth.hourly.allvars.csv".
-#' @param site_code Fluxnet site code e.g. "AU-How"
+#' @param site_code Fluxnet site code, e.g. "AU-How"
 #' @param out_path output path e.g. "./FLUXNET2016_processing/"
-#' @param era_file ERA input file (needed if using ERAinterim to gapfill met variables)
-#'        e.g. "FULLSET/FLX_AU-How_FLUXNET2015_ERAI_HH_1989-2014_1-3.csv"
-#' @param ERA_gapfill Gapfill met variables using ERAinterim?
-#' @param datasetname Name of the dataset, e.g. FLUXNET2015 or La Thuile. Defaults to FLUXNET2015,
-#'        and thus must be set if processing a dataset not compliant with FLUXNET2015 format.
-#' @param datasetversion Version of the dataset, e.g. "1-3"
+#' @param ERA_file [Optional] ERA input file (required if using ERAinterim to gapfill met variables)
+#'        e.g. "FLX_AU-How_FLUXNET2015_ERAI_HH_1989-2014_1-3.csv"
+#' @param met_gapfill Gapfill met variables? Select one of "statistical" and "ERAinterim". Defaults to NA (no gapfilling).
+#' @param flux_gapfill Gapfill flux variables? Select "statistical" or NA (default; no gapfilling).  
+#' @param datasetname Name of the dataset, e.g. FLUXNET2015 or La Thuile. Defaults to FLUXNET2015.
+#'        Must be set to "LaThuile" when processing the La Thuile synthesis data in its original format.
+#' @param datasetversion Dataset version, e.g. "1-3"
 #' @param fair_use La Thuile Fair Use policy that data should comply with, e.g. "LaThuile" or "Fair_Use". 
 #'        Can be a single entry or a vector of several policies. If this is set, code will only extract 
 #'        years that comply with the required policy/policies. Must provide fair_use_vec to use this 
@@ -48,7 +50,8 @@
 #'
 #'
 convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
-                                      ERA_file=NA, ERA_gapfill=FALSE,
+                                      ERA_file=NA, met_gapfill=NA,
+                                      flux_gapfill=NA,
                                       datasetname="FLUXNET2015", datasetversion="1-3",
                                       fair_use=NA, fair_use_vec=NA,
                                       missing = 15, gapfill_all=20,
@@ -319,6 +322,13 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
       av_precip=rep(NA, length(unique(gaps$consec)))
     }
         
+    
+    
+    
+    
+    
+    
+    
     
     ###########################################
     ### Convert units and check data ranges ###
