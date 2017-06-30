@@ -373,7 +373,7 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,              #outfile file
                             missing, gapfill_all, gapfill_good,    #thresholds used in processing
                             gapfill_med, gapfill_poor, min_yrs, 
                             total_missing, total_gapfilled,        #Percentage missing and gap-filled
-                            QCmeasured, QCgapfilled,               #QC flag values
+                            qcInfo,                                #QC flag values
                             infile,                                #Input file name
                             var_ind){                              #Indices to extract variables to be written
     
@@ -495,12 +495,7 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,              #outfile file
                          ", min_yrs: ", min_yrs,
                          sep=""), prec="text")
   ncatt_put(ncid,varid=0,attname='QC_flag_descriptions',
-            attval=paste("Measured: ", QCmeasured, 
-                         ", Good-quality gapfilled: ", QCgapfilled[1], 
-                         ", Medium-quality gapfilled: ", QCgapfilled[2], 
-                         ", Poor-quality gapfilled: ", QCgapfilled[3], 
-                         ", ERA-Interim gapfilled: ", QCgapfilled[4], 
-                         sep=""), prec="text")  
+            attval=qcInfo, prec="text")  
   ncatt_put(ncid,varid=0,attname='Package contact',
             attval='a.ukkola@unsw.edu.au')
   ncatt_put(ncid,varid=0,attname='PALS contact',
@@ -578,7 +573,7 @@ CreateMetNetcdfFile = function(metfilename, datain,               #outfile file 
                            missing, gapfill_all, gapfill_good,    #thresholds used in processing
                            gapfill_med, gapfill_poor, min_yrs,
                            total_missing, total_gapfilled,        #Percentage missing and gap-filled
-                           QCmeasured, QCgapfilled,               #QC flag values
+                           qcInfo,                                #QC flag values
                            ERA_gapfill=ERA_gapfill,               #Was ERA gapfilling used
                            infile,                                #Input file name
                            var_ind){                              #Indices to extract variables to be written
@@ -701,12 +696,7 @@ CreateMetNetcdfFile = function(metfilename, datain,               #outfile file 
 	                       ", min_yrs: ", min_yrs,
 	                       sep=""), prec="text")
 	ncatt_put(ncid,varid=0,attname='QC_flag_descriptions',
-	          attval=paste("Measured: ", QCmeasured, 
-                         ", Good-quality gapfilled: ",QCgapfilled[1], 
-                         ", Medium-quality gapfilled: ", QCgapfilled[2], 
-                         ", Poor-quality gapfilled: ", QCgapfilled[3], 
-                         ", ERA-Interim gapfilled: ", QCgapfilled[4], 
-                         sep=""), prec="text")  
+	          attval=qcInfo, prec="text")  
 	ncatt_put(ncid,varid=0,attname='Package contact',
 	          attval='a.ukkola@unsw.edu.au')
 	ncatt_put(ncid,varid=0,attname='PALS contact',

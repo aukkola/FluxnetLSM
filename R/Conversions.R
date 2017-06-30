@@ -4,12 +4,11 @@
 #
 # author: Anna Ukkola UNSW 2017
 #
-# TODO: Check and merge back in to palsR
 
 #' Converts units from original Fluxnet to target ALMA units
 #' @return datain
 #' @export
-ChangeUnits = function(datain, site_log){
+ChangeUnits <- function(datain, site_log){
     
   #Loop through variables. If original and target units do not match,
   #convert (or return error if conversion between units not known)
@@ -93,14 +92,23 @@ ChangeUnits = function(datain, site_log){
                                              pressure=datain$data[[which(datain$vars=="PA")]], 
                                              psurf_units=psurf_units,
                                              site_log)
+      
         
+      ###--- Template for adding a new conversion ---###
+      #Use the Fluxnet variable name and unit, and output unit as specified in data/Output_variables_xxx.csv
+#       } else if(datain$vars[k]=="Fluxnet variable name" & flx_units[k]=="Fluxnet variable unit" & 
+#                   alma_units[k]=="Output variable unit"){  
+#         
+#         datain$data[[k]] <- datain$data[[k]] * [your conversion]
         
+                
       ## If cannot find conversion, abort  
       } else {
         error <- paste("Unknown unit conversion. cannot convert between original ", 
-                       "Fluxnet and ALMA units, check variable: ", datain$vars[k], 
+                       "Fluxnet and required units, check variable: ", datain$vars[k], 
                        ". Available conversions: air temp C to K, rainfall mm to kg/m2/s, ",
                        "air pressure kPa to Pa, humidity from relative (%) to specific (kg/kg)",
+                       "and PAR (umol/m2/s) to shortwave radiation (W/m2)",
                        sep="")
         stop_and_log(error, site_log)
       }

@@ -100,5 +100,110 @@ append_and_warn <- function(warn, warnings, call=TRUE){
   return(warnings)
 }
 
+#-----------------------------------------------------------------------------
+
+#' Creates output directories and returns log output path
+#' @export
+create_outdir <- function(outdir, site, plots){
+  
+  #NetCDF files
+  outpath_nc <- paste(outdir, "/Nc_files", sep="")
+  dir.create(outpath_nc, showWarnings = FALSE, recursive=TRUE)
+  
+  #Log 
+  outpath_log <- paste(outdir, "/Logs", sep="")
+  dir.create(outpath_log, showWarnings = FALSE, recursive=TRUE)
+  
+  #Plots (if code set to plot)
+  if(!any(is.na(plots))){
+    outpath_plot <- paste(outdir, "/Figures/", site, sep="")
+    dir.create(outpath_plot, showWarnings = FALSE, recursive=TRUE)
+  }
+  
+  #Return log path for later use
+  return(outpath_log)
+}
+
+#-----------------------------------------------------------------------------
+
+#' Initialises site log
+#' @export
+initialise_sitelog <- function(site, logpath){
+  
+  site_log <- vector(length=9)
+  names(site_log) <- c("Site_code", "Processed", "Errors", 
+                       "Warnings", "No_files", "Met_files", "Flux_files", 
+                       "Excluded_eval", "log_path")
+  
+  site_log["Site_code"] <- site
+  site_log["Errors"]    <- ''
+  site_log["Warnings"]  <- ''
+  site_log[c(5:8)]      <- NA
+  site_log["log_path"]  <- logpath #removed when writing log to file
+  
+  return(site_log)
+  
+}
+
+#-----------------------------------------------------------------------------
+
+#' Retrieves QC flag information
+#' @export
+get_qc_flags <- function(dataset, subset=NA){
+  
+  #FLUXNET2015 subset
+  if(dataset=="FLUXNET2015" & subset=="SUBSET"){
+
+    #1: good quality gapfill, 2: ERA gapfilling, 3: statistical gapfilling
+    QCmeasured  <- 0
+    QCgapfilled <- c(1, 2, 3) 
+    
+    qc_info <- paste("Measured: ", QCmeasured, 
+                     ", Good-quality gapfilling: ",QCgapfilled[1], 
+                     ", ERA-Interim gapfilling: ", QCgapfilled[2], 
+                     ", Statistical gapfilling: ", QCgapfilled[3],                      
+                     sep="")
+ 
+  #FLUXNET2015 fullset or La Thuile
+  } else if ((dataset=="FLUXNET2015" & subset=="FULLSET") | dataset=="LaThuile"){
+    
+    #1: good quality gapfill, 2: medium, 3: poor, 
+    #4: ERA gapfilling, 5: statistical gapfilling
+    
+    #These correspond to the "qc" variables in La Thuile (not qcOK)
+    QCmeasured  <- 0
+    QCgapfilled <- c(1, 2, 3, 4, 5) 
+    
+    qc_info <- paste("Measured: ", QCmeasured, 
+                     ", Good-quality gapfilling: ",QCgapfilled[1], 
+                     ", Medium-quality gapfilling: ", QCgapfilled[2], 
+                     ", Poor-quality gapfilling: ", QCgapfilled[3], 
+                     ", ERA-Interim gapfilling: ", QCgapfilled[4], 
+                     ", Statistical gapfilling: ", QCgapfilled[5],
+                     sep="")
+    
+  #Dataset not known  
+  } else {
+    
+    stop(paste("Dataset name not recognised, cannot verify",
+              "QC flag convention. Please amend. See code",
+              "in R/Utility_functions.R for options"))
+  }
+  
+  
+  #Collate into a list
+  qc_flags <- list(QCmeasured, QCgapfilled, qc_info)
+  names(qc_flags) <- c("QC_measured", "QC_gapfilled", "qc_info")
+  
+  return(qc_info)
+  
+}
+
+
+
+
+
+
+
 
 
