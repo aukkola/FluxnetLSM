@@ -199,11 +199,18 @@ get_qc_flags <- function(dataset, subset=NA){
   
 }
 
+#-----------------------------------------------------------------------------
 
-
-
-
-
-
+#' Checks  that FLUXNET2015 version defined correctly
+#' @export
+check_flx2015_version <- function(dataset, version){
+  
+  if(dataset=="FLUXNET2015" & (is.na(version) | 
+     (version!="SUBSET" & version!="FULLSET"))){
+    stop(paste("Version of FLUXNET2015 data product not",
+               "specified correctly. Please set parameter",
+               "flx2015_version to 'FULLSET' or 'SUBSET'"))
+  }
+}
 
 

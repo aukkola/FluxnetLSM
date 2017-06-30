@@ -15,6 +15,8 @@
 #' 
 #' 
 #' 
+#' 
+#' 
 #' author: Anna Ukkola UNSW 2017.
 #' Main function to convert Fluxnet2015 CSV-files to NetCDF
 #'
@@ -29,13 +31,17 @@
 #' @param datasetname Name of the dataset, e.g. FLUXNET2015 or La Thuile. Defaults to FLUXNET2015,
 #'        and thus must be set if processing a dataset not compliant with FLUXNET2015 format.
 #' @param datasetversion Version of the dataset, e.g. "1-3"
+#' @param flx2015_version Version of FLUXNET2015 data product being used, i.e. "FULLSET" or "SUBSET". 
+#'        Required to set QC flags correctly.
 #' @param fair_use La Thuile Fair Use policy that data should comply with, e.g. "LaThuile" or "Fair_Use" (default). 
 #'        Can be a single entry or a vector of several policies. If this is set, code will only extract 
 #'        years that comply with the required policy/policies. Must provide fair_use_vec to use this 
 #'        functionality. 
 #' @param fair_use_vec A vector of Data Use policy for each year in the data file, e.g. "LaThuile" or "Fair_Use". 
 #'        Should have years as vector column names.
-#'        
+#' @param model Name of land surface model. Used to retrieve model specific attributes, such as site
+#'        plant functional type.
+#'         
 #' @param missing Maximum percentage of time steps allowed to be missing in any given year
 #' @param gapfill_all Maximum percentage of time steps allowed to be gap-filled 
 #'        (any quality) in any given year. Note if gapfill_all is set, any thresholds
@@ -59,7 +65,7 @@
 #'        "statistical" or NA (default; no gap-filling).
 #' 
 #' @param lwdown_method Method used to synthesize incoming longwave radiation. 
-#'        One of "Abramowitz_2012" (default), "Swinbank_1963" or "Brutsaert_1975").
+#'        One of "Abramowitz_2012" (default), "Swinbank_1963" or "Brutsaert_1975".
 #' @param regfill Maximum consecutive length of time (in number of days) to be gap-filled 
 #'        using multiple linear regression. Defaults to 30 days. Used to gapfill flux variables.
 #' @param regr_window Length of time period used to train multiple linear regression
@@ -81,7 +87,7 @@
 convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                                                                             
                                       datasetname="FLUXNET2015", datasetversion="n/a",
-                                      flx2015_subset=NA,
+                                      flx2015_version=NA,
                                       fair_use="Fair_Use", fair_use_vec=NA,
                                       
                                       model=NA,
@@ -110,11 +116,18 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     
     
     ### Set expected values for missing and gap-filled values ###
-    qc_flags <- get_qc_flags(datasetname, flx2015_subset)
+    
+    #First check that fluxnet2015 version specified correctly, if using it
+    check_flx2015_version(datasetname, flx2015_version)
+    
+    qc_flags <- get_qc_flags(datasetname, flx2015_version)
     
     Sprd_MissingVal <- -9999 # missing value in spreadsheet
     Nc_MissingVal   <- -9999 # missing value in created netcdf files
     
+    
+    ### Find model-specific parameters ###
+    model_params <- initialise_model(model)      
     
     
     ################################
@@ -164,7 +177,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     site_info <- get_site_metadata(site_code)
     
     #Log possible warnings and remove warnings from output var
-    site_log <- log_warning(warn=site_info$warn, site_log)
+    site_log  <- log_warning(warn=site_info$warn, site_log)
     site_info <- site_info$out
     
     
@@ -254,6 +267,18 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     
     # gapfill using ERA-interim data provided as part of FLUXNET2015
     if(met_gapfill == "statistical") {
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
       
       
       
@@ -499,7 +524,8 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                             qcInfo=qc_flags$qc_info,
                             ERA_gapfill=ERA_gapfill,
                             infile=infile,
-                            var_ind=met_ind)
+                            var_ind=met_ind,
+                            modelInfo=model_params)   ### COPMLETE !!!!!!
         
         
         
@@ -521,7 +547,8 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                              total_gapfilled=gaps$total_gapfilled[[k]][flux_ind[[k]]],
                              qcInfo=qc_flags$qc_info,
                              infile=infile,
-                             var_ind=flux_ind[[k]])
+                             var_ind=flux_ind[[k]],
+                             modelInfo=model_params)
         
     }
     

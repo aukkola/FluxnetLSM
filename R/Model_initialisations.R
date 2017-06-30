@@ -1,15 +1,23 @@
+# Model_initialisations.R
 #
-# 
+# Functions to initialise model attributes to
+# be written to NetCDF files
 #
+# TODO: add more models and attributes, including
+# CABLE patchfrac
 
-
-
-
+#' Finds model-specific parameters to be written 
+#' to output NetCDF files 
+#' @export
 initialise_model <- function(model){
   
-  if(model=="CABLE"){
+  if(is.na(model)){
     
-    pft_name="iveg"
+    pft_name <- NA
+    
+  } else if(model=="CABLE"){
+    
+    pft_name <- "iveg"
     
 
   ### Template for adding a new model ###
@@ -28,10 +36,6 @@ initialise_model <- function(model){
   }
   
   
-  
-  
   return(pft_name)
-  
-  
   
 }
