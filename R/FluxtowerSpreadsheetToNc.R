@@ -503,18 +503,30 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,              #outfile file
   if(!is.na(tier)) {
     ncatt_put(ncid,varid=0,attname='Fluxnet site tier',
               attval=siteInfo$Tier) }
-    
+  
+  
+  ### Write model parameters (as global atts) ###
+  if(!is.na(modelInfo)){
+    write_model_params(ncid, modelInfo, missing_value)
+  }
+  
+  
   # Add variable data to file:
   ncvar_put(ncid, latdim, vals=siteInfo$SiteLatitude)
   ncvar_put(ncid, londim, vals=siteInfo$SiteLongitude)
   
   
   # Optional meta data for each site:
-  if(!is.na(elevation)) {ncvar_put(ncid,elev,vals=elevation)}
-  if(!is.na(towerheight)) {ncvar_put(ncid,towheight,vals=towerheight)}
-  if(!is.na(canopyheight)) {ncvar_put(ncid,canheight,vals=canopyheight)}
-  if(!is.na(short_veg_type)) {ncvar_put(ncid,short_veg,vals=short_veg_type)}
-  if(!is.na(long_veg_type)) {ncvar_put(ncid,long_veg,vals=long_veg_type)}
+  if(!is.na(siteInfo$SiteElevation)) {
+    ncvar_put(ncid,elev,vals=siteInfo$SiteElevation)}
+  if(!is.na(siteInfo$TowerHeight)) {
+    ncvar_put(ncid,towheight,vals=siteInfo$TowerHeight)}
+  if(!is.na(siteInfo$CanopyHeight)) {
+    ncvar_put(ncid,canheight,vals=siteInfo$CanopyHeight)}
+  if(!is.na(siteInfo$IGBP_vegetation_short)) {
+    ncvar_put(ncid,short_veg,vals=siteInfo$IGBP_vegetation_short)}
+  if(!is.na(siteInfo$IGBP_vegetation_long)) {
+    ncvar_put(ncid,long_veg,vals=siteInfo$IGBP_vegetation_long)}
   
   
   
@@ -547,9 +559,7 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,              #outfile file
                                                    attname="Gap-filled_%", 
                                                    attval=round(total_gapfilled[x],1)))  
   
-  
-  
-  
+
   
   # Close netcdf file:
   nc_close(ncid)
@@ -701,23 +711,34 @@ CreateMetNetcdfFile = function(metfilename, datain,               #outfile file 
 	          attval='a.ukkola@unsw.edu.au')
 	ncatt_put(ncid,varid=0,attname='PALS contact',
 		attval='palshelp@gmail.com')
-	if(!is.na(tier)) {
+	if(!is.na(siteInfo$Tier)) {
 	  ncatt_put(ncid,varid=0,attname='Fluxnet site tier',
 	            attval=siteInfo$Tier) }
 	
+  
+  ### Write model parameters (as global atts) ###
+  if(!is.na(modelInfo)){
+    write_model_params(ncid, modelInfo, missing_value)
+  }
+  
+  
 	# Add variable data to file:
 	ncvar_put(ncid, latdim, vals=siteInfo$SiteLatitude)
 	ncvar_put(ncid, londim, vals=siteInfo$SiteLongitude)
 
   
 	# Optional meta data for each site:
-	if(!is.na(elevation)) {ncvar_put(ncid,elev,vals=elevation)}
-	if(!is.na(towerheight)) {ncvar_put(ncid,towheight,vals=towerheight)}
-  if(!is.na(canopyheight)) {ncvar_put(ncid,canheight,vals=canopyheight)}
-	if(!is.na(short_veg_type)) {ncvar_put(ncid,short_veg,vals=short_veg_type)}
-  if(!is.na(long_veg_type)) {ncvar_put(ncid,long_veg,vals=long_veg_type)}
-	if(!is.na(av_precip)) {ncvar_put(ncid,av_rain,vals=av_precip)}
-
+	if(!is.na(siteInfo$SiteElevation)) {
+    ncvar_put(ncid,elev,vals=siteInfo$SiteElevation)}
+	if(!is.na(siteInfo$TowerHeight)) {
+    ncvar_put(ncid,towheight,vals=siteInfo$TowerHeight)}
+	if(!is.na(siteInfo$CanopyHeight)) {
+    ncvar_put(ncid,canheight,vals=siteInfo$CanopyHeight)}
+	if(!is.na(siteInfo$IGBP_vegetation_short)) {
+    ncvar_put(ncid,short_veg,vals=siteInfo$IGBP_vegetation_short)}
+	if(!is.na(siteInfo$IGBP_vegetation_long)) {
+    ncvar_put(ncid,long_veg,vals=siteInfo$IGBP_vegetation_long)}
+	
  
 	# Time dependent variables:
   lapply(1:length(var_defs), function(x) ncvar_put(nc=ncid, 
@@ -759,4 +780,36 @@ CreateMetNetcdfFile = function(metfilename, datain,               #outfile file 
 	# Close netcdf file:
 	nc_close(ncid)
 }
+
+
+
+#-----------------------------------------------------------------------------
+
+#' Writes model parameters as global attribute to NetCDF file
+#' @export
+write_model_params <- function(ncid, modelInfo, missing_val){
+    
+  #Get variable names
+  vars <- sapply(modelInfo, names)
+  
+  for(k in 1:length(vars)){
+    
+    #Check that value is not missing
+    if(modelInfo[[k]] != missing_val & !is.na(modelInfo[[k]])){
+      
+      #Write attribute
+      ncatt_put(ncid,varid=0,attname=vars[k],
+                attval=modelInfo[[k]], prec="text")  
+      
+    }
+  }
+}
+
+
+
+
+
+
+
+
 
