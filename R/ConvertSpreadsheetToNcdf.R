@@ -260,10 +260,11 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     #Gapfill using statistical methods
     if(met_gapfill == "statistical") {
       
-      DataFromText <- GapfillMet_statistical(DataFromText, qc_name, qc_flags,
-                                             copyfill, lwdown_method,
+      DataFromText <- GapfillMet_statistical(datain=DataFromText, qc_name=qc_name, 
+                                             qc_flags=qc_flags, copyfill=copyfill, 
+                                             linfill=linfill, lwdown_method=lwdown_method,
                                              elevation=site_info$SiteElevation,
-                                             gaps, site_log)
+                                             gaps=gaps, site_log=site_log)
     
   
     # gapfill using ERA-interim data provided as part of FLUXNET2015      

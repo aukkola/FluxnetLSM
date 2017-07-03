@@ -203,61 +203,42 @@ GapfillMet_statistical <- function(datain, qc_name, qc_flags,
   
   
   ### Then gapfill LWdown and air pressure ###
+
+  #Find Tair index
+  tair_ind <- find_ind_and_qc(ind, var=c("TA_F_MDS", "TA_F", "Ta_f"))
   
+  ## LWdown ##s
   if(length(lwdown_ind) > 0){
     
+    #Find indices for rel humidity/VPD
+    rh_ind   <- find_ind_and_qc(ind, var=c("RH", "Rh"))
+    
+    if(length(rh_ind) ==0){
+      rh_ind <- find_ind_and_qc(ind, var=c("VPD_F_MDS", "VPD_F", "VPD_f"))
+    }
+    
+    #Do not have both available, stop
+    if(length(tair_ind)==0 | length(rh_ind)==0){
+      error <- paste("Cannot gapfill incoming longwave radiation",
+                     "do not have both air temperature and relative",
+                     "humidity or vapour pressure deficit available.")
+      stop_and_log(error=error, site_log=site_log)
+    }
     
     
-    
+    #Synthesize LWdown
     temp_data <- gapfill_LWdown_Pair(datain, var="LWdown", var_ind=lwdown_ind, 
-                                     TairK=tair_ind, RH=rh_ind, 
-                                     technique=technique, site_log=site_log)
-    
-    
-      if(length(temp_data$missing) > 0){
+                                     TairK=tair_ind, RH=rh_ind[1], 
+                                     technique=lwdown_method, site_log=site_log)
         
-        ### Save information to QC flags (creat qc flag if doesn't exist) ###
-        qc_col <- which(datain$vars==paste(vars[k], qc_name, sep=""))
-        
-        #QC variable exists, replace gapfilled tsteps with correct flag
-        if(length(qc_col) > 0){
-          
-          datain$data[temp_data$missing, qc_col] <- qc_value
-          
-        } else {
-          
-          message(paste("Could not find QC flag for variable", 
-                        vars[k], "gap-filled with statistical",
-                        "methods. Creating QC flag."))     
-          
-          #Initialise QC flag with zeros and replace with "4" where gap-filled
-          qc_var <- rep(qc_flags$QC_measured, length(datain$data[,vars[k]]))
-          qc_var[temp_data$missing] <- qc_value
-          
-          #Create name for QC variable and save data and name to data.frame
-          #Use output variable name to create qc flag name
-          qc_varname <- paste(datain$out_vars[vars[k]],"_qc", sep="")
-          
-          #Append qc time series to data
-          datain$data <- cbind(datain$data, qc_var)
-          
-          #Set column name correctly
-          colnames(datain$data)[ncol(datain$data)] <- qc_varname
-          
-          #Add new QC var to attributes
-          datain <- create_qc_var(datain, qc_varname, qc_flags)
-          
-        }
-      }
+    #Replace with gapfilled data
+    datain$data[,names(lwdown_ind)] <- temp_data$data
     
-  }
-  
-  if(length(pair_ind) >0){
     
     if(length(temp_data$missing) > 0){
       
       ### Save information to QC flags (creat qc flag if doesn't exist) ###
-      qc_col <- which(datain$vars==paste(vars[k], qc_name, sep=""))
+      qc_col <- which(datain$vars==paste(names(lwdown_ind), qc_name, sep=""))
       
       #QC variable exists, replace gapfilled tsteps with correct flag
       if(length(qc_col) > 0){
@@ -271,12 +252,12 @@ GapfillMet_statistical <- function(datain, qc_name, qc_flags,
                       "methods. Creating QC flag."))     
         
         #Initialise QC flag with zeros and replace with "4" where gap-filled
-        qc_var <- rep(qc_flags$QC_measured, length(datain$data[,vars[k]]))
+        qc_var <- rep(qc_flags$QC_measured, length(datain$data[,names(lwdown_ind)]))
         qc_var[temp_data$missing] <- qc_value
         
         #Create name for QC variable and save data and name to data.frame
         #Use output variable name to create qc flag name
-        qc_varname <- paste(datain$out_vars[vars[k]],"_qc", sep="")
+        qc_varname <- paste(datain$out_vars[names(lwdown_ind)],"_qc", sep="")
         
         #Append qc time series to data
         datain$data <- cbind(datain$data, qc_var)
@@ -293,10 +274,69 @@ GapfillMet_statistical <- function(datain, qc_name, qc_flags,
   }
   
   
+  ## Air Pressure ##
+  if(length(pair_ind) >0){
+    
+    #Do not have both available, stop
+    if(length(tair_ind)==0 | is.na(elevation)){
+      error <- paste("Cannot gapfill air pressure, do not have",
+                     "both air temperature and elevation available.",
+                     "Elevation is set in site metadata file, please",
+                     "amend if missing.")
+      stop_and_log(error=error, site_log=site_log)
+    }
+    
+    
+    #Synthesize LWdown
+    temp_data <- gapfill_LWdown_Pair(datain, var="Pair", var_ind=pair_ind, 
+                                     TairK=tair_ind, elev=elevation,
+                                     site_log=site_log)
+    
+    #Replace with gapfilled data
+    datain$data[,names(lwdown_ind)] <- temp_data$data
+    
+    
+    if(length(temp_data$missing) > 0){
+      
+      ### Save information to QC flags (creat qc flag if doesn't exist) ###
+      qc_col <- which(datain$vars==paste(names(pair_ind), qc_name, sep=""))
+      
+      #QC variable exists, replace gapfilled tsteps with correct flag
+      if(length(qc_col) > 0){
+        
+        datain$data[temp_data$missing, qc_col] <- qc_value
+        
+      } else {
+        
+        message(paste("Could not find QC flag for variable", 
+                      "Air Pressure, gap-filled with statistical",
+                      "methods. Creating QC flag."))     
+        
+        #Initialise QC flag with zeros and replace with "4" where gap-filled
+        qc_var <- rep(qc_flags$QC_measured, length(datain$data[,names(pair_ind)]))
+        qc_var[temp_data$missing] <- qc_value
+        
+        #Create name for QC variable and save data and name to data.frame
+        #Use output variable name to create qc flag name
+        qc_varname <- paste(datain$out_vars[names(pair_ind)],"_qc", sep="")
+        
+        #Append qc time series to data
+        datain$data <- cbind(datain$data, qc_var)
+        
+        #Set column name correctly
+        colnames(datain$data)[ncol(datain$data)] <- qc_varname
+        
+        #Add new QC var to attributes
+        datain <- create_qc_var(datain, qc_varname, qc_flags)
+        
+      }
+    }
+    
+    
+  }
   
   
-  
-  
+  #Return modified data frame
   return(datain)
   
 
@@ -499,6 +539,11 @@ FindExcludeEval <- function(datain, all_missing, gaps, include_all){
 find_ind_and_qc <- function(inds, var, qc_name=NA){
   
   var_ind <- sapply(var, function(x) which(names(ind)==x))
+  
+  #Remove any possible duplicate indices (happens if variable 
+  #outputted several times, e.g. RH)
+  var_ind <- lapply(var_ind, function(x) if(length(x) > 1) x[1] else x=x)
+  
   if(!is.na(qc_name)){
     qc_ind  <- sapply(var, function(x) which(names(ind)==paste(x, qc_name, sep=""))) 
     
@@ -511,3 +556,5 @@ find_ind_and_qc <- function(inds, var, qc_name=NA){
     
   return(inds)
 }
+
+

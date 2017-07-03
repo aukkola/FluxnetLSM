@@ -546,7 +546,7 @@ gapfill_LWdown_Pair <- function(data, var, var_ind, TairK=NA, RH=NA,
       
       #Synthesize
       for(i in missing){
-        data_to_fill[i] <- SynthesizePSurf(tair[i], elevation)
+        data_to_fill[i] <- SynthesizePSurf(tair[i], elev)
       }
     }
   }
