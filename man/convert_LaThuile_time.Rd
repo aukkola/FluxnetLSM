@@ -4,7 +4,7 @@
 \alias{convert_LaThuile_time}
 \title{Converts La Thuile time format to Fluxnet2015 time format}
 \usage{
-convert_LaThuile_time(timestep)
+convert_LaThuile_time(timestep, tstepsize)
 }
 \description{
 Converts La Thuile time format to Fluxnet2015 time format

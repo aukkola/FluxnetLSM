@@ -27,7 +27,6 @@
 #'        e.g. "AU-How.2001.synth.hourly.allvars.csv".
 #' @param site_code Fluxnet site code e.g. "AU-How"
 #' @param out_path output path e.g. "./FLUXNET2016_processing/"
-#' 
 #' @param datasetname Name of the dataset, e.g. FLUXNET2015 or La Thuile. Defaults to FLUXNET2015,
 #'        and thus must be set if processing a dataset not compliant with FLUXNET2015 format.
 #' @param datasetversion Version of the dataset, e.g. "1-3"
@@ -41,7 +40,6 @@
 #'        Should have years as vector column names.
 #' @param model Name of land surface model. Used to retrieve model specific attributes, such as site
 #'        plant functional type.
-#'         
 #' @param missing Maximum percentage of time steps allowed to be missing in any given year
 #' @param gapfill_all Maximum percentage of time steps allowed to be gap-filled 
 #'        (any quality) in any given year. Note if gapfill_all is set, any thresholds
@@ -55,26 +53,23 @@
 #' @param gapfill_poor Maximum percentage of time steps allowed to be poor-quality gap-filled 
 #'        in any given year. Refer to package documentation for information on QC flags.
 #'        Set to NA if not required (default).
-#' @param min_yrs Minimum number of consecutive years to process
-#' 
+#' @param min_yrs Minimum number of consecutive years to process 
 #' @param met_gapfill Method to use for gap-filling meteorological data. Set to one of 
 #'        "ERAinterim", "statistical" or NA (default; no gap-filling).        
-#' @param era_file ERA input file (needed if using ERAinterim to gapfill met variables)
-#'        e.g. "FULLSET/FLX_AU-How_FLUXNET2015_ERAI_HH_1989-2014_1-3.csv"
 #' @param flux_gapfill Method to use for gap-filling flux data. Set to one of
 #'        "statistical" or NA (default; no gap-filling).
-#' 
+#' @param era_file ERA input file (needed if using ERAinterim to gapfill met variables)
+#'        e.g. "FULLSET/FLX_AU-How_FLUXNET2015_ERAI_HH_1989-2014_1-3.csv" 
 #' @param lwdown_method Method used to synthesize incoming longwave radiation. 
 #'        One of "Abramowitz_2012" (default), "Swinbank_1963" or "Brutsaert_1975".
 #' @param regfill Maximum consecutive length of time (in number of days) to be gap-filled 
 #'        using multiple linear regression. Defaults to 30 days. Used to gapfill flux variables.
-#' @param regr_window Length of time period used to train multiple linear regression
-#'        used for gap-filling flux variables.
+#' @param regr_window Length of time period (in number of days) used to train multiple linear regression
+#'        used for gap-filling flux variables. Defaults to 180 days.
 #' @param linfill Maximum consecutive length of time (in hours) to be gap-filled 
 #'        using linear interpolation. Used for all variables except rainfall. Defaults to 4 hours. 
-#' @param copyfill Maximum consecutive length of time (in number of days)
-#'        Used for rainfall.
-#' 
+#' @param copyfill Maximum consecutive length of time (in number of days) to be gap-filled using
+#'        copyfill. Defaults to 10 days.
 #' @param include_all_eval Should all evaluation values be included, regardless of data gaps? 
 #'        If set to FALSE, any evaluation variables with missing or gap-filled values in
 #'        excess of the thresholds will be discarded.
@@ -84,25 +79,24 @@
 #' @export
 #'
 #'
-convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
-                                                                            
+convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,                                   
                                       datasetname="FLUXNET2015", datasetversion="n/a",
                                       flx2015_version=NA,
                                       fair_use="Fair_Use", fair_use_vec=NA,
-                                      
                                       model=NA,
-                                      
-                                      met_gapfill=NA, era_file=NA,
+                                      met_gapfill=NA, 
                                       flux_gapfill=NA,
+                                      era_file=NA,
                                       lwdown_method="Abramowitz_2012",
-                                      
+                                      regfill=30, regwindow=180,
+                                      linfill=4, copyfill=10,
                                       missing = 15, gapfill_all=20,
                                       gapfill_good=NA, gapfill_med=NA,
                                       gapfill_poor=NA, min_yrs=2,
-                                      
                                       include_all_eval=TRUE,
                                       plot=c("annual", "diurnal", "timeseries")) {
     
+
     library(R.utils)
     library(pals)
   
@@ -115,7 +109,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     site_log <- initialise_sitelog(site_code, outlog)
     
     
-    ### Set expected values for missing and gap-filled values ###
+    ### Set expected values for missing values, QC flags and time stamps ###
     
     #First check that fluxnet2015 version specified correctly, if using it
     check_flx2015_version(datasetname, flx2015_version)
@@ -124,10 +118,19 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     
     Sprd_MissingVal <- -9999 # missing value in spreadsheet
     Nc_MissingVal   <- -9999 # missing value in created netcdf files
+       
     
-    
-    ### Find model-specific parameters ###
-    model_params <- initialise_model(model)      
+    #Name of time stamp and QC variables
+    if(datasetname=="LaThuile"){
+      time_vars <- c("Year", "DoY", "Time", "DTIME")
+      qc_name <- "qc"
+
+    } else {
+      time_vars <- c("TIMESTAMP_START", "TIMESTAMP_END")
+      qc_name <- "_QC"
+      
+    }
+     
     
     
     ################################
@@ -149,29 +152,12 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     }
     
     vars <- read.csv(var_file, header=TRUE,
-    colClasses=c("character", "character", "character",
-                 "character", "character", "character",
-                 "character",
-                 "numeric",   "numeric",
-                 "logical", "logical",
-                 "character"))
+                     colClasses=c("character", "character", "character",
+                     "character", "character", "character",
+                     "character", "numeric", "numeric",
+                     "logical", "logical", "character"))
     
-    
-    #Name of time stamp variables
-    if(datasetname=="LaThuile"){
-      time_vars <- c("Year", "DoY", "Time", "DTIME")
-    } else {
-      time_vars <- c("TIMESTAMP_START", "TIMESTAMP_END")
-    }
-    
-    
-    #Set QC flag variable name (differs for Fluxnet2015 and LaThuile)
-    if(datasetname=="LaThuile"){
-      qc_name <- "qc"
-    } else {
-      qc_name <- "_QC"
-    }
-    
+
     
     #Read site information (lon, lat, elevation)
     site_info <- get_site_metadata(site_code)
@@ -195,7 +181,11 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     }
         
 
-    # Read text file containing flux data:
+    ### Find model-specific parameters ###
+    model_params <- initialise_model(model, site_info)      
+    
+    
+    # Read text file containing flux data
     DataFromText <- ReadCSVFluxData(fileinname=infile, vars=vars, 
                                     datasetname=datasetname,
                                     time_vars=time_vars, site_log,
@@ -203,7 +193,8 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                                     fair_usage_vec=fair_use_vec,
                                     site_code=site_code)
     
-    # Make sure whole number of days in dataset:
+    
+    # Make sure whole number of days in dataset
     CheckCSVTiming(DataFromText, site_log)
     
     
@@ -235,9 +226,10 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                            all_eval = vars[which(DataFromText$categories=="Eval")],
                            qc_name=qc_name, site_log)
  
+    
     #Log possible warnings and remove warnings from output var
     site_log <- log_warning(warn=gaps$warn, site_log)
-    gaps <- gaps$out
+    gaps     <- gaps$out
     
     
     ## Check that gap check found whole years ##
@@ -265,85 +257,22 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     ###--- Gapfill meteorological variables ---###
     ##############################################
     
-    # gapfill using ERA-interim data provided as part of FLUXNET2015
+    #Gapfill using statistical methods
     if(met_gapfill == "statistical") {
       
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
+      DataFromText <- GapfillMet_statistical(DataFromText, qc_name, qc_flags,
+                                             copyfill, lwdown_method,
+                                             elevation=site_info$SiteElevation,
+                                             gaps, site_log)
+    
+  
+    # gapfill using ERA-interim data provided as part of FLUXNET2015      
     } else if(met_gapfill == "ERAinterim") {
       
-
-      #Read ERA data and extract time steps corresponding to obs
-      era_data <- read_era(ERA_file=ERA_file, datain=DataFromText)
-      
-      #Find indices for met variables to be gapfilled
-      ind <- which(DataFromText$categories=="Met")
-      
-      #Retrieve VPD and air temp units. Used to convert ERAinterim VPD to RH in gapfill function
-      tair_units <- DataFromText$units$original_units[which(vars=="TA_F_MDS")]
-      vpd_units  <- DataFromText$units$original_units[which(vars=="VPD_F_MDS")]
-      
-      #If not found, set to unknown
-      if(length(tair_units)==0){ tair_units = "UNKNOWN" } 
-      if(length(vpd_units)==0){ vpd_units = "UNKNOWN" }
-      
-      #Gapfill met variables
-      temp_data <- GapfillMet(datain=DataFromText$data[,ind], era_data=era_data,
-                              era_vars=DataFromText$era_vars[ind],
-                              tair_units=tair_units, vpd_units=vpd_units,
-                              missing_val=Sprd_MissingVal,
-                              out_vars=DataFromText$out_vars[ind],
-                              qc_name=qc_name, site_log)
-      
-      
-      #Check that column names of temp_data and data to be replaced match. Stop if not
-      if(!all(colnames(temp_data$datain)==colnames(DataFromText$data[,ind]))){
-        error <- paste("Error gap-filling met data with ERAinterim.", 
-                       "Column names of data to be replaced do not match")
-        stop_and_log(error, site_log)
-      }
-      
-      
-      #Replace original met variables with gap-filled variables
-      DataFromText$data[,ind] <- temp_data$datain
-      
-      #If new QC variables were created, create and append
-      #variable attributes to data frame
-      if(length(temp_data$new_qc) > 0){
-        
-        #Append qc time series to data
-        DataFromText$data <- cbind(DataFromText$data, temp_data$new_qc)
-        
-        qc_vars <- colnames(temp_data$new_qc)
-        
-        for(k in 1:length(qc_vars)){
-          DataFromText <- create_qc_var(DataFromText, qc_name=qc_vars[k])
-        }
-      }
-      
-      #Basic sanity check
-      if(ncol(DataFromText$data)!=length(DataFromText$vars)){
-        error <- "Error creating new QC flags"
-        stop_and_log(error, site_log)
-      }
-      
+      #Gapfill with ERAinterim
+      DataFromText <- GapfillMet_with_ERA(DataFromText, ERA_file, 
+                                          qc_name, qc_flags)
+           
     #Cannot recognise method, stop
     } else if (!is.na(met_gapfill)) {
       
@@ -353,27 +282,18 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     
     
     
+    
+    
     ####################################
     ###--- Gapfill flux variables ---###
     ####################################
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+    #Gapfill flux variables using statistical methods
+    if(gapfill_flux){
+      
+      DataFromText <- GapfillFlux(DataFromText, qc_name, qc_flags,
+                                  regfill, regwindow, linfill)
+    }
     
     
     ############################################################
@@ -525,7 +445,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                             ERA_gapfill=ERA_gapfill,
                             infile=infile,
                             var_ind=met_ind,
-                            modelInfo=model_params)   ### COPMLETE !!!!!!
+                            modelInfo=model_params)
         
         
         
@@ -551,8 +471,6 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                              modelInfo=model_params)
         
     }
-    
-      
     
     
     #############################

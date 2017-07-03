@@ -158,6 +158,8 @@ get_qc_flags <- function(dataset, subset=NA){
     QCmeasured  <- 0
     QCgapfilled <- c(1, 2, 3) 
     
+    names(QCgapfilled) <- c("good", "ERA", "statistical")
+    
     qc_info <- paste("Measured: ", QCmeasured, 
                      ", Good-quality gapfilling: ",QCgapfilled[1], 
                      ", ERA-Interim gapfilling: ", QCgapfilled[2], 
@@ -173,6 +175,8 @@ get_qc_flags <- function(dataset, subset=NA){
     #These correspond to the "qc" variables in La Thuile (not qcOK)
     QCmeasured  <- 0
     QCgapfilled <- c(1, 2, 3, 4, 5) 
+    
+    names(QCgapfilled) <- c("good", "medium", "poor", "ERA", "statistical")
     
     qc_info <- paste("Measured: ", QCmeasured, 
                      ", Good-quality gapfilling: ",QCgapfilled[1], 
@@ -192,10 +196,10 @@ get_qc_flags <- function(dataset, subset=NA){
   
   
   #Collate into a list
-  qc_flags <- list(QCmeasured, QCgapfilled, qc_info)
+  qc_flags        <- list(QCmeasured, QCgapfilled, qc_info)
   names(qc_flags) <- c("QC_measured", "QC_gapfilled", "qc_info")
   
-  return(qc_info)
+  return(qc_flags)
   
 }
 

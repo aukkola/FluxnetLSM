@@ -40,7 +40,7 @@ ChangeUnits <- function(datain, site_log){
       ## Air temperature (C to K)
       if((datain$vars[k]=="TA_F_MDS" | datain$vars[k]=="Ta_f") &
           flx_units[k]=="C" & alma_units[k]=="K"){
-        datain$data[[k]] <- datain$data[[k]] + 273.15
+        datain$data[[k]] <- celsius_to_kelvin(datain$data[[k]])
         
         
       ## CO2: different but equivalent units, do nothing
@@ -225,3 +225,17 @@ calc_esat <- function(airtemp){
   
   return(esat)
 }
+
+#-----------------------------------------------------------------------------
+
+#' Convert air temperature from Celsius to Kelvin
+#' @export
+celsius_to_kelvin <- function(data){
+  data <- data + 273.15
+  return(data)
+}
+
+
+
+
+

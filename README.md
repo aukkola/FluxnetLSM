@@ -58,3 +58,16 @@ See `examples` for example usage. Three examples are provided for processing a s
 - multiple sites using parallel programming (`examples/example_conversion_multiple_sites_parallel.R`)
 
 
+
+### Troubleshooting
+
+1. The package does not recognise the unit conversion
+
+	Unit conversions are performed by the function `ChangeUnits`, you can find this under `R/Conversions.R`. A template is provided towards the end of this function for adding a new conversion.
+
+
+
+
+
+
+

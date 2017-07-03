@@ -4,12 +4,12 @@
 \alias{convert_fluxnet_to_netcdf}
 \title{ConvertSpreadsheetToNcdf.R}
 \usage{
-convert_fluxnet_to_netcdf(infile, site_code, out_path, ERA_file = NA,
-  ERA_gapfill = FALSE, datasetname = "FLUXNET2015",
-  datasetversion = "1-3", fair_use = NA, fair_use_vec = NA,
-  missing = 15, gapfill_all = 20, gapfill_good = NA, gapfill_med = NA,
-  gapfill_poor = NA, min_yrs = 2, include_all_eval = TRUE,
-  plot = c("annual", "diurnal", "timeseries"))
+convert_fluxnet_to_netcdf(infile, site_code, out_path,
+  datasetname = "FLUXNET2015", datasetversion = "n/a", fair_use = NA,
+  fair_use_vec = NA, met_gapfill = NA, era_file = NA, flux_gapfill = NA,
+  lwdown_method = "Abramowitz_2012", missing = 15, gapfill_all = 20,
+  gapfill_good = NA, gapfill_med = NA, gapfill_poor = NA, min_yrs = 2,
+  include_all_eval = TRUE, plot = c("annual", "diurnal", "timeseries"))
 }
 \arguments{
 \item{infile}{input filename,
@@ -20,8 +20,6 @@ e.g. "AU-How.2001.synth.hourly.allvars.csv".}
 \item{site_code}{Fluxnet site code e.g. "AU-How"}
 
 \item{out_path}{output path e.g. "./FLUXNET2016_processing/"}
-
-\item{ERA_gapfill}{Gapfill met variables using ERAinterim?}
 
 \item{datasetname}{Name of the dataset, e.g. FLUXNET2015 or La Thuile. Defaults to FLUXNET2015,
 and thus must be set if processing a dataset not compliant with FLUXNET2015 format.}
@@ -34,7 +32,19 @@ years that comply with the required policy/policies. Must provide fair_use_vec t
 functionality.}
 
 \item{fair_use_vec}{A vector of Data Use policy for each year in the data file, e.g. "LaThuile" or "Fair_Use".
-Should have years as vector column names.}
+       Should have years as vector column names.}
+
+\item{met_gapfill}{Method to use for gap-filling meteorological data. Set to one of
+"ERAinterim", "statistical" or NA (default; no gap-filling).}
+
+\item{era_file}{ERA input file (needed if using ERAinterim to gapfill met variables)
+e.g. "FULLSET/FLX_AU-How_FLUXNET2015_ERAI_HH_1989-2014_1-3.csv"}
+
+\item{flux_gapfill}{Method to use for gap-filling flux data. Set to one of
+       "statistical" or NA (default; no gap-filling).}
+
+\item{lwdown_method}{Method used to synthesize incoming longwave radiation.
+One of "Abramowitz_2012" (default), "Swinbank_1963" or "Brutsaert_1975").}
 
 \item{missing}{Maximum percentage of time steps allowed to be missing in any given year}
 
@@ -63,14 +73,34 @@ excess of the thresholds will be discarded.}
 \item{plot}{Should annual, diurnal and/or 14-day running mean plots be produced?
        Set to NA if not required.}
 
-\item{era_file}{ERA input file (needed if using ERAinterim to gapfill met variables)
-e.g. "FULLSET/FLX_AU-How_FLUXNET2015_ERAI_HH_1989-2014_1-3.csv"}
+\item{regfill}{Maximum consecutive length of time (in number of days) to be gap-filled
+using multiple linear regression. Defaults to 30 days. Used to gapfill flux variables.}
+
+\item{regr_window}{Length of time period used to train multiple linear regression
+used for gap-filling flux variables.}
+
+\item{linfill}{Maximum consecutive length of time (in hours) to be gap-filled
+using linear interpolation. Used for all variables except rainfall. Defaults to 4 hours.}
+
+\item{copyfill}{Maximum consecutive length of time (in number of days)
+Used for rainfall.}
 }
 \description{
 Converts data from a FLUXNET2015 formatted spreadsheet to
 NetCDF.
 }
 \details{
+Gapfilling options:
+
+EraInterim:
+Downscaled ERAInterim estimates are provided for all meteorological variables
+in the FLUXNET2015 release. Any missing time steps are replaced with the corresponding
+ERAInterim estimates.
+
+Statistical:
+
+
+
 author: Anna Ukkola UNSW 2017.
 Main function to convert Fluxnet2015 CSV-files to NetCDF
 }
