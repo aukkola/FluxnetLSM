@@ -430,9 +430,10 @@ copyfill_met <- function(data, tsteps, tstepsize,
   max_gap <- (copyfill*60*60*24)/tstepsize
   
   #First check that no gaps are longer than "copyfill"
-  for(k in 1:length(start)){
+  for(n in 1:length(start)){
     
-    missing <- which(data[start[k]:end[k]]==Sprd_MissingVal)
+    #Find missing values
+    missing <- which(data[start[n]:end[n]]==Sprd_MissingVal)
     
     consec <- seqToIntervals(missing)
     
@@ -444,41 +445,39 @@ copyfill_met <- function(data, tsteps, tstepsize,
                      "consecutive gap of ", copyfill,
                      " days. Amend parameter 'copyfill' to ",
                      "change this.", sep="")
-        
       stop_and_log(error, site_log)
-      
-    }
-  }
-  
-  
-  #All missing values
-  missing <- which(data==Sprd_MissingVal)
-  
-  if(length(missing) > 0){
-    
-    #Convert time steps to monts, days and hours (no year)
-    tsteps <- format(strptime(tsteps[,1], "%Y%m%d%H%M"), 
-                     format="%m%d%H%M")
-    
-    for(k in missing){
-      
-      eqv_tsteps <- which(tsteps==tsteps[k])
-      
-      #Find data for the same time steps, set missing to NA
-      fill_data <- data[eqv_tsteps]
-      fill_data[fill_data==Sprd_MissingVal] <- NA
-      
-      fill_value <- mean(fill_data, na.rm=TRUE)
-      
-      #Set to missing value if couldn't calculate fill value
-      if(is.na(fill_value)) fill_value <- Sprd_MissingVal
-      
-      #Replace missing value with this
-      data[k] <- fill_value
-      
     }
     
-  }
+    
+    #If found missing, gapfill
+    if(length(missing) > 0){
+      
+      #Loop through missing values
+      for(k in missing){
+        
+        #add start to k
+        k <- k + start[n] -1 
+        
+        #Find same time step for other years
+        eqv_tsteps <- which(tsteps==tsteps[k])
+        
+        #Find data for the same time steps, set missing to NA
+        fill_data <- data[eqv_tsteps]
+        fill_data[fill_data==Sprd_MissingVal] <- NA
+        
+        fill_value <- mean(fill_data, na.rm=TRUE)
+        
+        #Set to missing value if couldn't calculate fill value
+        if(is.na(fill_value)) fill_value <- Sprd_MissingVal
+        
+        #Replace missing value with this
+        data[k] <- fill_value
+        
+      } 
+    }
+    
+  } # time periods
+  
 
   #Return gap-filled data and index of missing values
   return(list(data=data, missing=missing))
@@ -497,7 +496,7 @@ gapfill_LWdown_Pair <- function(data, var, var_ind, TairK=NA, RH=NA,
   tair <- datain$data[,names(TairK)]
 
   #Get Tair units 
-  tair_units <- datain$units$original_units[names(tairK)]
+  tair_units <- datain$units$original_units[names(TairK)]
   
   #Convert Tair if necessary (need Kelvin)
   if(tair_units == "C"){
@@ -567,6 +566,8 @@ SynthesizeLWdown <- function(TairK,RH,technique){
   
   #Three techniques available, see Abramowitz et al. (2012),
   #Geophysical Research Letters, 39, L04808 for details
+  
+  zeroC <- 273.15
   
   if(technique=='Swinbank_1963'){
     # Synthesise LW down from air temperature only:

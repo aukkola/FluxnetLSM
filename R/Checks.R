@@ -340,8 +340,8 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
     
     #Calculate % missing for each variable
     total_missing[[k]] <- apply(datain$data, MARGIN=2, function(x) 
-      length(which(x[tstart[k]:tend[k]] == missing_val)) 
-      / length(x[tstart[k]:tend[k]]) *100)
+                                length(which(x[tstart[k]:tend[k]] == missing_val)) 
+                                / length(x[tstart[k]:tend[k]]) *100)
     
     #Calculate % gap-filled
     #Find indices for QC variables (if exist)
@@ -441,3 +441,33 @@ CheckDataRanges = function(datain, missingval, site_log){
 
 
 #-----------------------------------------------------------------------------
+
+#' Performs initial checks on function arguments
+#' @export
+InitialChecks <- function(met_gapfill, era_file, missing, aggregate,
+                          datasetname, flx2015_version){
+  
+  #Check that ERA file supplied if using ERAinterim met_gapfilling
+  if(!is.na(met_gapfill) & met_gapfill=="ERAinterim" & is.na(era_file)){s
+    stop("Must provide era_file when using ERAinterim gapfilling!")
+  }
+  
+  #Check that missing is between 0-100
+  if(missing <0 | missing >100 | is.na(missing)){
+    stop("Argument 'missing' not set correctly, must be a number between 0-100")
+  }
+  
+  #Check that aggregate time step is divisible by 24
+  if(!is.na(aggregate)){
+    if(24 %% aggregate != 0){
+    stop("Aggregate time step must be divisible by 24 and greater than original data timestep, please amend.")
+    }
+  }
+  
+  if(datasetname=="FLUXNET2015" & flx2015_version!="FULLSET" & flx2015_version!="SUBSET"){
+    stop("Argument 'flx2015_version' not set correctly, please use one of 'FULLSET' and 'SUBSET'.")
+  }
+  
+}
+
+

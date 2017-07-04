@@ -95,10 +95,16 @@ GapfillMet_statistical <- function(datain, qc_name, qc_flags,
   #Find indices for met variables to be gapfilled
   ind <- which(datain$categories=="Met")
   
+  if(length(ind)==0){
+    warning("No met variables found, cannot perform met data gapfilling")
+    return()
+  }
+  
+  
   #Remove QC vars
   qc_ind <- which(grepl(qc_name, substr(names(ind), 
                   nchar(names(ind))-2, nchar(names(ind)))))
-  if(length(qc_ind) > 0) ind <- ind[-qc_ind]
+  if(length(qc_ind) > 0) {ind <- ind[-qc_ind]}
   
   #Var names
   vars <- names(ind)
@@ -119,13 +125,18 @@ GapfillMet_statistical <- function(datain, qc_name, qc_flags,
   
   ### First gapfill variables other than LWdown and air pressure ###
   
+  #Convert time steps to monts, days and hours (no year)
+  #Used for copyfill, done here so only have to do once
+  tsteps <- format(strptime(datain$time[,1], "%Y%m%d%H%M"), 
+                   format="%m%d%H%M")
+  
   #Need some of these for LWdown and air pressure
-  for(k in ind_others){
+  for(k in 1:length(ind_others)){
     
     #Rainfall (only use copyfill)
     if(any(vars[k]==c("P", "P_F", "Precip_f"))){
       
-      temp_data <- copyfill_met(data=datain$data[,vars[k]], tsteps=datain$time,
+      temp_data <- copyfill_met(data=datain$data[,vars[k]], tsteps=tsteps,
                                 tstepsize=datain$timestepsize,copyfill, 
                                 start=gaps$tseries_start,
                                 end=gaps$tseries_end,
@@ -145,7 +156,7 @@ GapfillMet_statistical <- function(datain, qc_name, qc_flags,
       gapfilled <- temp_data$missing
       
       #Then use copyfill for longer gaps
-      temp_data <- copyfill_met(data=temp_data$data, tsteps=datain$time,
+      temp_data <- copyfill_met(data=temp_data$data, tsteps=tsteps,
                                 tstepsize=datain$timestepsize,
                                 copyfill, start=gaps$tseries_start,
                                 end=gaps$tseries_end,
@@ -158,7 +169,7 @@ GapfillMet_statistical <- function(datain, qc_name, qc_flags,
     }
     
     
-    #Repalce data with gapfilled data
+    #Replace data with gapfilled data
     datain$data[,vars[k]] <- temp_data$data
     
     
@@ -538,7 +549,7 @@ FindExcludeEval <- function(datain, all_missing, gaps, include_all){
 #' @export
 find_ind_and_qc <- function(inds, var, qc_name=NA){
   
-  var_ind <- sapply(var, function(x) which(names(ind)==x))
+  var_ind <- sapply(var, function(x) which(names(inds)==x))
   
   #Remove any possible duplicate indices (happens if variable 
   #outputted several times, e.g. RH)
