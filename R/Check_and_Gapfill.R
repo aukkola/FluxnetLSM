@@ -356,6 +356,63 @@ GapfillMet_statistical <- function(datain, qc_name, qc_flags,
 
 #-----------------------------------------------------------------------------
 
+#' Updates data gap information after gap-filling
+#' @export
+update_gaps <- function(gaps, qc, datain){
+  
+  #updates total_missing and total_gapfilled
+  
+  data <- datain$data
+  vars <- datain$vars
+  
+  #Loop through time periods
+  for(k in 1:length(gaps$total_missing)){
+    
+    #Loop through variables
+    for(v in 1:length(vars){
+      
+      ind <- which(names(gaps$total_missing[[k]]) == vars[v])
+      
+      #If didn't find variable, add to gaps list
+      if(length(ind)==0){
+        
+      
+        
+      #Else update existing
+      } else{
+        
+        gaps$total_missing[[k]][vars[v]]
+        
+      }
+      
+      
+      
+      
+    }
+    
+    
+    
+  }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  return(gaps)
+}
+
+
+
+
+#-----------------------------------------------------------------------------
+
 #'Creates attributes for a new QC variable
 #' @return datain
 #' @export

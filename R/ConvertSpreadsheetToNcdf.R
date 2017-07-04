@@ -81,25 +81,24 @@
 #'
 convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,                                   
                                       datasetname="FLUXNET2015", datasetversion="n/a",
-                                      flx2015_version=NA,
+                                      flx2015_version="FULLSET",
                                       fair_use="Fair_Use", fair_use_vec=NA,
-                                      model=NA,
+                                      aggregate=NA,
                                       met_gapfill=NA, 
                                       flux_gapfill=NA,
                                       era_file=NA,
-                                      lwdown_method="Abramowitz_2012",
-                                      regfill=30, regwindow=180,
-                                      linfill=4, copyfill=10,
                                       missing = 15, gapfill_all=20,
                                       gapfill_good=NA, gapfill_med=NA,
                                       gapfill_poor=NA, min_yrs=2,
+                                      linfill=4, copyfill=10,
+                                      regfill=30, regwindow=180,
+                                      lwdown_method="Abramowitz_2012",
                                       include_all_eval=TRUE,
+                                      model=NA, 
                                       plot=c("annual", "diurnal", "timeseries")) {
     
 
-    library(R.utils)
-    library(pals)
-  
+    library(R.utils)  
     
     ### Create sub-folders for outputs ###
     outlog <- create_outdir(out_path, site_code, plot)
@@ -132,6 +131,11 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     }
      
     
+    #Do some initial checks that arguments set correctly
+    InitialChecks(met_gapfill, era_file, missing, aggregate,
+                  datasetname, flx2015_version)
+    
+    
     
     ################################
     ###--- Read variable data ---###
@@ -148,8 +152,13 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     if(datasetname=="LaThuile"){
       var_file <- system.file("data","Output_variables_LaThuile.csv", package="FluxnetLSM")
     } else {
-      var_file <- system.file("data","Output_variables_Default_FLUXNET2015.csv", package="FluxnetLSM")
+      var_file <- system.file("data","Output_variables_FLUXNET2015.csv", package="FluxnetLSM")
     }
+    
+    
+    
+    ### REMOVE THIS !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    var_file <- "~/Documents/FLUXNET2016_processing/scripts/data//Output_variables_FLUXNET2015.csv"
     
     vars <- read.csv(var_file, header=TRUE,
                      colClasses=c("character", "character", "character",
@@ -257,31 +266,53 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     ###--- Gapfill meteorological variables ---###
     ##############################################
     
-    #Gapfill using statistical methods
-    if(met_gapfill == "statistical") {
+    if(!is.na(met_gapfill)){
       
-      DataFromText <- GapfillMet_statistical(datain=DataFromText, qc_name=qc_name, 
-                                             qc_flags=qc_flags, copyfill=copyfill, 
-                                             linfill=linfill, lwdown_method=lwdown_method,
-                                             elevation=site_info$SiteElevation,
-                                             gaps=gaps, site_log=site_log)
+      #Gapfill using statistical methods
+      if(met_gapfill == "statistical") {
+        
+        
+        DataFromText <- GapfillMet_statistical(datain=DataFromText, qc_name=qc_name, 
+                                               qc_flags=qc_flags, copyfill=copyfill, 
+                                               linfill=linfill, lwdown_method=lwdown_method,
+                                               elevation=site_info$SiteElevation,
+                                               gaps=gaps, site_log=site_log)
+        
+        
+        # gapfill using ERA-interim data provided as part of FLUXNET2015      
+      } else if(met_gapfill == "ERAinterim") {
+        
+        #Gapfill with ERAinterim
+        DataFromText <- GapfillMet_with_ERA(DataFromText, ERA_file, 
+                                            qc_name, qc_flags)
+        
+        #Cannot recognise method, stop
+      } else {
+        
+        stop(paste("Cannot ascertain met_gapfill method. Choose one of",
+                   "'ERAinterim' and 'statistical' or set to NA if not desired"))  
+      }
+      
+      
+      
+      
+      
+      #COMPLETE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      #doesn't stop if can't gapfill all values
     
-  
-    # gapfill using ERA-interim data provided as part of FLUXNET2015      
-    } else if(met_gapfill == "ERAinterim") {
+      #COMPLETE !!!!!!!!!!!!!!!!!
+      #Need to update gaps
       
-      #Gapfill with ERAinterim
-      DataFromText <- GapfillMet_with_ERA(DataFromText, ERA_file, 
-                                          qc_name, qc_flags)
-           
-    #Cannot recognise method, stop
-    } else if (!is.na(met_gapfill)) {
+      #Update gaps after performing gapfilling
       
-      stop(paste("Cannot ascertain met_gapfill method. Choose one of",
-                 "'ERAinterim' and 'statistical' or set to NA if not desired"))  
+      gaps <- update_gaps(gaps, qc_info, DataFromText)
+      
+      
+      
+      
+      
     }
-    
-    
+       
     
     
     
@@ -294,7 +325,20 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
       
       DataFromText <- GapfillFlux(DataFromText, qc_name, qc_flags,
                                   regfill, regwindow, linfill)
+      
+      
+      #COMPLETE !!!!!!!!!!!!!!!!!
+      
+      #Need to update gaps
+      
+      #gaps <- update_gaps(gaps, DataFromText)
+      
+      
+      
+      
+      
     }
+    
     
     
     ############################################################
@@ -322,6 +366,28 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
       av_precip=rep(NA, length(unique(gaps$consec)))
     }
         
+    
+    
+    ############################################
+    ### Aggregate data to a longer time step ###
+    ############################################
+
+    if(!is.na(aggregate)){
+      
+      if(aggregate)
+      
+      
+      
+      
+    }
+    
+    
+    
+    
+    
+    
+    
+    
     
     ###########################################
     ### Convert units and check data ranges ###

@@ -28,11 +28,14 @@ initialise_model <- function(model, site_info){
   ### Template for adding a new model ###
   #} else if(model=="My_model"){
     
-  #     #PFT (set NetCDF variable name, here iver)
+  #     #PFT (specify the variable name as set in Site_metadata.csv,
+  #     #and the variable name you wish to be written in the NetCDF files)
   #     pft        <- site_info$out[paste(model, "_PFT", sep="")]
   #     names(pft) <- "my_pft_variable_name"
   #     
-  #     #Collate to list (this will allow more params to be added later)
+  #     #You can add multiple parameters in this fashion
+  #     #Collate these to this list and they will be automatically
+  #     #written to the output file:
   #     outs <- list(pft)
   
     

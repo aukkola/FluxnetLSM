@@ -147,9 +147,9 @@ ReadCSVFluxData <- function(fileinname, vars, datasetname, time_vars, site_log, 
   
 	timestepsize <- as.numeric(end) - as.numeric(start)
   
-	if( !(timestepsize>=300 && timestepsize<=3600) ){
+	if( !(timestepsize>=300 && timestepsize<=86400) ){
     error <- paste("Time step size must be between",
-                   "300 and 3600 seconds. Time step size",
+                   "300 and 86400 seconds. Time step size",
                    timestepsize, "found in file")
     stop_and_log(error, site_log)
     return(site_log)
