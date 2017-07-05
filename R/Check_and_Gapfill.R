@@ -132,43 +132,31 @@ GapfillMet_statistical <- function(datain, qc_name, qc_flags,
   
   #Need some of these for LWdown and air pressure
   for(k in 1:length(ind_others)){
-    
-    #Rainfall (only use copyfill)
-    if(any(vars[k]==c("P", "P_F", "Precip_f"))){
-      
-      temp_data <- copyfill_met(data=datain$data[,vars[k]], tsteps=tsteps,
-                                tstepsize=datain$timestepsize,copyfill, 
-                                start=gaps$tseries_start,
-                                end=gaps$tseries_end,
-                                varname=vars[k], site_log)
-       
-    #Other variables
-    } else {
-      
-      #First use linear interpolation for short
-      #subdiurnal gaps
-      temp_data <- linfill_met(data=datain$data[,vars[k]], 
-                                tsteps=datain$time,
-                                tstepsize=datain$timestepsize,
-                                linfill)
 
-      #Save gapfilled tsteps
-      gapfilled <- temp_data$missing
       
-      #Then use copyfill for longer gaps
-      temp_data <- copyfill_met(data=temp_data$data, tsteps=tsteps,
-                                tstepsize=datain$timestepsize,
-                                copyfill, start=gaps$tseries_start,
-                                end=gaps$tseries_end,
-                                varname=vars[k], site_log)
-      
-      #Append gapfilled with new temp_data
-      if(length(gapfilled) > 0){
-        temp_data$missing <- append(temp_data$missing, gapfilled)
-      }
+    #First use linear interpolation for short
+    #subdiurnal gaps
+    temp_data <- linfill_met(data=datain$data[,vars[k]], 
+                              tsteps=datain$time,
+                              tstepsize=datain$timestepsize,
+                              linfill)
+
+    #Save gapfilled tsteps
+    gapfilled <- temp_data$missing
+    
+    #Then use copyfill for longer gaps
+    temp_data <- copyfill_met(data=temp_data$data, tsteps=tsteps,
+                              tstepsize=datain$timestepsize,
+                              copyfill, start=gaps$tseries_start,
+                              end=gaps$tseries_end,
+                              varname=vars[k], site_log)
+    
+    #Append gapfilled with new temp_data
+    if(length(gapfilled) > 0){
+      temp_data$missing <- append(temp_data$missing, gapfilled)
     }
-    
-    
+
+        
     #Replace data with gapfilled data
     datain$data[,vars[k]] <- temp_data$data
     
@@ -353,59 +341,17 @@ GapfillMet_statistical <- function(datain, qc_name, qc_flags,
 
 }
 
-
 #-----------------------------------------------------------------------------
 
-#' Updates data gap information after gap-filling
+#' Gapfill flux variables using statistical methods
 #' @export
-update_gaps <- function(gaps, datain, qcInfo, qcName){
+GapfillFlux(datain, qc_name, qc_flags, regfill, linfill){
   
-  #updates total_missing and total_gapfilled
+  #Gapfills short gaps (up to linfill length of time) using
+  #linear interpolation
   
-  data <- datain$data
-  vars <- datain$vars
-  
-  #Loop through time periods
-  for(k in 1:length(gaps$total_missing)){
-    
-    start <- gaps$tseries_start[k]
-    end   <- gaps$tseries_end[k]
-    
-    #Loop through variables
-    for(v in 1:length(vars){
-      
-      #Find variable index
-      ind <- which(names(gaps$total_missing[[k]]) == vars[v])
-      
-      #Find corresponding QC var (if applicable)
-      qc_var <- which(names(gaps$total_missing[[k]]) == paste(vars[v], qcName, sep=""))
-            
-      #Determine no. of missing values and convert to percentage
-      missing <- length(which(datain$data[start:end,vars[v]] == Sprd_MissingVal))
-      missing <- missing / length(start:end) * 100
-      
-      #If didn't find variable, add to gaps list
-      if(length(ind)==0){
-          
-        names(missing) <- vars[v]
-        gaps$total_missing[[k]] <- append(gaps$total_missing[[k]], missing)
-        
-      #Else update existing
-      } else{
-    
-        #Convert to percentage and save
-        gaps$total_missing[[k]][vars[v]] <- missing
-        
-      }
-      
-      
-      
-      
-    }
-    
-    
-    
-  }
+  #Gapfills longer gaps (up to regfill length of time) using
+  #linear regression against met variables
   
   
   
@@ -418,8 +364,17 @@ update_gaps <- function(gaps, datain, qcInfo, qcName){
   
   
   
-  return(gaps)
+  
+  
+  
+  
+  
+  
+  
 }
+
+
+
 
 
 
@@ -469,7 +424,6 @@ create_qc_var <- function(datain, qc_name, qc_flags){
 }
 
 #-----------------------------------------------------------------------------
-
 
 #' Fills QC flags with 3 (poor gap-filling) when
 #' QC flag missing but data variable available
@@ -532,9 +486,7 @@ calc_avPrecip <- function(datain, gaps){
   return(av_precip)
 }
 
-
 #-----------------------------------------------------------------------------
-
 
 #' Finds indices for flux variables to be outputted
 #' @export

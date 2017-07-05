@@ -298,10 +298,10 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     ####################################
     
     #Gapfill flux variables using statistical methods
-    if(flux_gapfill){
+    if(!is.na(flux_gapfill)){
       
       DataFromText <- GapfillFlux(DataFromText, qc_name, qc_flags,
-                                  regfill, regwindow, linfill)
+                                  regfill, linfill)
            
     }
     
@@ -314,7 +314,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     #missing met variables not passed through
     #Setting gapfill_all to gapfill_all+missing so matches the level of missing and
     #gap-filling originally passed to the function
-    if(met_gapfill | flux_gapfill){
+    if(!is.na(met_gapfill) | !is.na(flux_gapfill)){
       gaps  <- CheckDataGaps(datain = DataFromText, missing_val = Sprd_MissingVal,
                              QCmeasured=qc_flags$QC_measured, 
                              QCgapfilled=qc_flags$QC_gapfilled,
