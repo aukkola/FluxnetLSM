@@ -64,8 +64,6 @@
 #'        One of "Abramowitz_2012" (default), "Swinbank_1963" or "Brutsaert_1975".
 #' @param regfill Maximum consecutive length of time (in number of days) to be gap-filled 
 #'        using multiple linear regression. Defaults to 30 days. Used to gapfill flux variables.
-#' @param regr_window Length of time period (in number of days) used to train multiple linear regression
-#'        used for gap-filling flux variables. Defaults to 180 days.
 #' @param linfill Maximum consecutive length of time (in hours) to be gap-filled 
 #'        using linear interpolation. Used for all variables except rainfall. Defaults to 4 hours. 
 #' @param copyfill Maximum consecutive length of time (in number of days) to be gap-filled using
@@ -91,7 +89,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                                       gapfill_good=NA, gapfill_med=NA,
                                       gapfill_poor=NA, min_yrs=2,
                                       linfill=4, copyfill=10,
-                                      regfill=30, regwindow=180,
+                                      regfill=30,
                                       lwdown_method="Abramowitz_2012",
                                       include_all_eval=TRUE,
                                       model=NA, 
@@ -233,7 +231,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                            essential_met = vars[which(DataFromText$essential_met)], 
                            preferred_eval = vars[which(DataFromText$preferred_eval)],
                            all_eval = vars[which(DataFromText$categories=="Eval")],
-                           qc_name=qc_name, site_log)
+                           qc_name=qc_name, site_log=site_log)
  
     
     #Log possible warnings and remove warnings from output var
@@ -292,51 +290,41 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
         stop(paste("Cannot ascertain met_gapfill method. Choose one of",
                    "'ERAinterim' and 'statistical' or set to NA if not desired"))  
       }
-      
-      
-      
-      
-      
-      #COMPLETE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      #doesn't stop if can't gapfill all values
-    
-      #COMPLETE !!!!!!!!!!!!!!!!!
-      #Need to update gaps
-      
-      #Update gaps after performing gapfilling
-      
-      gaps <- update_gaps(gaps, qc_info, DataFromText)
-      
-      
-      
-      
-      
     }
-       
-    
-    
+         
     
     ####################################
     ###--- Gapfill flux variables ---###
     ####################################
     
     #Gapfill flux variables using statistical methods
-    if(gapfill_flux){
+    if(flux_gapfill){
       
       DataFromText <- GapfillFlux(DataFromText, qc_name, qc_flags,
                                   regfill, regwindow, linfill)
-      
-      
-      #COMPLETE !!!!!!!!!!!!!!!!!
-      
-      #Need to update gaps
-      
-      #gaps <- update_gaps(gaps, DataFromText)
-      
-      
-      
-      
-      
+           
+    }
+    
+    
+    ########################################################
+    ### Update info on data gaps if performed gapfilling ###
+    ########################################################
+    
+    #Update gaps after gapfilling. Setting missing to 0 here to make sure
+    #missing met variables not passed through
+    #Setting gapfill_all to gapfill_all+missing so matches the level of missing and
+    #gap-filling originally passed to the function
+    if(met_gapfill | flux_gapfill){
+      gaps  <- CheckDataGaps(datain = DataFromText, missing_val = Sprd_MissingVal,
+                             QCmeasured=qc_flags$QC_measured, 
+                             QCgapfilled=qc_flags$QC_gapfilled,
+                             missing=0, gapfill_all=gapfill_all+missing,
+                             gapfill_good=NA, gapfill_med=NA,
+                             gapfill_poor=NA, min_yrs=min_yrs,
+                             essential_met = vars[which(DataFromText$essential_met)], 
+                             preferred_eval = vars[which(DataFromText$preferred_eval)],
+                             all_eval = vars[which(DataFromText$categories=="Eval")],
+                             qc_name=qc_name, showWarn=FALSE, site_log=site_log)    
     }
     
     

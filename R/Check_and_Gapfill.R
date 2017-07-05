@@ -358,7 +358,7 @@ GapfillMet_statistical <- function(datain, qc_name, qc_flags,
 
 #' Updates data gap information after gap-filling
 #' @export
-update_gaps <- function(gaps, qc, datain){
+update_gaps <- function(gaps, datain, qcInfo, qcName){
   
   #updates total_missing and total_gapfilled
   
@@ -368,20 +368,33 @@ update_gaps <- function(gaps, qc, datain){
   #Loop through time periods
   for(k in 1:length(gaps$total_missing)){
     
+    start <- gaps$tseries_start[k]
+    end   <- gaps$tseries_end[k]
+    
     #Loop through variables
     for(v in 1:length(vars){
       
+      #Find variable index
       ind <- which(names(gaps$total_missing[[k]]) == vars[v])
+      
+      #Find corresponding QC var (if applicable)
+      qc_var <- which(names(gaps$total_missing[[k]]) == paste(vars[v], qcName, sep=""))
+            
+      #Determine no. of missing values and convert to percentage
+      missing <- length(which(datain$data[start:end,vars[v]] == Sprd_MissingVal))
+      missing <- missing / length(start:end) * 100
       
       #If didn't find variable, add to gaps list
       if(length(ind)==0){
-        
-      
+          
+        names(missing) <- vars[v]
+        gaps$total_missing[[k]] <- append(gaps$total_missing[[k]], missing)
         
       #Else update existing
       } else{
-        
-        gaps$total_missing[[k]][vars[v]]
+    
+        #Convert to percentage and save
+        gaps$total_missing[[k]][vars[v]] <- missing
         
       }
       

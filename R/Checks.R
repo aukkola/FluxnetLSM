@@ -29,7 +29,7 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
                           QCgapfilled, missing, gapfill_all, 
                           gapfill_good, gapfill_med, gapfill_poor,
                           min_yrs, essential_met, preferred_eval,
-                          all_eval, qc_name, site_log){
+                          all_eval, qc_name, showWarn=TRUE, site_log){
   
   #Checks the existence of data gaps and determines which
   #years should be outputted depending on the percentage of missing
@@ -77,12 +77,14 @@ CheckDataGaps <- function(datain, missing_val, QCmeasured,
   } else {
     
     threshold <- NA
-    warn <-  paste("Cannot check for the percentage of",
-                   "gap-filled data, no thresholds set.",
-                   "Set at least one of 'gapfill_all',",
-                   "'gapfill_good', 'gapfill_med' or",
-                   "'gapfill_poor' to check for gapfilling")
-    
+    if(showWarn){
+      warn <-  paste("Cannot check for the percentage of",
+                     "gap-filled data, no thresholds set.",
+                     "Set at least one of 'gapfill_all',",
+                     "'gapfill_good', 'gapfill_med' or",
+                     "'gapfill_poor' to check for gapfilling")
+    }
+       
     warnings <- append_and_warn(warn=warn, warnings)
   }
   
