@@ -63,7 +63,8 @@
 #' @param lwdown_method Method used to synthesize incoming longwave radiation. 
 #'        One of "Abramowitz_2012" (default), "Swinbank_1963" or "Brutsaert_1975".
 #' @param regfill Maximum consecutive length of time (in number of days) to be gap-filled 
-#'        using multiple linear regression. Defaults to 30 days. Used to gapfill flux variables.
+#'        using multiple linear regression. Defaults to 30 days. Default method used to gapfill flux variables.
+#'        If gapfilling by copyfill is preferred, set regfill to NA.
 #' @param linfill Maximum consecutive length of time (in hours) to be gap-filled 
 #'        using linear interpolation. Used for all variables except rainfall. Defaults to 4 hours. 
 #' @param copyfill Maximum consecutive length of time (in number of days) to be gap-filled using
@@ -153,11 +154,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
       var_file <- system.file("data","Output_variables_FLUXNET2015.csv", package="FluxnetLSM")
     }
     
-    
-    
-    ### REMOVE THIS !!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    var_file <- "~/Documents/FLUXNET2016_processing/scripts/data//Output_variables_FLUXNET2015.csv"
-    
+        
     vars <- read.csv(var_file, header=TRUE,
                      colClasses=c("character", "character", "character",
                      "character", "character", "character",
@@ -300,9 +297,12 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     #Gapfill flux variables using statistical methods
     if(!is.na(flux_gapfill)){
       
-      DataFromText <- GapfillFlux(DataFromText, qc_name, qc_flags,
-                                  regfill, linfill)
-           
+      gapfilled_flux <- GapfillFlux(DataFromText, qc_name, qc_flags,
+                                  regfill, linfill, copyfill,
+                                  gaps, site_log)      
+      
+      DataFromText <- gapfilled_flux$dataout
+      site_log     <- gapfilled_flux$site_log
     }
     
     

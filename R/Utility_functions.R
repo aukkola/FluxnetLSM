@@ -130,15 +130,16 @@ create_outdir <- function(outdir, site, plots){
 #' @export
 initialise_sitelog <- function(site, logpath){
   
-  site_log <- vector(length=9)
+  site_log <- vector(length=11)
   names(site_log) <- c("Site_code", "Processed", "Errors", 
-                       "Warnings", "No_files", "Met_files", "Flux_files", 
-                       "Excluded_eval", "log_path")
+                       "Warnings", "No_files", "Met_files", 
+                       "Flux_files","Excluded_eval", "Gapfill_met", 
+                       "Gapfill_flux", "log_path")
   
   site_log["Site_code"] <- site
   site_log["Errors"]    <- ''
   site_log["Warnings"]  <- ''
-  site_log[c(5:8)]      <- NA
+  site_log[c(5:10)]     <- NA
   site_log["log_path"]  <- logpath #removed when writing log to file
   
   return(site_log)

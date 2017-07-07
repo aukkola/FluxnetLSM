@@ -6,241 +6,6 @@
 # edited by Anna Ukkola UNSW Jun 2017
 
 
-
-
-######################################################
-# Below are functions previously used for gapfilling Fluxnet formatted spreadhseets
-# Does linear gap filling between met data and flux:
-regressionfill = function(PALSt,varname,templateVersion,starttime,
-                          regThreshold=4,winsize=8760){
-  tsteps = length(PALSt[,1]) - 3
-  # Get index of variable in question:
-  vidx = varIndex(varname,templateVersion)
-  ingap = FALSE
-  ctr = 0
-  for(t in 4:(tsteps+3)){
-    if(PALSt[t,vidx] == SprdMissingVal){ # i.e. missing data
-      ingap = TRUE
-      ctr = ctr + 1
-      if(t==(tsteps+3)){ # i.e. data missing from last timestep
-        if(ctr<=regThreshold){ # i.e. there are very few missing timesteps
-          # Just make last few missing timesteps equal to last real value:
-          PALSt[(t-ctr):t,vidx] = PALSt[(t-ctr-1),vidx]
-          PALSt[(t-ctr):t,(vidx+1)] = 0 # following fluxdata.org
-          nowstart = dateFromTstep(starttime,t-ctr)
-          nowend = dateFromTstep(starttime,t)
-          cat(nowstart$time,'hr,',nowstart$day,month.abb[nowstart$month],
-              nowstart$year,'through to',nowend$time,'hr,',nowend$day,
-              month.abb[nowend$month],nowend$year,':\n')
-          cat('Filled timestep',t-ctr,'to',t,'(',ctr,'in total) of',varname,
-              'with previous non-missing value:',PALSt[(t-ctr-1),vidx],' \n')
-        }else{
-          # Get regression parameters based on previous section of timeseries:
-          rtrain = regtrain(PALSt,vidx,(t-ctr),t,'previous',templateVersion,winsize)
-          # Use these to empirically gap-fill missing section:
-          regresult = regpredict(rtrain,PALSt,vidx,(t-ctr),t,templateVersion)
-          PALSt[(t-ctr):t,vidx] = regresult
-          PALSt[(t-ctr):t,(vidx+1)] = 0 # following fluxdata.org
-          nowstart = dateFromTstep(starttime,t-ctr)
-          nowend = dateFromTstep(starttime,t)
-          cat(nowstart$time,'hr,',nowstart$day,month.abb[nowstart$month],
-              nowstart$year,'through to',nowend$time,'hr,',nowend$day,
-              month.abb[nowend$month],nowend$year,':\n')
-          cat('Filled timestep',t-ctr,'to',t,'(',ctr,'in total) of',varname,
-              'with regression based on met drivers. \n')
-        }
-      }
-    }else{ # not missing data
-      if(ingap){ # i.e. 1st timestep after gap
-        if(ctr <= regThreshold){ # i.e. there are very few missing timesteps
-          # Just use a linear fit between surrounding timesteps
-          if((t-ctr) == 4){ # i.e. the first time step was missing
-            # Just make first few missing timesteps equal first real value:
-            PALSt[(t-ctr):(t-1),vidx] = PALSt[t,vidx]
-            PALSt[(t-ctr):(t-1),(vidx+1)] = 0 # following fluxdata.org
-            nowstart = dateFromTstep(starttime,t-ctr)
-            nowend = dateFromTstep(starttime,t-1)
-            cat(nowstart$time,'hr,',nowstart$day,month.abb[nowstart$month],
-                nowstart$year,'through to',nowend$time,'hr,',nowend$day,
-                month.abb[nowend$month],nowend$year,':\n')
-            cat('Filled timestep',t-ctr,'to',t-1,'(',ctr,'in total) of',varname,
-                'with first non-missing value:',PALSt[t,vidx],' \n')
-          }else{ # there is a variable value before and after gap 
-            # Fill gap with linear approximation:
-            fill_values = as.single(PALSt[(t-ctr-1),vidx]) + c(1:ctr) *
-              (as.single(PALSt[t,vidx])-as.single(PALSt[(t-ctr-1),vidx]))/(ctr+1)
-            PALSt[(t-ctr):(t-1),vidx] = fill_values
-            # Note in variable flag that this is crude gap-filling:
-            PALSt[(t-ctr):(t-1),(vidx+1)] = 0 # following fluxdata.org
-            nowstart = dateFromTstep(starttime,t-ctr)
-            nowend = dateFromTstep(starttime,t-1)
-            cat(nowstart$time,'hr,',nowstart$day,month.abb[nowstart$month],
-                nowstart$year,'through to',nowend$time,'hr,',nowend$day,
-                month.abb[nowend$month],nowend$year,':\n')
-            cat('Filled timestep',t-ctr,'to',t-1 ,'(',ctr,
-                'in total) of',varname,'with linear map of surrounding timesteps. \n')
-          }	
-        }else if((t-ctr) <  ceiling(winsize/2)){ # Gap close to the start of the timeseries:
-          # Get regression parameters based on previous section of timeseries:
-          rtrain = regtrain(PALSt,vidx,(t-ctr),(t-1),'next',templateVersion,winsize)
-          # Use these to empirically gap-fill missing section:
-          regresult = regpredict(rtrain,PALSt,vidx,(t-ctr),(t-1),templateVersion)
-          PALSt[(t-ctr):(t-1),vidx] = regresult
-          PALSt[(t-ctr):(t-1),(vidx+1)] = 0 # following fluxdata.org
-          nowstart = dateFromTstep(starttime,t-ctr)
-          nowend = dateFromTstep(starttime,t-1)
-          cat(nowstart$time,'hr,',nowstart$day,month.abb[nowstart$month],
-              nowstart$year,'through to',nowend$time,'hr,',nowend$day,
-              month.abb[nowend$month],nowend$year,':\n')
-          cat('Filled timestep',t-ctr,'to',t-1,'(',ctr,'in total) of',varname,
-              'with regression based on met drivers. \n')
-        }else if((t + ceiling(winsize/2)) > tsteps){# Gap close to the end of the timeseries:
-          # Get regression parameters based on previous section of timeseries:
-          rtrain = regtrain(PALSt,vidx,(t-ctr),(t-1),'previous',templateVersion,winsize)
-          # Use these to empirically gap-fill missing section:
-          regresult = regpredict(rtrain,PALSt,vidx,(t-ctr),(t-1),templateVersion)
-          PALSt[(t-ctr):(t-1),vidx] = regresult
-          PALSt[(t-ctr):(t-1),(vidx+1)] = 0 # following fluxdata.org
-          nowstart = dateFromTstep(starttime,t-ctr)
-          nowend = dateFromTstep(starttime,t-1)
-          cat(nowstart$time,'hr,',nowstart$day,month.abb[nowstart$month],nowstart$year,
-              'through to',nowend$time,'hr,',nowend$day,month.abb[nowend$month],nowend$year,':\n')
-          cat('Filled timestep',t-ctr,'to',t-1,'(',ctr,'in total) of',varname,
-              'with regression based on met drivers. \n')
-        }else{ # there is space to train with data before and after gap
-          # Get regression parameters based on previous section of timeseries:
-          rtrain = regtrain(PALSt,vidx,(t-ctr),(t-1),'around',templateVersion,winsize)
-          # Use these to empirically gap-fill missing section:
-          regresult = regpredict(rtrain,PALSt,vidx,(t-ctr),(t-1),templateVersion)
-          PALSt[(t-ctr):(t-1),vidx] = regresult
-          PALSt[(t-ctr):(t-1),(vidx+1)] = 0 # following fluxdata.org
-          nowstart = dateFromTstep(starttime,t-ctr)
-          nowend = dateFromTstep(starttime,t-1)
-          cat(nowstart$time,'hr,',nowstart$day,month.abb[nowstart$month],nowstart$year,
-              'through to',nowend$time,'hr,',nowend$day,month.abb[nowend$month],nowend$year,':\n')
-          cat('Filled timestep',t-ctr,'to',t-1,'(',ctr,'in total) of',varname,
-              'with regression based on met drivers. \n')
-        }
-        # Reset gap timestep counter:
-        ingap = FALSE
-        ctr = 0
-      }
-    }		
-  }
-  return(PALSt)	
-}
-
-
-
-# Train multiple linear regression:
-regtrain = function(PALSt,vidx,startT,endT,sourceDirection,templateVersion,winsize=3000){
-  swidx = varIndex('SWdown',templateVersion)
-  tidx = varIndex('Tair',templateVersion)
-  hidx = varIndex('Qair',templateVersion)
-  if(sourceDirection=='previous'){
-    trainStart = startT - winsize
-    trainEnd = startT - 1
-    trainY = PALSt[trainStart:trainEnd,vidx]
-    trainX = matrix(NA,(trainEnd-trainStart+1),3)
-    trainX[,1] = PALSt[trainStart:trainEnd,swidx]
-    trainX[,2] = PALSt[trainStart:trainEnd,tidx]
-    trainX[,3] = PALSt[trainStart:trainEnd,hidx]
-  }else if(sourceDirection=='next'){
-    trainStart = endT + 1
-    trainEnd = endT + winsize
-    trainY = PALSt[trainStart:trainEnd,vidx]
-    trainX = matrix(NA,(trainEnd-trainStart+1),3)
-    trainX[,1] = PALSt[trainStart:trainEnd,swidx]
-    trainX[,2] = PALSt[trainStart:trainEnd,tidx]
-    trainX[,3] = PALSt[trainStart:trainEnd,hidx]
-  }else if(sourceDirection=='around'){
-    trainStartpre = startT - ceiling(winsize/2)
-    trainEndpre = startT - 1
-    trainStartpost = endT + 1
-    trainEndpost = endT + ceiling(winsize/2)
-    trainY = c()
-    trainY[1:ceiling(winsize/2)] = PALSt[trainStartpre:trainEndpre,vidx]
-    trainY[(ceiling(winsize/2)+1):(ceiling(winsize/2)*2)] = 
-      PALSt[trainStartpost:trainEndpost,vidx]
-    trainX = matrix(NA,(ceiling(winsize/2)*2),3)
-    trainX[1:ceiling(winsize/2),1] = PALSt[trainStartpre:trainEndpre,swidx]
-    trainX[(ceiling(winsize/2)+1):(ceiling(winsize/2)*2),1] = 
-      PALSt[trainStartpost:trainEndpost,swidx]
-    trainX[1:ceiling(winsize/2),2] = PALSt[trainStartpre:trainEndpre,tidx]
-    trainX[(ceiling(winsize/2)+1):(ceiling(winsize/2)*2),2] = 
-      PALSt[trainStartpost:trainEndpost,tidx]
-    trainX[1:ceiling(winsize/2),3] = PALSt[trainStartpre:trainEndpre,hidx]
-    trainX[(ceiling(winsize/2)+1):(ceiling(winsize/2)*2),3] = 
-      PALSt[trainStartpost:trainEndpost,hidx]
-  }else{
-    stop('Unknown sourceDirection [regtrain]')
-  }
-  # Separate day and night:
-  dayn = DayNight(as.double(trainX[,1]))
-  trainYday = as.double(trainY[dayn])
-  trainXday1 = as.double(trainX[dayn,1])
-  trainXday2 = as.double(trainX[dayn,2])
-  trainXday3 = as.double(trainX[dayn,3])
-  trainYnight = as.double(trainY[!dayn])
-  trainXnight1 = as.double(trainX[!dayn,1])
-  trainXnight2 = as.double(trainX[!dayn,2])
-  trainXnight3 = as.double(trainX[!dayn,3])
-  # Convert missing values to NAs so regression copes:
-  for(t in 1:length(trainYday)){
-    if(trainYday[t] == SprdMissingVal){trainYday[t] = NA}
-    if(trainXday1[t] == SprdMissingVal){trainXday1[t] = NA}
-    if(trainXday2[t] == SprdMissingVal){trainXday2[t] = NA}
-    if(trainXday3[t] == SprdMissingVal){trainXday3[t] = NA}
-  }
-  for(t in 1:length(trainYnight)){
-    if(trainYnight[t] == SprdMissingVal){trainYnight[t] = NA}
-    if(trainXnight1[t] == SprdMissingVal){trainXnight1[t] = NA}
-    if(trainXnight2[t] == SprdMissingVal){trainXnight2[t] = NA}
-    if(trainXnight3[t] == SprdMissingVal){trainXnight3[t] = NA}
-  }
-  
-  # Train regression parameters:
-  rgrp_day = lm(trainYday ~ trainXday1 + trainXday2 + 
-                  trainXday3,na.action=na.omit)
-  rgrp_night = lm(trainYnight ~ trainXnight1 + 
-                    trainXnight2 + trainXnight3,na.action=na.omit)
-  rgrp = list(day = rgrp_day, night = rgrp_night)
-  return(rgrp)
-}
-
-# Use multiple linear regression parameters to predict time series:
-regpredict = function(rgrp,PALSt,vidx,startT,endT,templateVersion){
-  ntsteps = endT - startT + 1
-  # Get indices of predictor variables in matrix:
-  swidx = varIndex('SWdown',templateVersion)
-  tidx = varIndex('Tair',templateVersion)
-  hidx = varIndex('Qair',templateVersion)	
-  testX = matrix(NA,ntsteps,3)
-  # Write variables to predictor matrix:
-  testX[,1] = as.double(PALSt[startT:endT,swidx])
-  testX[,2] = as.double(PALSt[startT:endT,tidx])
-  testX[,3] = as.double(PALSt[startT:endT,hidx])
-  # Separate day and night:
-  dayn = DayNight(as.double(testX[,1]))
-  
-  empflux = c()
-  # Use existing parameters to make empirical prediction:
-  daycoefs = coef(rgrp$day)
-  nightcoefs = coef(rgrp$night)
-  for(t in 1:ntsteps){
-    if(dayn[t]){ # i.e. daytime time step
-      empflux[t] = sum(daycoefs[2:4]*testX[t,]) + daycoefs[1]
-    }else{
-      empflux[t] = sum(nightcoefs[2:4]*testX[t,]) + nightcoefs[1]
-    }
-  }
-  return(empflux)
-}
-
-
-
-#-----------------------------------------------------------------------------
-
 #' Gapfills met data
 #' @return out
 #' @export
@@ -363,7 +128,7 @@ gapfill_with_ERA <- function(datain, era_data, era_vars, tair_units, vpd_units,
 
 #' Performs linear interpolation gapfilling
 #' @export
-linfill_met <- function(data, tsteps, tstepsize,
+linfill_data <- function(data, tstepsize,
                         linfill=10){
   
   #Max number of consecutive time steps allowed
@@ -418,16 +183,14 @@ linfill_met <- function(data, tsteps, tstepsize,
 
 #' Performs copyfill gapfilling
 #' @export
-copyfill_met <- function(data, tsteps, tstepsize,
-                         copyfill=10,
-                         start, end,
-                         varname,
-                         site_log){
+copyfill_data <- function(data, tsteps, tstepsize, copyfill=10,
+                          start, end, varname, site_log){
   
   
   #Max number of consecutive time steps allowed
   # to be missing
   max_gap <- (copyfill*60*60*24)/tstepsize
+  
   
   #First check that no gaps are longer than "copyfill"
   for(n in 1:length(start)){
@@ -438,7 +201,7 @@ copyfill_met <- function(data, tsteps, tstepsize,
     consec <- seqToIntervals(missing)
     
     #One or several gaps too large, return error
-    if(any(consec[,2] - consec[,1]) > max_gap){
+    if(any(consec[,2] - consec[,1] + 1 > max_gap)){
     
       error <- paste("Data gap too long in variable ",
                      varname, " to be gapfilled. Currently set to a maximum ",
@@ -557,6 +320,179 @@ gapfill_LWdown_Pair <- function(data, var, var_ind, TairK=NA, RH=NA,
 
 }
 
+
+#-----------------------------------------------------------------------------
+
+#' Gapfills flux data using linear regression against met variables
+#' @export
+regfill_flux <- function(ydata, traindata, tstepsize, regfill, varname, 
+                         swdown_ind, tair_ind, rh_ind, swdown_units, 
+                         start, end, site_log){
+  
+
+  #Max number of consecutive time steps allowed
+  # to be missing
+  max_gap <- (regfill*60*60*24)/tstepsize
+  
+  missing_all <- vector()
+  
+  #First check that no gaps are longer than "regfill"
+  for(n in 1:length(start)){
+    
+    #Find missing values
+    missing <- which(ydata[start[n]:end[n]]==Sprd_MissingVal)
+    
+    if(length(missing) > 0){
+      
+      consec <- seqToIntervals(missing)
+      consec <- matrix(consec, ncol=2) #convert to matrix
+      
+      #One or several gaps too large, return warning
+      if(any(consec[,2] - consec[,1] + 1 > max_gap)){
+        
+        warn <- paste("Data gap too long in variable ",
+                      varname, " to be gapfilled using regfill. Currently set to a maximum ",
+                      "consecutive gap of ", regfill," days. Amend parameter 'regfill' to ",
+                      "change this.", sep="")
+        site_log <- warn_and_log(warn, site_log)
+      }
+      
+      
+      #Only add indices for time periods shorter than regfill
+      rm_ind <- which((consec[,2] - consec[,1] + 1) > max_gap)
+      if(length(rm_ind) > 0) { 
+        consec <- consec[-rm_ind,] 
+      }
+      
+      #Create sequences
+      seq    <- apply(consec, MARGIN=1, function(x) seq(from=x[1], to=x[2]))
+      
+      #Append to missing
+      missing_all <- append(missing_all, unlist(seq)+start[n]-1)    
+      
+    }
+   }
+    
+  
+  #If found missing values:
+  if(length(missing_all) > 0){  
+    
+    #SWdown, Tair and humidity available
+    if(length(swdown_ind)>0 & length(swdown_ind)>0 & length(swdown_ind)>0){
+      
+      #Collate training data
+      train_data <- as.matrix(cbind(traindata[swdown_ind], traindata[tair_ind],
+                                    traindata[rh_ind]))
+      colnames(train_data) <- c("SWdown", "Tair", "RH")
+      
+      #Only SWdown available
+    } else if (length(swdown_ind)>0){
+      
+      #Collate training data
+      train_data <- as.matrix(traindata[swdown_ind])
+      colnames(train_data) <- c("SWdown")
+      
+      #None available, return
+    } else {
+      
+      #Log warning to site log that no met variables were available to gapfill fluxes
+      warn <- paste("Cannot perform regression gapfilling of flux variables",
+                    "no SWdown or PAR available")
+      
+      site_log <- log_warning(warn, site_log)
+      outs     <- list(y=ydata, site_log=site_log, method=NA, missing=c())
+      return(outs)
+    }
+        
+    #Obtain regression parameters, separately for day and night
+    reg_params <- regtrain(train_data, ydata, swdown_units)
+    
+    #Predict y using regression
+    predicted_y <- regpredict(reg_params$rgrp, reg_params$traindata,
+                              reg_params$dayn)
+
+    #Replace missing values with predicted values
+    ydata[missing_all] <- predicted_y[missing_all]
+        
+  }
+  
+  #Collate outputs
+  outs <- list(y=ydata, site_log=site_log, method=colnames(train_data), missing=missing)
+  
+  return(outs)
+  
+}
+
+#-----------------------------------------------------------------------------
+
+#' Trains multiple linear regression for flux gap-filling 
+#' separately for day and night
+#' @export
+regtrain <- function(traindata, ydata, ...){
+  
+  #First replace missing values with NA
+  traindata[traindata==Sprd_MissingVal] <- NA
+  ydata[ydata==Sprd_MissingVal] <- NA
+    
+  # Separate day and night:
+  dayn <- DayNight(as.double(traindata[,"SWdown"]), swdown_units)
+  
+  #Day and night training datasets
+  Yday     <- ydata[dayn]
+  trainDay <- traindata[dayn,]
+  
+  Ynight     <- ydata[!dayn]
+  trainNight <- traindata[!dayn,]
+  
+  #Collate to dataframes
+  data_day           <- cbind(Yday, trainDay)
+  colnames(data_day) <- c("y", colnames(traindata))
+  
+  data_night           <- cbind(Ynight, trainNight)
+  colnames(data_night) <- c("y", colnames(traindata))
+  
+  
+  # Train regression parameters (dot means use all variables
+  # in data frame as predictors):
+  rgrp_day   <- lm(y ~ ., data=as.data.frame(data_day), na.action=na.omit)
+  rgrp_night <- lm(y ~ ., data=as.data.frame(data_night), na.action=na.omit)
+  
+  #Return as list
+  rgrp       <- list(day = rgrp_day, night = rgrp_night)
+  
+  return(list(rgrp=rgrp, traindata=traindata, dayn=dayn))
+}
+
+#-----------------------------------------------------------------------------
+
+#' Predict flux values using linear regression parameters
+#' @export
+regpredict <- function(rgrp,traindata, dayn){
+  
+  # Use existing parameters to make empirical prediction:
+  daycoefs   <- coef(rgrp$day)
+  nightcoefs <- coef(rgrp$night)
+  
+  #Calculate each x * coef
+  x_vals_day   <- traindata
+  x_vals_night <- traindata
+  
+  for(k in 1:ncol(traindata)){
+    x_vals_day[,k]   <- x_vals_day[,k] * daycoefs[1+k]
+    x_vals_night[,k] <- x_vals_night[,k] * nightcoefs[1+k]
+  }
+  
+  #Predict y
+  day_y   <- rowSums(x_vals_day) - daycoefs[1]
+  night_y <- rowSums(x_vals_night) - nightcoefs[1]
+  
+  #Combine and mask day/night
+  predicted_y <- dayn
+  predicted_y[which(dayn)]  <- day_y[which(dayn)]
+  predicted_y[which(!dayn)] <- night_y[which(!dayn)]
+  
+  return(predicted_y)
+}
 
 #-----------------------------------------------------------------------------
 

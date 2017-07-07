@@ -160,6 +160,35 @@ create_dummy_year <- function(year, tstep, time_vars){
 
 #-----------------------------------------------------------------------------
 
+#' Finds day and night time steps
+#' @export
+DayNight <- function (SWdown, units) 
+{
+  
+  #Adapted from PALS
+  
+  #Minor modifications to allow for PAR and SWdown
+  if(units=="umol/m2/s"){
+    threshold <- 5 / (1/2.3)
+  } else{
+    threshold <- 5
+  }
+  
+  #Initialise with NA
+  daynotnight = rep(NA, length(SWdown))
+  
+  #Set daytime to TRUE
+  daynotnight[SWdown > threshold] <- TRUE
+  
+  #Set nighttime to FALSE
+  daynotnight[SWdown <= threshold] <- FALSE
+  
+  
+  return(daynotnight)
+}
+
+#-----------------------------------------------------------------------------
+
 # These functions are reproduced from PALS
 # Author: Gab Abramowitz UNSW 2014 (palshelp at gmail dot com)
 
@@ -208,7 +237,8 @@ Yeardays <- function(startyear,ndays) {
 }
 
 #----
-
+#' Finds leap years
+#' @export
 is.leap = function(year){
   if((((year %% 4)==0) & ((year %% 100)!=0)) || 
        (((year %% 4)==0) & ((year %% 400)==0))){
