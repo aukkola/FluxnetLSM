@@ -199,16 +199,18 @@ copyfill_data <- function(data, tsteps, tstepsize, copyfill=10,
     missing <- which(data[start[n]:end[n]]==Sprd_MissingVal)
     
     consec <- seqToIntervals(missing)
+    consec <- matrix(consec, ncol=2) #convert to matrix
     
-    #One or several gaps too large, return error
+    #One or several gaps too large, skip time period
     if(any(consec[,2] - consec[,1] + 1 > max_gap)){
     
-      error <- paste("Data gap too long in variable ",
+      warn <- paste("Data gap too long in variable ",
                      varname, " to be gapfilled. Currently set to a maximum ",
                      "consecutive gap of ", copyfill,
                      " days. Amend parameter 'copyfill' to ",
                      "change this.", sep="")
-      stop_and_log(error, site_log)
+      site_log <- warn_and_log(warn=warn, site_log=site_log)
+      next
     }
     
     
@@ -243,7 +245,7 @@ copyfill_data <- function(data, tsteps, tstepsize, copyfill=10,
   
 
   #Return gap-filled data and index of missing values
-  return(list(data=data, missing=missing))
+  return(list(data=data, missing=missing, site_log=site_log))
   
 }
 
@@ -417,7 +419,7 @@ regfill_flux <- function(ydata, traindata, tstepsize, regfill, varname,
   }
   
   #Collate outputs
-  outs <- list(y=ydata, site_log=site_log, method=colnames(train_data), missing=missing)
+  outs <- list(data=ydata, site_log=site_log, method=colnames(train_data), missing=missing)
   
   return(outs)
   
@@ -505,24 +507,34 @@ SynthesizeLWdown <- function(TairK,RH,technique){
   
   zeroC <- 273.15
   
-  if(technique=='Swinbank_1963'){
-    # Synthesise LW down from air temperature only:
-    lwdown <- 0.0000094*0.0000000567*TairK^6
-    
-  }else if(technique=='Brutsaert_1975'){
-    satvapres <- 611.2*exp(17.67*((TairK-zeroC)/(TairK-29.65)))
-    vapres    <- pmax(5,RH)/100*satvapres
-    emiss     <- 0.642*(vapres/TairK)^(1/7)
-    lwdown    <- emiss*0.0000000567*TairK^4
-    
-  }else if(technique=='Abramowitz_2012'){
-    satvapres <- 611.2*exp(17.67*((TairK-zeroC)/(TairK-29.65)))
-    vapres    <- pmax(5,RH)/100*satvapres
-    lwdown    <- 2.648*TairK + 0.0346*vapres - 474
-    
-  }else{
-    CheckError('S4: Unknown requested LWdown synthesis technique.')
+  #Inputs missing, set lwdown missing
+  if(TairK==Sprd_MissingVal | RH==Sprd_MissingVal){
+    lwdown <- Sprd_MissingVal
+
+  #Else synthesise value
+  } else {
+      
+    if(technique=='Swinbank_1963'){
+      # Synthesise LW down from air temperature only:
+      lwdown <- 0.0000094*0.0000000567*TairK^6
+      
+    }else if(technique=='Brutsaert_1975'){
+      satvapres <- 611.2*exp(17.67*((TairK-zeroC)/(TairK-29.65)))
+      vapres    <- pmax(5,RH)/100*satvapres
+      emiss     <- 0.642*(vapres/TairK)^(1/7)
+      lwdown    <- emiss*0.0000000567*TairK^4
+      
+    }else if(technique=='Abramowitz_2012'){
+      satvapres <- 611.2*exp(17.67*((TairK-zeroC)/(TairK-29.65)))
+      vapres    <- pmax(5,RH)/100*satvapres
+      lwdown    <- 2.648*TairK + 0.0346*vapres - 474
+      
+    }else{
+      CheckError('S4: Unknown requested LWdown synthesis technique.')
+    }
   }
+  
+
   return(lwdown)
 }
 
@@ -532,7 +544,16 @@ SynthesizeLWdown <- function(TairK,RH,technique){
 #' @export
 SynthesizePSurf <- function(TairK,elevation){
   # Synthesizes PSurf based on temperature and elevation
-  PSurf <- 101325 * (TairK / (TairK + 0.0065*elevation))^(9.80665/287.04/0.0065)
+  
+  #If Tair missing, set Pair missing
+  if(TairK==Sprd_MissingVal){
+    PSurf <- Sprd_MissingVal
+    
+  #Else synthesise
+  }else {
+    PSurf <- 101325 * (TairK / (TairK + 0.0065*elevation))^(9.80665/287.04/0.0065)
+  }
+  
   return(PSurf)
 }
 

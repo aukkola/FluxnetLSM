@@ -102,12 +102,10 @@ GapfillMet_statistical <- function(datain, qc_name, qc_flags,
   
 
   #Remove QC vars
-  qc_ind <- which(grepl(qc_name, substr(names(ind), 
-                  nchar(names(ind))-2, nchar(names(ind)))))
+  qc_ind <- which(grepl(qc_name, substr(names(ind), (nchar(qc_name)-1), 
+                                        nchar(names(ind)))))
   if(length(qc_ind) > 0) {ind <- ind[-qc_ind]}
   
-  #Var names
-  vars <- names(ind)
   
   #Find lwdown and air pressure indices (note, no air pressure in La Thuile)
   lwdown_ind <- find_ind_and_qc(ind, var=c("LW_IN_F_MDS", "LW_IN_F", "LW_in"))
@@ -120,9 +118,12 @@ GapfillMet_statistical <- function(datain, qc_name, qc_flags,
   } else {
     ind_others <- ind
   }
-   
+  
+  
+  #Var names and their corresponding output varnames
   vars_other <- names(ind_others)
-    
+  out_vars   <- datain$out_vars[ind_others]
+  
   ### First gapfill variables other than LWdown and air pressure ###
   
   #Convert time steps to monts, days and hours (no year)
@@ -130,9 +131,18 @@ GapfillMet_statistical <- function(datain, qc_name, qc_flags,
   tsteps <- format(strptime(datain$time[,1], "%Y%m%d%H%M"), 
                    format="%m%d%H%M")
   
+  
+  #Add new category to indata for saving gapfilling method
+  datain$gapfill_met <- rep(NA, length(ind))
+  names(datain$gapfill_met) <- names(ind)
+  
+  
   #Need some of these for LWdown and air pressure
   for(k in 1:length(ind_others)){
       
+    #Save method for each variable
+    method <- vector()
+    
     #First use linear interpolation for short
     #subdiurnal gaps
     temp_data <- linfill_data(data=datain$data[,vars_other[k]], 
@@ -150,9 +160,14 @@ GapfillMet_statistical <- function(datain, qc_name, qc_flags,
                               varname=vars_other[k], site_log)
     
     
+    if(length(temp_data$missing) > 0) {
+      method <- append(method, "copyfill") 
+    } 
+    
     #Append gapfilled with new temp_data
     if(length(gapfilled) > 0){
       temp_data$missing <- append(temp_data$missing, gapfilled)
+      method <- append(method, "linfill")
     }
        
     #Replace data with gapfilled data
@@ -161,10 +176,17 @@ GapfillMet_statistical <- function(datain, qc_name, qc_flags,
     if(length(temp_data$missing) > 0){
       
       #Save information to QC flags (creat qc flag if doesn't exist)
-      datain <- update_qc(datain, temp_data, vars_other[k], 
-                          qc_name, qc_value, qc_flags)  
+      datain <- update_qc(datain, temp_data, vars_other[k], qc_name, qc_value, 
+                          qc_flags, outname=out_vars[k], cat="Met")  
+      
+      #Save gapfilling methods
+      datain$gapfill_met[vars_other[k]] <- paste(method, collapse="; ")
          
     } #qc
+    
+    #Update site log
+    site_log <- temp_data$site_log
+    
   } #vars
   
   
@@ -203,9 +225,15 @@ GapfillMet_statistical <- function(datain, qc_name, qc_flags,
     if(length(temp_data$missing) > 0){
       
       #Save information to QC flags (creat qc flag if doesn't exist)
-      datain <- update_qc(datain, temp_data, names(lwdown_ind), qc_name, qc_value, qc_flags)  
+      datain <- update_qc(datain, temp_data, names(lwdown_ind), qc_name, qc_value, 
+                          qc_flags, outname=datain$out_vars[lwdown_ind], cat="Met")  
     
+      #Add gapfilling method 
+      datain$gapfill_met[names(lwdown_ind)] <- paste("Synthesis based on", lwdown_method)
+      
     }
+    
+
   }
   
 
@@ -234,15 +262,18 @@ GapfillMet_statistical <- function(datain, qc_name, qc_flags,
     if(length(temp_data$missing) > 0){
       
       #Save information to QC flags (creat qc flag if doesn't exist)
-      datain <- update_qc(datain, temp_data, names(pair_ind), qc_name, qc_value, qc_flags)  
+      datain <- update_qc(datain, temp_data, names(pair_ind), qc_name, qc_value, 
+                          qc_flags, outname=datain$out_vars[pair_ind], cat="Met")  
+      
+      #Add gapfilling method 
+      datain$gapfill_met[names(pair_ind)] <-"Synthesis based on Tair and elevation"
     
     }
-     
   }
   
   
   #Return modified data frame
-  return(datain)
+  return(list(data=datain, site_log=site_log))
   
 
 }
@@ -271,8 +302,15 @@ GapfillFlux <- function(datain, qc_name, qc_flags, regfill,
     return()
   }
   
-  #Var names
-  vars <- names(ind)
+  #Remove QC vars
+  qc_ind <- which(grepl(qc_name, substr(names(ind), (nchar(qc_name)-1), nchar(names(ind)))))
+  if(length(qc_ind) > 0) {ind <- ind[-qc_ind]}
+  
+  
+  #Var names and their corresponding output var names
+  vars     <- names(ind)
+  out_vars <- datain$out_vars[ind]
+  
   
   #Find Tair, RH/VPD and SWdown index for regression gapfilling
   all_vars   <- datain$vars
@@ -359,62 +397,23 @@ GapfillFlux <- function(datain, qc_name, qc_flags, regfill,
     datain$data[,vars[k]] <- temp_data$data
     
     if(length(temp_data$missing) > 0){
-      
+
       #Save information to QC flags (creat qc flag if doesn't exist)
-      datain <- update_qc(datain, temp_data, vars[k], qc_name, qc_value, qc_flags)  
+      datain <- update_qc(datain, temp_data, vars[k], qc_name, qc_value, 
+                          qc_flags, outname=out_vars[k], cat="Eval")  
       
       #Save gapfilling methods
       datain$gapfill_flux[vars[k]] <- paste(method, collapse="; ")
       
     } #qc
+    
+    #Update site log
+    site_log <- temp_data$site_log
+    
   } #vars
     
   return(list(dataout=datain, site_log=site_log))
 
-}
-
-#-----------------------------------------------------------------------------
-
-#'Creates attributes for a new QC variable
-#' @return datain
-#' @export
-create_qc_var <- function(datain, qc_name, qc_flags){
-    
-    #Appends attributes for new QC variable to indata
-    #In some cases, need to add a column name as not set automatically
-    
-    #vars
-    datain$vars <- append(datain$vars, qc_name)
-    
-    #output vars
-    datain$out_vars <- append(datain$out_vars, qc_name)
-    
-    #era_vars
-    datain$era_vars <- append(datain$era_vars, NA)
-    names(datain$era_vars)[length(datain$era_vars)] <- qc_name
-    
-    #attributes
-    Fluxnet_var <- NULL
-    Longname    <- paste(strsplit(qc_name, "_qc"), "quality control flag")
-    CF_name     <- NULL
-    datain$attributes <- rbind(datain$attributes, c(Fluxnet_var, Longname, CF_name))  
-       
-    #units
-    datain$units$original_units <- append(datain$units$original_units, "-")
-    datain$units$target_units   <- append(datain$units$target_units, "-")
-    
-    #var_ranges
-    qc_range <- c(qc_flags$QC_measured, qc_flags$QC_gapfilled)
-    datain$var_ranges <- cbind(datain$var_ranges, rbind(min(qc_range),
-                                                        max(qc_range)))
-    colnames(datain$var_ranges)[ncol(datain$var_ranges)] <- qc_name
-    
-    #categories
-    datain$categories <- append(datain$categories, "Met")
-    names(datain$categories)[length(datain$categories)] <- qc_name
-    
-    
-    return(datain)
 }
 
 #-----------------------------------------------------------------------------
@@ -586,9 +585,63 @@ find_ind_and_qc <- function(inds, var, qc_name=NA){
 
 #-----------------------------------------------------------------------------
 
+#'Creates attributes for a new QC variable
+#' @return datain
+#' @export
+create_qc_var <- function(datain, qc_name, qc_flags, outname, cat){
+  
+  #Appends attributes for new QC variable to indata
+  #In some cases, need to add a column name as not set automatically
+  
+  #vars
+  datain$vars <- append(datain$vars, qc_name)
+  
+  #output vars
+  names <- names(datain$out_vars)
+  datain$out_vars <- append(datain$out_vars, paste(outname, "_qc", sep=""))
+  
+  names(datain$out_vars) <- c(names,qc_name)
+  
+  #era_vars
+  datain$era_vars <- append(datain$era_vars, NA)
+  names(datain$era_vars)[length(datain$era_vars)] <- qc_name
+  
+  #era_vars
+  datain$aggr_method <- append(datain$aggr_method, NA)
+  names(datain$aggr_method)[length(datain$aggr_method)] <- qc_name
+  
+  #attributes
+  Fluxnet_var <- "NULL"
+  Longname    <- paste(strsplit(outname, "_qc"), "quality control flag")
+  CF_name     <- "NULL"
+  datain$attributes <- rbind(datain$attributes, c(Fluxnet_var, Longname, CF_name))  
+  
+  #units
+  datain$units$original_units <- append(datain$units$original_units, "-")
+  names(datain$units$original_units) <- qc_name
+  
+  datain$units$target_units   <- append(datain$units$target_units, "-")
+  names(datain$units$target_units) <- qc_name
+  
+  
+  #var_ranges
+  qc_range <- c(qc_flags$QC_measured, qc_flags$QC_gapfilled)
+  datain$var_ranges <- cbind(datain$var_ranges, rbind(min(qc_range),
+                                                      max(qc_range)))
+  colnames(datain$var_ranges)[ncol(datain$var_ranges)] <- qc_name
+  
+  #categories
+  datain$categories <- append(datain$categories, cat)
+  names(datain$categories)[length(datain$categories)] <- qc_name
+  
+  
+  return(datain)
+}
+
+#-----------------------------------------------------------------------------
 #' Updates QC flags after gap-filling
 #' @export
-update_qc <- function(data, temp_data, varname, qc_name, qc_value, qc_flags){
+update_qc <- function(data, temp_data, varname, qc_name, qc_value, qc_flags,...){
   
   #Find index for QC variable
   qc_col <- which(data$vars==paste(varname, qc_name, sep=""))
@@ -610,19 +663,20 @@ update_qc <- function(data, temp_data, varname, qc_name, qc_value, qc_flags){
     
     #Create name for QC variable and save data and name to data.frame
     #Use output variable name to create qc flag name
-    qc_varname <- paste(data$out_vars[varname],"_qc", sep="")
+    qc_varname <- paste(varname, qc_name, sep="")
     
     #Append qc time series to data
-    datain$data <- cbind(data$data, qc_var)
+    data$data <- cbind(data$data, qc_var)
     
     #Set column name correctly
     colnames(data$data)[ncol(data$data)] <- qc_varname
     
     #Add new QC var to attributes
-    data <- create_qc_var(data, qc_varname, qc_flags)
-    
+    data <- create_qc_var(data, qc_varname, qc_flags,  ...)
     
   }
   
   return(data)
 }
+
+

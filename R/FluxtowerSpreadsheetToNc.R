@@ -128,6 +128,10 @@ ReadCSVFluxData <- function(fileinname, vars, datasetname, time_vars, site_log, 
   pref_eval <- retrieve_varinfo(vars_present=tcol$names, 
                                 all_vars=vars, attribute="Preferred_eval")
   
+  #Retrieve aggregation method
+  aggr_method <- retrieve_varinfo(vars_present=tcol$names, 
+                                all_vars=vars, attribute="Aggregate_method")
+  
   
   ###### Get time step and date information #######
   
@@ -170,8 +174,9 @@ ReadCSVFluxData <- function(fileinname, vars, datasetname, time_vars, site_log, 
                   attributes=attributes, out_vars=out_vars,
                   essential_met=ess_met, preferred_eval=pref_eval,
                   units=units, var_ranges=var_ranges, categories=categories,
-                  time=FluxTime, ntsteps=ntsteps, starttime=starttime, 
-                  timestepsize=timestepsize, daysPerYr=intyears$daysperyear,
+                  aggr_method=aggr_method, time=FluxTime, ntsteps=ntsteps, 
+                  starttime=starttime, timestepsize=timestepsize, 
+                  daysPerYr=intyears$daysperyear,
                   ndays=ndays, whole=intyears$whole)
 
   return(filedata)
