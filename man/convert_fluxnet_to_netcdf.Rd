@@ -5,11 +5,14 @@
 \title{ConvertSpreadsheetToNcdf.R}
 \usage{
 convert_fluxnet_to_netcdf(infile, site_code, out_path,
-  datasetname = "FLUXNET2015", datasetversion = "n/a", fair_use = NA,
-  fair_use_vec = NA, met_gapfill = NA, era_file = NA, flux_gapfill = NA,
-  lwdown_method = "Abramowitz_2012", missing = 15, gapfill_all = 20,
-  gapfill_good = NA, gapfill_med = NA, gapfill_poor = NA, min_yrs = 2,
-  include_all_eval = TRUE, plot = c("annual", "diurnal", "timeseries"))
+  datasetname = "FLUXNET2015", datasetversion = "n/a",
+  flx2015_version = "FULLSET", fair_use = "Fair_Use", fair_use_vec = NA,
+  met_gapfill = NA, flux_gapfill = NA, era_file = NA, missing = 15,
+  gapfill_all = 20, gapfill_good = NA, gapfill_med = NA,
+  gapfill_poor = NA, min_yrs = 2, linfill = 4, copyfill = 10,
+  regfill = 30, lwdown_method = "Abramowitz_2012",
+  include_all_eval = TRUE, aggregate = NA, model = NA,
+  plot = c("annual", "diurnal", "timeseries"))
 }
 \arguments{
 \item{infile}{input filename,
@@ -26,25 +29,25 @@ and thus must be set if processing a dataset not compliant with FLUXNET2015 form
 
 \item{datasetversion}{Version of the dataset, e.g. "1-3"}
 
-\item{fair_use}{La Thuile Fair Use policy that data should comply with, e.g. "LaThuile" or "Fair_Use".
+\item{flx2015_version}{Version of FLUXNET2015 data product being used, i.e. "FULLSET" or "SUBSET".
+Required to set QC flags correctly.}
+
+\item{fair_use}{La Thuile Fair Use policy that data should comply with, e.g. "LaThuile" or "Fair_Use" (default).
 Can be a single entry or a vector of several policies. If this is set, code will only extract
 years that comply with the required policy/policies. Must provide fair_use_vec to use this
 functionality.}
 
 \item{fair_use_vec}{A vector of Data Use policy for each year in the data file, e.g. "LaThuile" or "Fair_Use".
-       Should have years as vector column names.}
+Should have years as vector column names.}
 
 \item{met_gapfill}{Method to use for gap-filling meteorological data. Set to one of
 "ERAinterim", "statistical" or NA (default; no gap-filling).}
 
+\item{flux_gapfill}{Method to use for gap-filling flux data. Set to one of
+"statistical" or NA (default; no gap-filling).}
+
 \item{era_file}{ERA input file (needed if using ERAinterim to gapfill met variables)
 e.g. "FULLSET/FLX_AU-How_FLUXNET2015_ERAI_HH_1989-2014_1-3.csv"}
-
-\item{flux_gapfill}{Method to use for gap-filling flux data. Set to one of
-       "statistical" or NA (default; no gap-filling).}
-
-\item{lwdown_method}{Method used to synthesize incoming longwave radiation.
-One of "Abramowitz_2012" (default), "Swinbank_1963" or "Brutsaert_1975").}
 
 \item{missing}{Maximum percentage of time steps allowed to be missing in any given year}
 
@@ -66,24 +69,31 @@ Set to NA if not required (default).}
 
 \item{min_yrs}{Minimum number of consecutive years to process}
 
+\item{linfill}{Maximum consecutive length of time (in hours) to be gap-filled
+using linear interpolation. Used for all variables except rainfall. Defaults to 4 hours.}
+
+\item{copyfill}{Maximum consecutive length of time (in number of days) to be gap-filled using
+copyfill. Defaults to 10 days.}
+
+\item{regfill}{Maximum consecutive length of time (in number of days) to be gap-filled
+using multiple linear regression. Defaults to 30 days. Default method used to gapfill flux variables.
+If gapfilling by copyfill is preferred, set regfill to NA.}
+
+\item{lwdown_method}{Method used to synthesize incoming longwave radiation.
+One of "Abramowitz_2012" (default), "Swinbank_1963" or "Brutsaert_1975".}
+
 \item{include_all_eval}{Should all evaluation values be included, regardless of data gaps?
 If set to FALSE, any evaluation variables with missing or gap-filled values in
 excess of the thresholds will be discarded.}
 
+\item{aggregate}{Time step (in hours) that the data is aggregated to. Must be divisible by 24 and can be set to
+a maximum 24 hours (daily). Defaults to NA (no aggregation).}
+
+\item{model}{Name of land surface model. Used to retrieve model specific attributes, such as site
+plant functional type.}
+
 \item{plot}{Should annual, diurnal and/or 14-day running mean plots be produced?
        Set to NA if not required.}
-
-\item{regfill}{Maximum consecutive length of time (in number of days) to be gap-filled
-using multiple linear regression. Defaults to 30 days. Used to gapfill flux variables.}
-
-\item{regr_window}{Length of time period used to train multiple linear regression
-used for gap-filling flux variables.}
-
-\item{linfill}{Maximum consecutive length of time (in hours) to be gap-filled
-using linear interpolation. Used for all variables except rainfall. Defaults to 4 hours.}
-
-\item{copyfill}{Maximum consecutive length of time (in number of days)
-Used for rainfall.}
 }
 \description{
 Converts data from a FLUXNET2015 formatted spreadsheet to
@@ -98,6 +108,8 @@ in the FLUXNET2015 release. Any missing time steps are replaced with the corresp
 ERAInterim estimates.
 
 Statistical:
+
+
 
 
 

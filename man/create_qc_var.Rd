@@ -4,7 +4,7 @@
 \alias{create_qc_var}
 \title{Creates attributes for a new QC variable}
 \usage{
-create_qc_var(datain, qc_name)
+create_qc_var(datain, qc_name, qc_flags, outname, cat)
 }
 \value{
 datain

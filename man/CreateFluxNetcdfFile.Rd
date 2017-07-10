@@ -4,13 +4,9 @@
 \alias{CreateFluxNetcdfFile}
 \title{Creates a netcdf file for flux variables}
 \usage{
-CreateFluxNetcdfFile(fluxfilename, datain, latitude, longitude, site_code,
-  long_sitename, datasetversion, github_rev, tier = NA, ind_start, ind_end,
-  starttime, timestepsize, flux_varname, cf_name, elevation = NA,
-  towerheight = NA, canopyheight = NA, short_veg_type = NA,
-  long_veg_type = NA, missing, gapfill_all, gapfill_good, gapfill_med,
-  gapfill_poor, min_yrs, total_missing, total_gapfilled, QCmeasured,
-  QCgapfilled, infile, var_ind)
+CreateFluxNetcdfFile(fluxfilename, datain, site_code, siteInfo, ind_start,
+  ind_end, starttime, flux_varname, cf_name, total_missing, total_gapfilled,
+  qcInfo, arg_info, var_ind, modelInfo)
 }
 \description{
 Creates a netcdf file for flux variables

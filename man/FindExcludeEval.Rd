@@ -4,7 +4,7 @@
 \alias{FindExcludeEval}
 \title{Finds evaluation variables to exlude}
 \usage{
-FindExcludeEval(datain, all_missing, gaps, include_all)
+FindExcludeEval(datain, all_missing, gaps, include_all, qc_name)
 }
 \description{
 Finds evaluation variables to exlude
