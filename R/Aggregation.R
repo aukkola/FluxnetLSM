@@ -23,9 +23,10 @@ aggregate_tsteps <- function(datain, new_tstep, qc_flags, qc_name){
   #Indices for aggregating
   seq <- seq(from=1, by=ntsteps, length.out=nrow(new_data))
   
-  #Flags for observed and good-quality gapfill
-  good_data <- c(qc_flags$QC_measured, qc_flags$QC_gapfilled["good"])
+  #Flags for observed 
+  good_data <- c(qc_flags$QC_measured)
   
+  #Loop through variables
   for(k in 1:length(vars)){
     
     method <- datain$aggr_method[vars[k]]
@@ -96,7 +97,14 @@ aggregate_tsteps <- function(datain, new_tstep, qc_flags, qc_name){
   datain$timestepsize <- datain$timestepsize * ntsteps
   
   
-  return(datain)
+  #New QC flag descriptions
+  
+  qc_flags$qc_info <- "Fraction (0-1) of aggregated time steps that were observed"
+  
+  #Collate
+  outs <- list(data=datain, qc_flags=qc_flags)
+  
+  return(outs)
   
 }
 
@@ -109,6 +117,9 @@ qc_frac <- function(data, good_data){
   
   good_frac <- which(sapply(good_data, function(x) data==x))
   good_frac <- length(good_frac) / length(data)
+  
+  #If any data missing, set QC flag to missing
+  if(any(data==Sprd_MissingVal)) good_frac <- Sprd_MissingVal
   
   return(good_frac)
 }

@@ -222,15 +222,9 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     
     # Check if variables have gaps in the time series and determine what years to output:
     gaps  <- CheckDataGaps(datain = DataFromText, missing_val = Sprd_MissingVal,
-                           QCmeasured=qc_flags$QC_measured, 
-                           QCgapfilled=qc_flags$QC_gapfilled,
-                           missing = missing, gapfill_all=gapfill_all,
-                           gapfill_good=gapfill_good, gapfill_med=gapfill_med,
-                           gapfill_poor=gapfill_poor, min_yrs=min_yrs,
-                           essential_met = vars[which(DataFromText$essential_met)], 
-                           preferred_eval = vars[which(DataFromText$preferred_eval)],
-                           all_eval = vars[which(DataFromText$categories=="Eval")],
-                           qc_name=qc_name, site_log=site_log)
+                           qc_flags=qc_flags, missing=missing, gapfill_all=gapfill_all,
+                           gapfill_good=NA, gapfill_med=NA, gapfill_poor=NA, min_yrs=min_yrs,
+                           qc_name=qc_name, showWarn=FALSE, site_log=site_log)
  
     
     #Log possible warnings and remove warnings from output var
@@ -241,23 +235,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     ## Check that gap check found whole years ##
     IsWholeYrs(datain=DataFromText, gaps, site_log)
     
-    
-    ### Save info on which evaluation variables have all values missing ###
-
-    #These are excluded when writing NetCDF file
-    #Find variables with all values missing
-    all_missing <- lapply(gaps$total_missing, function(x) names(which(x==100)))
-    
-    exclude_eval <- rep(NA, length(all_missing))
-
-    if(any(sapply(all_missing, length) > 0) | !include_all_eval){
      
-      #Find variables to exclude
-      exclude_eval <- FindExcludeEval(datain=DataFromText, all_missing=all_missing, 
-                                        gaps=gaps, include_all=include_all_eval)
-      
-    }
-    
     
     ##############################################
     ###--- Gapfill meteorological variables ---###
@@ -281,7 +259,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
       } else if(met_gapfill == "ERAinterim") {
         
         #Gapfill with ERAinterim
-        DataFromText <- GapfillMet_with_ERA(DataFromText, ERA_file, 
+        DataFromText <- GapfillMet_with_ERA(DataFromText, era_file, 
                                             qc_name, qc_flags)
         
       #Cannot recognise method, stop
@@ -309,27 +287,74 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     }
     
     
-    ########################################################
-    ### Update info on data gaps if performed gapfilling ###
-    ########################################################
+    
+    
+    ############################################
+    ### Aggregate data to a longer time step ###
+    ############################################
+
+    if(!is.na(aggregate)){
+      
+      # Aggregate to a coarser time step as set by argument aggregate
+      # QC flags are set to a fraction measured+good gapfilling
+      # (as per FLUXNET2015 convention for aggregated data)
+           
+      aggregated_data <- aggregate_tsteps(datain=DataFromText, new_tstep=aggregate,
+                                       qc_flags=qc_flags, qc_name=qc_name)
+      
+      #update QC flag info
+      DataFromText <- aggregated_data$data
+      qc_flags     <- aggregated_data$qc_flags
+      
+    }
+    
+    
+    #################################################################
+    ### Update info on data gaps after gapfilling and aggregating ###
+    #################################################################
     
     #Update gaps after gapfilling. Setting missing to 0 here to make sure
     #missing met variables not passed through
     #Setting gapfill_all to gapfill_all+missing so matches the level of missing and
     #gap-filling originally passed to the function
     if(!is.na(met_gapfill) | !is.na(flux_gapfill)){
-      gaps  <- CheckDataGaps(datain = DataFromText, missing_val = Sprd_MissingVal,
-                             QCmeasured=qc_flags$QC_measured, 
-                             QCgapfilled=qc_flags$QC_gapfilled,
-                             missing=0, gapfill_all=gapfill_all+missing,
-                             gapfill_good=NA, gapfill_med=NA,
-                             gapfill_poor=NA, min_yrs=min_yrs,
-                             essential_met = vars[which(DataFromText$essential_met)], 
-                             preferred_eval = vars[which(DataFromText$preferred_eval)],
-                             all_eval = vars[which(DataFromText$categories=="Eval")],
-                             qc_name=qc_name, showWarn=FALSE, site_log=site_log)    
+      miss    <- 0
+      gap_all <- gapfill_all+missing
+    } else{
+      miss    <- missing
+      gap_all <- gapfill_all
     }
     
+    gaps  <- CheckDataGaps(datain=DataFromText, missing_val=Sprd_MissingVal,
+                           qc_flags=qc_flags, missing=miss, gapfill_all=gap_all,
+                           gapfill_good=NA, gapfill_med=NA,
+                           gapfill_poor=NA, min_yrs=min_yrs,
+                           qc_name=qc_name, showWarn=FALSE, 
+                           aggregate=aggregate, site_log=site_log)    
+    
+    #Log possible warnings and remove warnings from output var
+    site_log <- log_warning(warn=gaps$warn, site_log)
+    gaps     <- gaps$out
+
+    
+    
+    
+    ### Save info on which evaluation variables have all values missing ###
+    
+    #These are excluded when writing NetCDF file
+    #Find variables with all values missing
+    all_missing <- lapply(gaps$total_missing, function(x) names(which(x==100)))
+    
+    exclude_eval <- rep(NA, length(all_missing))
+    
+    if(any(sapply(all_missing, length) > 0) | !include_all_eval){
+      
+      #Find variables to exclude
+      exclude_eval <- FindExcludeEval(datain=DataFromText, all_missing=all_missing, 
+                                      gaps=gaps, include_all=include_all_eval,
+                                      qc_name=qc_name)
+      
+    }
     
     
     ############################################################
@@ -338,7 +363,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     
     # Written as an attribute to file. Calculated before converting
     # data units, i.e. assumes rainfall units mm/timestep
-        
+    
     if(any(DataFromText$attributes[,1]=="P")){
       
       #Check that units in mm
@@ -355,23 +380,6 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     } else {
       #Set to NA, repeat to match no. of output files 
       av_precip=rep(NA, length(unique(gaps$consec)))
-    }
-        
-    
-    
-    ############################################
-    ### Aggregate data to a longer time step ###
-    ############################################
-
-    if(!is.na(aggregate)){
-      
-      # Aggregate to a coarser time step as set by argument aggregate
-      # QC flags are set to a fraction measured+good gapfilling
-      # (as per FLUXNET2015 convention for aggregated data)
-           
-      DataFromText <- aggregate_tsteps(datain=DataFromText, new_tstep=aggregate,
-                                       qc_flags=qc_flags, qc_name=qc_name)
-      
     }
     
     

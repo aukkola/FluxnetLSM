@@ -36,11 +36,19 @@ gapfill_with_ERA <- function(datain, era_data, era_vars, tair_units, vpd_units,
   
   #Initialise list for new QC variables
   #created if no existing QC flags for a variable
-  new_qc   <- vector()
-  qc_names <- vector()
+  new_qc     <- vector()
+  qc_names   <- vector()
+  qc_outname <- vector()
   
+  #Save method if any tsteps gapfilled
+  method <- vector("list", length=length(ind))
+  names(method) <- names(ind)
+    
   #Loop through available variables
   for(k in 1:length(avail_era)){
+    
+    #Initialise method
+    method[[k]] <- vector()
     
     #Find flux data column index and ERAinterim column index
     #for variable being processed
@@ -86,6 +94,8 @@ gapfill_with_ERA <- function(datain, era_data, era_vars, tair_units, vpd_units,
         
       }
       
+      #Save method
+      method[[k]] <- append(method[[k]], "ERA-Interim")
       
       ## Set QC flags to "4" for time steps filled with ERA data ##
       #Find corresponding qc variable, if available
@@ -106,8 +116,9 @@ gapfill_with_ERA <- function(datain, era_data, era_vars, tair_units, vpd_units,
         
         #Create name for QC variable and save data and name to data.frame
         #Use output variable name to create qc flag name
-        qc_names <- cbind(qc_names, paste(avail_out[k],"_qc", sep=""))
-        new_qc <- cbind(new_qc, qc_var)
+        qc_names   <- cbind(qc_names, paste(avail_flux[k], qc_name, sep=""))
+        new_qc     <- cbind(new_qc, qc_var)
+        qc_outname <- cbind(qc_outname, avail_out[k])
         
       }   
     } #if
@@ -115,9 +126,14 @@ gapfill_with_ERA <- function(datain, era_data, era_vars, tair_units, vpd_units,
   
   
   #Assign new QC variable names to data frame column names
-  if(length(new_qc) > 0){ colnames(new_qc) <- qc_names}
-  
-  out <- list(datain=datain, new_qc=new_qc)
+  if(length(new_qc) > 0){ 
+    colnames(new_qc) <- qc_names
+  } 
+  new_qc_info <- list(new_qc, qc_outname)
+  names(new_qc_info) <- c("data","outname")
+
+  #Collate outputs
+  out <- list(datain=datain, new_qc=new_qc_info, method=method)
   
   return(out)
   

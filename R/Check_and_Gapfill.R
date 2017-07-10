@@ -9,7 +9,7 @@
 
 #' Gapfills meteorological data with down-scaled ERAinterim estimates
 #' @export
-GapfillMet_with_ERA <- function(indata, ERA_file, qc_name, ...){
+GapfillMet_with_ERA <- function(datain, ERA_file, qc_name, ...){
   
   #Read ERA data and extract time steps corresponding to obs
   era_data <- read_era(ERA_file=ERA_file, datain=datain)
@@ -32,6 +32,14 @@ GapfillMet_with_ERA <- function(indata, ERA_file, qc_name, ...){
                                 missing_val=Sprd_MissingVal,
                                 out_vars=datain$out_vars[ind],
                                 qc_name=qc_name, qc_flags, site_log)
+    
+  #Add new category to indata for saving gapfilling method
+  datain$gapfill_met <- rep(NA, length(ind))
+  names(datain$gapfill_met) <- names(ind)
+    
+  #Save methods
+  methods <- unlist(temp_data$method)
+  datain$gapfill_met[names(methods)] <- methods
   
   
   #Check that column names of temp_data and data to be replaced match. Stop if not
@@ -47,15 +55,16 @@ GapfillMet_with_ERA <- function(indata, ERA_file, qc_name, ...){
   
   #If new QC variables were created, create and append
   #variable attributes to data frame
-  if(length(temp_data$new_qc) > 0){
+  if(length(temp_data$new_qc$data) > 0){
     
     #Append qc time series to data
-    datain$data <- cbind(datain$data, temp_data$new_qc)
+    datain$data <- cbind(datain$data, temp_data$new_qc$data)
     
-    qc_vars <- colnames(temp_data$new_qc)
+    qc_vars <- colnames(temp_data$new_qc$data)
     
     for(k in 1:length(qc_vars)){
-      datain <- create_qc_var(datain, qc_name=qc_vars[k], qc_flags)
+      datain <- create_qc_var(datain, qc_name=qc_vars[k], qc_flags, 
+                              outname=temp_data$new_qc$outname[k], cat="Met")
     }
   }
   
@@ -134,7 +143,7 @@ GapfillMet_statistical <- function(datain, qc_name, qc_flags,
   
   #Add new category to indata for saving gapfilling method
   datain$gapfill_met <- rep(NA, length(ind))
-  names(datain$gapfill_met) <- names(ind)
+  names(datain$gapfill_met) <- vars
   
   
   #Need some of these for LWdown and air pressure
@@ -520,7 +529,7 @@ FindFluxInd <- function(datain, exclude_eval, k, site_log){
 
 #' Finds evaluation variables to exlude
 #' @export
-FindExcludeEval <- function(datain, all_missing, gaps, include_all){
+FindExcludeEval <- function(datain, all_missing, gaps, include_all, qc_name){
   
   #Extract names of evaluation variables
   cats <- datain$categories
@@ -539,12 +548,12 @@ FindExcludeEval <- function(datain, all_missing, gaps, include_all){
   
   #Only exclude QC variables if corresponding data variable excluded as well. Keep otherwise
   #Find all QC variables
-  qc_vars <- lapply(exclude_eval, function(x) x[grepl("_QC", x)])
+  qc_vars <- lapply(exclude_eval, function(x) x[grepl(qc_name, x)])
   
   if(any(sapply(qc_vars, length) > 0)){
     
     #Find QC variables with corresponding data variable
-    remove_qc <-  mapply(function(x,y) is.element(gsub("_QC", "", y), x), x=exclude_eval, y=qc_vars)
+    remove_qc <-  mapply(function(x,y) is.element(gsub(qc_name, "", y), x), x=exclude_eval, y=qc_vars)
     
     #If any QC vars without a corresponding data variable, don't include
     #them in excluded variables
@@ -597,32 +606,23 @@ create_qc_var <- function(datain, qc_name, qc_flags, outname, cat){
   datain$vars <- append(datain$vars, qc_name)
   
   #output vars
-  names <- names(datain$out_vars)
-  datain$out_vars <- append(datain$out_vars, paste(outname, "_qc", sep=""))
-  
-  names(datain$out_vars) <- c(names,qc_name)
+  datain$out_vars <- append_qc(datain$out_vars, paste(outname, "_qc", sep=""), qc_name)
+    
+  #era_vars
+  datain$era_vars <- append_qc(datain$era_vars, NA, qc_name)
   
   #era_vars
-  datain$era_vars <- append(datain$era_vars, NA)
-  names(datain$era_vars)[length(datain$era_vars)] <- qc_name
-  
-  #era_vars
-  datain$aggr_method <- append(datain$aggr_method, NA)
-  names(datain$aggr_method)[length(datain$aggr_method)] <- qc_name
+  datain$aggr_method <- append_qc(datain$aggr_method, NA, qc_name)
   
   #attributes
   Fluxnet_var <- "NULL"
-  Longname    <- paste(strsplit(outname, "_qc"), "quality control flag")
+  Longname    <- paste(outname, "quality control flag")
   CF_name     <- "NULL"
   datain$attributes <- rbind(datain$attributes, c(Fluxnet_var, Longname, CF_name))  
   
   #units
-  datain$units$original_units <- append(datain$units$original_units, "-")
-  names(datain$units$original_units) <- qc_name
-  
-  datain$units$target_units   <- append(datain$units$target_units, "-")
-  names(datain$units$target_units) <- qc_name
-  
+  datain$units$original_units <- append_qc(datain$units$original_units, "-", qc_name)  
+  datain$units$target_units   <- append_qc(datain$units$target_units, "-", qc_name)
   
   #var_ranges
   qc_range <- c(qc_flags$QC_measured, qc_flags$QC_gapfilled)
@@ -631,14 +631,17 @@ create_qc_var <- function(datain, qc_name, qc_flags, outname, cat){
   colnames(datain$var_ranges)[ncol(datain$var_ranges)] <- qc_name
   
   #categories
-  datain$categories <- append(datain$categories, cat)
-  names(datain$categories)[length(datain$categories)] <- qc_name
+  datain$categories <- append_qc(datain$categories, cat, qc_name)  
   
+  #Essential met / preferred eval
+  datain$essential_met  <- append_qc(datain$essential_met, FALSE, qc_name)
+  datain$preferred_eval <- append_qc(datain$preferred_eval, FALSE, qc_name)
   
   return(datain)
 }
 
 #-----------------------------------------------------------------------------
+
 #' Updates QC flags after gap-filling
 #' @export
 update_qc <- function(data, temp_data, varname, qc_name, qc_value, qc_flags,...){
@@ -679,4 +682,16 @@ update_qc <- function(data, temp_data, varname, qc_name, qc_value, qc_flags,...)
   return(data)
 }
 
+#-----------------------------------------------------------------------------
+
+#' Appends information for new QC flag
+#' @export
+append_qc <- function(old_data, new_value, new_name){
+  
+  old_data <- append(old_data, new_value)
+  names(old_data)[length(old_data)] <- new_name
+  
+  return(old_data)
+  
+}
 
