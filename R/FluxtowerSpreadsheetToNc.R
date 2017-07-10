@@ -371,33 +371,34 @@ convert_LaThuile <- function(infiles, fair_usage=NA, fair_usage_vec=NA,
 CreateFluxNetcdfFile = function(fluxfilename, datain,              #outfile file and data
                             site_code,                             #Fluxnet site code
                             siteInfo,                              #Site attributes
-                            datasetversion,                        #Dataset version
                             ind_start, ind_end,                    #time period indices
-                            starttime, timestepsize,               #timing info
+                            starttime,                             #timing info
                             flux_varname, cf_name,                 #Original Fluxnet variable names and CF_compliant names
-                            missing, gapfill_all, gapfill_good,    #thresholds used in processing
-                            gapfill_med, gapfill_poor, min_yrs, 
                             total_missing, total_gapfilled,        #Percentage missing and gap-filled
                             qcInfo,                                #QC flag values
-                            infile,                                #Input file name
-                            var_ind){                              #Indices to extract variables to be written
-    
+                            arg_info,                              #Processing information
+                            var_ind,                               #Indices to extract variables to be written
+                            modelInfo){                            #Model parameters
+  
   
   
   # load netcdf library
   library(ncdf4) 
   
+  #Time step size
+  timestepsize <- datain$timestepsize
   
   #Extract time period to be written
   datain$data <- datain$data[ind_start:ind_end,]
   
   # default missing value for all variables
-  missing_value=NcMissingVal
+  missing_value=Nc_MissingVal
   
   # Define x, y and z dimensions
   xd = ncdim_def('x',vals=c(1),units='')	
   yd = ncdim_def('y',vals=c(1),units='')
   zd = ncdim_def('z',vals=c(1),units='')
+  dimnchar = ncdim_def("nchar", "", 1:200, create_dimvar=FALSE )
   
   # Determine data start date and time:
   timeunits = CreateTimeunits(starttime)
@@ -454,14 +455,14 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,              #outfile file
   }
   # Define IGBP short vegetation type:
   if(!is.na(siteInfo$IGBP_vegetation_short)){
-    short_veg=ncvar_def('IGBP_veg_short','-',dim=list(xd,yd), missval=NULL,
+    short_veg=ncvar_def('IGBP_veg_short','-',dim=list(dimnchar), missval=NULL,
                         longname='IGBP vegetation type (short)', prec="char")
     opt_vars[[ctr]] = short_veg
     ctr <- ctr + 1
   }
   # Define IGBP long vegetation type:
   if(!is.na(siteInfo$IGBP_vegetation_long)){
-    long_veg=ncvar_def('IGBP_veg_long','-',dim=list(xd,yd), missval=NULL,
+    long_veg=ncvar_def('IGBP_veg_long','-',dim=list(dimnchar), missval=NULL,
                        longname='IGBP vegetation type (long)', prec="char")
     opt_vars[[ctr]] = long_veg
     ctr <- ctr + 1 
@@ -488,32 +489,27 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,              #outfile file
   ncatt_put(ncid,varid=0,attname='site_name',
             attval=as.character(siteInfo$Fullname), prec="text")
   ncatt_put(ncid,varid=0,attname='Fluxnet_dataset_version',
-            attval=datasetversion, prec="text")
-  ncatt_put(ncid,varid=0,attname='Input_file',
-            attval=infile, prec="text")
-  ncatt_put(ncid,varid=0,attname='Processing_thresholds(%)',
-            attval=paste("missing: ", missing,
-                         ", gapfill_all: ", gapfill_all,
-                         ", gapfill_good: ", gapfill_good,
-                         ", gapfill_med: ", gapfill_med,
-                         ", gapfill_poor: ", gapfill_poor,
-                         ", min_yrs: ", min_yrs,
-                         sep=""), prec="text")
+            attval=arg_info$datasetversion, prec="text")  
   ncatt_put(ncid,varid=0,attname='QC_flag_descriptions',
             attval=qcInfo, prec="text")  
-  ncatt_put(ncid,varid=0,attname='Package contact',
-            attval='a.ukkola@unsw.edu.au')
-  ncatt_put(ncid,varid=0,attname='PALS contact',
-            attval='palshelp@gmail.com')
-  if(!is.na(tier)) {
+  
+  #args info
+  add_processing_info(ncid, arg_info, datain, cat="Flux") 
+  
+  #tier
+  if(!is.na(siteInfo$Tier)) {
     ncatt_put(ncid,varid=0,attname='Fluxnet site tier',
-              attval=siteInfo$Tier) }
+              attval=siteInfo$Tier)
+  }  
   
-  
-  ### Write model parameters (as global atts) ###
+  # model params
   if(!is.na(modelInfo)){
     write_model_params(ncid, modelInfo, missing_value)
   }
+  
+  #contact info
+  ncatt_put(ncid,varid=0,attname='Package contact',
+            attval='a.ukkola@unsw.edu.au')  
   
   
   # Add variable data to file:
@@ -565,6 +561,18 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,              #outfile file
                                                    attval=round(total_gapfilled[x],1)))  
   
 
+  #Add variable-specific gap-filling methods to file
+  if(!is.na(arg_info$flux_gapfill)){
+    
+    gap_methods <- datain$gapfill_flux[which(!is.na(datain$gapfill_flux))]
+    gap_vars <- names(gap_methods)
+    lapply(1:length(var_defs), function(x) if(any(gap_vars==names(var_defs[[x]]$name))){
+      ncatt_put(nc=ncid, varid=var_defs[[x]], 
+                attname="Gapfilling_method", 
+                attval=gap_methods[names(var_defs[[x]]$name)],
+                prec="text")} )
+  }
+  
   
   # Close netcdf file:
   nc_close(ncid)
@@ -580,34 +588,34 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,              #outfile file
 CreateMetNetcdfFile = function(metfilename, datain,               #outfile file and data
                            site_code,                             #Fluxnet site code 
                            siteInfo,                              #Site attributes
-                           datasetversion,                        #Dataset version 
                            ind_start, ind_end,                    #time period indices
-                           starttime, timestepsize,               #timing info
+                           starttime,                             #timing info
                            flux_varname, cf_name,                 #Original Fluxnet variable names and CF_compliant names
                            av_precip=NA,                          #average annual rainfall
-                           missing, gapfill_all, gapfill_good,    #thresholds used in processing
-                           gapfill_med, gapfill_poor, min_yrs,
                            total_missing, total_gapfilled,        #Percentage missing and gap-filled
                            qcInfo,                                #QC flag values
-                           ERA_gapfill=ERA_gapfill,               #Was ERA gapfilling used
-                           infile,                                #Input file name
-                           var_ind){                              #Indices to extract variables to be written
+                           arg_info,                              #Arguments passed to main function
+                           var_ind,                               #Indices to extract variables to be written
+                           modelInfo){                            #Model parameters
     
   
   # load netcdf library
 	library(ncdf4) 
   
-
+	#Time step size
+  timestepsize <- datain$timestepsize
+	
   #Extract time period to be written
   datain$data <- datain$data[ind_start:ind_end,]
   
 	# default missing value for all variables
-	missing_value=NcMissingVal
+	missing_value=Nc_MissingVal
   
 	# Define x, y and z dimensions
 	xd = ncdim_def('x',vals=c(1),units='')	
 	yd = ncdim_def('y',vals=c(1),units='')
 	zd = ncdim_def('z',vals=c(1),units='')
+	dimnchar = ncdim_def("nchar", "", 1:200, create_dimvar=FALSE )
   
 	# Determine data start date and time:
 	timeunits = CreateTimeunits(starttime)
@@ -665,14 +673,14 @@ CreateMetNetcdfFile = function(metfilename, datain,               #outfile file 
 	}
 	# Define IGBP short vegetation type:
 	if(!is.na(siteInfo$IGBP_vegetation_short)){
-	  short_veg=ncvar_def('IGBP_veg_short','-',dim=list(xd,yd), missval=NULL,
+	  short_veg=ncvar_def('IGBP_veg_short','-',dim=list(dimnchar), missval=NULL,
 	                      longname='IGBP vegetation type (short)', prec="char")
 	  opt_vars[[ctr]] = short_veg
 	  ctr <- ctr + 1
 	}
 	# Define IGBP long vegetation type:
 	if(!is.na(siteInfo$IGBP_vegetation_long)){
-	  long_veg=ncvar_def('IGBP_veg_long','-',dim=list(xd,yd), missval=NULL,
+	  long_veg=ncvar_def('IGBP_veg_long','-',dim=list(dimnchar), missval=NULL,
 	                     longname='IGBP vegetation type (long)', prec="char")
 	  opt_vars[[ctr]] = long_veg
 	  ctr <- ctr + 1 
@@ -689,43 +697,40 @@ CreateMetNetcdfFile = function(metfilename, datain,               #outfile file 
 	}
   
   
+  
 	#### Write global attributes ###
-  ncatt_put(ncid,varid=0,attname='Production_time',
-		attval=as.character(Sys.time()))
+	#### Write global attributes ###
+	ncatt_put(ncid,varid=0,attname='Production_time',
+	          attval=as.character(Sys.time()))
 	ncatt_put(ncid,varid=0,attname='Github_revision',  
-		attval=siteInfo$Processing$git_rev, prec="text")
+	          attval=siteInfo$Processing$git_rev, prec="text")
 	ncatt_put(ncid,varid=0,attname='site_code',
-		attval=site_code, prec="text")
-  ncatt_put(ncid,varid=0,attname='site_name',
-          attval=as.character(siteInfo$Fullname), prec="text")
-  ncatt_put(ncid,varid=0,attname='Fluxnet_dataset_version',
-		attval=datasetversion, prec="text")	 
-	ncatt_put(ncid,varid=0,attname='Input_file',
-	          attval=infile, prec="text")
-	ncatt_put(ncid,varid=0,attname='Processing_thresholds(%)',
-	          attval=paste("missing: ", missing,
-	                       ", gapfill_all: ", gapfill_all,
-	                       ", gapfill_good: ", gapfill_good,
-	                       ", gapfill_med: ", gapfill_med,
-	                       ", gapfill_poor: ", gapfill_poor,
-	                       ", min_yrs: ", min_yrs,
-	                       sep=""), prec="text")
+	          attval=site_code, prec="text")
+	ncatt_put(ncid,varid=0,attname='site_name',
+	          attval=as.character(siteInfo$Fullname), prec="text")
+	ncatt_put(ncid,varid=0,attname='Fluxnet_dataset_version',
+	          attval=arg_info$datasetversion, prec="text")  
 	ncatt_put(ncid,varid=0,attname='QC_flag_descriptions',
 	          attval=qcInfo, prec="text")  
-	ncatt_put(ncid,varid=0,attname='Package contact',
-	          attval='a.ukkola@unsw.edu.au')
-	ncatt_put(ncid,varid=0,attname='PALS contact',
-		attval='palshelp@gmail.com')
+	
+	#args info
+	add_processing_info(ncid, arg_info, datain, cat="Met") 
+	
+	#tier
 	if(!is.na(siteInfo$Tier)) {
 	  ncatt_put(ncid,varid=0,attname='Fluxnet site tier',
-	            attval=siteInfo$Tier) }
+	            attval=siteInfo$Tier)
+	}  
 	
-  
-  ### Write model parameters (as global atts) ###
-  if(!is.na(modelInfo)){
-    write_model_params(ncid, modelInfo, missing_value)
-  }
-  
+	# model params
+	if(!is.na(modelInfo)){
+	  write_model_params(ncid, modelInfo, missing_value)
+	}
+	
+	#contact info
+	ncatt_put(ncid,varid=0,attname='Package contact',
+	          attval='a.ukkola@unsw.edu.au')	
+	
   
 	# Add variable data to file:
 	ncvar_put(ncid, latdim, vals=siteInfo$SiteLatitude)
@@ -762,7 +767,7 @@ CreateMetNetcdfFile = function(metfilename, datain,               #outfile file 
                                                    prec="text"))
 
 	#Add ERA-Interim name to file when available (if used)
-  if(ERA_gapfill){
+  if(arg_info$met_gapfill=="ERAinterim"){
     lapply(1:length(var_defs), function(x) if(!is.na(datain$era_vars[var_ind[x]])){ 
                                            ncatt_put(nc=ncid, varid=var_defs[[x]], 
                                            attname="ERA-Interim variable used in gapfilling", 
@@ -781,12 +786,24 @@ CreateMetNetcdfFile = function(metfilename, datain,               #outfile file 
 	                                                 attval=round(total_gapfilled[x],1)))  
 	
 	
+	#Add variable-specific gap-filling methods to file
+	if(!is.na(arg_info$met_gapfill)){
+	  
+	  gap_methods <- datain$gapfill_met[which(!is.na(datain$gapfill_met))]
+	  gap_vars <- names(gap_methods)
+	  lapply(1:length(var_defs), function(x) if(any(gap_vars==names(var_defs[[x]]$name))){
+	    ncatt_put(nc=ncid, varid=var_defs[[x]], 
+	              attname="Gapfilling_method", 
+	              attval=gap_methods[names(var_defs[[x]]$name)],
+	              prec="text")} )
+	}
+	
+  
+  
 
 	# Close netcdf file:
 	nc_close(ncid)
 }
-
-
 
 #-----------------------------------------------------------------------------
 
@@ -810,9 +827,86 @@ write_model_params <- function(ncid, modelInfo, missing_val){
   }
 }
 
+#-----------------------------------------------------------------------------
 
+#' Writes attributes common to met and flux NC files
+#' @export
+add_processing_info <- function(ncid, arg_info, datain, cat){
+  
+  #Input file
+  ncatt_put(ncid,varid=0,attname='Input_file',
+            attval=arg_info$infile, prec="text")
+  
+  
+  #Processing thresholds
+  ncatt_put(ncid,varid=0,attname='Processing_thresholds(%)',
+            attval=paste("missing: ", arg_info$missing,
+                         ", gapfill_all: ", arg_info$gapfill_all,
+                         ", gapfill_good: ", arg_info$gapfill_good,
+                         ", gapfill_med: ", arg_info$gapfill_med,
+                         ", gapfill_poor: ", arg_info$gapfill_poor,
+                         ", min_yrs: ", arg_info$min_yrs,
+                         sep=""), prec="text")
+  
+  #Aggregation
+  if(!is.na(arg_info$aggregate)){  
+    ncatt_put(ncid,varid=0,attname='Timestep_aggregation',
+              attval=paste("Aggregated from", (datain$original_timestepsize/60/60),
+                           "hours to", datain$timestepsize/60/60, "hours"))                      
+  }
+  
+  
+  
+ #Gapfilling info
+ #Met data
+ if(cat=="Met" & !is.na(arg_info$met_gapfill)){
+   
+   ncatt_put(ncid,varid=0,attname='Gapfilling_method',
+             attval=arg_info$met_gapfill, prec="text")
+   
+   if(arg_info$met_gapfill=="statistical") {
+     
+     ncatt_put(ncid,varid=0,attname='Gapfilling_thresholds',
+               attval=paste("linfill: ", arg_info$linfill,", copyfill: ", arg_info$copyfill,
+                            ", lwdown_method: ", arg_info$lwdown_method, sep=""),
+               prec="text")
+   
+   } else if(arg_info$met_gapfill=="ERAinterim"){
+     
+     ncatt_put(ncid,varid=0,attname='ERAinterim_file',
+               attval=arg_info$era_file, prec="text")
+   }
+   
+   
+ #Flux data 
+ } else if(cat=="Flux" & !is.na(arg_info$flux_gapfill)){
+   
+   ncatt_put(ncid,varid=0,attname='Gapfilling_method',
+             attval=arg_info$flux_gapfill, prec="text")
+   
+   ncatt_put(ncid,varid=0,attname='Gapfilling_thresholds',
+             attval=paste("linfill: ", arg_info$linfill,", copyfill: ", arg_info$copyfill,
+                          ", regfill: ", arg_info$regfill, sep=""),
+             prec="text")
+   
+ }
+  
 
-
+  #La Thuile fair use
+  if(arg_info$datasetname=="LaThuile"){
+    ncatt_put(ncid,varid=0,attname="LaThuile_fair_use_policies",
+              attval=arg_info$fair_use, prec="text")
+  }
+  
+ 
+  #FLUXNET2015 subset
+  if(arg_info$datasetname=="FLUXNET2015"){
+    ncatt_put(ncid,varid=0,attname='FLUXNET2015_version',
+              attval=arg_info$flx2015_version, prec="text")
+  }
+ 
+  
+}
 
 
 

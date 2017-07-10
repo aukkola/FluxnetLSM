@@ -80,7 +80,6 @@ GapfillMet_with_ERA <- function(datain, ERA_file, qc_name, ...){
 
 }
 
-
 #-----------------------------------------------------------------------------
 
 #' Gapfill meteorological variables using statistical methods

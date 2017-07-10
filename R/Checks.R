@@ -88,9 +88,10 @@ CheckDataGaps <- function(datain, missing_val, qc_flags,
                      "Set at least one of 'gapfill_all',",
                      "'gapfill_good', 'gapfill_med' or",
                      "'gapfill_poor' to check for gapfilling")
-    }
-       
-    warnings <- append_and_warn(warn=warn, warnings)
+      
+      warnings <- append_and_warn(warn=warn, warnings)
+    
+    }   
   }
   
   
@@ -121,9 +122,9 @@ CheckDataGaps <- function(datain, missing_val, qc_flags,
     ### Gap-filled ###
     #Initialise gapfilled percentage as zeros
     if(is.na(aggregate)){
-      perc_gapfilled[[k]] <- matrix(Sprd_MissingVal, nrow=length(threshold), ncol=length(start))
+      perc_gapfilled[[k]] <- matrix(0, nrow=length(threshold), ncol=length(start))
     } else{
-      perc_gapfilled[[k]] <- matrix(Sprd_MissingVal, nrow=1, ncol=length(start))
+      perc_gapfilled[[k]] <- matrix(0, nrow=1, ncol=length(start))
     }
     
     #If threshold set, check for gap-filling
@@ -174,7 +175,9 @@ CheckDataGaps <- function(datain, missing_val, qc_flags,
         } else {
           
           #Calculate total gapfilled (1 - QC frac)
-          perc_gapfilled[[k]][1,] <- sum(1 - qcdata[start[x]:end[x]]) / length(qcdata[start[x]:end[x]]) * 100
+          perc_gapfilled[[k]][1,] <- sapply(1:length(start), function(x)  
+                                     sum(1 - qcdata[start[x]:end[x]]) /
+                                     length(qcdata[start[x]:end[x]]) * 100) 
           
         } #aggregate
 
@@ -202,6 +205,7 @@ CheckDataGaps <- function(datain, missing_val, qc_flags,
   #eval variables if option chosen)
   eval_remove <- list()
   
+
   #Loop through years
   for(k in 1:length(start)){
     
@@ -226,8 +230,8 @@ CheckDataGaps <- function(datain, missing_val, qc_flags,
     #If missing value threshold not exceeded, check for gapfilling (if threshold set)
     if(yr_keep[k] & any(!is.na(threshold))){
       
-      #Using gapfill_all
-      if(length(threshold)==1){
+      #Using gapfill_all or aggregated
+      if(length(threshold)==1 | !is.na(aggregate)){
         
         # If ANY essential vars have too many gapfilled or missing values OR 
         # ALL preferred vars have too many gapfilled or missing values,
@@ -254,7 +258,7 @@ CheckDataGaps <- function(datain, missing_val, qc_flags,
           yr_keep[k] <- FALSE
         }
       }
-      
+
     } #gap-filling
     
   } #years
@@ -374,14 +378,21 @@ CheckDataGaps <- function(datain, missing_val, qc_flags,
         
         data <- datain$data[tstart[k]:tend[k],qc_ind[[v]]]
         
-        total_gapfilled[[k]][v] <- length(which(data %in% qc_flags$QC_gapfilled)) / 
-          length(data) *100      
-      } else { #No QC var
+        #No time step aggreagation
+        if(is.na(aggregate)){
+          total_gapfilled[[k]][v] <- length(which(data %in% qc_flags$QC_gapfilled)) / 
+                                     length(data) *100 
+        #Aggregation
+        } else {          
+          total_gapfilled[[k]][v] <- sum(1 - data) / length(data) * 100
+        }
+  
+      #No QC var  
+      } else { 
         total_gapfilled[[k]][v] <- 0
       }
     }
     names(total_gapfilled[[k]]) <- colnames(datain$data)
-    
   }        
   
   

@@ -9,9 +9,13 @@
 #' @export
 aggregate_tsteps <- function(datain, new_tstep, qc_flags, qc_name){
   
+  #First save old original tstep
+  datain$original_timestepsize  <- datain$timestepsize 
+  
   #Number of time steps to aggregate
   ntsteps <- (new_tstep * 60*60) / datain$timestepsize 
   
+
   #Variable names
   vars <- datain$vars
   

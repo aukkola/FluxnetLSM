@@ -121,7 +121,7 @@ create_outdir <- function(outdir, site, plots){
   }
   
   #Return log path for later use
-  return(outpath_log)
+  return(list(nc=outpath_nc, log=outpath_log, plot=outpath_plot))
 }
 
 #-----------------------------------------------------------------------------
