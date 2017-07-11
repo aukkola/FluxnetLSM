@@ -114,7 +114,7 @@ CheckDataGaps <- function(datain, qc_flags, missing, gapfill_all,
     ### Missing ###
     #Calculate the percentage of data missing each year
     perc_missing[[k]] <- sapply(1:length(start), function(x)
-                         length( is.na(which(data[start[x]:end[x]] ))) /
+                         length(which(is.na(data[start[x]:end[x]] ))) /
                          length(start[x]:end[x]) * 100)
     
     ### Gap-filled ###
