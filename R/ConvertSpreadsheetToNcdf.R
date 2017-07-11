@@ -116,8 +116,8 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
   
   qc_flags <- get_qc_flags(datasetname, flx2015_version)
   
-  Sprd_MissingVal <- -9999 # missing value in spreadsheet
-  Nc_MissingVal   <- -9999 # missing value in created netcdf files
+  Sprd_MissingVal <<- -9999 # missing value in spreadsheet
+  Nc_MissingVal   <<- -9999 # missing value in created netcdf files
   
   
   #Name of time stamp and QC variables
