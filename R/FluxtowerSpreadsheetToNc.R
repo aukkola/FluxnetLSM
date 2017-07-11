@@ -762,7 +762,7 @@ CreateMetNetcdfFile = function(metfilename, datain,               #outfile file 
                                                    prec="text"))
 
 	#Add ERA-Interim name to file when available (if used)
-  if(arg_info$met_gapfill=="ERAinterim"){
+  if(!is.na(arg_info$met_gapfill) & (arg_info$met_gapfill=="ERAinterim")){
     lapply(1:length(var_defs), function(x) if(!is.na(datain$era_vars[var_ind[x]])){ 
                                            ncatt_put(nc=ncid, varid=var_defs[[x]], 
                                            attname="ERA-Interim variable used in gapfilling", 
