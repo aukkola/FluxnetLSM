@@ -60,7 +60,7 @@ See `examples` for example usage. Three examples are provided for processing a s
 
 2. I would like to output model-specific attributes for sites
 
-Model-specific attributes for each site, such as the plant functional type, can be saved in the `data/Site_metadata.csv` file (see example for CABLE PFT). Model-specific attributes are then set in the function `initialise_model` (stored in `R/Model_initialisations.R`) where a template for adding a new model attribute is provided. Finally, to write these in the NetCDF files, set the argument `model` to your model name when running the package.
+	Model-specific attributes for each site, such as the plant functional type, can be saved in the `data/Site_metadata.csv` file (see example for CABLE PFT). Model-specific attributes are then set in the function `initialise_model` (stored in `R/Model_initialisations.R`) where a template for adding a new model attribute is provided. Finally, to write these in the NetCDF files, set the argument `model` to your model name when running the package.
 
 
 
