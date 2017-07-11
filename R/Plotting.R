@@ -12,12 +12,13 @@
 #'
 #' @export
 #' 
-plot_nc <- function(ncfile, analysis_type, vars, outfile){
+plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
   
   #Initialise warnings
   warnings <- ""
   
   #Separate data and QC variables
+  #TODO: hard coding "_qc" here, need to change
   data_vars <- vars[!grepl("_qc", vars)]
   qc_vars   <- vars[grepl("_qc", vars)]
   
@@ -58,10 +59,10 @@ plot_nc <- function(ncfile, analysis_type, vars, outfile){
   syear     <- as.numeric(format(startdate, "%Y"))
   
   
-  ## If rainfall (P) and air temp (TA_F_MDS) being plotted, ##
+  ## If rainfall and air temp being plotted, ##
   ## convert to units mm/timestepsize and deg C             ##
-  if(any(fluxnet_names=="P")){
-    ind <- which(fluxnet_names=="P")
+  if(any(fluxnet_names==varnames$precip)){
+    ind <- which(fluxnet_names==varnames$precip)
     
     #If recognised units, convert to mm/timestep
     if(data_units[[ind]]=="mm/s" | data_units[[ind]]=="mm s-1" | 
@@ -71,8 +72,8 @@ plot_nc <- function(ncfile, analysis_type, vars, outfile){
       data_units[[ind]] <- paste("mm/", timestepsize/60, "min", sep="")
     }
   }
-  if(any(fluxnet_names=="TA_F_MDS")){
-    ind <- which(fluxnet_names=="TA_F_MDS")
+  if(any(fluxnet_names==varnames$tair)){
+    ind <- which(fluxnet_names==varnames$tair)
     
     #If recognised units, convert to mm/timestep
     if(data_units[[ind]]=="K"){

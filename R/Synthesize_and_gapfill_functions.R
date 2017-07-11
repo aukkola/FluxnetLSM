@@ -10,7 +10,8 @@
 #' @return out
 #' @export
 gapfill_with_ERA <- function(datain, era_data, era_vars, tair_units, vpd_units,
-                             missing_val, out_vars, qc_name, qc_flags, site_log){
+                             missing_val, out_vars, qc_name, qc_flags, varnames, 
+                             site_log){
   
   #ERAinterim estimates are provided for TA, SW_in,
   #LW_IN, VPD, PA, P and WS
@@ -65,7 +66,7 @@ gapfill_with_ERA <- function(datain, era_data, era_vars, tair_units, vpd_units,
       
       ### Relative humidity ###
       #If Flux variable relative humidity, but ERA variable VPD, convert
-      if(any(avail_flux[k] == c("RH", "Rh")) & avail_era[k]=="VPD_ERA"){
+      if(avail_flux[k] == varnames$relhumidity & avail_era[k]=="VPD_ERA"){
         
         era_tair_col <- which(colnames(era_data)=="TA_ERA")
         
@@ -269,7 +270,7 @@ copyfill_data <- function(data, tsteps, tstepsize, copyfill=10,
 #-----------------------------------------------------------------------------
 
 gapfill_LWdown_Pair <- function(data, var, var_ind, TairK=NA, RH=NA, 
-                               technique=NA, elev=NA, site_log){
+                               technique=NA, elev=NA, varnames, site_log){
   
   #Get data to gapfill and Tair
   data_to_fill <- datain$data[,names(var_ind)]
@@ -298,7 +299,7 @@ gapfill_LWdown_Pair <- function(data, var, var_ind, TairK=NA, RH=NA,
     rh   <- datain$data[,names(RH)]
     
     #First check that have relative humidity in %, not VPD
-    if(any(names(RH)==c("VPD_F_MDS", "VPD_F", "VPD_f"))){
+    if(names(RH)==varnames$vpd){
       vpd_units  <- datain$units$original_units[names(RH)]
       rh         <- VPD2RelHum(VPD=rh, airtemp=tair, vpd_units, tair_units, site_log)
     }

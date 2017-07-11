@@ -37,8 +37,6 @@ ReadCSVFluxData <- function(fileinname, vars, datasetname, time_vars, site_log, 
   if(datasetname=="LaThuile"){
     
     FluxData <- convert_LaThuile(infiles=fileinname, 
-                               #  fair_usage=fair_use,
-                                # fair_usage_vec=fair_use_vec,
                                  min_yrs=min_yrs,
                                  tcol=tcol,
                                  site_log=site_log, ...)    
@@ -360,8 +358,6 @@ convert_LaThuile <- function(infiles, fair_usage=NA, fair_usage_vec=NA,
   return(converted_data) 
   
 }
-
-
 
 #-----------------------------------------------------------------------------
 
@@ -695,8 +691,7 @@ CreateMetNetcdfFile = function(metfilename, datain,               #outfile file 
 	} else {
 	  ncid = nc_create(metfilename, vars=append(var_defs, c(list(latdim), list(londim), opt_vars)))
 	}
-  
-  
+    
   
 	#### Write global attributes ###
 	#### Write global attributes ###
@@ -798,9 +793,6 @@ CreateMetNetcdfFile = function(metfilename, datain,               #outfile file 
 	              prec="text")} )
 	}
 	
-  
-  
-
 	# Close netcdf file:
 	nc_close(ncid)
 }
@@ -856,7 +848,6 @@ add_processing_info <- function(ncid, arg_info, datain, cat){
   }
   
   
-  
  #Gapfilling info
  #Met data
  if(cat=="Met" & !is.na(arg_info$met_gapfill)){
@@ -887,8 +878,7 @@ add_processing_info <- function(ncid, arg_info, datain, cat){
    ncatt_put(ncid,varid=0,attname='Gapfilling_thresholds',
              attval=paste("linfill: ", arg_info$linfill,", copyfill: ", arg_info$copyfill,
                           ", regfill: ", arg_info$regfill, sep=""),
-             prec="text")
-   
+             prec="text")  
  }
   
 
@@ -897,8 +887,7 @@ add_processing_info <- function(ncid, arg_info, datain, cat){
     ncatt_put(ncid,varid=0,attname="LaThuile_fair_use_policies",
               attval=arg_info$fair_use, prec="text")
   }
-  
- 
+   
   #FLUXNET2015 subset
   if(arg_info$datasetname=="FLUXNET2015"){
     ncatt_put(ncid,varid=0,attname='FLUXNET2015_version',

@@ -8,7 +8,7 @@
 #' Converts units from original Fluxnet to target ALMA units
 #' @return datain
 #' @export
-ChangeUnits <- function(datain, site_log){
+ChangeUnits <- function(datain, varnames, site_log){
     
   #Loop through variables. If original and target units do not match,
   #convert (or return error if conversion between units not known)
@@ -38,30 +38,27 @@ ChangeUnits <- function(datain, site_log){
       #Recognises original FLUXNET2015 and LaThuile variable names
       
       ## Air temperature (C to K)
-      if((datain$vars[k]=="TA_F_MDS" | datain$vars[k]=="Ta_f") &
-          flx_units[k]=="C" & alma_units[k]=="K"){
+      if(datain$vars[k] == varnames$tair & flx_units[k]=="C" & alma_units[k]=="K"){
         datain$data[[k]] <- celsius_to_kelvin(datain$data[[k]])
         
         
       ## CO2: different but equivalent units, do nothing
-      } else if((datain$vars[k]=="CO2_F_MDS" | datain$vars[k]=="CO2") &
-                 flx_units[k]=="umolCO2/mol" & alma_units[k]=="ppm"){
+      } else if(datain$vars[k] == varnames$co2 & flx_units[k]=="umolCO2/mol" & alma_units[k]=="ppm"){
         next
         
         
       ## Rainfall (mm/timestep to mm/s)
-      } else if((datain$vars[k]=="P" | datain$vars[k]=="Precip_f") & 
-                 flx_units[k]=="mm" & alma_units[k]=="kg/m2/s"){
+      } else if(datain$vars[k] == varnames$precip & flx_units[k]=="mm" & alma_units[k]=="kg/m2/s"){
         datain$data[[k]] <- datain$data[[k]] / tstep
         
         
       ## Air pressure (kPa to Pa) (Not in La Thuile dataset)
-      } else if(datain$vars[k]=="PA" & flx_units[k]=="kPa" & alma_units[k]=="Pa"){  
+      } else if(datain$vars[k] == varnames$airpressure & flx_units[k]=="kPa" & alma_units[k]=="Pa"){  
         datain$data[[k]] <- datain$data[[k]] * 1000
       
         
       ## Photosynthetically Active Radiation (PAR) to SWdown
-      } else if(datain$vars[k]=="PPFD_f" & flx_units[k]=="umol/m2/s" & alma_units[k]=="W/m2"){  
+      } else if(datain$vars[k]== varnames$par & flx_units[k]=="umol/m2/s" & alma_units[k]=="W/m2"){  
         
         #Conversion following Monteith & Unsworth (1990), Principles of Environmental Physics
         datain$data[[k]] <- datain$data[[k]] * (1 / 2.3)
@@ -71,25 +68,24 @@ ChangeUnits <- function(datain, site_log){
         
         
       ## Specific humidity (in kg/kg, calculate from tair, rel humidity and psurf)
-      } else if((datain$vars[k]=="RH" | datain$vars[k]=="Rh") & 
-                 flx_units[k]=="%" & alma_units[k]=="kg/kg"){  
+      } else if(datain$vars[k] == varnames$relhumidity & flx_units[k]=="%" & alma_units[k]=="kg/kg"){  
         
         #Find Tair and PSurf units
-        psurf_units <- flx_units[which(datain$vars=="PA")]
-        tair_units  <- flx_units[which(datain$vars=="TA_F_MDS" | datain$vars=="Ta_f")]
+        psurf_units <- flx_units[varnames$airpressure]
+        tair_units  <- flx_units[varnames$tair]
         
         #If already converted, reset units to new converted units
-        if(converted[which(datain$vars=="PA")]) {
-          psurf_units <- alma_units[which(datain$vars=="PA")]         
+        if(converted[which(datain$vars == varnames$airpressure)]) {
+          psurf_units <- alma_units[varnames$airpressure]         
         } 
-        if (converted[which(datain$vars=="TA_F_MDS" | datain$vars=="Ta_f")]){
-          tair_units <- alma_units[which(datain$vars=="TA_F_MDS" | datain$vars=="Ta_f")]
+        if (converted[which(datain$vars == varnames$tair)]){
+          tair_units <- alma_units[varnames$tair]
         }          
 
-        datain$data[[k]] <- Rel2SpecHumidity(relHum=datain$data[[which(datain$vars=="RH" | datain$vars=="Rh")]], 
-                                             airtemp=datain$data[[which(datain$vars=="TA_F_MDS" | datain$vars=="Ta_f")]], 
+        datain$data[[k]] <- Rel2SpecHumidity(relHum=datain$data[,varnames$relhumidity], 
+                                             airtemp=datain$data[,varnames$tair], 
                                              tair_units=tair_units, 
-                                             pressure=datain$data[[which(datain$vars=="PA")]], 
+                                             pressure=datain$data[,varnames$airpressure], 
                                              psurf_units=psurf_units,
                                              site_log)
       

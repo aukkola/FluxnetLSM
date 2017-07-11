@@ -219,4 +219,47 @@ check_flx2015_version <- function(dataset, version){
   }
 }
 
+#-----------------------------------------------------------------------------
+
+#' Gets possible varnames for FLUXNET FULLSET/SUBSET and La Thuile
+#' @export
+get_varnames <- function(datasetname, flx2015_version){
+  
+  #These are used for unit conversions etc.
+  
+  #First instance is FLUXNET2015 FULLSET,
+  #Second FLUXNET2015 SUBSET
+  #Third La Thuile
+  
+  if(datasetname=="FLUXNET2015" & flx2015_version=="FULLSET"){
+    ind <- 1
+  } else if(datasetname=="FLUXNET2015" & flx2015_version=="SUBSET"){
+    ind <- 2
+  } else if (datasetname=="LaThuile"){
+    ind <- 3
+  } else {
+    #Else assume FLUXNET2015 fullset format
+    ind <- 1
+  } 
+  
+  tair   <- c("TA_F_MDS", "TA_F", "Ta_f")
+  precip <- c("P", "P_F", "Precip_f")
+  airpressure <- c("PA", "PA_F", "NULL")
+  co2 <- c("CO2_F_MDS", "CO2_F_MDS", "CO2")
+  par <- c("NULL", "NULL", "PPFD_f")
+  relhumidity <- c("RH","Rh")  
+  lwdown <- c("LW_IN_F_MDS", "LW_IN_F", "LW_in")
+  vpd <- c("VPD_F_MDS", "VPD_F", "VPD_f")
+  
+  outs <- list(tair=tair[ind], precip=precip[ind], airpressure=airpressure[ind],
+               co2=co2[ind], par=par[ind], relhumidity=relhumidity[ind],
+               lwdown=lwdown[ind], vpd=vpd[ind])
+  
+  return(outs)
+  
+}
+
+
+
+
 

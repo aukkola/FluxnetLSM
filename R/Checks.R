@@ -180,7 +180,6 @@ CheckDataGaps <- function(datain, missing_val, qc_flags,
                                      length(qcdata[start[x]:end[x]]) * 100) 
           
         } #aggregate
-
       } #qc var
     } #threshold
   } #variables

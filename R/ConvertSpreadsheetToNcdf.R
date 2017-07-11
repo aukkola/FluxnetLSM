@@ -137,6 +137,11 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                 datasetname, flx2015_version)
   
   
+  #Get variable names specific for the dataset (fluxnet2015, lathuile)
+  #used for data conversions etc.
+  dataset_vars <- get_varnames(datasetname, flx2015_version)
+  
+  
   
   ################################
   ###--- Read variable data ---###
@@ -250,7 +255,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                                               qc_flags=qc_flags, copyfill=copyfill, 
                                               linfill=linfill, lwdown_method=lwdown_method,
                                               elevation=site_info$SiteElevation,
-                                              gaps=gaps, site_log=site_log)
+                                              gaps=gaps, varnames=dataset_vars, site_log=site_log)
       
       DataFromText <- gapfilled_met$data
       site_log     <- gapfilled_met$site_log        
@@ -260,7 +265,8 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
       
       #Gapfill with ERAinterim
       DataFromText <- GapfillMet_with_ERA(DataFromText, era_file, 
-                                          qc_name, qc_flags)
+                                          qc_name, dataset_vars,
+                                          qc_flags)
       
       #Cannot recognise method, stop
     } else {
@@ -280,7 +286,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     
     gapfilled_flux <- GapfillFlux(DataFromText, qc_name, qc_flags,
                                   regfill, linfill, copyfill,
-                                  gaps, site_log)      
+                                  gaps, varnames=dataset_vars, site_log)      
     
     DataFromText <- gapfilled_flux$dataout
     site_log     <- gapfilled_flux$site_log
@@ -367,10 +373,10 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
   # Written as an attribute to file. Calculated before converting
   # data units, i.e. assumes rainfall units mm/timestep
   
-  if(any(DataFromText$attributes[,1]=="P")){
+  if(any(DataFromText$attributes[,1]==dataset_vars$precip)){
     
     #Check that units in mm
-    if(DataFromText$units$original_units["P"] == "mm"){
+    if(DataFromText$units$original_units[dataset_vars$precip] == "mm"){
       
       av_precip <- calc_avPrecip(datain=DataFromText, gaps=gaps)
       
@@ -393,7 +399,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
   
   # Convert data units from original Fluxnet units
   # to desired units as set in variables.csv
-  ConvertedData <- ChangeUnits(DataFromText, site_log)
+  ConvertedData <- ChangeUnits(DataFromText, dataset_vars, site_log)
   
   
   # Check that data are within acceptable ranges: 
@@ -566,11 +572,11 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
         
         out1 <- plot_nc(ncfile=nc_met, analysis_type=plot, 
                         vars=DataFromText$out_vars[DataFromText$categories=="Met"],
-                        outfile=outfile_met)      
+                        varnames=dataset_vars, outfile=outfile_met)      
         
         out2 <- plot_nc(ncfile=nc_flux, analysis_type=plot,
                         vars=DataFromText$out_vars[flux_ind[[k]]],
-                        outfile=outfile_flux)
+                        varnames=dataset_vars, outfile=outfile_flux)
         
         #Log possible warnings
         site_log <- log_warning(warn=out1, site_log)

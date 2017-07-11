@@ -9,7 +9,7 @@
 
 #' Gapfills meteorological data with down-scaled ERAinterim estimates
 #' @export
-GapfillMet_with_ERA <- function(datain, ERA_file, qc_name, ...){
+GapfillMet_with_ERA <- function(datain, ERA_file, qc_name, varnames, ...){
   
   #Read ERA data and extract time steps corresponding to obs
   era_data <- read_era(ERA_file=ERA_file, datain=datain)
@@ -18,8 +18,8 @@ GapfillMet_with_ERA <- function(datain, ERA_file, qc_name, ...){
   ind <- which(datain$categories=="Met")
   
   #Retrieve VPD and air temp units. Used to convert ERAinterim VPD to RH in gapfill function
-  tair_units <- datain$units$original_units[which(vars=="TA_F_MDS" | vars=="Ta_f")]
-  vpd_units  <- datain$units$original_units[which(vars=="VPD_F_MDS" | vars=="VPD_f")]
+  tair_units <- datain$units$original_units[which(vars==varnames$tair)]
+  vpd_units  <- datain$units$original_units[which(vars==varnames$vpd)]
   
   #If not found, set to unknown
   if(length(tair_units)==0){ tair_units = "UNKNOWN" } 
@@ -31,7 +31,8 @@ GapfillMet_with_ERA <- function(datain, ERA_file, qc_name, ...){
                                 tair_units=tair_units, vpd_units=vpd_units,
                                 missing_val=Sprd_MissingVal,
                                 out_vars=datain$out_vars[ind],
-                                qc_name=qc_name, qc_flags, site_log)
+                                qc_name=qc_name, qc_flags, 
+                                varnames=varnames, site_log)
     
   #Add new category to indata for saving gapfilling method
   datain$gapfill_met <- rep(NA, length(ind))
@@ -86,7 +87,7 @@ GapfillMet_with_ERA <- function(datain, ERA_file, qc_name, ...){
 #' @export
 GapfillMet_statistical <- function(datain, qc_name, qc_flags,
                                    copyfill, linfill, lwdown_method,
-                                   elevation, gaps, site_log){
+                                   elevation, gaps, varnames, site_log){
   
   #Uses several gapfilling methods depending on variable:
   #LWdown and air pressure: synthesis
@@ -116,8 +117,8 @@ GapfillMet_statistical <- function(datain, qc_name, qc_flags,
   
   
   #Find lwdown and air pressure indices (note, no air pressure in La Thuile)
-  lwdown_ind <- find_ind_and_qc(ind, var=c("LW_IN_F_MDS", "LW_IN_F", "LW_in"))
-  pair_ind   <- find_ind_and_qc(ind, var=c("PA", "PA_F"))
+  lwdown_ind <- find_ind_and_qc(ind, var=varnames$lwdown)
+  pair_ind   <- find_ind_and_qc(ind, var=varnames$airpressure)
   
   
   #Find indices for other variables
@@ -202,16 +203,16 @@ GapfillMet_statistical <- function(datain, qc_name, qc_flags,
   ### Then gapfill LWdown and air pressure ###
 
   #Find Tair index
-  tair_ind <- find_ind_and_qc(ind, var=c("TA_F_MDS", "TA_F", "Ta_f"))
+  tair_ind <- find_ind_and_qc(ind, var=varnames$tair)
   
   ## LWdown ##s
   if(length(lwdown_ind) > 0){
     
     #Find indices for rel humidity/VPD
-    rh_ind   <- find_ind_and_qc(ind, var=c("RH", "Rh"))
+    rh_ind   <- find_ind_and_qc(ind, var=varnames$relhumidity)
     
     if(length(rh_ind) ==0){
-      rh_ind <- find_ind_and_qc(ind, var=c("VPD_F_MDS", "VPD_F", "VPD_f"))
+      rh_ind <- find_ind_and_qc(ind, var=varnames$vpd)
     }
     
     #Do not have both available, stop
@@ -225,7 +226,8 @@ GapfillMet_statistical <- function(datain, qc_name, qc_flags,
     #Synthesize LWdown
     temp_data <- gapfill_LWdown_Pair(datain, var="LWdown", var_ind=lwdown_ind, 
                                      TairK=tair_ind, RH=rh_ind[1], 
-                                     technique=lwdown_method, site_log=site_log)
+                                     technique=lwdown_method, varnames=varnames,
+                                     site_log=site_log)
         
     #Replace with gapfilled data
     datain$data[,names(lwdown_ind)] <- temp_data$data
@@ -291,7 +293,7 @@ GapfillMet_statistical <- function(datain, qc_name, qc_flags,
 #' Gapfill flux variables using statistical methods
 #' @export
 GapfillFlux <- function(datain, qc_name, qc_flags, regfill, 
-                        linfill, copyfill, gaps, site_log){
+                        linfill, copyfill, gaps, varnames, site_log){
   
   #Gapfills short gaps (up to linfill length of time) using
   #linear interpolation
@@ -322,14 +324,14 @@ GapfillFlux <- function(datain, qc_name, qc_flags, regfill,
   
   #Find Tair, RH/VPD and SWdown index for regression gapfilling
   all_vars   <- datain$vars
-  tair_ind   <- which(all_vars=="TA_F_MDS" |  all_vars=="TA_F" | all_vars=="Ta_f")[1]
-  swdown_ind <- which(all_vars=="SW_IN_F_MDS" | all_vars=="SW_IN_F" | all_vars=="PPFD_f")[1]
+  tair_ind   <- which(all_vars==varnames$tair)[1]
+  swdown_ind <- which(all_vars=="SW_IN_F_MDS" | all_vars=="SW_IN_F" | all_vars=="PPFD_f")[1] #leaving this in case of swdown/par issues elsewhere
   
   #Find indices for rel humidity/VPD
-  rh_ind   <- which(all_vars=="RH" | all_vars=="Rh")[1]
+  rh_ind   <- which(all_vars==varnames$relhumidity)[1]
   
   if(length(rh_ind) ==0){
-    rh_ind <- which(all_vars=="VPD_F_MDS" | all_vars=="VPD_F" | all_vars=="VPD_f")[1]
+    rh_ind <- which(all_vars==varnames$vpd)[1]
   }
   
   
