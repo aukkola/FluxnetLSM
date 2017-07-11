@@ -67,7 +67,7 @@ write_log <- function(site_log){
 stop_and_log <- function(error, site_log){
   
   #remove plot path
-  file.remove(site_log["plot_path"])
+  file.remove(site_log["plot_path"], recursive=TRUE)
   
   site_log <- log_error(error, site_log)
   write_log(site_log)

@@ -267,7 +267,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
       #Gapfill with ERAinterim
       DataFromText <- GapfillMet_with_ERA(DataFromText, era_file, 
                                           qc_name, dataset_vars,
-                                          qc_flags)
+                                          qc_flags=qc_flags)
       
       #Cannot recognise method, stop
     } else {
