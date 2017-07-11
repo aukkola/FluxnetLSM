@@ -404,7 +404,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
   
   
   # Check that data are within acceptable ranges: 
-  CheckDataRanges(ConvertedData, missingval=Nc_MissingVal, site_log)
+  CheckDataRanges(ConvertedData, site_log)
   
   
   #Replace original data with converted data
