@@ -324,7 +324,7 @@ gapfill_LWdown_Pair <- function(data, var, var_ind, TairK=NA, RH=NA,
       
       #Synthesize
       for(i in missing){
-        data_to_fill[i] <- SynthesizePSurf(tair[i], elev)
+        data_to_fill[i] <- SynthesizePSurf(tair[i], elev, data$units$original_units[varnames$airpressure])
       }
     }
   }
@@ -553,17 +553,26 @@ SynthesizeLWdown <- function(TairK,RH,technique){
 
 #' Synthesises air pressure based on Tair and elevation
 #' @export
-SynthesizePSurf <- function(TairK,elevation){
+SynthesizePSurf <- function(TairK, elevation, pair_units){
   # Synthesizes PSurf based on temperature and elevation
   
   #If Tair missing, set Pair missing
   if(is.na(TairK)){
     PSurf <- NA
     
-  #Else synthesise
+  #Else synthesise (in Pa)
   }else {
     PSurf <- 101325 * (TairK / (TairK + 0.0065*elevation))^(9.80665/287.04/0.0065)
   }
+  
+  #Convert to kPa if necessary
+  if(pair_units=="kPa"){
+    PSurf <- PSurf/1000
+  } else if (pair_units != "Pa"){
+    stop(paste("Cannot synthesise air pressure, do not recognise air pressure units.",
+               "Please use Pa or kPa"))
+  }
+  
   
   return(PSurf)
 }
