@@ -249,6 +249,40 @@ is.leap = function(year){
   return(leap)
 }
 
+#----
+
+#' Creates time unit
+#' @export
+CreateTimeunits = function(starttime) {
+  # Determine data start date and time:
+  shour = floor(starttime$shod)
+  smin = floor((starttime$shod - shour)*60)
+  ssec = floor(((starttime$shod - shour)*60 - smin)*60)
+  start_hod = paste(Create2Uchar(shour),':',Create2Uchar(smin),':',Create2Uchar(ssec),sep='')
+  timeunits=paste('seconds since ',as.character(starttime$syear),'-',
+                  Create2Uchar(starttime$smonth),'-',Create2Uchar(starttime$sday),' ',
+                  start_hod,sep='')
+  return(timeunits)
+}
+
+#----
+
+#' Creates time stamp string
+#' @export
+Create2Uchar = function(intin){
+  # Creates string of length 2 from integer of length 1 or 2
+  if(intin<10){
+    temp=as.character(intin)
+    charout=paste('0',temp,sep='')
+  }else if(intin>99){
+    charout='NA'
+    CheckError('I3: Character variable too long in function Create2Uchar.')
+  }else{
+    charout=as.character(intin)	
+  }
+  return(charout)
+}
+
 #-----------------------------------------------------------------------------
 
 
