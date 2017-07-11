@@ -4,7 +4,7 @@
 \alias{SynthesizePSurf}
 \title{Synthesises air pressure based on Tair and elevation}
 \usage{
-SynthesizePSurf(TairK, elevation)
+SynthesizePSurf(TairK, elevation, pair_units)
 }
 \description{
 Synthesises air pressure based on Tair and elevation
