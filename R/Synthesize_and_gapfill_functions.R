@@ -10,7 +10,7 @@
 #' @return out
 #' @export
 gapfill_with_ERA <- function(datain, era_data, era_vars, tair_units, vpd_units,
-                             missing_val, out_vars, qc_name, qc_flags, varnames, 
+                             out_vars, qc_name, qc_flags, varnames, 
                              site_log){
   
   #ERAinterim estimates are provided for TA, SW_in,
@@ -58,10 +58,10 @@ gapfill_with_ERA <- function(datain, era_data, era_vars, tair_units, vpd_units,
     era_col <- which(colnames(era_data)==avail_era[k])
     
     #If gaps in met data variable, gapfill
-    if(any(datain[,flx_col]==missing_val)){
+    if(any(datain[,flx_col]==Sprd_MissingVal)){
       
       #Find missing values to fill
-      missing <- which(datain[,flx_col]==missing_val)
+      missing <- which(datain[,flx_col]==Sprd_MissingVal)
       
       
       ### Relative humidity ###

@@ -29,7 +29,6 @@ GapfillMet_with_ERA <- function(datain, ERA_file, qc_name, varnames, ...){
   temp_data <- gapfill_with_ERA(datain=datain$data[,ind], era_data=era_data,
                                 era_vars=datain$era_vars[ind],
                                 tair_units=tair_units, vpd_units=vpd_units,
-                                missing_val=Sprd_MissingVal,
                                 out_vars=datain$out_vars[ind],
                                 qc_name=qc_name, qc_flags, 
                                 varnames=varnames, site_log)
