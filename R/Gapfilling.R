@@ -651,7 +651,7 @@ update_qc <- function(data, temp_data, varname, qc_name, qc_value, qc_flags,...)
   #QC variable exists, replace gapfilled tsteps with correct flag
   if(length(qc_col) > 0){
     
-    datain$data[temp_data$missing, qc_col] <- qc_value
+    data$data[temp_data$missing, qc_col] <- qc_value
     
   } else {
     
