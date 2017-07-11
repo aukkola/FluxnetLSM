@@ -237,6 +237,25 @@ Yeardays <- function(startyear,ndays) {
 }
 
 #----
+
+#' Gets month indices
+#' @export
+getMonthDays = function(leap=FALSE) {
+  # The days on which each month begins:
+  if (leap) {    #  J   F   M   A    M    J    J    A    S    O    N    D    J
+    month_start=c(1, 32, 61, 92, 122, 153, 183, 214, 245, 275, 306, 336, 367)
+    feb = 29
+  } else {
+    month_start=c(1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366)
+    feb = 28
+  }
+  month_length=c(31, feb, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
+  
+  return(list(start=month_start,length=month_length))
+}
+
+#----
+
 #' Finds leap years
 #' @export
 is.leap = function(year){
