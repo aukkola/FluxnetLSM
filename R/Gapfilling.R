@@ -139,10 +139,9 @@ GapfillMet_statistical <- function(datain, qc_name, qc_flags,
   tsteps <- format(strptime(datain$time[,1], "%Y%m%d%H%M"), 
                    format="%m%d%H%M")
   
-  
   #Add new category to indata for saving gapfilling method
   datain$gapfill_met <- rep(NA, length(ind))
-  names(datain$gapfill_met) <- vars
+  names(datain$gapfill_met) <- names(ind)
   
   
   #Need some of these for LWdown and air pressure
