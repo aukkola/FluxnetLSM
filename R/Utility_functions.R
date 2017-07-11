@@ -50,8 +50,9 @@ write_log <- function(site_log){
   #extract output path
   out_path <- site_log["log_path"]
   
-  #remove log path, don't need to write it to file
+  #remove log and plot path, don't need to write it to file
   site_log <- site_log[-which(names(site_log)=="log_path")]
+  site_log <- site_log[-which(names(site_log)=="plot_path")]
   
   #Save log to CSV file
   write.csv(t(as.matrix(site_log)), paste(out_path, "/", site_log["Site_code"], 
@@ -64,6 +65,10 @@ write_log <- function(site_log){
 #' Writes site log and then aborts, reporting error
 #' @export
 stop_and_log <- function(error, site_log){
+  
+  #remove plot path
+  file.remove(site_log$plot_path)
+  
   site_log <- log_error(error, site_log)
   write_log(site_log)
   stop(site_log["Errors"], call.=FALSE)
@@ -128,9 +133,9 @@ create_outdir <- function(outdir, site, plots){
 
 #' Initialises site log
 #' @export
-initialise_sitelog <- function(site, logpath){
+initialise_sitelog <- function(site, paths){
   
-  site_log <- vector(length=11)
+  site_log <- vector(length=12)
   names(site_log) <- c("Site_code", "Processed", "Errors", 
                        "Warnings", "No_files", "Met_files", 
                        "Flux_files","Excluded_eval", "Gapfill_met", 
@@ -140,7 +145,8 @@ initialise_sitelog <- function(site, logpath){
   site_log["Errors"]    <- ''
   site_log["Warnings"]  <- ''
   site_log[c(5:10)]     <- NA
-  site_log["log_path"]  <- logpath #removed when writing log to file
+  site_log["log_path"]  <- paths$log  #removed when writing log to file
+  site_log["plot_path"] <- paths$plot #removed when writing log to file
   
   return(site_log)
   

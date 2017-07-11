@@ -106,7 +106,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
   
   
   ### Initialise site log ###
-  site_log <- initialise_sitelog(site_code, out_paths$log)
+  site_log <- initialise_sitelog(site_code, out_paths)
   
   
   ### Set expected values for missing values, QC flags and time stamps ###
