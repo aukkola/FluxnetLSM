@@ -67,7 +67,7 @@ write_log <- function(site_log){
 stop_and_log <- function(error, site_log){
   
   #remove plot path
-  file.remove(site_log$plot_path)
+  file.remove(site_log["plot_path"])
   
   site_log <- log_error(error, site_log)
   write_log(site_log)
@@ -142,7 +142,7 @@ initialise_sitelog <- function(site, paths){
   names(site_log) <- c("Site_code", "Processed", "Errors", 
                        "Warnings", "No_files", "Met_files", 
                        "Flux_files","Excluded_eval", "Gapfill_met", 
-                       "Gapfill_flux", "log_path")
+                       "Gapfill_flux", "log_path", "plot_path")
   
   site_log["Site_code"] <- site
   site_log["Errors"]    <- ''
