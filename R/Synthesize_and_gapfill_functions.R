@@ -345,8 +345,8 @@ gapfill_LWdown_Pair <- function(data, var, var_ind, TairK=NA, RH=NA,
 #' Gapfills flux data using linear regression against met variables
 #' @export
 regfill_flux <- function(ydata, traindata, tstepsize, regfill, varname, 
-                         swdown_ind, tair_ind, rh_ind, swdown_units, 
-                         start, end, site_log){
+                         swdown_ind, tair_ind, rh_ind,
+                         start, end, site_log, ...){
   
 
   #Max number of consecutive time steps allowed
@@ -423,8 +423,9 @@ regfill_flux <- function(ydata, traindata, tstepsize, regfill, varname,
       return(outs)
     }
         
+
     #Obtain regression parameters, separately for day and night
-    reg_params <- regtrain(train_data, ydata, swdown_units)
+    reg_params <- regtrain(train_data, ydata, ...)
     
     #Predict y using regression
     predicted_y <- regpredict(reg_params$rgrp, reg_params$traindata,

@@ -368,9 +368,8 @@ GapfillFlux <- function(datain, qc_name, qc_flags, regfill,
                                 tstepsize=datain$timestepsize,
                                 regfill, varname=vars[k], 
                                 swdown_ind, tair_ind, rh_ind,
-                                swdown_units=datain$units$original_units[swdown_ind],
                                 start=gaps$tseries_start, end=gaps$tseries_end, 
-                                site_log)
+                                site_log=site_log, swdown_units=datain$units$original_units[swdown_ind])
     
       
       #Save method info is used regression fill
