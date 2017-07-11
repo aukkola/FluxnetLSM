@@ -273,12 +273,12 @@ gapfill_LWdown_Pair <- function(data, var, var_ind, TairK=NA, RH=NA,
                                technique=NA, elev=NA, varnames, site_log){
   
   #Get data to gapfill and Tair
-  data_to_fill <- datain$data[,names(var_ind)]
+  data_to_fill <- data$data[,names(var_ind)]
   
-  tair <- datain$data[,names(TairK)]
+  tair <- data$data[,names(TairK)]
 
   #Get Tair units 
-  tair_units <- datain$units$original_units[names(TairK)]
+  tair_units <- data$units$original_units[names(TairK)]
   
   #Convert Tair if necessary (need Kelvin)
   if(tair_units == "C"){
@@ -296,11 +296,11 @@ gapfill_LWdown_Pair <- function(data, var, var_ind, TairK=NA, RH=NA,
   if(var=="LWdown"){
     
     #Extract rel humidity data    
-    rh   <- datain$data[,names(RH)]
+    rh   <- data$data[,names(RH)]
     
     #First check that have relative humidity in %, not VPD
     if(names(RH)==varnames$vpd){
-      vpd_units  <- datain$units$original_units[names(RH)]
+      vpd_units  <- data$units$original_units[names(RH)]
       rh         <- VPD2RelHum(VPD=rh, airtemp=tair, vpd_units, tair_units, site_log)
     }
     
