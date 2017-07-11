@@ -5,7 +5,7 @@
 \title{Gapfills flux data using linear regression against met variables}
 \usage{
 regfill_flux(ydata, traindata, tstepsize, regfill, varname, swdown_ind,
-  tair_ind, rh_ind, swdown_units, start, end, site_log)
+  tair_ind, rh_ind, start, end, site_log, ...)
 }
 \description{
 Gapfills flux data using linear regression against met variables

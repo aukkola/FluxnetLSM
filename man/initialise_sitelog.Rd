@@ -4,7 +4,7 @@
 \alias{initialise_sitelog}
 \title{Initialises site log}
 \usage{
-initialise_sitelog(site, logpath)
+initialise_sitelog(site, paths)
 }
 \description{
 Initialises site log

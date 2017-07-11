@@ -4,14 +4,11 @@
 \alias{CheckDataGaps}
 \title{Checks for missing and gap-filled data and determines output years}
 \usage{
-CheckDataGaps(datain, missing_val, qc_flags, missing, gapfill_all, gapfill_good,
-  gapfill_med, gapfill_poor, min_yrs, qc_name, showWarn = TRUE,
-  aggregate = NA, site_log)
+CheckDataGaps(datain, qc_flags, missing, gapfill_all, gapfill_good, gapfill_med,
+  gapfill_poor, min_yrs, qc_name, showWarn = TRUE, aggregate = NA, site_log)
 }
 \arguments{
 \item{datain}{Input data list}
-
-\item{missing_val}{Missing value}
 
 \item{qc_flags}{Values of qc flags}
 
