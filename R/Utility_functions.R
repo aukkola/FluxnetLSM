@@ -114,14 +114,17 @@ create_outdir <- function(outdir, site, plots){
   outpath_log <- paste(outdir, "/Logs", sep="")
   dir.create(outpath_log, showWarnings = FALSE, recursive=TRUE)
   
+  paths <- list(nc=outpath_nc, log=outpath_log)
+
   #Plots (if code set to plot)
   if(!any(is.na(plots))){
     outpath_plot <- paste(outdir, "/Figures/", site, sep="")
     dir.create(outpath_plot, showWarnings = FALSE, recursive=TRUE)
+    paths$plot <- outpath_plot
   }
   
   #Return log path for later use
-  return(list(nc=outpath_nc, log=outpath_log, plot=outpath_plot))
+  return(paths)
 }
 
 #-----------------------------------------------------------------------------
