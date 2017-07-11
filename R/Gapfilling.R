@@ -18,8 +18,8 @@ GapfillMet_with_ERA <- function(datain, ERA_file, qc_name, varnames, ...){
   ind <- which(datain$categories=="Met")
   
   #Retrieve VPD and air temp units. Used to convert ERAinterim VPD to RH in gapfill function
-  tair_units <- datain$units$original_units[which(vars==varnames$tair)]
-  vpd_units  <- datain$units$original_units[which(vars==varnames$vpd)]
+  tair_units <- datain$units$original_units[varnames$tair]
+  vpd_units  <- datain$units$original_units[varnames$vpd]
   
   #If not found, set to unknown
   if(length(tair_units)==0){ tair_units = "UNKNOWN" } 
