@@ -30,8 +30,8 @@ GapfillMet_with_ERA <- function(datain, ERA_file, qc_name, varnames, ...){
                                 era_vars=datain$era_vars[ind],
                                 tair_units=tair_units, vpd_units=vpd_units,
                                 out_vars=datain$out_vars[ind],
-                                qc_name=qc_name, qc_flags, 
-                                varnames=varnames, site_log)
+                                qc_name=qc_name, varnames=varnames, 
+                                site_log, ...)
     
   #Add new category to indata for saving gapfilling method
   datain$gapfill_met <- rep(NA, length(ind))
@@ -63,8 +63,8 @@ GapfillMet_with_ERA <- function(datain, ERA_file, qc_name, varnames, ...){
     qc_vars <- colnames(temp_data$new_qc$data)
     
     for(k in 1:length(qc_vars)){
-      datain <- create_qc_var(datain, qc_name=qc_vars[k], qc_flags, 
-                              outname=temp_data$new_qc$outname[k], cat="Met")
+      datain <- create_qc_var(datain, qc_name=qc_vars[k], outname=temp_data$new_qc$outname[k], 
+                              cat="Met", ...)
     }
   }
   
