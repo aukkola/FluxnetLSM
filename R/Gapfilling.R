@@ -442,7 +442,7 @@ FillQCvarMissing <- function(datain, gapfillVal, qc_name){
     
     #Find these instances
     ind <- which(!is.na(datain$data[data_vars[k]]) & 
-                   is.na(datain$data[qc_vars[k]]==missingVal))
+                   is.na(datain$data[qc_vars[k]]))
     
     #If they exists, replace missing QC flag with poor gapfilling
     if(length(ind) > 0){
