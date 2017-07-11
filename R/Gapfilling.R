@@ -234,7 +234,7 @@ GapfillMet_statistical <- function(datain, qc_name, qc_flags,
       
       #Save information to QC flags (creat qc flag if doesn't exist)
       datain <- update_qc(datain, temp_data, names(lwdown_ind), qc_name, qc_value, 
-                          qc_flags, outname=datain$out_vars[lwdown_ind], cat="Met")  
+                          qc_flags, outname=datain$out_vars[names(lwdown_ind)], cat="Met")  
     
       #Add gapfilling method 
       datain$gapfill_met[names(lwdown_ind)] <- paste("Synthesis based on", lwdown_method)
@@ -272,7 +272,7 @@ GapfillMet_statistical <- function(datain, qc_name, qc_flags,
       
       #Save information to QC flags (creat qc flag if doesn't exist)
       datain <- update_qc(datain, temp_data, names(pair_ind), qc_name, qc_value, 
-                          qc_flags, outname=datain$out_vars[pair_ind], cat="Met")  
+                          qc_flags, outname=datain$out_vars[names(pair_ind)], cat="Met")  
       
       #Add gapfilling method 
       datain$gapfill_met[names(pair_ind)] <-"Synthesis based on Tair and elevation"
