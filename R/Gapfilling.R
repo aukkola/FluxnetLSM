@@ -576,7 +576,7 @@ find_ind_and_qc <- function(inds, var, qc_name=NA){
   
   #Remove any possible duplicate indices (happens if variable 
   #outputted several times, e.g. RH)
-  var_ind <- lapply(var_ind, function(x) if(length(x) > 1) x[1] else x=x)
+  if(length(var_ind) > 1) { var_ind <- var_ind[1,] }
   
   if(!is.na(qc_name)){
     qc_ind  <- sapply(var, function(x) which(names(ind)==paste(x, qc_name, sep=""))) 
