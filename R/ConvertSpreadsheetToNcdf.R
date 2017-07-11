@@ -221,13 +221,14 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
   #(pers. comm. with D. Papale, Fluxnet)
   
   #Set these time steps to 3 (poor gap-filling)
-  DataFromText <- FillQCvarMissing(datain=DataFromText, missingVal=Sprd_MissingVal,
-                                   gapfillVal=qc_flags$QC_gapfilled, qc_name=qc_name)
+  DataFromText <- FillQCvarMissing(datain=DataFromText, 
+                                   gapfillVal=qc_flags$QC_gapfilled, 
+                                   qc_name=qc_name)
   
   
   # Check if variables have gaps in the time series and determine what years to output:
-  gaps  <- CheckDataGaps(datain = DataFromText, missing_val = Sprd_MissingVal,
-                         qc_flags=qc_flags, missing=missing, gapfill_all=gapfill_all,
+  gaps  <- CheckDataGaps(datain = DataFromText, qc_flags=qc_flags, 
+                         missing=missing, gapfill_all=gapfill_all,
                          gapfill_good=NA, gapfill_med=NA, gapfill_poor=NA, min_yrs=min_yrs,
                          qc_name=qc_name, showWarn=FALSE, site_log=site_log)
   
@@ -334,8 +335,8 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                      gapfill_poor, na.rm=TRUE)
     }
     
-    gaps  <- CheckDataGaps(datain=DataFromText, missing_val=Sprd_MissingVal,
-                           qc_flags=qc_flags, missing=miss, gapfill_all=gap_all,
+    gaps  <- CheckDataGaps(datain=DataFromText, qc_flags=qc_flags, 
+                           missing=miss, gapfill_all=gap_all,
                            gapfill_good=NA, gapfill_med=NA,
                            gapfill_poor=NA, min_yrs=min_yrs,
                            qc_name=qc_name, showWarn=FALSE, 
@@ -418,6 +419,10 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
   ####################################################
   ###--- Write output met and flux NetCDF files ---###
   ####################################################
+  
+  #Set all NA values to Nc missing value
+  DataFromText$data[is.na(DataFromText$data)] <- Nc_MissingVal
+  
   
   #Gather argument info
   arg_info <- list(infile=infile, datasetversion=datasetversion, datasetname=datasetname,

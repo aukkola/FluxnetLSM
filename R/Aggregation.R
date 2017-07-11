@@ -20,7 +20,7 @@ aggregate_tsteps <- function(datain, new_tstep, qc_flags, qc_name){
   vars <- datain$vars
   
   #Initialise new data.frame
-  new_data <- matrix(Sprd_MissingVal, ncol=ncol(datain$data), nrow=nrow(datain$data)/ntsteps)
+  new_data <- matrix(NA, ncol=ncol(datain$data), nrow=nrow(datain$data)/ntsteps)
   colnames(new_data) <- colnames(datain$data)
   new_data <- as.data.frame(new_data)
   
@@ -54,9 +54,7 @@ aggregate_tsteps <- function(datain, new_tstep, qc_flags, qc_name){
       #Other variables: average or sum up  
     } else {
       
-      #Set missing values to NA before aggregating
       aggr_data <- datain$data[,vars[k]]
-      aggr_data[aggr_data==Sprd_MissingVal] <- NA
       
       if(method=="mean"){
         
@@ -71,10 +69,6 @@ aggregate_tsteps <- function(datain, new_tstep, qc_flags, qc_name){
         stop(paste("Aggregation method for variable", vars[k], "not recognised.",
                    "Method must be set to 'mean' or 'sum', please amend output variable file."))
       }
-      
-      
-      #Set missing values back to Sprd_missingval
-      aggr_data[is.na(aggr_data)] <- Sprd_MissingVal
       
       #Write to data frame
       new_data[,vars[k]] <- aggr_data
@@ -121,9 +115,6 @@ qc_frac <- function(data, good_data){
   
   good_frac <- which(sapply(good_data, function(x) data==x))
   good_frac <- length(good_frac) / length(data)
-  
-  #If any data missing, set QC flag to missing
-  if(any(data==Sprd_MissingVal)) good_frac <- Sprd_MissingVal
   
   return(good_frac)
 }

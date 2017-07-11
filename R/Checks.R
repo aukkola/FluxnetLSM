@@ -9,7 +9,6 @@
 
 #' Checks for missing and gap-filled data and determines output years
 #' @param datain Input data list
-#' @param missing_val Missing value
 #' @param qc_flags Values of qc flags
 #' @param missing Threshold for missing values per year (as percentage)
 #' @param gapfill_all Threshold for all gap_filling per year (as percentage)
@@ -25,8 +24,7 @@
 #' @param site_log Site log
 #' @return out
 #' @export
-CheckDataGaps <- function(datain, missing_val, qc_flags, 
-                          missing, gapfill_all, 
+CheckDataGaps <- function(datain, qc_flags, missing, gapfill_all, 
                           gapfill_good, gapfill_med, gapfill_poor,
                           min_yrs, qc_name, showWarn=TRUE, 
                           aggregate=NA, site_log){
@@ -116,7 +114,7 @@ CheckDataGaps <- function(datain, missing_val, qc_flags,
     ### Missing ###
     #Calculate the percentage of data missing each year
     perc_missing[[k]] <- sapply(1:length(start), function(x)
-                         length( which(data[start[x]:end[x]] == missing_val)) /
+                         length( is.na(which(data[start[x]:end[x]] ))) /
                          length(start[x]:end[x]) * 100)
     
     ### Gap-filled ###
@@ -148,7 +146,7 @@ CheckDataGaps <- function(datain, missing_val, qc_flags,
             #Find values that are not measured or missing
             perc_gapfilled[[k]] <- sapply(1:length(start), function(x)
               length( which(qcdata[start[x]:end[x]] != qc_flags$QC_measured &
-                              qcdata[start[x]:end[x]] != missing_val)) /
+                              !is.na(qcdata[start[x]:end[x]]))) /
                 length(start[x]:end[x]) * 100)
             
             #Convert to matrix so compatible with vars without QC
@@ -363,7 +361,7 @@ CheckDataGaps <- function(datain, missing_val, qc_flags,
     
     #Calculate % missing for each variable
     total_missing[[k]] <- apply(datain$data, MARGIN=2, function(x) 
-                                length(which(x[tstart[k]:tend[k]] == missing_val)) 
+                                length(which(is.na(x[tstart[k]:tend[k]])))
                                 / length(x[tstart[k]:tend[k]]) *100)
     
     #Calculate % gap-filled

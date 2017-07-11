@@ -58,10 +58,10 @@ gapfill_with_ERA <- function(datain, era_data, era_vars, tair_units, vpd_units,
     era_col <- which(colnames(era_data)==avail_era[k])
     
     #If gaps in met data variable, gapfill
-    if(any(datain[,flx_col]==Sprd_MissingVal)){
+    if(any(is.na(datain[,flx_col]))){
       
       #Find missing values to fill
-      missing <- which(datain[,flx_col]==Sprd_MissingVal)
+      missing <- which(is.na(datain[,flx_col]))
       
       
       ### Relative humidity ###
@@ -153,7 +153,7 @@ linfill_data <- function(data, tstepsize,
   max_gap <- (linfill*60*60)/tstepsize
   
   #All missing values
-  missing <- which(data==Sprd_MissingVal)
+  missing <- which(is.na(data))
   
   consec <- seqToIntervals(missing)
   
@@ -213,7 +213,7 @@ copyfill_data <- function(data, tsteps, tstepsize, copyfill=10,
   for(n in 1:length(start)){
     
     #Find missing values
-    missing <- which(data[start[n]:end[n]]==Sprd_MissingVal)
+    missing <- which(is.na(data[start[n]:end[n]]))
     
     consec <- seqToIntervals(missing)
     consec <- matrix(consec, ncol=2) #convert to matrix
@@ -245,13 +245,10 @@ copyfill_data <- function(data, tsteps, tstepsize, copyfill=10,
         
         #Find data for the same time steps, set missing to NA
         fill_data <- data[eqv_tsteps]
-        fill_data[fill_data==Sprd_MissingVal] <- NA
         
+        #Calculate average
         fill_value <- mean(fill_data, na.rm=TRUE)
-        
-        #Set to missing value if couldn't calculate fill value
-        if(is.na(fill_value)) fill_value <- Sprd_MissingVal
-        
+                
         #Replace missing value with this
         data[k] <- fill_value
         
@@ -305,7 +302,7 @@ gapfill_LWdown_Pair <- function(data, var, var_ind, TairK=NA, RH=NA,
     }
     
     #Find missing indices
-    missing <- which(data_to_fill==Sprd_MissingVal)
+    missing <- which(is.na(data_to_fill))
     
     if(length(missing) > 0){
     
@@ -321,7 +318,7 @@ gapfill_LWdown_Pair <- function(data, var, var_ind, TairK=NA, RH=NA,
   } else if (var=="Pair"){
     
     #Find missing indices
-    missing <- which(data_to_fill==Sprd_MissingVal)
+    missing <- which(is.na(data_to_fill))
     
     if(length(missing) > 0){
       
@@ -359,7 +356,7 @@ regfill_flux <- function(ydata, traindata, tstepsize, regfill, varname,
   for(n in 1:length(start)){
     
     #Find missing values
-    missing <- which(ydata[start[n]:end[n]]==Sprd_MissingVal)
+    missing <- which(is.na(ydata[start[n]:end[n]]))
     
     if(length(missing) > 0){
       
@@ -449,10 +446,6 @@ regfill_flux <- function(ydata, traindata, tstepsize, regfill, varname,
 #' separately for day and night
 #' @export
 regtrain <- function(traindata, ydata, ...){
-  
-  #First replace missing values with NA
-  traindata[traindata==Sprd_MissingVal] <- NA
-  ydata[ydata==Sprd_MissingVal] <- NA
     
   # Separate day and night:
   dayn <- DayNight(as.double(traindata[,"SWdown"]), swdown_units)
@@ -526,8 +519,8 @@ SynthesizeLWdown <- function(TairK,RH,technique){
   zeroC <- 273.15
   
   #Inputs missing, set lwdown missing
-  if(TairK==Sprd_MissingVal | RH==Sprd_MissingVal){
-    lwdown <- Sprd_MissingVal
+  if(is.na(TairK) | is.na(RH)){
+    lwdown <- NA
 
   #Else synthesise value
   } else {
@@ -564,8 +557,8 @@ SynthesizePSurf <- function(TairK,elevation){
   # Synthesizes PSurf based on temperature and elevation
   
   #If Tair missing, set Pair missing
-  if(TairK==Sprd_MissingVal){
-    PSurf <- Sprd_MissingVal
+  if(is.na(TairK)){
+    PSurf <- NA
     
   #Else synthesise
   }else {

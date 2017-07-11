@@ -429,8 +429,7 @@ GapfillFlux <- function(datain, qc_name, qc_flags, regfill,
 #' QC flag missing but data variable available
 #' @return datain
 #' @export
-FillQCvarMissing <- function(datain, missingVal, 
-                             gapfillVal, qc_name){
+FillQCvarMissing <- function(datain, gapfillVal, qc_name){
   
   #Find QC variables and corresponding data variables
   qc_ind  <- which(grepl(qc_name, datain$vars))  
@@ -442,8 +441,8 @@ FillQCvarMissing <- function(datain, missingVal,
   for(k in 1:length(data_vars)){
     
     #Find these instances
-    ind <- which(datain$data[data_vars[k]]!=missingVal & 
-                   datain$data[qc_vars[k]]==missingVal)
+    ind <- which(!is.na(datain$data[data_vars[k]]) & 
+                   is.na(datain$data[qc_vars[k]]==missingVal))
     
     #If they exists, replace missing QC flag with poor gapfilling
     if(length(ind) > 0){

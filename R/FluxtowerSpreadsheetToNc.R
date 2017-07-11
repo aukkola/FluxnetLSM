@@ -76,6 +76,10 @@ ReadCSVFluxData <- function(fileinname, vars, datasetname, time_vars, site_log, 
   FluxData <- FluxData[,-time_ind]
   
   
+  #Set all missing values to NA
+  FluxData[FluxData==Sprd_MissingVal] <- NA
+  
+  
   #Duplicate Fluxnet data column if the same variable needs to be
   #processed several times (e.g. RH converted to RH and Qair)
   if(ncol(FluxData) != length(tcol$names))
@@ -387,9 +391,6 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,              #outfile file
   #Extract time period to be written
   datain$data <- datain$data[ind_start:ind_end,]
   
-  # default missing value for all variables
-  missing_value=Nc_MissingVal
-  
   # Define x, y and z dimensions
   xd = ncdim_def('x',vals=c(1),units='')	
   yd = ncdim_def('y',vals=c(1),units='')
@@ -412,17 +413,17 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,              #outfile file
   var_defs <- lapply(var_ind, function(x) ncvar_def(name=datain$out_vars[x],
                                                     units=datain$units$target_units[x], 
                                                     dim=list(xd,yd,zd,td), 
-                                                    missval=missing_value, 
+                                                    missval=Nc_MissingVal, 
                                                     longname=datain$attributes[x,2]))
   
   
   # First necessary non-time variables:
   # Define latitude:
   latdim <- ncvar_def('latitude','degrees_north',dim=list(xd,yd),
-                      missval=missing_value, longname='Latitude')  
+                      missval=Nc_MissingVal, longname='Latitude')  
   # Define longitude:
   londim <- ncvar_def('longitude','degrees_east',dim=list(xd,yd),
-                      missval=missing_value,longname='Longitude')
+                      missval=Nc_MissingVal,longname='Longitude')
   
   
   #Then optional non-time variables:
@@ -431,21 +432,21 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,              #outfile file
   # Define measurement height on tower:
   if(!is.na(siteInfo$TowerHeight)){
     towheight=ncvar_def('tower_height','m',dim=list(xd,yd),
-                        missval=missing_value,longname='Height of flux tower')
+                        missval=Nc_MissingVal,longname='Height of flux tower')
     opt_vars[[ctr]] = towheight
     ctr <- ctr + 1
   }  
   # Define site canopy height:
   if(!is.na(siteInfo$CanopyHeight)){
     canheight=ncvar_def('canopy_height','m',dim=list(xd,yd),
-                        missval=missing_value,longname='Canopy height')
+                        missval=Nc_MissingVal,longname='Canopy height')
     opt_vars[[ctr]] = canheight
     ctr <- ctr + 1
   }
   #Define site elevation:
   if(!is.na(siteInfo$SiteElevation)){
     elev=ncvar_def('elevation','m',dim=list(xd,yd),
-                   missval=missing_value,longname='Site elevation')
+                   missval=Nc_MissingVal,longname='Site elevation')
     opt_vars[[ctr]] = elev
     ctr <- ctr + 1
   }
@@ -500,7 +501,7 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,              #outfile file
   
   # model params
   if(!is.na(modelInfo)){
-    write_model_params(ncid, modelInfo, missing_value)
+    write_model_params(ncid, modelInfo, Nc_MissingVal)
   }
   
   #contact info
@@ -604,9 +605,6 @@ CreateMetNetcdfFile = function(metfilename, datain,               #outfile file 
   #Extract time period to be written
   datain$data <- datain$data[ind_start:ind_end,]
   
-	# default missing value for all variables
-	missing_value=Nc_MissingVal
-  
 	# Define x, y and z dimensions
 	xd = ncdim_def('x',vals=c(1),units='')	
 	yd = ncdim_def('y',vals=c(1),units='')
@@ -630,17 +628,17 @@ CreateMetNetcdfFile = function(metfilename, datain,               #outfile file 
   var_defs <- lapply(var_ind, function(x) ncvar_def(name=datain$out_vars[x],
                                                     units=datain$units$target_units[x], 
                                                     dim=list(xd,yd,zd,td), 
-                                                    missval=missing_value, 
+                                                    missval=Nc_MissingVal, 
                                                     longname=datain$attributes[x,2]))
   
   
 	# First necessary non-time variables:
 	# Define latitude:
 	latdim <- ncvar_def('latitude','degrees_north',dim=list(xd,yd),
-	                   missval=missing_value, longname='Latitude')  
+	                   missval=Nc_MissingVal, longname='Latitude')  
 	# Define longitude:
 	londim <- ncvar_def('longitude','degrees_east',dim=list(xd,yd),
-	                   missval=missing_value,longname='Longitude')
+	                   missval=Nc_MissingVal,longname='Longitude')
   
   
 	#Then optional non-time variables:
@@ -649,21 +647,21 @@ CreateMetNetcdfFile = function(metfilename, datain,               #outfile file 
 	# Define measurement height on tower:
 	if(!is.na(siteInfo$TowerHeight)){
 	  towheight=ncvar_def('tower_height','m',dim=list(xd,yd),
-	                      missval=missing_value,longname='Height of flux tower')
+	                      missval=Nc_MissingVal,longname='Height of flux tower')
 	  opt_vars[[ctr]] = towheight
 	  ctr <- ctr + 1
 	}  
 	# Define site canopy height:
 	if(!is.na(siteInfo$CanopyHeight)){
 	  canheight=ncvar_def('canopy_height','m',dim=list(xd,yd),
-	                      missval=missing_value,longname='Canopy height')
+	                      missval=Nc_MissingVal,longname='Canopy height')
 	  opt_vars[[ctr]] = canheight
 	  ctr <- ctr + 1
 	}
 	#Define site elevation:
 	if(!is.na(siteInfo$SiteElevation)){
 	  elev=ncvar_def('elevation','m',dim=list(xd,yd),
-	                 missval=missing_value,longname='Site elevation')
+	                 missval=Nc_MissingVal,longname='Site elevation')
 	  opt_vars[[ctr]] = elev
 	  ctr <- ctr + 1
 	}
@@ -719,7 +717,7 @@ CreateMetNetcdfFile = function(metfilename, datain,               #outfile file 
 	
 	# model params
 	if(!is.na(modelInfo)){
-	  write_model_params(ncid, modelInfo, missing_value)
+	  write_model_params(ncid, modelInfo, Nc_MissingVal)
 	}
 	
 	#contact info
