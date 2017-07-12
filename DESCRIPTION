@@ -12,7 +12,6 @@ RoxygenNote: 6.0.0.9000
 Imports:
     R.utils,
     ncdf4,
-    pals,
     rvest
 Suggests:
     testthat
