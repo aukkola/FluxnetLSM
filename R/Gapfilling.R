@@ -391,7 +391,7 @@ GapfillFlux <- function(datain, qc_name, qc_flags, regfill,
                                  varname=vars[k], site_log)
       
       #Save method info
-      if(length(temp_data$missing) > 0) { method <- append("copyfill") } 
+      if(length(temp_data$missing) > 0) { method <- append(method,"copyfill") } 
     }
      
     
