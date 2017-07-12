@@ -30,7 +30,8 @@ ReadCSVFluxData <- function(fileinname, vars, datasetname, time_vars, site_log, 
                          var_classes=vars$Fluxnet_class, 
                          essential_vars=vars$Essential_met,
                          preferred_vars=vars$Preferred_eval,
-                         time_vars=time_vars, site_log, ...)  
+                         time_vars=time_vars, site_log, 
+                         datasetname=datasetname)  
   
 
   # If using La Thuile dataset, convert to Fluxnet2015 format

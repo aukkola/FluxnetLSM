@@ -64,7 +64,7 @@ findColIndices = function(fileinname, var_names, var_classes,
   
   #Find time information
   #Returns time variables and column classes
-  time_info <- findTimeInfo(time_vars, headers, site_log, datasetname)
+  time_info <- findTimeInfo(time_vars, headers, site_log, ...)
   
   #Check that column indices for time and other variables don't overlap
   if(length(intersect(time_info$ind, ind)) > 0){
@@ -102,7 +102,7 @@ findColIndices = function(fileinname, var_names, var_classes,
 #' Extract time stamp information
 #' @return time stamp variables
 #' @export
-findTimeInfo <- function(time_vars, headers, site_log, datasetname=NA){
+findTimeInfo <- function(time_vars, headers, site_log, datasetname){
     
   ind <- sapply(time_vars, function(x) which(headers==x))
   
