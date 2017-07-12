@@ -2,8 +2,7 @@
 #
 # Functions for synthesizing or gapfilling timeseries.
 #
-# Gab Abramowitz UNSW 2014 (palshelp at gmail dot com),
-# edited by Anna Ukkola UNSW Jun 2017
+# author: Anna Ukkola UNSW Jun 2017
 
 
 #' Gapfills met data

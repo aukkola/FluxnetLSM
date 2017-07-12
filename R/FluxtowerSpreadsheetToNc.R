@@ -216,7 +216,6 @@ convert_LaThuile <- function(infiles, fair_usage=NA, fair_usage_vec=NA,
                              min_yrs, tcol, site_log, site_code){
   
   library(R.utils) #seqToIntervals
-  library(pals)
   
   ### Find files to process ###
   

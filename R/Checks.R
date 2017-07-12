@@ -423,7 +423,6 @@ IsWholeYrs <- function(datain, gaps, site_log){
 
 #-----------------------------------------------------------------------------
 
-# TODO: This function exists in palsR/Gab in pals/R/FluxtowerSpreadsheetToNc.R and has a different signature. Merge?
 #' Checks that data are within specified ranges
 #' @export
 CheckDataRanges <- function(datain, site_log){

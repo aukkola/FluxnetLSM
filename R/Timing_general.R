@@ -66,9 +66,6 @@ convertToHoursMins <- function(time, format = '%02d%02d')
 #' Converts La Thuile time format to Fluxnet2015 time format
 #' @export
 convert_LaThuile_time <- function(timestep, tstepsize){
-  
-  library(pals)
-          
   #Last time step of each year uses the next year, fix this
   if( timestep["DoY"] > 364 & timestep["Time"] == 0){
     timestep["Year"] <- timestep["Year"] - 1 

@@ -157,7 +157,6 @@ VPD2RelHum <- function(VPD, airtemp, vpd_units, tair_units, site_log){
 
 #-----------------------------------------------------------------------------
 
-# TODO: This function exists in palsR/Gab in pals/R/Units.R and has a different signature. Merge?
 #' Converts relative humidity to specific humidity.
 #' @return specific humidity in kg/kg
 #' @export
