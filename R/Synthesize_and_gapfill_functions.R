@@ -421,7 +421,7 @@ regfill_flux <- function(ydata, traindata, tstepsize, regfill, varname,
         
 
     #Obtain regression parameters, separately for day and night
-    reg_params <- regtrain(traindata, ydata, ...)
+    reg_params <- regtrain(train_data, ydata, ...)
     
     #Predict y using regression
     predicted_y <- regpredict(reg_params$rgrp, reg_params$traindata,
@@ -429,11 +429,15 @@ regfill_flux <- function(ydata, traindata, tstepsize, regfill, varname,
 
     #Replace missing values with predicted values
     ydata[missing_all] <- predicted_y[missing_all]
-        
-  }
+   
+    #Save method
+    method <- colnames(train_data)
+  } else {
+    method <- ""
+  }  
   
   #Collate outputs
-  outs <- list(data=ydata, site_log=site_log, method=colnames(train_data), missing=missing)
+  outs <- list(data=ydata, site_log=site_log, method=method, missing=missing)
   
   return(outs)
   
