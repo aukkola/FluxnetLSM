@@ -1,15 +1,16 @@
 #' Example data conversion using the Howard Springs site.
 #'
-#' Converts useful variables from a Fluxnet 2015 spreatsheet format into two
+#' Converts useful variables from a FLUXNET2015 FULLSET spreatsheet format into two
 #' netcdf files, one for fluxes, and one for met forcings.
 #' 
 #' The user must provide the input file name (with full path),
 #' output directory path and site code. All other settings
-#' are optional and are set to their default values in this
-#' example.
+#' are optional. This example uses statistical gapfilling for
+#' meteorological and flux variables, all other options are set 
+#' to their default values in this example.
 #' 
 
-library(FluxnetLSM)  # convert_fluxnet_to_netcdf
+library(FluxnetLSM) 
 
 #clear R environment
 rm(list=ls(all=TRUE))
@@ -19,9 +20,10 @@ rm(list=ls(all=TRUE))
 ###--- Required inputs ---###
 #############################
 
+#--- User must define these ---#
+
 #Fluxnet site ID (see http://fluxnet.fluxdata.org/sites/site-list-and-pages/)
 site_code <- "AU-How"
-
 
 # This directory should contain appropriate data from 
 # http://fluxnet.fluxdata.org/data/fluxnet2015-dataset/
@@ -31,12 +33,11 @@ in_path <- "~/Documents/FLUXNET2016_processing/Inputs"
 out_path <- "~/Documents/FLUXNET2016_processing/Outputs"
 
 
-# Name and version of dataset being processed (e.g. "FLUXNET2015")
-datasetname="FLUXNET2015"
+
+#--- Automatically retrieve all Fluxnet files in input directory ---#
 
 # Input Fluxnet data file (using FULLSET in this example, se R/Helpers.R for details)
-infile <- get_fluxnet_files(in_path, site_code,
-                            datasetname=datasetname)
+infile <- get_fluxnet_files(in_path, site_code)
 
 #Retrieve dataset version
 datasetversion <- get_fluxnet_version_no(infile)
@@ -46,28 +47,9 @@ datasetversion <- get_fluxnet_version_no(infile)
 ###--- Optional settings ---###
 ###############################
 
-# ERAinterim meteo file for gap-filling met data (set to FALSE if not desired)
-ERA_gapfill  <- TRUE
-ERA_file <- get_fluxnet_erai_files(in_path, site_code,
-                                   datasetname = datasetname,
-                                   datasetversion = datasetversion)
-
-#What percentage of time steps allowed to be missing
-#or gap-filled in any given year? And minimum number of 
-#consecutive years to process
-#Note: Always checks for missing values. If no gapfilling 
-#thresholds set, will not check for gap-filling.
-missing      <- 15 #max. percent missing (must be set)
-gapfill_all  <- 20 #max. percent gapfilled (optional)
-gapfill_good <- NA #max. percent good-quality gapfilled (optional, ignored if gapfill_all set)
-gapfill_med  <- NA #max. percent medium-quality gapfilled (optional, ignored if gapfill_all set)
-gapfill_poor <- NA #max. percent poor-quality gapfilled (optional, ignored if gapfill_all set)
-min_yrs      <- 2  #min. number of consecutive years
-
-#Should code produce plots to visualise outputs? (set to NA if not desired)
-#(annual: average monthly cycle; diurnal: average diurnal cycle by season;
-#timeseries: 14-day running mean time series)
-plot <- c("annual", "diurnal","timeseries")
+# Gapfilling options
+met_gapfill  <- "statistical"
+flux_gapfill  <- "statistical"
 
 
 ##########################
@@ -75,12 +57,7 @@ plot <- c("annual", "diurnal","timeseries")
 ##########################
 
 convert_fluxnet_to_netcdf(infile=infile, site_code=site_code, out_path=out_path,
-                          ERA_file=ERA_file, ERA_gapfill=ERA_gapfill, datasetname=datasetname, 
-                          datasetversion=datasetversion, missing = missing, 
-                          gapfill_all=gapfill_all, gapfill_good=gapfill_good, 
-                          gapfill_med=gapfill_med, gapfill_poor=gapfill_poor,
-                          include_all_eval=TRUE,
-                          min_yrs=min_yrs, plot=plot)
+                          met_gapfill=met_gapfill, flux_gapfill=flux_gapfill)
 
 
 

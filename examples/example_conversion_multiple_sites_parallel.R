@@ -8,8 +8,10 @@
 #' input files. All other input arguments are optional and 
 #' are set to their default values in this example.
 #' 
+#' Requires package "parallel"
+#' 
 
-library(FluxnetLSM)  # convert_fluxnet_to_netcdf
+library(FluxnetLSM)
 library(parallel)
 
 #clear R environment
