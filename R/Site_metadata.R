@@ -373,9 +373,9 @@ get_fluxdata_org_site_metadata <- function(metadata, site_url=NULL) {
     new_metadata$SiteLongitude <- as.numeric(table_data[table_data[1] == "Longitude:"][2])
 
     elevation_text <- table_data[table_data[1] == "Elevation (m):"][2]
-    elevation <- as.numeric(gsub("m", "", elevation_text))
+    elevation <- suppressWarnings(as.numeric(gsub("m", "", elevation_text)))
     if (!is.na(elevation)) {  # lots of Fluxdata.org elevtions are missing, don't overwrite
-    new_metadata$SiteElevation <- elevation
+        new_metadata$SiteElevation <- elevation
     }
 
     IGBP_text = strsplit(gsub("\\)", "", table_data[table_data[1] == "IGBP:"][2]), " \\(")[[1]]
