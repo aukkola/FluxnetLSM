@@ -47,19 +47,17 @@ datasetversion <- get_fluxnet_version_no(infile)
 ###--- Optional settings ---###
 ###############################
 
+conversion_opts <- get_default_conversion_options()
+
 # Gapfilling options
-met_gapfill  <- "statistical"
-flux_gapfill  <- "statistical"
+conversion_opts$met_gapfill  <- "statistical"
+conversion_opts$flux_gapfill  <- "statistical"
 
 
 ##########################
 ###--- Run analysis ---###
 ##########################
 
-convert_fluxnet_to_netcdf(infile=infile, site_code=site_code, out_path=out_path,
-                          met_gapfill=met_gapfill, flux_gapfill=flux_gapfill)
-
-
-
-
-
+convert_fluxnet_to_netcdf(site_code = site_code,
+                          infile = infile, out_path = out_path,
+                          options = conversion_opts)
