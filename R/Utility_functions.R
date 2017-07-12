@@ -256,7 +256,7 @@ get_varnames <- function(datasetname, flx2015_version){
   airpressure <- c("PA", "PA_F", "NULL")
   co2 <- c("CO2_F_MDS", "CO2_F_MDS", "CO2")
   par <- c("NULL", "NULL", "PPFD_f")
-  relhumidity <- c("RH","Rh")  
+  relhumidity <- c("RH","RH", "Rh")  
   lwdown <- c("LW_IN_F_MDS", "LW_IN_F", "LW_in")
   vpd <- c("VPD_F_MDS", "VPD_F", "VPD_f")
   
