@@ -393,7 +393,7 @@ regfill_flux <- function(ydata, traindata, tstepsize, regfill, varname,
   if(length(missing_all) > 0){  
     
     #SWdown, Tair and humidity available
-    if(length(swdown_ind)>0 & length(swdown_ind)>0 & length(swdown_ind)>0){
+    if(length(swdown_ind)>0 & length(tair_ind)>0 & length(rh_ind)>0){
       
       #Collate training data
       train_data <- as.matrix(cbind(traindata[swdown_ind], traindata[tair_ind],
