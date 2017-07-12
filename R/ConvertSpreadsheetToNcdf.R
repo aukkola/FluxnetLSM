@@ -329,6 +329,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
   
   if(!is.na(met_gapfill) | !is.na(flux_gapfill) | !is.na(aggregate)){
     
+    #If used gapfilling, set missing to zero
     if(!is.na(met_gapfill) | !is.na(flux_gapfill)){
       miss    <- 0
       gap_all <- sum(gapfill_all, gapfill_good, gapfill_med, 
@@ -428,7 +429,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
   DataFromText$data[is.na(DataFromText$data)] <- Nc_MissingVal
   
   
-  #Gather argument info
+  #Gather argument info to save as metadata in Nc file
   arg_info <- list(infile=infile, datasetversion=datasetversion, datasetname=datasetname,
                    flx2015_version=flx2015_version, fair_use=fair_use,
                    met_gapfill=met_gapfill, flux_gapfill=flux_gapfill, 
