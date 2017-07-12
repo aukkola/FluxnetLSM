@@ -372,21 +372,13 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file, out_path,
   
   #Set all NA values to Nc missing value
   DataFromText$data[is.na(DataFromText$data)] <- Nc_MissingVal
-  
-  
+
+
   #Gather argument info to save as metadata in Nc file
-  arg_info <- append(
-                     list(infile=infile, datasetversion=options$datasetversion, datasetname=options$datasetname,
-                   flx2015_version=options$flx2015_version, fair_use=options$fair_use,
-                   met_gapfill=options$met_gapfill, flux_gapfill=options$flux_gapfill, 
-                   era_file=era_file, missing=options$missing, gapfill_all=options$gapfill_all,
-                   gapfill_good=options$gapfill_good, gapfill_med=options$gapfill_med,
-                   gapfill_poor=options$gapfill_poor, min_yrs=options$min_yrs,
-                   linfill=options$linfill, copyfill=options$copyfill, regfill=options$regfill,
-                   lwdown_method=options$lwdown_method, include_all_eval=options$include_all_eval,
-                   aggregate=options$aggregate, model=options$model)
-    
-  
+  arg_info <- append(list(infile=infile, era_file=era_file),
+                     options)
+
+
   #Initialise variables to save output file names (used to write log and for plotting)
   met_files  <- vector()
   flux_files <- vector()
