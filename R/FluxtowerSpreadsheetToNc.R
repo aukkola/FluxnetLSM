@@ -506,11 +506,6 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,              #outfile file
               attval=siteInfo$Tier)
   }  
   
-  # model params
-  if(!is.na(modelInfo)){
-    write_model_params(ncid, modelInfo, Nc_MissingVal)
-  }
-  
   #contact info
   ncatt_put(ncid,varid=0,attname='Package contact',
             attval='a.ukkola@unsw.edu.au')  
