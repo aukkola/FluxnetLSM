@@ -149,7 +149,9 @@ initialise_sitelog <- function(site, paths){
   site_log["Warnings"]  <- ''
   site_log[c(5:10)]     <- NA
   site_log["log_path"]  <- paths$log  #removed when writing log to file
-  site_log["plot_path"] <- paths$plot #removed when writing log to file
+  if ('plot' %in% names(paths)) {
+      site_log["plot_path"] <- paths$plot #removed when writing log to file
+  }
   
   return(site_log)
   
