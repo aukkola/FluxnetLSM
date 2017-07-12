@@ -158,7 +158,11 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
   if(datasetname=="LaThuile"){
     var_file <- system.file("data","Output_variables_LaThuile.csv", package="FluxnetLSM")
   } else {
-    var_file <- system.file("data","Output_variables_FLUXNET2015.csv", package="FluxnetLSM")
+    if(flx2015_version=="SUBSET"){
+      var_file <- system.file("data","Output_variables_FLUXNET2015_SUBSET.csv", package="FluxnetLSM")
+    } else {
+      var_file <- system.file("data","Output_variables_FLUXNET2015_FULLSET.csv", package="FluxnetLSM")
+    }
   }
   
   
