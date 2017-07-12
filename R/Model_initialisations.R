@@ -17,9 +17,13 @@ initialise_model <- function(model, site_info){
     
   } else if(model=="CABLE"){
     
-    #PFT (set NetCDF variable name, here iver)
-    pft        <- site_info[paste(model, "_PFT", sep="")]
-    names(pft) <- "iveg"
+    #Variable: PFT (set NetCDF variable name (varname), value to read from site_info (varvalue),
+    #long variable name (longname), and units (units))
+    pft        <- list(varname  = "iveg",
+                       varvalue = site_info[paste(model, "_PFT", sep="")],
+                       longname = "CABLE veg type",
+                       units    = "-"
+                       )
     
     #Collate to list (this will allow more params to be added later)
     outs <- list(pft)
@@ -30,9 +34,12 @@ initialise_model <- function(model, site_info){
     
   #     #PFT (specify the variable name as set in Site_metadata.csv,
   #     #and the variable name you wish to be written in the NetCDF files)
-  #     pft        <- site_info$out[paste(model, "_PFT", sep="")]
-  #     names(pft) <- "my_pft_variable_name"
-  #     
+  #     pft        <- list(varname  = "model_variable_name",
+  #                        varvalue = site_info[paste(model, "_PFT", sep="")],
+  #                        longname = "variable long name",
+  #                        units    = "variable units"
+  #                        )
+  #
   #     #You can add multiple parameters in this fashion
   #     #Collate these to this list and they will be automatically
   #     #written to the output file:

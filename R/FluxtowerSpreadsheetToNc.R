@@ -416,6 +416,12 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,              #outfile file
                                                     longname=datain$attributes[x,2]))
   
   
+  #Create model variable definitions if applicable
+  if(any(!is.na(modelInfo))){
+    model_defs <- define_model_params(modelInfo, list(xd,yd))
+  }
+  
+  
   # First necessary non-time variables:
   # Define latitude:
   latdim <- ncvar_def('latitude','degrees_north',dim=list(xd,yd),
@@ -467,12 +473,14 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,              #outfile file
   
   # END VARIABLE DEFINITIONS #########################################
   
-  ### Create netcdf file ###
-  if(length(opt_vars)==0) {
-    ncid = nc_create(fluxfilename, vars=append(var_defs, c(list(latdim), list(londim))))
-  } else {
-    ncid = nc_create(fluxfilename, vars=append(var_defs, c(list(latdim), list(londim), opt_vars)))
-  }
+  #Collate variables
+  all_vars <- append(var_defs, c(list(latdim), list(londim)))
+  
+  if(length(opt_vars)>0) { all_vars <- append(all_vars, opt_vars) }
+  if(any(!is.na(modelInfo)))  { all_vars <- append(all_vars, model_defs$nc_vars) }
+  
+  #Create
+  ncid <- nc_create(metfilename, vars=all_vars)
   
   
   #### Write global attributes ###
@@ -570,6 +578,18 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,              #outfile file
   }
   
   
+  #Add model parameters
+  if(any(!is.na(modelInfo))){
+    
+    #If created new variables, add to file
+    if(length(model_defs$nc_vars) > 0){
+      lapply(1:length(model_defs$nc_vars), function(x) ncvar_put(nc=ncid, 
+                                                                 varid=model_defs$nc_vars[[x]], 
+                                                                 vals=model_defs$vals[[x]]))     
+    }
+  }
+  
+  
   # Close netcdf file:
   nc_close(ncid)
 }
@@ -621,8 +641,7 @@ CreateMetNetcdfFile = function(metfilename, datain,               #outfile file 
 	td = ncdim_def('time', unlim=TRUE, units=timeunits, vals=timedata)
   
 	# VARIABLE DEFINITIONS ##############################################
-
-  
+	
   #Create variable definitions for time series variables
   var_defs <- lapply(var_ind, function(x) ncvar_def(name=datain$out_vars[x],
                                                     units=datain$units$target_units[x], 
@@ -630,6 +649,11 @@ CreateMetNetcdfFile = function(metfilename, datain,               #outfile file 
                                                     missval=Nc_MissingVal, 
                                                     longname=datain$attributes[x,2]))
   
+	#Create model variable definitions if applicable
+	if(any(!is.na(modelInfo))){
+	  model_defs <- define_model_params(modelInfo, list(xd,yd))
+	}
+	
   
 	# First necessary non-time variables:
 	# Define latitude:
@@ -683,15 +707,20 @@ CreateMetNetcdfFile = function(metfilename, datain,               #outfile file 
 	# END VARIABLE DEFINITIONS #########################################
   
   ### Create netcdf file ###
-	if(length(opt_vars)==0) {
-    ncid = nc_create(metfilename, vars=append(var_defs, c(list(latdim), list(londim))))
-	} else {
-	  ncid = nc_create(metfilename, vars=append(var_defs, c(list(latdim), list(londim), opt_vars)))
-	}
-    
+  
+  #Collate variables
+	all_vars <- append(var_defs, c(list(latdim), list(londim)))
+	  
+	if(length(opt_vars)>0) { all_vars <- append(all_vars, opt_vars) }
+	if(any(!is.na(modelInfo)))  { all_vars <- append(all_vars, model_defs$nc_vars) }
+	
+  #Create
+	ncid <- nc_create(metfilename, vars=all_vars)
+  
+  
   
 	#### Write global attributes ###
-	#### Write global attributes ###
+  
 	ncatt_put(ncid,varid=0,attname='Production_time',
 	          attval=as.character(Sys.time()))
 	ncatt_put(ncid,varid=0,attname='Github_revision',  
@@ -713,11 +742,6 @@ CreateMetNetcdfFile = function(metfilename, datain,               #outfile file 
 	  ncatt_put(ncid,varid=0,attname='Fluxnet site tier',
 	            attval=siteInfo$Tier)
 	}  
-	
-	# model params
-	if(!is.na(modelInfo)){
-	  write_model_params(ncid, modelInfo, Nc_MissingVal)
-	}
 	
 	#contact info
 	ncatt_put(ncid,varid=0,attname='Package contact',
@@ -789,6 +813,21 @@ CreateMetNetcdfFile = function(metfilename, datain,               #outfile file 
 	              attval=gap_methods[names(var_defs[[x]]$name)],
 	              prec="text")} )
 	}
+  
+  
+  #Add model parameters
+	if(any(!is.na(modelInfo))){
+    
+    #If created new variables, add to file
+    if(length(model_defs$nc_vars) > 0){
+      lapply(1:length(model_defs$nc_vars), function(x) ncvar_put(nc=ncid, 
+                                                       varid=model_defs$nc_vars[[x]], 
+                                                       vals=model_defs$vals[[x]]))     
+    }
+	}
+  
+  
+  
 	
 	# Close netcdf file:
 	nc_close(ncid)
@@ -798,22 +837,36 @@ CreateMetNetcdfFile = function(metfilename, datain,               #outfile file 
 
 #' Writes model parameters as global attribute to NetCDF file
 #' @export
-write_model_params <- function(ncid, modelInfo, missing_val){
-    
-  #Get variable names
-  vars <- sapply(modelInfo, names)
+define_model_params <- function(modelInfo, dims){
+
+  nc_vars <- list() 
+  vals    <- list()
   
-  for(k in 1:length(vars)){
+  #Loop through model variables
+  for(k in 1:length(modelInfo)){
+    
+    val <- modelInfo[[k]]$varvalue
     
     #Check that value is not missing
-    if(modelInfo[[k]] != missing_val & !is.na(modelInfo[[k]])){
+    if(val != Nc_MissingVal & val != Sprd_MissingVal & !is.na(val)){
+            
+      #Append to netcdf variables
+      nc_vars <- append(nc_vars, list(ncvar_def(name=modelInfo[[k]]$varname,
+                                           units=modelInfo[[k]]$units, 
+                                           dim=dims, 
+                                           missval=Nc_MissingVal, 
+                                           longname=modelInfo[[k]]$longname)))
       
-      #Write attribute
-      ncatt_put(ncid,varid=0,attname=vars[k],
-                attval=modelInfo[[k]], prec="text")  
-      
+      #Save value
+      vals <- append(vals, list(modelInfo[[k]]$varvalue))
     }
   }
+    
+  
+  #Collate var definitions and values
+  outs <- list(nc_vars=nc_vars, vals=vals)
+  
+  return(outs)
 }
 
 #-----------------------------------------------------------------------------
