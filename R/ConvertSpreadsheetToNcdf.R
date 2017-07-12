@@ -621,7 +621,9 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file, out_path,
 #'        a maximum 24 hours (daily). Defaults to NA (no aggregation).
 #' - model: Name of land surface model. Used to retrieve model specific attributes, such as site
 #'        plant functional type.
-
+#'
+#' @export
+#'
 get_default_conversion_options <- function() {
     options <- list(
         datasetname="FLUXNET2015",
