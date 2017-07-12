@@ -41,10 +41,10 @@ get_site_code <- function(metadata){
 #' Gets the git version from the installed package
 #' See src/zzz.R for how git revision is discovered
 get_git_version <- function() {
-  
+
     #Initialise warnings
     warnings <- ""
-    
+
     desc <- read.dcf(system.file("DESCRIPTION", package = "FluxnetLSM"))
     if ("git_revision" %in% colnames(desc)) {
         git_rev <- desc[1, "git_revision"]
@@ -52,10 +52,10 @@ get_git_version <- function() {
         git_rev <- desc[1, "RemoteSha"]
     } else {
         git_rev <- "UNKNOWN"
-                
+
         warn <- paste("Unknown git revision of FluxnetLSM. Please",
                       "visit https://github.com/aukkola/FluxnetLSM and",
-                      "review the installation procedure")        
+                      "review the installation procedure")
         warnings <- append_and_warn(warn=warn, warnings)
     }
     return(list(git_rev=git_rev, warn=warnings))
@@ -67,10 +67,10 @@ get_git_version <- function() {
 #' @return metadata list
 #' @export
 add_processing_metadata <- function(metadata) {
-   
+
     #return git revision and warning if revision found
     git_rev = get_git_version()
-  
+
     metadata$Processing <- list(
         processor = "FluxnetLSM",
         URL = "https://github.com/aukkola/FluxnetLSM",
@@ -86,19 +86,38 @@ add_processing_metadata <- function(metadata) {
 #'
 #' @return metadata list
 #' @export
-update_metadata <- function(metadata, new_metadata, overwrite=TRUE) {    
+update_metadata <- function(metadata, new_metadata, overwrite=TRUE) {
     for (n in names(new_metadata)) {
-        if (!is.na(new_metadata[[n]])) {
-            if (n %in% names(metadata) && !is.na(metadata[[n]]) &&
-                new_metadata[[n]] != metadata[[n]]) {
-                overwrite_text = if (overwrite) "Overwriting" else "Not overwriting"
-                
-                warn <- paste("New metadata for ", n, " has different values! ",
-                              overwrite_text, ".\n", "  old: ", metadata[n], 
-                              ", new: ", new_metadata[n], sep="")
-                message(warn)
+        if (!is.na(new_metadata[[n]])) {  # Don't overwrite with empty data
+            if (n %in% names(metadata) && !is.na(metadata[[n]])) { # Old data already exists, check
+                different <- FALSE
+                if (!is.numeric(metadata[[n]])) {
+                    if (new_metadata[[n]] != metadata[[n]]) { # non-numeric and different
+                        different <- TRUE
+                    }
+                } else { # numeric
+                    if (round(new_metadata[[n]], 4) != round(metadata[[n]], 4)) { # and different
+                        different <- TRUE
+                    }
+                }
+
+                if (different) {
+                    overwrite_text = if (overwrite) "Overwriting" else "Not overwriting"
+
+                    warn <- paste0("New metadata for ", n, " has different values! ",
+                                   overwrite_text, ".\n",
+                                   "  old: ", metadata[n],
+                                   ", new: ", new_metadata[n])
+                    message(warn)
+
+                    if (overwrite) {
+                        metadata[n] <- new_metadata[n]
+                    }
+
+                }
+            } else {  # old data is empty, or doesn't exist
+                metadata[n] <- new_metadata[n]
             }
-            metadata[n] <- new_metadata[n]
         }
     }
 
@@ -216,7 +235,7 @@ update_csv_from_ornl <- function() {
 #' Get all available site codes from site_status table
 #' @export
 get_ornl_site_codes <- function() {
-  
+
     library(rvest)
     status_table_url <- "https://fluxnet.ornl.gov/site_status"
 
@@ -272,7 +291,7 @@ get_ornl_site_url_list <- function(site_code_list) {
 #' @return metadata list
 #' @export
 get_ornl_site_metadata <- function(metadata, site_url=NULL, overwrite=TRUE) {
-  
+
     library(rvest)
     site_code <- get_site_code(metadata)
 
@@ -300,8 +319,8 @@ get_ornl_site_metadata <- function(metadata, site_url=NULL, overwrite=TRUE) {
     table_data <- page_html %>% html_node("table#fluxnet_site_location_information") %>% html_table()
     new_metadata$Country <- table_data[table_data[1] == "Country:"][2]
     lat_lon <- strsplit(table_data[table_data[1] == "Coordinates:(Lat, Long)"][2], ", ")[[1]]
-    new_metadata$SiteLatitude <- as.numeric(lat_lon[1])
-    new_metadata$SiteLongitude <- as.numeric(lat_lon[2])
+    new_metadata$SiteLatitude <- round(as.numeric(lat_lon[1]), 5)  # round to ~1m
+    new_metadata$SiteLongitude <- round(as.numeric(lat_lon[2]), 5)
 
     # Site Characteristics
     tryCatch({
@@ -350,7 +369,7 @@ get_fluxdata_org_site_metadata <- function(metadata, site_url=NULL) {
     site_code <- get_site_code(metadata)
 
     new_metadata = list()
-    
+
     if (is.null(site_url)) {
         site_url <- get_site_fluxdata_org_url(site_code)
         new_metadata$fluxdata_org_URL <- site_url
@@ -460,7 +479,7 @@ get_site_metadata <- function(site_code, incl_processing=TRUE,
                               use_csv=TRUE, update_csv=FALSE) {
     #Initialise warnings
     warnings <- ""
-  
+
     metadata <- site_metadata_template(site_code)
 
     if (use_csv) {
