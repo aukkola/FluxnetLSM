@@ -354,7 +354,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     
   }
   
-  
+
   ### Save info on which evaluation variables have all values missing ###
   
   #These are excluded when writing NetCDF file
@@ -371,6 +371,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                                     qc_name=qc_name)
     
   }
+   
   
   
   ############################################################
