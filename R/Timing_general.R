@@ -519,6 +519,27 @@ GetNumberTimesteps = function(fid,timevar){
   return(ntsteps)
 }
 
+#----
+
+#' Gets the day of month and month, given day of year
+#' @export
+doydate = function(doy,leap=FALSE){
+  # Doydate returns the day of month and month, given day of year:
+  month=getMonthDays(leap)
+  # Find month of this doy
+  for(m in 1:12){
+    if(doy >= month$start[m] && doy < month$start[m+1]){
+      doymonth = m
+      doyday = doy - month$start[m] + 1
+    }
+  }
+  date = list(month = doymonth, day = doyday)
+  return(date)
+}
+
+
+
+
 #-----------------------------------------------------------------------------
 
 
