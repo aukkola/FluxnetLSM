@@ -480,7 +480,7 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,              #outfile file
   if(any(!is.na(modelInfo)))  { all_vars <- append(all_vars, model_defs$nc_vars) }
   
   #Create
-  ncid <- nc_create(metfilename, vars=all_vars)
+  ncid <- nc_create(fluxfilename, vars=all_vars)
   
   
   #### Write global attributes ###
