@@ -451,7 +451,7 @@ regfill_flux <- function(ydata, traindata, tstepsize, regfill, varname,
 regtrain <- function(traindata, ydata, ...){
     
   # Separate day and night:
-  dayn <- DayNight(as.double(traindata[,"SWdown"]), swdown_units)
+  dayn <- DayNight(as.double(traindata[,"SWdown"]), ...)
   
   #Day and night training datasets
   Yday     <- ydata[dayn]

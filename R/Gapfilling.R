@@ -370,7 +370,7 @@ GapfillFlux <- function(datain, qc_name, qc_flags, regfill,
                                 regfill, varname=vars[k], 
                                 swdown_ind, tair_ind, rh_ind,
                                 start=gaps$tseries_start, end=gaps$tseries_end, 
-                                site_log=site_log, swdown_units=datain$units$original_units[swdown_ind])
+                                site_log=site_log, units=datain$units$original_units[swdown_ind])
     
       
       #Save method info is used regression fill
