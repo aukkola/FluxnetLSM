@@ -499,8 +499,8 @@ regpredict <- function(rgrp,traindata, dayn){
   }
   
   #Predict y
-  day_y   <- rowSums(x_vals_day) - daycoefs[1]
-  night_y <- rowSums(x_vals_night) - nightcoefs[1]
+  day_y   <- rowSums(x_vals_day) + daycoefs[1]
+  night_y <- rowSums(x_vals_night) + nightcoefs[1]
   
   #Combine and mask day/night
   predicted_y <- dayn
