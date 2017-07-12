@@ -21,11 +21,13 @@
 #' Main function to convert Fluxnet2015 CSV-files to NetCDF
 #'
 #'
+#' @param site_code Fluxnet site code e.g. "AU-How"
 #' @param infile input filename,
 #'        e.g. "FULLSET/FLX_AU-How_FLUXNET2015_FULLSET_HH_2001-2014_1-3.csv".
 #'        La Thuile data is expected to be in the format sitecode.year.xxxx.csv,
 #'        e.g. "AU-How.2001.synth.hourly.allvars.csv".
-#' @param site_code Fluxnet site code e.g. "AU-How"
+#' @param era_file:ERA input file (needed if using ERAinterim to gapfill met variables)
+#'        e.g. "FULLSET/FLX_AU-How_FLUXNET2015_ERAI_HH_1989-2014_1-3.csv"
 #' @param out_path output path e.g. "./FLUXNET2016_processing/"
 #' @param options options for the conversion.
 #'        See get\code{\link{get_default_conversion_options}}.
@@ -35,7 +37,7 @@
 #' @export
 #'
 #'
-convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
+convert_fluxnet_to_netcdf <- function(site_code, infile, era_file, out_path,
                                       options=get_default_conversion_options(),
                                       plot=c("annual", "diurnal", "timeseries")) {
   
@@ -74,7 +76,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
   
   
   #Do some initial checks that arguments set correctly
-  InitialChecks(options$met_gapfill, options$era_file, options$missing, options$aggregate,
+  InitialChecks(options$met_gapfill, era_file, options$missing, options$aggregate,
                 options$datasetname, options$flx2015_version)
   
   
@@ -211,7 +213,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
     } else if(options$met_gapfill == "ERAinterim") {
       
       #Gapfill with ERAinterim
-      DataFromText <- GapfillMet_with_ERA(DataFromText, options$era_file, 
+      DataFromText <- GapfillMet_with_ERA(DataFromText, era_file,
                                           qc_name, dataset_vars,
                                           qc_flags=qc_flags)
       
@@ -377,7 +379,7 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
                      list(infile=infile, datasetversion=options$datasetversion, datasetname=options$datasetname,
                    flx2015_version=options$flx2015_version, fair_use=options$fair_use,
                    met_gapfill=options$met_gapfill, flux_gapfill=options$flux_gapfill, 
-                   era_file=options$era_file, missing=options$missing, gapfill_all=options$gapfill_all,
+                   era_file=era_file, missing=options$missing, gapfill_all=options$gapfill_all,
                    gapfill_good=options$gapfill_good, gapfill_med=options$gapfill_med,
                    gapfill_poor=options$gapfill_poor, min_yrs=options$min_yrs,
                    linfill=options$linfill, copyfill=options$copyfill, regfill=options$regfill,
@@ -597,8 +599,6 @@ convert_fluxnet_to_netcdf <- function(infile, site_code, out_path,
 #'        "ERAinterim", "statistical" or NA (default; no gap-filling).
 #' - flux_gapfill: Method to use for gap-filling flux data. Set to one of
 #'        "statistical" or NA (default; no gap-filling).
-#' - era_file: ERA input file (needed if using ERAinterim to gapfill met variables)
-#'        e.g. "FULLSET/FLX_AU-How_FLUXNET2015_ERAI_HH_1989-2014_1-3.csv"
 #' - missing: Maximum percentage of time steps allowed to be missing in any given year
 #' - gapfill_all: Maximum percentage of time steps allowed to be gap-filled
 #'        (any quality) in any given year. Note if gapfill_all is set, any thresholds
@@ -639,7 +639,6 @@ get_default_conversion_options <- function() {
         fair_use_vec=NA,
         met_gapfill=NA,
         flux_gapfill=NA,
-        era_file=NA,
         missing=15,
         gapfill_all=20,
         gapfill_good=NA,
