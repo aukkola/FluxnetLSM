@@ -18,7 +18,7 @@ initialise_model <- function(model, site_info){
   } else if(model=="CABLE"){
     
     #PFT (set NetCDF variable name, here iver)
-    pft        <- site_info$out[paste(model, "_PFT", sep="")]
+    pft        <- site_info[paste(model, "_PFT", sep="")]
     names(pft) <- "iveg"
     
     #Collate to list (this will allow more params to be added later)
