@@ -27,10 +27,10 @@ site_code <- "AU-How"
 
 # This directory should contain appropriate data from 
 # http://fluxnet.fluxdata.org/data/fluxnet2015-dataset/
-in_path <- "~/Documents/FLUXNET2016_processing/Inputs"
+in_path <- "./Inputs"
 
 #Outputs will be saved to this directory
-out_path <- "~/Documents/FLUXNET2016_processing/Outputs"
+out_path <- "./Outputs"
 
 
 
