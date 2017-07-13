@@ -67,7 +67,7 @@ if(any(sapply(ERA_files, length)==0) & conv_opts$met_gapfill=="ERAinterim"){
 mapply(function(site_code, infile, ERA_file, datasetversion) {
         try(
             convert_fluxnet_to_netcdf(site_code = site_code,
-                                      infile = infile
+                                      infile = infile,
                                       out_path = out_path,
                                       era_file = ERA_file,
                                       conv_opts = conv_opts,
