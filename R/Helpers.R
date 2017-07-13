@@ -62,17 +62,11 @@ get_fluxnet_version_no <- function(file) {
 #' Gets Fluxnet site_code from Fluxnet file.
 #' Useful when processing multiple files
 #' @export
-get_fluxnet_site_code <- function(file, datasetname = "FLUXNET2015") {
+get_fluxnet_site_code <- function(path) {
   #assumes a FLUXNET2015 file, e.g FLX_US-Ha1_FLUXNET2015_FULLSET_HR_1991-2012_1-3.csv
-  #Strip file paths
-  split <- strsplit(file, "/")[[1]]
-  no_path   <- split[grepl(datasetname, split)]
+  filename  <- basename(path)
   #Subset site code
-  site_code <- substr(no_path, start=5, stop=10) 
-  
+  site_code <- substr(filename, start = 5, stop = 10)
+
   return(site_code)
 }
-
-
-
-
