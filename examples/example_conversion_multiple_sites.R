@@ -46,11 +46,11 @@ site_codes <- sapply(infiles, get_fluxnet_site_code)
 ###--- Optional settings ---###
 ###############################
 
-conversion_opts <- get_default_conversion_options()
+conv_opts <- get_default_conversion_options()
 
 # ERAinterim meteo file for gap-filling met data (set to NA if not desired)
 # Find ERA-files corresponding to site codes
-conversion_opts$met_gapfill  <- "ERAinterim"
+conv_opts$met_gapfill  <- "ERAinterim"
 ERA_files     <- sapply(site_codes, function(x) get_fluxnet_erai_files(in_path, site_code=x))
 
 #Stop if didn't find ERA files
@@ -65,15 +65,15 @@ if(any(sapply(ERA_files, length)==0) & met_gapfill=="ERAinterim"){
 
 #Loops through sites
 mapply(function(site_code, infile, ERA_file, datasetversion) {
-        conversion_opts$datasetversions <- =datasetversion
+        conv_opts$datasetversions <- datasetversion
         try(
-            convert_fluxnet_to_netcdf(site_code=site_code,
-                                      infile=infile
-                                      out_path=out_path,
-                                      era_file=ERA_file,
-                                      conversion_opts)
+            convert_fluxnet_to_netcdf(site_code = site_code,
+                                      infile = infile
+                                      out_path = out_path,
+                                      era_file = ERA_file,
+                                      conv_opts = conv_opts)
         )},
-    site_code=site_codes,
-    infile=infiles,
-    ERA_file=ERA_files,
-    datasetversion=datasetversions)
+    site_code = site_codes,
+    infile = infiles,
+    ERA_file = ERA_files,
+    datasetversion = datasetversions)
