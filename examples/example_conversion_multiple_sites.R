@@ -39,7 +39,7 @@ infiles <- get_fluxnet_files(in_path)
 datasetversions <- sapply(infiles, get_fluxnet_version_no)
 
 #Retrieve site codes
-site_codes <- sapply(infiles, get_fluxnet_site_code)
+site_codes <- sapply(infiles, get_site_code)
 
 
 ###############################
@@ -54,7 +54,7 @@ conv_opts$met_gapfill  <- "ERAinterim"
 ERA_files     <- sapply(site_codes, function(x) get_fluxnet_erai_files(in_path, site_code=x))
 
 #Stop if didn't find ERA files
-if(any(sapply(ERA_files, length)==0) & met_gapfill=="ERAinterim"){
+if(any(sapply(ERA_files, length)==0) & conv_opts$met_gapfill=="ERAinterim"){
   stop("No ERA files found, amend input path")
 }
 

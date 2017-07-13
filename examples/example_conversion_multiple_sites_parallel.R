@@ -46,7 +46,7 @@ infiles <- get_fluxnet_files(in_path,
 datasetversions <- sapply(infiles, get_fluxnet_version_no)
 
 #Retrieve site codes
-site_codes <- sapply(infiles, get_fluxnet_site_code)
+site_codes <- sapply(infiles, get_site_code)
 
 
 ###############################
