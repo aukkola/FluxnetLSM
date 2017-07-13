@@ -104,14 +104,14 @@ if(exists("plot"))             {clusterExport(cl, "plot")}
 #Loops through sites
 clusterMap(cl = cl, function(site_code, infile, ERA_file, datasetversion) {
     library(FluxnetLSM)
-    conv_opts$datasetversion <- datasetversion
     tryCatch(
         convert_fluxnet_to_netcdf(
             site_code = site_code,
             infile = infile,
             ERA_file = ERA_file,
-            options = conv_opts,
-            plot = plot
+            conv_opts = conv_opts,
+            plot = plot,
+            datasetversion = datasetversion  # overrides conv_opts
             ),
          error = function(e) NULL)
     },

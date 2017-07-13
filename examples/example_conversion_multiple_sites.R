@@ -65,13 +65,14 @@ if(any(sapply(ERA_files, length)==0) & met_gapfill=="ERAinterim"){
 
 #Loops through sites
 mapply(function(site_code, infile, ERA_file, datasetversion) {
-        conv_opts$datasetversions <- datasetversion
         try(
             convert_fluxnet_to_netcdf(site_code = site_code,
                                       infile = infile
                                       out_path = out_path,
                                       era_file = ERA_file,
-                                      conv_opts = conv_opts)
+                                      conv_opts = conv_opts,
+                                      datasetversion = datasetversion
+                                      )
         )},
     site_code = site_codes,
     infile = infiles,

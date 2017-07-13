@@ -48,10 +48,13 @@ datasetversion <- get_fluxnet_version_no(infile)
 ###############################
 
 conv_opts <- get_default_conversion_options()
+conv_opts$datasetversion <- datasetversion
 
 # Gapfilling options
 conv_opts$met_gapfill  <- "statistical"
 conv_opts$flux_gapfill  <- "statistical"
+conv_opts$copyfill <- 30
+conv_opts$regfill <- 60
 
 
 ##########################

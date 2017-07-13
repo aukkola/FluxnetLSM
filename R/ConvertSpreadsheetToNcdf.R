@@ -39,8 +39,14 @@
 #'
 convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
                                       conv_opts=get_default_conversion_options(),
-                                      plot=c("annual", "diurnal", "timeseries")) {
+                                      plot=c("annual", "diurnal", "timeseries"),
+                                      ...) {
   
+  # We allow options to be passed directly into the function, to override conv_opts
+  opt_args <- list(...)
+  for (o in names(opt_args)) {
+      conv_opts[o] = opt_args[o]
+  }
   
   library(R.utils)  
   
