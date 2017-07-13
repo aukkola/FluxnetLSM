@@ -37,7 +37,7 @@
 #' @export
 #'
 #'
-convert_fluxnet_to_netcdf <- function(site_code, infile, era_file, out_path,
+convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
                                       conv_opts=get_default_conversion_options(),
                                       plot=c("annual", "diurnal", "timeseries")) {
   
