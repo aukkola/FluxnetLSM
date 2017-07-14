@@ -415,19 +415,27 @@ DiurnalCycle <- function(obslabel,dcdata,varname,ytext,legendtext,
   yaxmax=max(avday,na.rm=na.rm)+(max(avday,na.rm=na.rm)-yaxmin)*0.15 # y axis maximum in plot
   # Now plot each panel:
   for(k in 1:4){# for each season (DJF, MAM etc)
-    # Plot obs data result:
-    plot(xloc,avday[k,,1],type="l",xaxt="n",xlab=paste(labels[k],'hour of day'),
-         ylab=ytext,lwd=4,col=plotcolours[1],ylim=c(yaxmin,yaxmax))
-    # Then add other curves, if any:
-    if(ncurves>1){
-      pscore = matrix(NA,4,(ncurves-1))
-      for(p in 2:ncurves){ # for each additional curve
-        lines(xloc,avday[k,,p],lwd=3,col=plotcolours[p])
-        # Score is normalised mean error:
-        pscore[k,p-1] = sum(abs(avday[k,,p] - avday[k,,1]),na.rm=TRUE) /
-          sum(abs(as.vector(mean(avday[k,,1],na.rm=TRUE) - avday[k,,1])),na.rm=TRUE)
+    #All missing: plot empty
+    if(all(is.na(avday[k,,1]))){
+      plot(xloc, xloc, type="n",xaxt="n",xlab=paste(labels[k],'hour of day'),
+           ylab=ytext,yaxt="n")
+      mtext(side=3, "All values missing", col="red", line=-4)
+    #Else plot
+    }else{
+      # Plot obs data result:
+      plot(xloc,avday[k,,1],type="l",xaxt="n",xlab=paste(labels[k],'hour of day'),
+           ylab=ytext,lwd=4,col=plotcolours[1],ylim=c(yaxmin,yaxmax))
+      # Then add other curves, if any:
+      if(ncurves>1){
+        pscore = matrix(NA,4,(ncurves-1))
+        for(p in 2:ncurves){ # for each additional curve
+          lines(xloc,avday[k,,p],lwd=3,col=plotcolours[p])
+          # Score is normalised mean error:
+          pscore[k,p-1] = sum(abs(avday[k,,p] - avday[k,,1]),na.rm=TRUE) /
+            sum(abs(as.vector(mean(avday[k,,1],na.rm=TRUE) - avday[k,,1])),na.rm=TRUE)
+        }  
       }	
-    }	
+    }
     axis(1,at=c(0,6*tstepinday/24,12*tstepinday/24,18*tstepinday/24,
                 23*tstepinday/24),labels=c('0','6','12','18','23'))
     title(alltitle) # add title
@@ -550,18 +558,25 @@ AnnualCycle <- function(obslabel,acdata,varname,ytext,legendtext,
   # Plot model output result:
   yaxmin=min(data_monthly,na.rm=na.rm) # y axis minimum in plot
   yaxmax=max(data_monthly,na.rm=na.rm)+0.18*(max(data_monthly,na.rm=na.rm)-yaxmin) # y axis maximum in plot
-  plot(xloc,data_monthly[,1],type="l",xaxt="n",xlab='Month',ylab=ytext,
-       lwd=3,col=plotcolours[1],ylim=c(yaxmin,yaxmax),cex.lab=1.2,cex.axis=1.3,
-       mgp = c(2.5,0.8,0))
-  # Add other curves:
-  if(ncurves>1){
-    pscore = c()
-    for(p in 2:ncurves){ # for each additional curve
-      lines(xloc,data_monthly[,p],lwd=3,col=plotcolours[p])
-      # Score is normalised mean error:
-      pscore[p-1] = sum(abs(data_monthly[,p] - data_monthly[,1])) /
-        sum(abs(mean(data_monthly[,1]) - data_monthly[,1]))
-    }	
+  #If all missing, plot empty
+  if(all(is.na(data_monthly[,1]))){
+    plot(xloc,xloc,type="n",xaxt="n",xlab='Month',ylab=ytext,yaxt="n",
+         cex.lab=1.2,cex.axis=1.3,mgp = c(2.5,0.8,0))
+    mtext(side=3, "All values missing", col="red", line=-4)
+  } else{
+    plot(xloc,data_monthly[,1],type="l",xaxt="n",xlab='Month',ylab=ytext,
+         lwd=3,col=plotcolours[1],ylim=c(yaxmin,yaxmax),cex.lab=1.2,cex.axis=1.3,
+         mgp = c(2.5,0.8,0))
+    # Add other curves:
+    if(ncurves>1){
+      pscore = c()
+      for(p in 2:ncurves){ # for each additional curve
+        lines(xloc,data_monthly[,p],lwd=3,col=plotcolours[p])
+        # Score is normalised mean error:
+        pscore[p-1] = sum(abs(data_monthly[,p] - data_monthly[,1])) /
+          sum(abs(mean(data_monthly[,1]) - data_monthly[,1]))
+      }  
+    }
   }
   axis(1,at=c(2,4,6,8,10,12),labels=c('2','4','6','8','10','12'),cex.axis=1.3)
   if(modlabel=='no'){ # i.e. an obs analysis
@@ -659,9 +674,15 @@ Timeseries <- function(obslabel,tsdata,varname,ytext,legendtext,
     xmax = length(data_smooth[,1])
     xloc=c(1:xmax)
     # Draw plot:
-    plot(xloc,data_smooth[,1],type="l",ylab=ytext,lwd=3,
-         col=plotcolours[1],ylim=c((ymin),(ymin + (ymax-ymin)*1.2)),
-         xaxt='n',cex.lab=plotcex,cex.axis=plotcex,xlab='',mgp = c(2.5,1,0))
+    #All missing, plot empty
+    if(all(is.na(data_smooth[,1]))){
+      plot(xloc,xloc,type="n",ylab=ytext, xaxt='n',cex.lab=plotcex,cex.axis=plotcex,xlab='',mgp = c(2.5,1,0))
+      mtext(side=3, "All values missing", col="red", line=-4)
+    } else {
+      plot(xloc,data_smooth[,1],type="l",ylab=ytext,lwd=3,
+           col=plotcolours[1],ylim=c((ymin),(ymin + (ymax-ymin)*1.2)),
+           xaxt='n',cex.lab=plotcex,cex.axis=plotcex,xlab='',mgp = c(2.5,1,0))
+    }
     # Calculate NME scores:
     if(ncurves>1){
       smoothscore = c()
