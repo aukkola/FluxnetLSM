@@ -168,7 +168,7 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
                      ytext=paste(data_vars[n], " (", data_units[n], ")", sep=""), 
                      legendtext=data_vars[n], timestepsize=timestepsize,
                      whole=timing$whole, plotcolours="blue",
-                     #vqcdata=as.matrix(var_qc),
+                     vqcdata=as.matrix(var_qc),
                      na.rm=TRUE)  
       }
       
@@ -281,7 +281,7 @@ DiurnalCycle <- function(obslabel,dcdata,varname,ytext,legendtext,
   # Plot layout:
   par(mfcol=c(2,2),mar=c(4,4,3,0.5),oma=c(0,0,0,1),
       mgp=c(2.5,0.7,0),ps=16,tcl=-0.4)
-  avday=array(0,dim=c(4,tstepinday,ncurves)) # initialise
+  avday=array(NA,dim=c(4,tstepinday,ncurves)) # initialise
   perc_missing = matrix(0,4,ncurves) #initialise, % data missing each season and model/obs
   if(modlabel=='no'){
     alltitle=paste('Obs:',obslabel)
@@ -411,8 +411,6 @@ DiurnalCycle <- function(obslabel,dcdata,varname,ytext,legendtext,
   
   # Determine boundaries for plots:
   xloc=c(0:(tstepinday-1)) # set location of x-coords in plot
-  yaxmin=min(avday,na.rm=na.rm) # y axis minimum in plot
-  yaxmax=max(avday,na.rm=na.rm)+(max(avday,na.rm=na.rm)-yaxmin)*0.15 # y axis maximum in plot
   # Now plot each panel:
   for(k in 1:4){# for each season (DJF, MAM etc)
     #All missing: plot empty
@@ -422,6 +420,8 @@ DiurnalCycle <- function(obslabel,dcdata,varname,ytext,legendtext,
       mtext(side=3, "All values missing", col="red", line=-4)
     #Else plot
     }else{
+      yaxmin=min(avday,na.rm=na.rm) # y axis minimum in plot
+      yaxmax=max(avday,na.rm=na.rm)+(max(avday,na.rm=na.rm)-yaxmin)*0.15 # y axis maximum in plot
       # Plot obs data result:
       plot(xloc,avday[k,,1],type="l",xaxt="n",xlab=paste(labels[k],'hour of day'),
            ylab=ytext,lwd=4,col=plotcolours[1],ylim=c(yaxmin,yaxmax))
@@ -435,71 +435,72 @@ DiurnalCycle <- function(obslabel,dcdata,varname,ytext,legendtext,
             sum(abs(as.vector(mean(avday[k,,1],na.rm=TRUE) - avday[k,,1])),na.rm=TRUE)
         }  
       }	
-    }
+
+      if(k==1){
+        # Position legend (and total score, if required):
+        posctr = 1
+        placeditemctr = 0
+        npos = 4
+        if(ncurves == 1) {
+          nitems = 1 # i.e. just need to position the legend
+        }else{
+          nitems = 2 # i.e. need to position total score as well
+        }
+        ypos = c() # y positions of items to placed
+        repeat{
+          if(! any((avday[k,0:tstepinday/5,]>(yaxmin+(npos-posctr)*(yaxmax-yaxmin)/npos)) &
+                     (avday[k,0:tstepinday/5,]<(yaxmin+(npos-posctr + 1)*(yaxmax-yaxmin)/npos)))){
+            # if not any data in this interval
+            placeditemctr = placeditemctr + 1 # i.e. we've just placed something
+            ypos[placeditemctr] = yaxmin+((npos-posctr+0.7)/npos)*(yaxmax-yaxmin)
+            if(placeditemctr==nitems) {break} # i.e. we've positioned everything
+          }else if (posctr == npos){
+            # give up and place everything regularly
+            for(i in 1:nitems){
+              ypos[i] = yaxmin+(1.1 - 0.2*i)*(yaxmax-yaxmin)
+            }
+            break
+          }
+          posctr = posctr + 1
+        }
+        legend(-1,ypos[2],legendtext[1:ncurves],lty=1,col=plotcolours[1:ncurves],
+               lwd=3,bty="n",yjust=0.5)
+        if(ncurves>1){
+          scorestring = paste(signif(pscoretotal,digits=2),collapse=', ')
+          removestring = paste(signif(removefractotal*100,digits=2),collapse=', ')
+          scoretext = paste('Total score: ',scorestring,'\n','(NME; ',
+                            removestring,'% data removed)',sep='')
+          text(-1,yaxmax-(yaxmax-yaxmin)*0.07,scoretext,pos=4)
+        }
+      }else if(k==3){
+        # Add note about removing gap-filled data:
+        if(vqcdata[1,1] != -1){
+          qctext = 'Gap-filled observed data removed\nfrom all plots and scores.'	
+        }else{	
+          qctext = 'All time steps of observed data used.'
+        }
+        text(-1,yaxmax-(yaxmax-yaxmin)*0.07,qctext,pos=4)
+      }
+      # Now position seasonal score:
+      if(ncurves>1){
+        scorestring = paste(signif(pscore[k,],digits=2),collapse=', ')
+        removestring = paste(signif(removefrac[k]*100,digits=2),collapse=', ')
+        scoretext = paste('Score: ',scorestring,'\n','(NME; ',
+                          removestring,'% data removed)',sep='')
+        text((tstepinday/2),yaxmax-(yaxmax-yaxmin)*0.07,scoretext,pos=4)	
+      }
+      #Print percentage of data missing if na.rm=TRUE and some data missing
+      if(na.rm){
+        if(!all(is.na(avday[k,,1])) & any(perc_missing[k,] > 0)){
+          rounded=round(perc_missing[k,],digits=3)
+          text(-1,yaxmax,paste("(",paste(rounded,collapse=", "), ")% data missing", sep=""),
+               pos=4, col="red")
+        }
+      }
+  }#all NA
     axis(1,at=c(0,6*tstepinday/24,12*tstepinday/24,18*tstepinday/24,
                 23*tstepinday/24),labels=c('0','6','12','18','23'))
     title(alltitle) # add title
-    if(k==1){
-      # Position legend (and total score, if required):
-      posctr = 1
-      placeditemctr = 0
-      npos = 4
-      if(ncurves == 1) {
-        nitems = 1 # i.e. just need to position the legend
-      }else{
-        nitems = 2 # i.e. need to position total score as well
-      }
-      ypos = c() # y positions of items to placed
-      repeat{
-        if(! any((avday[k,0:tstepinday/5,]>(yaxmin+(npos-posctr)*(yaxmax-yaxmin)/npos)) &
-                   (avday[k,0:tstepinday/5,]<(yaxmin+(npos-posctr + 1)*(yaxmax-yaxmin)/npos)))){
-          # if not any data in this interval
-          placeditemctr = placeditemctr + 1 # i.e. we've just placed something
-          ypos[placeditemctr] = yaxmin+((npos-posctr+0.7)/npos)*(yaxmax-yaxmin)
-          if(placeditemctr==nitems) {break} # i.e. we've positioned everything
-        }else if (posctr == npos){
-          # give up and place everything regularly
-          for(i in 1:nitems){
-            ypos[i] = yaxmin+(1.1 - 0.2*i)*(yaxmax-yaxmin)
-          }
-          break
-        }
-        posctr = posctr + 1
-      }
-      legend(-1,ypos[2],legendtext[1:ncurves],lty=1,col=plotcolours[1:ncurves],
-             lwd=3,bty="n",yjust=0.5)
-      if(ncurves>1){
-        scorestring = paste(signif(pscoretotal,digits=2),collapse=', ')
-        removestring = paste(signif(removefractotal*100,digits=2),collapse=', ')
-        scoretext = paste('Total score: ',scorestring,'\n','(NME; ',
-                          removestring,'% data removed)',sep='')
-        text(-1,yaxmax-(yaxmax-yaxmin)*0.07,scoretext,pos=4)
-      }
-    }else if(k==3){
-      # Add note about removing gap-filled data:
-      if(vqcdata[1,1] != -1){
-        qctext = 'Gap-filled observed data removed\nfrom all plots and scores.'	
-      }else{	
-        qctext = 'All time steps of observed data used.'
-      }
-      text(-1,yaxmax-(yaxmax-yaxmin)*0.07,qctext,pos=4)
-    }
-    # Now position seasonal score:
-    if(ncurves>1){
-      scorestring = paste(signif(pscore[k,],digits=2),collapse=', ')
-      removestring = paste(signif(removefrac[k]*100,digits=2),collapse=', ')
-      scoretext = paste('Score: ',scorestring,'\n','(NME; ',
-                        removestring,'% data removed)',sep='')
-      text((tstepinday/2),yaxmax-(yaxmax-yaxmin)*0.07,scoretext,pos=4)	
-    }
-    #Print percentage of data missing if na.rm=TRUE and some data missing
-    if(na.rm){
-      if(any(perc_missing[k,] > 0)){
-        rounded=round(perc_missing[k,],digits=3)
-        text(-1,yaxmax,paste("(",paste(rounded,collapse=", "), ")% data missing", sep=""),
-             pos=4, col="red")
-      }
-    }
   } # each plot / season
   result=list(err=FALSE,errtext=errtext,metrics=metrics)
   return(result)
@@ -555,15 +556,16 @@ AnnualCycle <- function(obslabel,acdata,varname,ytext,legendtext,
     }
   }
   xloc=c(1:12) # set location of x-coords
-  # Plot model output result:
-  yaxmin=min(data_monthly,na.rm=na.rm) # y axis minimum in plot
-  yaxmax=max(data_monthly,na.rm=na.rm)+0.18*(max(data_monthly,na.rm=na.rm)-yaxmin) # y axis maximum in plot
+  
   #If all missing, plot empty
   if(all(is.na(data_monthly[,1]))){
     plot(xloc,xloc,type="n",xaxt="n",xlab='Month',ylab=ytext,yaxt="n",
          cex.lab=1.2,cex.axis=1.3,mgp = c(2.5,0.8,0))
     mtext(side=3, "All values missing", col="red", line=-4)
   } else{
+    # Plot model output result:
+    yaxmin=min(data_monthly,na.rm=na.rm) # y axis minimum in plot
+    yaxmax=max(data_monthly,na.rm=na.rm)+0.18*(max(data_monthly,na.rm=na.rm)-yaxmin) # y axis maximum in plot
     plot(xloc,data_monthly[,1],type="l",xaxt="n",xlab='Month',ylab=ytext,
          lwd=3,col=plotcolours[1],ylim=c(yaxmin,yaxmax),cex.lab=1.2,cex.axis=1.3,
          mgp = c(2.5,0.8,0))
@@ -577,6 +579,24 @@ AnnualCycle <- function(obslabel,acdata,varname,ytext,legendtext,
           sum(abs(mean(data_monthly[,1]) - data_monthly[,1]))
       }  
     }
+    legend(1,max(data_monthly)+0.15*(max(data_monthly)-yaxmin),legendtext[1:ncurves],
+           lty=1,col=plotcolours[1:ncurves],lwd=3,bty="n",yjust=0.8)
+    if(ncurves>1){
+      scorestring = paste(signif(pscore,digits=3),collapse=', ')
+      scoretext = paste('Score: ',scorestring,'\n','(NME)',sep='')
+      text(8,max(data_monthly)+0.1*(max(data_monthly)-yaxmin),scoretext,pos=4,offset=1)
+      if(ncurves==2){ # model only
+        metrics[[1]] = list(name='NME',model_value=pscore[1])  
+      }else if(ncurves==3){
+        metrics[[1]] = list(name='NME',model_value=pscore[1],bench_value=list(bench1=pscore[2]))	
+      }else if(ncurves==4){
+        metrics[[1]] = list(name='NME',model_value=pscore[1],
+                            bench_value=list(bench1=pscore[2],bench2=pscore[3]))
+      }else if(ncurves==5){
+        metrics[[1]] = list(name='NME',model_value=pscore[1],
+                            bench_value=list(bench1=pscore[2],bench2=pscore[3],bench3=pscore[4]))
+      }
+    }
   }
   axis(1,at=c(2,4,6,8,10,12),labels=c('2','4','6','8','10','12'),cex.axis=1.3)
   if(modlabel=='no'){ # i.e. an obs analysis
@@ -586,29 +606,11 @@ AnnualCycle <- function(obslabel,acdata,varname,ytext,legendtext,
     title(paste('Average monthly ',varname[1],':   Obs - ',obslabel,'   Model - ',
                 modlabel,sep=''),cex.main=1.1) # add title
   }
-  legend(1,max(data_monthly)+0.15*(max(data_monthly)-yaxmin),legendtext[1:ncurves],
-         lty=1,col=plotcolours[1:ncurves],lwd=3,bty="n",yjust=0.8)
-  if(ncurves>1){
-    scorestring = paste(signif(pscore,digits=3),collapse=', ')
-    scoretext = paste('Score: ',scorestring,'\n','(NME)',sep='')
-    text(8,max(data_monthly)+0.1*(max(data_monthly)-yaxmin),scoretext,pos=4,offset=1)
-    if(ncurves==2){ # model only
-      metrics[[1]] = list(name='NME',model_value=pscore[1])	
-    }else if(ncurves==3){
-      metrics[[1]] = list(name='NME',model_value=pscore[1],bench_value=list(bench1=pscore[2]))	
-    }else if(ncurves==4){
-      metrics[[1]] = list(name='NME',model_value=pscore[1],
-                          bench_value=list(bench1=pscore[2],bench2=pscore[3]))
-    }else if(ncurves==5){
-      metrics[[1]] = list(name='NME',model_value=pscore[1],
-                          bench_value=list(bench1=pscore[2],bench2=pscore[3],bench3=pscore[4]))
-    }
-  }
   #Print percentage of data missing if na.rm=TRUE and some data missing
   if(na.rm){
     perc_missing = round(sapply(1:ncol(acdata), function(x) #round
       sum(is.na(acdata[,x]))/length(acdata[,x])), digits=3)      
-    if(any(perc_missing > 0)){
+    if(!all(is.na(data_monthly[,1])) & any(perc_missing > 0)){
       text(1,yaxmax, paste("(",paste(perc_missing,collapse=", "), ")% data missing", sep=""),
            pos=4,offset=1, col="red")
     }
@@ -785,88 +787,103 @@ Timeseries <- function(obslabel,tsdata,varname,ytext,legendtext,
       lines(xloc_qc,gapline,lwd=3,col='indianred')
       text(x=xmin,y=qctexty,cex=max((plotcex*0.75),0.85),pos=4,
            labels=paste(qcpc,'% of observed ',varname[1],' is gap-filled:',sep=''))
-    }		
+    }	
+    
+    
+  #Not smoothed
   }else{
-    # this code not functioning but kept for future modification:
-    yvalmin = signif(min(tsdata, na.rm=na.rm),3)
-    yvalmax = signif(max(tsdata, na.rm=na.rm),3)
-    datamean = signif(mean(tsdata[,1], na.rm=na.rm),3)
-    datasd = signif(sd(tsdata[,1], na.rm=na.rm),3)
-    ymin = yvalmin
-    ymax = yvalmax
     xmin = 1
     xmax = ntsteps
     xloc=c(1:xmax)
     y_adj=1
-    #If ignoring NA, make space for printing % missing
-    #Also shift other labels and legend down in this case
-    if(na.rm){
-      ymax=ymax*1.1
-      y_adj = 0.94
-    }
-    plot(xloc,tsdata[,1],type="l",ylab=ytext,lwd=3,
-         col=plotcolours[1],ylim=c(ymin,(ymin + (ymax-ymin)*1.3)),
-         xaxt='n',cex.lab=plotcex,cex.axis=plotcex,xlab='')
-    # Add smoothed curve over whole timeseries:
-    data_days=matrix(tsdata[,1],ncol=tstepinday,byrow=TRUE) 
-    data_smooth = c()
-    dayssmooth = 30
-    for(i in 1:(ndays-dayssmooth-1)){
-      # Find evaporative fraction using averaging window:
-      data_smooth[i] = mean(data_days[i:(i+dayssmooth-1),], na.rm=na.rm)
-    }
-    xct = c(1:(ndays-dayssmooth-1))
-    xsmooth = xct*tstepinday + (tstepinday*dayssmooth / 2 - tstepinday)
-    lines(xsmooth,data_smooth,lwd=3,col='gray')
-    
-    if(ncurves>1){
-      for(p in 2:ncurves){ # for each additional curve
-        lines(tsdata[,p],lwd=3,col=plotcolours[p])
-      }	
-    }
+
+    #All missing
+    if(all(is.na(tsdata[,1]))){
+      plot(xloc,xloc,type="n",ylab=ytext,lwd=3,
+           yaxt="n", xaxt='n',cex.lab=plotcex,cex.axis=plotcex,xlab='')
+      mtext(side=3, "All values missing", col="red", line=-4)
+    #Else plot
+    } else {
+      # this code not functioning but kept for future modification:
+      yvalmin = signif(min(tsdata, na.rm=na.rm),3)
+      yvalmax = signif(max(tsdata, na.rm=na.rm),3)
+      datamean = signif(mean(tsdata[,1], na.rm=na.rm),3)
+      datasd = signif(sd(tsdata[,1], na.rm=na.rm),3)
+      ymin = yvalmin
+      ymax = yvalmax
+      
+      #If ignoring NA, make space for printing % missing
+      #Also shift other labels and legend down in this case
+      if(na.rm){
+        ymax=ymax*1.1
+        y_adj = 0.94
+      }
+      
+      plot(xloc,tsdata[,1],type="l",ylab=ytext,lwd=3,
+           col=plotcolours[1],ylim=c(ymin,(ymin + (ymax-ymin)*1.3)),
+           xaxt='n',cex.lab=plotcex,cex.axis=plotcex,xlab='')
+      # Add smoothed curve over whole timeseries:
+      data_days=matrix(tsdata[,1],ncol=tstepinday,byrow=TRUE) 
+      data_smooth = c()
+      dayssmooth = 30
+      for(i in 1:(ndays-dayssmooth-1)){
+        # Find evaporative fraction using averaging window:
+        data_smooth[i] = mean(data_days[i:(i+dayssmooth-1),], na.rm=na.rm)
+      }
+      xct = c(1:(ndays-dayssmooth-1))
+      xsmooth = xct*tstepinday + (tstepinday*dayssmooth / 2 - tstepinday)
+      lines(xsmooth,data_smooth,lwd=3,col='gray')
+      
+      if(ncurves>1){
+        for(p in 2:ncurves){ # for each additional curve
+          lines(tsdata[,p],lwd=3,col=plotcolours[p])
+        }  
+      }
+      
+      legend(0-(xmax-xmin)*0.05,(ymin + (ymax-ymin)*(y_adj+0.42)),legend=legendtext[1:ncurves],lty=1,
+             col=plotcolours[1:ncurves],lwd=3,bty="n",cex=max((plotcex*0.75),1))
+      # Locations of max,min,mean,sd text:
+      stattextx = c(xmin,xmin+(xmax-xmin)*0.5)
+      stattexty = c(ymin + (ymax-ymin)*(y_adj+0.18),ymin + (ymax-ymin)*(y_adj+0.24))
+      # Write max,min,mean,sd to plot in two lines:
+      text(x=stattextx,y=stattexty[2],
+           labels=c(paste('Min = ',ymin,sep=''),paste('Max = ',ymax,sep='')),
+           cex=max((plotcex*0.75),1),pos=4)
+      text(x=stattextx,y=stattexty[1],
+           labels=c(paste('Mean = ',datamean,sep=''),paste('SD = ',datasd,sep='')),
+           cex=max((plotcex*0.75),1),pos=4)
+      #Print percentage of data missing if na.rm=TRUE and some data missing
+      if(na.rm){
+        perc_missing = signif(sapply(1:ncol(tsdata), function(x) 
+          sum(is.na(tsdata[,x]))/length(tsdata[,x])), digits=3)     
+        if(any(perc_missing > 0)){
+          text((xmax-xmin)*0.5,y=(ymin + (ymax-ymin)*(y_adj+0.42)),
+               paste("(",paste(perc_missing,collapse=", "), ")% data missing", sep=""),
+               pos=1,offset=1, col="red")
+        }
+        # Calculate QC time series information, if it exists:
+        if(vqcdata[1,1] != -1){
+          qcliney = ymin + (ymax-ymin)*(y_adj+0.04) # y-location of qc line
+          qctexty = ymin + (ymax-ymin)*(y_adj+0.09) # y-location of qc text
+          qcpc = signif((1-mean(vqcdata[,1], na.rm=TRUE))*100,2) # % of data that's gapfilled
+          # Construct line-plottable version of qc timeseries:
+          origline =	qcliney/(vqcdata[,1]) # 0s will become 'Inf'
+          gapline = (qcliney/(vqcdata[,1]-1))*-1 # 1s will become 'Inf'
+          # Plot qc time series line:
+          lines(origline,lwd=5,col='gray80')
+          lines(gapline,lwd=2,col='red')
+          text(x=stattextx[1],y=qctexty,cex=max((plotcex*0.75),1),pos=4,
+               labels=paste(qcpc,'% of time series is gap-filled:',sep=''))
+        }
+      }
+    } #all NA?
     for(l in 1:nyears){
       xxat[(2*l-1)] = (l-1)*365*tstepinday + 1
       xxat[(2*l)] = (l-1)*365*tstepinday + 183*tstepinday
       xxlab[(2*l-1)]=paste('1 Jan',substr(as.character(timing$syear+l-1),3,4))
       xxlab[(2*l)]=paste('1 Jul',substr(as.character(timing$syear+l-1),3,4))
     }
-    legend(0-(xmax-xmin)*0.05,(ymin + (ymax-ymin)*(y_adj+0.42)),legend=legendtext[1:ncurves],lty=1,
-           col=plotcolours[1:ncurves],lwd=3,bty="n",cex=max((plotcex*0.75),1))
     title(paste(obslabel,varname[1]),cex.main=plotcex)
-    # Locations of max,min,mean,sd text:
-    stattextx = c(xmin,xmin+(xmax-xmin)*0.5)
-    stattexty = c(ymin + (ymax-ymin)*(y_adj+0.18),ymin + (ymax-ymin)*(y_adj+0.24))
-    # Write max,min,mean,sd to plot in two lines:
-    text(x=stattextx,y=stattexty[2],
-         labels=c(paste('Min = ',ymin,sep=''),paste('Max = ',ymax,sep='')),
-         cex=max((plotcex*0.75),1),pos=4)
-    text(x=stattextx,y=stattexty[1],
-         labels=c(paste('Mean = ',datamean,sep=''),paste('SD = ',datasd,sep='')),
-         cex=max((plotcex*0.75),1),pos=4)
-    #Print percentage of data missing if na.rm=TRUE and some data missing
-    if(na.rm){
-      perc_missing = signif(sapply(1:ncol(tsdata), function(x) 
-        sum(is.na(tsdata[,x]))/length(tsdata[,x])), digits=3)	   
-      if(any(perc_missing > 0)){
-        text((xmax-xmin)*0.5,y=(ymin + (ymax-ymin)*(y_adj+0.42)),
-             paste("(",paste(perc_missing,collapse=", "), ")% data missing", sep=""),
-             pos=1,offset=1, col="red")
-      }
-      # Calculate QC time series information, if it exists:
-      if(vqcdata[1,1] != -1){
-        qcliney = ymin + (ymax-ymin)*(y_adj+0.04) # y-location of qc line
-        qctexty = ymin + (ymax-ymin)*(y_adj+0.09) # y-location of qc text
-        qcpc = signif((1-mean(vqcdata[,1], na.rm=TRUE))*100,2) # % of data that's gapfilled
-        # Construct line-plottable version of qc timeseries:
-        origline =	qcliney/(vqcdata[,1]) # 0s will become 'Inf'
-        gapline = (qcliney/(vqcdata[,1]-1))*-1 # 1s will become 'Inf'
-        # Plot qc time series line:
-        lines(origline,lwd=5,col='gray80')
-        lines(gapline,lwd=2,col='red')
-        text(x=stattextx[1],y=qctexty,cex=max((plotcex*0.75),1),pos=4,
-             labels=paste(qcpc,'% of time series is gap-filled:',sep=''))
-      }
-    }
     axis(1,at=xxat,labels=xxlab,cex.axis=plotcex)
     result = list(err=FALSE,errtext = errtext,metrics=metrics)
     return(result)
