@@ -264,7 +264,8 @@ copyfill_data <- function(data, tsteps, tstepsize, copyfill=10,
 
 
 #-----------------------------------------------------------------------------
-
+#' Synthesizes incoming longwave radiation and air pressure
+#' @export
 gapfill_LWdown_Pair <- function(data, var, var_ind, TairK=NA, RH=NA, 
                                technique=NA, elev=NA, varnames, site_log){
   
