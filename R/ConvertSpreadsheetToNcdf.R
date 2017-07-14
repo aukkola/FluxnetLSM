@@ -11,10 +11,13 @@
 #' ERAInterim estimates.
 #'
 #' Statistical:
-#'
-#'
-#'
-#'
+#' Met variables gapfilled with a combination of linear interpolation (for short gaps) and
+#' copyfill (for longer gaps). Air pressure and incoming longwave radiation are synthesised
+#' from air temperature, elevation and relative humidity.
+#' 
+#' Flux variables gapfilled using a combination of linear interpolation (for short gaps) and
+#' and a linear regression against met variables (incoming shortwave, and air temperature and 
+#' relative humidity, if available.). If regfill is set to NA, copyfill is used instead.
 #'
 #'
 #' author: Anna Ukkola UNSW 2017.
@@ -26,7 +29,7 @@
 #'        e.g. "FULLSET/FLX_AU-How_FLUXNET2015_FULLSET_HH_2001-2014_1-3.csv".
 #'        La Thuile data is expected to be in the format sitecode.year.xxxx.csv,
 #'        e.g. "AU-How.2001.synth.hourly.allvars.csv".
-#' @param era_file:ERA input file (needed if using ERAinterim to gapfill met variables)
+#' @param era_file ERA-Interim input file (needed if using ERAinterim to gapfill met variables)
 #'        e.g. "FULLSET/FLX_AU-How_FLUXNET2015_ERAI_HH_1989-2014_1-3.csv"
 #' @param out_path output path e.g. "./FLUXNET2016_processing/"
 #' @param conv_opts options for the conversion.
@@ -578,6 +581,7 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   
 } #function
 
+#-----------------------------------------------------------------------------
 
 #' Default options for a dataset conversion
 #'
