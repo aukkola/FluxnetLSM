@@ -162,7 +162,6 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
           var_qc <- matrix(-1, nrow = 1, ncol = 1)
         }
         
-        
         DiurnalCycle(obslabel=data_vars[n],dcdata=as.matrix(data[[n]]),
                      varname=data_vars[n], 
                      ytext=paste(data_vars[n], " (", data_units[n], ")", sep=""), 
@@ -261,7 +260,8 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
 #' Plots a diurnal cycle
 #' @export
 DiurnalCycle <- function(obslabel,dcdata,varname,ytext,legendtext,
-                         timestepsize,whole,plotcolours,modlabel='no',vqcdata=matrix(-1,nrow=1,ncol=1),
+                         timestepsize,whole,plotcolours,modlabel='no',
+                         vqcdata=matrix(-1,nrow=1,ncol=1),
                          na.rm=FALSE){
   errtext = 'ok'
   metrics = list()
@@ -359,20 +359,27 @@ DiurnalCycle <- function(obslabel,dcdata,varname,ytext,legendtext,
         }else{ # no gap-filling information - assume all data are useable:
           for(i in 1:tstepinday){
             # Sum all values for each timestep:
-            avday[k,i,p]=avday[k,i,p] + 
-              sum(data_days[(stid[k]+(l-1)*365):(fnid[k]+(l-1)*365),i], na.rm=na.rm)
+            if(all(is.na(data_days[(stid[k]+(l-1)*365):(fnid[k]+(l-1)*365),i]))){
+              avday[k,i,p] <- NA
+            } else{
+              avday[k,i,p]=avday[k,i,p] + 
+                sum(data_days[(stid[k]+(l-1)*365):(fnid[k]+(l-1)*365),i], na.rm=na.rm)
+             }
             missing_vals[k] = missing_vals[k] + 
               sum(is.na(data_days[(stid[k]+(l-1)*365):(fnid[k]+(l-1)*365),i])) #count missing values
           }
           if(k==1){ # i.e. DJF, which is split in any year
             # add Dec to Jan/Feb
             for(i in 1:tstepinday){
-              avday[k,i,p]=avday[k,i,p] + 
-                sum(data_days[(stid[k+4]+(l-1)*365):(fnid[k+4]+(l-1)*365),i], na.rm=na.rm)
+              if(all(is.na(data_days[(stid[k+4]+(l-1)*365):(fnid[k+4]+(l-1)*365),i]))){
+                avday[k,i,p] <- NA
+              } else{
+                avday[k,i,p]=avday[k,i,p] + 
+                  sum(data_days[(stid[k+4]+(l-1)*365):(fnid[k+4]+(l-1)*365),i], na.rm=na.rm)
+              }
               missing_vals[k] = missing_vals[k] + 
                 sum(is.na(data_days[(stid[k]+(l-1)*365):(fnid[k]+(l-1)*365),i])) #count missing values
             }
-            
           }
         } # use gap-filling info or not
       } # for each year in the data set
