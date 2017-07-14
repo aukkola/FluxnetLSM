@@ -281,7 +281,7 @@ DiurnalCycle <- function(obslabel,dcdata,varname,ytext,legendtext,
   # Plot layout:
   par(mfcol=c(2,2),mar=c(4,4,3,0.5),oma=c(0,0,0,1),
       mgp=c(2.5,0.7,0),ps=16,tcl=-0.4)
-  avday=array(NA,dim=c(4,tstepinday,ncurves)) # initialise
+  avday=array(0,dim=c(4,tstepinday,ncurves)) # initialise
   perc_missing = matrix(0,4,ncurves) #initialise, % data missing each season and model/obs
   if(modlabel=='no'){
     alltitle=paste('Obs:',obslabel)
@@ -788,7 +788,6 @@ Timeseries <- function(obslabel,tsdata,varname,ytext,legendtext,
       text(x=xmin,y=qctexty,cex=max((plotcex*0.75),0.85),pos=4,
            labels=paste(qcpc,'% of observed ',varname[1],' is gap-filled:',sep=''))
     }	
-    
     
   #Not smoothed
   }else{
