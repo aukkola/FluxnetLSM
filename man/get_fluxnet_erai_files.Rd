@@ -4,7 +4,7 @@
 \alias{get_fluxnet_erai_files}
 \title{Gets Fluxnet ERA Interim file(s) available at a given path}
 \usage{
-get_fluxnet_erai_files(path, site_code = "[A-Z]{2}-[A-Z|0-9]{3}", ...)
+get_fluxnet_erai_files(path, site_code = "[A-Z]{2}-[A-Za-z0-9]{3}", ...)
 }
 \description{
 Gets Fluxnet ERA Interim file(s) available at a given path

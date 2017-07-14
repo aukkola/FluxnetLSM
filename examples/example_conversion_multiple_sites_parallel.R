@@ -26,10 +26,10 @@ rm(list=ls(all=TRUE))
 
 # This directory should contain appropriate data from 
 # http://fluxnet.fluxdata.org/data/fluxnet2015-dataset/
-in_path <- "~/Documents/FLUXNET2016_processing/Inputs"
+in_path <- "./Inputs"
 
 #Outputs will be saved to this directory
-out_path <- "~/Documents/FLUXNET2016_processing/Outputs"
+out_path <- "./Outputs"
 
 # Get default conversion options. See help(get_default_conversion_options)
 conv_opts <- get_default_conversion_options()
@@ -40,13 +40,13 @@ conv_opts <- get_default_conversion_options()
 # Input Fluxnet data files (using FULLSET in this example, se R/Helpers.R for details)
 infiles <- get_fluxnet_files(in_path,
                              datasetname = conv_opts$datasetname,
-                             subset = conv_opts$flx2105_version)
+                             subset = conv_opts$flx2015_version)
 
 #Retrieve dataset versions
 datasetversions <- sapply(infiles, get_fluxnet_version_no)
 
 #Retrieve site codes
-site_codes <- sapply(infiles, get_fluxnet_site_code)
+site_codes <- sapply(infiles, get_path_site_code)
 
 
 ###############################
