@@ -40,10 +40,13 @@ in the FLUXNET2015 release. Any missing time steps are replaced with the corresp
 ERAInterim estimates.
 
 Statistical:
+Met variables gapfilled with a combination of linear interpolation (for short gaps) and
+copyfill (for longer gaps). Air pressure and incoming longwave radiation are synthesised
+from air temperature, elevation and relative humidity.
 
-
-
-
+Flux variables gapfilled using a combination of linear interpolation (for short gaps) and
+and a linear regression against met variables (incoming shortwave, and air temperature and
+relative humidity, if available.). If regfill is set to NA, copyfill is used instead.
 
 author: Anna Ukkola UNSW 2017.
 Main function to convert Fluxnet2015 CSV-files to NetCDF
