@@ -236,7 +236,7 @@ convert_LaThuile <- function(infiles, fair_usage=NA, fair_usage_vec=NA,
     
   } else {
     
-    warning("Not using Fair Use policy to extract years")
+    warning("Not using Fair Use policy to extract site years")
     
     #Find years that are fair use and have files for
     years <- as.numeric(all_years)
