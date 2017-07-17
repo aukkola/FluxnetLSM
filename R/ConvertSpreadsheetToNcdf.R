@@ -108,7 +108,13 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   #semicolon separator and this leads to incorrect table headers)
   
   if(conv_opts$datasetname=="LaThuile"){
-    var_file <- system.file("data","Output_variables_LaThuile.csv", package="FluxnetLSM")
+    var_file     <- system.file("data","Output_variables_LaThuile.csv", package="FluxnetLSM")
+    
+    #Fair use information
+    fair_use_file          <- system.file("data","LaThuile_site_policy.csv", package="FluxnetLSM")
+    fair_use_vec           <- read.csv(fair_use_file, header=TRUE, check.names=FALSE)[site==site_code,]
+    conv_opts$fair_use_vec <- fair_use_vec[fair_use_vec$site==site_code,]
+    
   } else {
     if(conv_opts$flx2015_version=="SUBSET"){
       var_file <- system.file("data","Output_variables_FLUXNET2015_SUBSET.csv", package="FluxnetLSM")
