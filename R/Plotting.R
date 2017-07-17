@@ -112,7 +112,7 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
       }
       
       par(mai=c(0.6,0.7,0.7,0.2))
-      par(omi=c(0.5,0.3,0.2,0.1))
+      par(omi=c(0.8,0.5,0.2,0.1))
       par(mfrow=c(ceiling(sqrt(no_vars)), ceiling(sqrt(no_vars))))
       
       #Plot
@@ -147,7 +147,7 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
       }
       
       par(mai=c(0.6,0.7,0.7,0.2))
-      par(omi=c(0.5,0.3,0.2,0.1))
+      par(omi=c(0.8,0.5,0.2,0.1))
       par(mfrow=c(ceiling(sqrt(no_vars)), ceiling(sqrt(no_vars))))
       
       #Plot
@@ -198,7 +198,7 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
       }
       
       par(mai=c(0.6,0.6,0.4,0.2))
-      par(omi=c(0.5,0.3,0.2,0.1))
+      par(omi=c(0.8,0.5,0.2,0.1))
       par(mfrow=c(ceiling(no_vars/2), 2))
       
 
@@ -234,7 +234,7 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
                    varname=data_vars[n],
                    ytext=paste(data_vars[n], " (", data_units[n], ")", sep=""), 
                    legendtext=data_vars[n],
-                   plotcex=no_vars, timing=timing, 
+                   plotcex=no_vars/2 + 1 , timing=timing, 
                    smoothed = FALSE, winsize = 1, 
                    plotcolours="blue", 
                    vqcdata = as.matrix(var_qc),
