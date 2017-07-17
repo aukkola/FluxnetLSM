@@ -107,7 +107,7 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
           width=no_vars*5)
       
       par(mai=c(0.6,0.7,0.7,0.2))
-      par(omi=c(0.4,0.2,0.2,0.1))
+      par(omi=c(0.5,0.3,0.2,0.1))
       par(mfrow=c(ceiling(sqrt(no_vars)), ceiling(sqrt(no_vars))))
       
       #Plot
@@ -138,7 +138,7 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
           width=no_vars*10)
       
       par(mai=c(0.6,0.7,0.7,0.2))
-      par(omi=c(0.2,0.2,0.2,0.1))
+      par(omi=c(0.5,0.3,0.2,0.1))
       par(mfrow=c(ceiling(sqrt(no_vars)), ceiling(sqrt(no_vars))))
       
       #Plot
@@ -185,7 +185,7 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
       pdf(paste(outfile, "Timeseries.pdf", sep=""), height=no_vars*2.2*5, width=no_vars*1.4*5)
       
       par(mai=c(0.6,0.6,0.4,0.2))
-      par(omi=c(0.2,0.2,0.2,0.1))
+      par(omi=c(0.5,0.3,0.2,0.1))
       par(mfrow=c(ceiling(no_vars/2), 2))
       
 
@@ -221,7 +221,7 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
                    varname=data_vars[n],
                    ytext=paste(data_vars[n], " (", data_units[n], ")", sep=""), 
                    legendtext=data_vars[n],
-                   plotcex=1.5, timing=timing, 
+                   plotcex=2.5, timing=timing, 
                    smoothed = FALSE, winsize = 1, 
                    plotcolours="blue", 
                    vqcdata = as.matrix(var_qc),
