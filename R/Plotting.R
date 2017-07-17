@@ -192,7 +192,7 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
 
       #Initialise file
       if(no_vars > 3){
-        pdf(paste(outfile, "Timeseries.pdf", sep=""), height=no_vars*2.2*5, width=no_vars*1.4*5)
+        pdf(paste(outfile, "Timeseries.pdf", sep=""), height=no_vars*2.2*2.5, width=no_vars*1.4*2.5)
       } else {
         pdf(paste(outfile, "Timeseries.pdf", sep=""), height=no_vars*2.2, width=no_vars*1.4)        
       }
@@ -234,7 +234,7 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
                    varname=data_vars[n],
                    ytext=paste(data_vars[n], " (", data_units[n], ")", sep=""), 
                    legendtext=data_vars[n],
-                   plotcex=1.5, timing=timing, 
+                   plotcex=no_vars, timing=timing, 
                    smoothed = FALSE, winsize = 1, 
                    plotcolours="blue", 
                    vqcdata = as.matrix(var_qc),
@@ -620,10 +620,10 @@ AnnualCycle <- function(obslabel,acdata,varname,ytext,legendtext,
   }
   axis(1,at=c(2,4,6,8,10,12),labels=c('2','4','6','8','10','12'),cex.axis=1.3)
   if(modlabel=='no'){ # i.e. an obs analysis
-    title(paste('Average monthly ',varname[1],':   Obs - ',obslabel,
+    title(paste('Average monthly ',varname[1],#':   Obs - ',obslabel,
                 sep=''),cex.main=1.1) # add title
   }else{
-    title(paste('Average monthly ',varname[1],':   Obs - ',obslabel,'   Model - ',
+    title(paste('Average monthly ',varname[1],#':   Obs - ',obslabel,'   Model - ',
                 modlabel,sep=''),cex.main=1.1) # add title
   }
   #Print percentage of data missing if na.rm=TRUE and some data missing
