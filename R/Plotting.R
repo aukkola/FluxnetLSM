@@ -456,7 +456,7 @@ DiurnalCycle <- function(obslabel,dcdata,varname,ytext,legendtext,
         ypos = c() # y positions of items to placed
         repeat{
           if(! any((avday[k,0:tstepinday/5,]>(yaxmin+(npos-posctr)*(yaxmax-yaxmin)/npos)) &
-                     (avday[k,0:tstepinday/5,]<(yaxmin+(npos-posctr + 1)*(yaxmax-yaxmin)/npos)))){
+                     (avday[k,0:tstepinday/5,]<(yaxmin+(npos-posctr + 1)*(yaxmax-yaxmin)/npos)), na.rm=TRUE)){
             # if not any data in this interval
             placeditemctr = placeditemctr + 1 # i.e. we've just placed something
             ypos[placeditemctr] = yaxmin+((npos-posctr+0.7)/npos)*(yaxmax-yaxmin)
