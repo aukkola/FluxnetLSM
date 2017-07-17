@@ -1,4 +1,6 @@
-#' Example data conversion for multiple sites.
+#' Example data conversion for multiple sites using FLUXNET2015.
+#'
+#' See LaThuile/example_conversion_multiple_sites.R for the corresponding La Thuile example.
 #'
 #' Converts useful variables from a FLUXNET2015 spreatsheet format into two
 #' netcdf files, one for fluxes, and one for met forcings.
