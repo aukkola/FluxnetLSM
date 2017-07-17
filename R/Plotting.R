@@ -580,15 +580,15 @@ AnnualCycle <- function(obslabel,acdata,varname,ytext,legendtext,
   #If all missing, plot empty
   if(all(is.na(data_monthly[,1]))){
     plot(xloc,xloc,type="n",xaxt="n",xlab='Month',ylab=ytext,yaxt="n",
-         cex.lab=1.2,cex.axis=1.3,mgp = c(2.5,0.8,0))
+         cex.lab=1.2,cex.axis=1.3)#,mgp = c(2.5,0.8,0))
     mtext(side=3, "All values missing", col="red", line=-4)
   } else{
     # Plot model output result:
     yaxmin=min(data_monthly,na.rm=na.rm) # y axis minimum in plot
     yaxmax=max(data_monthly,na.rm=na.rm)+0.18*(max(data_monthly,na.rm=na.rm)-yaxmin) # y axis maximum in plot
     plot(xloc,data_monthly[,1],type="l",xaxt="n",xlab='Month',ylab=ytext,
-         lwd=3,col=plotcolours[1],ylim=c(yaxmin,yaxmax),cex.lab=1.2,cex.axis=1.3,
-         mgp = c(2.5,0.8,0))
+         lwd=3,col=plotcolours[1],ylim=c(yaxmin,yaxmax),cex.lab=1.2,cex.axis=1.3)#,
+         #mgp = c(2.5,0.8,0))
     # Add other curves:
     if(ncurves>1){
       pscore = c()
