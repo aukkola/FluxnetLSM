@@ -80,12 +80,12 @@ get_fluxnet_version_no <- function(file) {
 get_path_site_code <- function(path) {
   #assumes a FLUXNET2015 file, e.g FLX_US-Ha1_FLUXNET2015_FULLSET_HR_1991-2012_1-3.csv
   filename  <- basename(path)
-  if (substring(filename, 1, nchar("FLX")) == "FLX"){     #better implementation but only for R>3.3: startsWith(filename, "FLX_")) {
+  if (substring(filename[1], 1, nchar("FLX")) == "FLX"){     #better implementation but only for R>3.3: startsWith(filename, "FLX_")) {
     site_code <- substr(filename, start = 5, stop = 10)
   } else {
     site_code <- substr(filename, start=1, stop = 6)
   }
-  if (!grepl("^[A-Z]{2}-[A-Za-z0-9]{3}$", site_code)) {
+  if (!grepl("^[A-Z]{2}-[A-Za-z0-9]{3}$", site_code[1])) {
     stop("Site code not found in file name")
   }
 
