@@ -103,8 +103,13 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
     if(analysis_type[k]=="annual"){
       
       #Initialise file
-      pdf(paste(outfile, "AnnualCycle.pdf", sep=""), height=no_vars*5,
-          width=no_vars*5)
+      if(no_vars > 3){
+         pdf(paste(outfile, "AnnualCycle.pdf", sep=""), height=no_vars*5,
+            width=no_vars*5)
+      } else {
+         pdf(paste(outfile, "AnnualCycle.pdf", sep=""), height=no_vars,
+            width=no_vars)
+      }
       
       par(mai=c(0.6,0.7,0.7,0.2))
       par(omi=c(0.5,0.3,0.2,0.1))
@@ -132,10 +137,14 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
     ###################
     } else if(analysis_type[k]=="diurnal"){
       
-      
       #Initialise file
-      pdf(paste(outfile, "DiurnalCycle.pdf", sep=""), height=no_vars*10,
-          width=no_vars*10)
+      if(no_vars > 3){
+        pdf(paste(outfile, "DiurnalCycle.pdf", sep=""), height=no_vars*10,
+            width=no_vars*10)
+      } else {
+        pdf(paste(outfile, "DiurnalCycle.pdf", sep=""), height=no_vars,
+            width=no_vars)
+      }
       
       par(mai=c(0.6,0.7,0.7,0.2))
       par(omi=c(0.5,0.3,0.2,0.1))
@@ -182,7 +191,11 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
     } else if(analysis_type[k]=="timeseries"){
 
       #Initialise file
-      pdf(paste(outfile, "Timeseries.pdf", sep=""), height=no_vars*2.2*5, width=no_vars*1.4*5)
+      if(no_vars > 3){
+        pdf(paste(outfile, "Timeseries.pdf", sep=""), height=no_vars*2.2*5, width=no_vars*1.4*5)
+      } else {
+        pdf(paste(outfile, "Timeseries.pdf", sep=""), height=no_vars*2.2, width=no_vars*1.4)        
+      }
       
       par(mai=c(0.6,0.6,0.4,0.2))
       par(omi=c(0.5,0.3,0.2,0.1))
@@ -221,7 +234,7 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
                    varname=data_vars[n],
                    ytext=paste(data_vars[n], " (", data_units[n], ")", sep=""), 
                    legendtext=data_vars[n],
-                   plotcex=2.5, timing=timing, 
+                   plotcex=1.5, timing=timing, 
                    smoothed = FALSE, winsize = 1, 
                    plotcolours="blue", 
                    vqcdata = as.matrix(var_qc),
