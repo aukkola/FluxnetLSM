@@ -16,16 +16,16 @@ e.g. "FULLSET/FLX_AU-How_FLUXNET2015_FULLSET_HH_2001-2014_1-3.csv".
 La Thuile data is expected to be in the format sitecode.year.xxxx.csv,
 e.g. "AU-How.2001.synth.hourly.allvars.csv".}
 
+\item{era_file}{ERA-Interim input file (needed if using ERAinterim to gapfill met variables)
+e.g. "FULLSET/FLX_AU-How_FLUXNET2015_ERAI_HH_1989-2014_1-3.csv"}
+
 \item{out_path}{output path e.g. "./FLUXNET2016_processing/"}
 
 \item{conv_opts}{options for the conversion.
 See get\code{\link{get_default_conversion_options}}.}
 
 \item{plot}{Should annual, diurnal and/or 14-day running mean plots be produced?
-Set to NA if not required.}
-
-\item{era_file:ERA}{input file (needed if using ERAinterim to gapfill met variables)
-e.g. "FULLSET/FLX_AU-How_FLUXNET2015_ERAI_HH_1989-2014_1-3.csv"}
+       Set to NA if not required.}
 }
 \description{
 Converts data from a FLUXNET2015 formatted spreadsheet to
