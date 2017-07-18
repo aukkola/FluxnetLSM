@@ -16,7 +16,7 @@ RH,%,numeric,RH,%,Near surface relative humidity,relative_humidty,0,100,FALSE,FA
 RH,%,numeric,Qair,kg/kg,Near surface specific humidity,specific_humidity,0,0.1,FALSE,FALSE,Met,VPD_ERA,mean
 NETRAD,W/m2,numeric,Rnet,W/m2,Net absorbed radiation,surface_net_downward_radiative_flux,-1000,1360,FALSE,TRUE,Eval,NA,mean
 NETRAD_QC,-,integer,Rnet_qc,-,Rnet quality control flag,NULL,0,5,FALSE,FALSE,Eval,NA,NA
-CO2_F_MDS,umolCO2/mol,numeric,CO2air,ppm,Near surface CO2 concentration,mole_fraction_of_carbon_dioxide_in_air,200,600,FALSE,FALSE,Eval,NA,mean
+CO2_F_MDS,umolCO2/mol,numeric,CO2air,ppm,Near surface CO2 concentration,mole_fraction_of_carbon_dioxide_in_air,200,900,FALSE,FALSE,Eval,NA,mean
 CO2_F_MDS_QC,-,integer,CO2air_qc,-,CO2air quality control flag,NULL,0,5,FALSE,FALSE,Eval,NA,NA
 G_F_MDS,W/m2,numeric,Qg,W/m2,Ground heat flux,upward_heat_flux_at_ground_level_in_soil,-1000,1000,FALSE,FALSE,Eval,NA,mean
 G_F_MDS_QC,-,numeric,Qg_qc,-,Qg quality control flag,NULL,0,5,FALSE,FALSE,Eval,NA,NA
@@ -34,6 +34,3 @@ GPP_DT_VUT_REF,umol/m2/s,numeric,GPP_DT,umol/m2/s,"Gross primary productivity of
 GPP_DT_VUT_SE,umol/m2/s,numeric,GPP_DT_se,umol/m2/s,"Gross primary productivity of CO2 standard error (variable ustar, daytime partitioning)",NULL,-200,200,FALSE,FALSE,Eval,NA,mean
 GPP_NT_VUT_REF,umol/m2/s,numeric,GPP,umol/m2/s,"Gross primary productivity of CO2 (variable ustar, nighttime partitioning)",gross_primary_productivity_of_biomass_expressed_as_carbon,-200,200,FALSE,FALSE,Eval,NA,mean
 GPP_NT_VUT_SE,umol/m2/s,numeric,GPP_se,umol/m2/s,"Gross primary productivity of CO2 standard error (variable ustar, nighttime partitioning)",NULL,-200,200,FALSE,FALSE,Eval,NA,mean
-
-
-
