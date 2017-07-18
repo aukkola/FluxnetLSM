@@ -24,3 +24,4 @@ NEE_f_unc,umol/m2/s,numeric,NEE_uc,umol/m2/s,"Net ecosystem exchange of CO2 unce
 GPP_f,umol/m2/s,numeric,GPP,umol/m2/s,Gross primary productivity of CO2,gross_primary_productivity_of_biomass_expressed_as_carbon,-200,200,FALSE,FALSE,Eval,NA,mean
 
 
+
