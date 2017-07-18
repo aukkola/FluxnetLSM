@@ -901,7 +901,7 @@ Timeseries <- function(obslabel,tsdata,varname,ytext,legendtext,
       xxlab[(2*l)]=paste('1 Jul',substr(as.character(timing$syear+l-1),3,4))
     }
     title(paste(obslabel,varname[1]),cex.main=plotcex)
-    axis(1,at=xxat,labels=xxlab,cex.axis=plotcex,mgp = c(2.3,plot.cex*0.7,0))
+    axis(1,at=xxat,labels=xxlab,cex.axis=plotcex,mgp = c(2.3,plotcex*0.7,0))
     result = list(err=FALSE,errtext = errtext,metrics=metrics)
     return(result)
   }
