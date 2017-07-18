@@ -116,7 +116,7 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
       par(mfrow=c(ceiling(sqrt(no_vars)), ceiling(sqrt(no_vars))))
       
       #Plot
-      for(n in 1){#:length(data)){
+      for(n in 1:length(data)){
         
         AnnualCycle(obslabel="", acdata=as.matrix(data[[n]]),
                     varname=data_vars[n], 
