@@ -361,7 +361,6 @@ regfill_flux <- function(ydata, traindata, tstepsize, regfill, varname,
     if(length(missing) > 0){
       
       consec <- seqToIntervals(missing)
-      consec <- matrix(consec, ncol=2) #convert to matrix
       
       #One or several gaps too large, return warning
       if(any(consec[,2] - consec[,1] + 1 > max_gap)){
@@ -379,6 +378,8 @@ regfill_flux <- function(ydata, traindata, tstepsize, regfill, varname,
       if(length(rm_ind) > 0) { 
         consec <- consec[-rm_ind,] 
       }
+      
+      consec <- matrix(consec, ncol=2) #convert to matrix
       
       #Create sequences
       seq    <- apply(consec, MARGIN=1, function(x) seq(from=x[1], to=x[2]))
