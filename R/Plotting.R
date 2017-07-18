@@ -103,16 +103,12 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
     if(analysis_type[k]=="annual"){
       
       #Initialise file
-      if(no_vars > 3){
-         pdf(paste(outfile, "AnnualCycle.pdf", sep=""), height=no_vars*5,
+      pdf(paste(outfile, "AnnualCycle.pdf", sep=""), height=no_vars*5,
             width=no_vars*5)
-      } else {
-         pdf(paste(outfile, "AnnualCycle.pdf", sep=""), height=no_vars,
-            width=no_vars)
-      }
+
       
-      par(mai=c(0.6+(no_vars/10),0.7+(no_vars/5),0.7,0.2))
-      par(omi=c(0.8,0.5,0.2,0.1))
+      par(mai=c(0.6+(no_vars/7),1+(no_vars/15),0.7,0.2))
+      par(omi=c(0.8+(no_vars/10),0.5+(no_vars/10),0.2+(no_vars/10),0.1+(no_vars/10)))
       par(mfrow=c(ceiling(sqrt(no_vars)), ceiling(sqrt(no_vars))))
       
       #Plot
