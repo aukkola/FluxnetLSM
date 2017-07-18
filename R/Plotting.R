@@ -136,13 +136,9 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
     } else if(analysis_type[k]=="diurnal"){
       
       #Initialise file
-      if(no_vars > 3){
-        pdf(paste(outfile, "DiurnalCycle.pdf", sep=""), height=no_vars*10,
-            width=no_vars*10)
-      } else {
-        pdf(paste(outfile, "DiurnalCycle.pdf", sep=""), height=no_vars,
-            width=no_vars)
-      }
+      #Each variable is plotted as a separate figure so dimensions handled differently
+      pdf(paste(outfile, "DiurnalCycle.pdf", sep=""), height=10,
+          width=10)
       
       par(mai=c(0.6,0.7,0.7,0.2))
       par(omi=c(0.8,0.5,0.2,0.1))
@@ -175,7 +171,7 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
                      legendtext=data_vars[n], timestepsize=timestepsize,
                      whole=timing$whole, plotcolours="blue",
                      #vqcdata=as.matrix(var_qc),
-                     na.rm=TRUE)  
+                     plot.cex=1, na.rm=TRUE)  
       }
       
       #Close file
@@ -273,7 +269,7 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
 DiurnalCycle <- function(obslabel,dcdata,varname,ytext,legendtext,
                          timestepsize,whole,plotcolours,modlabel='no',
                          vqcdata=matrix(-1,nrow=1,ncol=1),
-                         na.rm=FALSE){
+                         plot.cex, na.rm=FALSE){
   errtext = 'ok'
   metrics = list()
   if(!whole){ # we need a whole number of years for this to run
@@ -434,7 +430,7 @@ DiurnalCycle <- function(obslabel,dcdata,varname,ytext,legendtext,
     #All missing: plot empty
     if(all(is.na(avday[k,,1]))){
       plot(xloc, xloc, type="n",xaxt="n",xlab=paste(labels[k],'hour of day'),
-           ylab=ytext,yaxt="n")
+           ylab=ytext,yaxt="n", cex.axis=plot.cex, cex.lab=plot.cex)
       mtext(side=3, "All values missing", col="red", line=-4)
     #Else plot
     }else{
@@ -442,7 +438,8 @@ DiurnalCycle <- function(obslabel,dcdata,varname,ytext,legendtext,
       yaxmax=max(avday,na.rm=na.rm)+(max(avday,na.rm=na.rm)-yaxmin)*0.15 # y axis maximum in plot
       # Plot obs data result:
       plot(xloc,avday[k,,1],type="l",xaxt="n",xlab=paste(labels[k],'hour of day'),
-           ylab=ytext,lwd=4,col=plotcolours[1],ylim=c(yaxmin,yaxmax))
+           ylab=ytext,lwd=4,col=plotcolours[1],ylim=c(yaxmin,yaxmax), 
+           cex.axis=plot.cex, cex.lab=plot.cex)
       # Then add other curves, if any:
       if(ncurves>1){
         pscore = matrix(NA,4,(ncurves-1))
@@ -482,7 +479,7 @@ DiurnalCycle <- function(obslabel,dcdata,varname,ytext,legendtext,
           posctr = posctr + 1
         }
         legend(-1,ypos[2],legendtext[1:ncurves],lty=1,col=plotcolours[1:ncurves],
-               lwd=3,bty="n",yjust=0.5)
+               lwd=3,bty="n",yjust=0.5, cex=plot.cex)
         if(ncurves>1){
           scorestring = paste(signif(pscoretotal,digits=2),collapse=', ')
           removestring = paste(signif(removefractotal*100,digits=2),collapse=', ')
@@ -517,7 +514,8 @@ DiurnalCycle <- function(obslabel,dcdata,varname,ytext,legendtext,
       }
   }#all NA
     axis(1,at=c(0,6*tstepinday/24,12*tstepinday/24,18*tstepinday/24,
-                23*tstepinday/24),labels=c('0','6','12','18','23'))
+                23*tstepinday/24),labels=c('0','6','12','18','23'), 
+                cex.axis=plot.cex, cex.lab=plot.cex)
     title(alltitle) # add title
   } # each plot / season
   result=list(err=FALSE,errtext=errtext,metrics=metrics)
