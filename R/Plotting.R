@@ -111,12 +111,12 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
             width=no_vars)
       }
       
-      par(mai=c(0.6,0.7,0.7,0.2))
+      par(mai=c(0.6+(no_vars/10),0.7+(no_vars/5),0.7,0.2))
       par(omi=c(0.8,0.5,0.2,0.1))
       par(mfrow=c(ceiling(sqrt(no_vars)), ceiling(sqrt(no_vars))))
       
       #Plot
-      for(n in 1:length(data)){
+      for(n in 1){#:length(data)){
         
         AnnualCycle(obslabel="", acdata=as.matrix(data[[n]]),
                     varname=data_vars[n], 
@@ -124,11 +124,13 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
                     legendtext=data_vars[n], 
                     timestepsize=timestepsize,
                     whole=timing$whole, plotcolours="blue",
-                    na.rm=TRUE)  
+                    plot.cex=no_vars/2, na.rm=TRUE)  
       }
   
       #Close file
       dev.off()
+      
+      
       
       
       
@@ -530,8 +532,8 @@ DiurnalCycle <- function(obslabel,dcdata,varname,ytext,legendtext,
 
 #' Plots an annual cycle
 #' @export
-AnnualCycle <- function(obslabel,acdata,varname,ytext,legendtext,
-                        timestepsize,whole,plotcolours,modlabel='no',na.rm=FALSE){
+AnnualCycle <- function(obslabel,acdata,varname,ytext,legendtext,timestepsize,
+                        whole,plotcolours,modlabel='no',plot.cex,na.rm=FALSE){
   ######
   errtext = 'ok'
   metrics = list()
@@ -580,15 +582,15 @@ AnnualCycle <- function(obslabel,acdata,varname,ytext,legendtext,
   #If all missing, plot empty
   if(all(is.na(data_monthly[,1]))){
     plot(xloc,xloc,type="n",xaxt="n",xlab='Month',ylab=ytext,yaxt="n",
-         cex.lab=1.2,cex.axis=1.3,mgp = c(2.5,0.8,0))
-    mtext(side=3, "All values missing", col="red", line=-4)
+         cex,cex.axis=plot.cex*1.08,mgp = c(2.5+plot.cex*0.9,0.8,0))
+    mtext(side=3, "All values missing", col="red", line=-4, cex=plot.cex)
   } else{
     # Plot model output result:
     yaxmin=min(data_monthly,na.rm=na.rm) # y axis minimum in plot
     yaxmax=max(data_monthly,na.rm=na.rm)+0.18*(max(data_monthly,na.rm=na.rm)-yaxmin) # y axis maximum in plot
     plot(xloc,data_monthly[,1],type="l",xaxt="n",xlab='Month',ylab=ytext,
-         lwd=3,col=plotcolours[1],ylim=c(yaxmin,yaxmax),cex.lab=1.2,cex.axis=1.3,
-         mgp = c(2.5,0.8,0))
+         lwd=3,col=plotcolours[1],ylim=c(yaxmin,yaxmax),cex.lab=plot.cex,cex.axis=plot.cex*1.08,
+         mgp = c(2.5+plot.cex*0.9,0.8,0))
     # Add other curves:
     if(ncurves>1){
       pscore = c()
@@ -600,11 +602,11 @@ AnnualCycle <- function(obslabel,acdata,varname,ytext,legendtext,
       }  
     }
     legend(1,max(data_monthly)+0.15*(max(data_monthly)-yaxmin),legendtext[1:ncurves],
-           lty=1,col=plotcolours[1:ncurves],lwd=3,bty="n",yjust=0.8)
+           lty=1,col=plotcolours[1:ncurves],lwd=3,bty="n",yjust=0.8, cex=plot.cex)
     if(ncurves>1){
       scorestring = paste(signif(pscore,digits=3),collapse=', ')
       scoretext = paste('Score: ',scorestring,'\n','(NME)',sep='')
-      text(8,max(data_monthly)+0.1*(max(data_monthly)-yaxmin),scoretext,pos=4,offset=1)
+      text(8,max(data_monthly)+0.1*(max(data_monthly)-yaxmin),scoretext,pos=4,offset=1, cex=plot.cex)
       if(ncurves==2){ # model only
         metrics[[1]] = list(name='NME',model_value=pscore[1])  
       }else if(ncurves==3){
@@ -618,21 +620,22 @@ AnnualCycle <- function(obslabel,acdata,varname,ytext,legendtext,
       }
     }
   }
-  axis(1,at=c(2,4,6,8,10,12),labels=c('2','4','6','8','10','12'),cex.axis=1.3)
+  axis(1,at=c(2,4,6,8,10,12),labels=c('2','4','6','8','10','12'),cex.axis=plot.cex,
+       mgp = c(2.3,plot.cex*0.7,0))
   if(modlabel=='no'){ # i.e. an obs analysis
     title(paste('Average monthly ',varname[1],#':   Obs - ',obslabel,
-                sep=''),cex.main=1.1) # add title
+                sep=''),cex.main=plot.cex) # add title
   }else{
     title(paste('Average monthly ',varname[1],#':   Obs - ',obslabel,'   Model - ',
-                modlabel,sep=''),cex.main=1.1) # add title
+                modlabel,sep=''),cex.main=plot.cex) # add title
   }
   #Print percentage of data missing if na.rm=TRUE and some data missing
   if(na.rm){
     perc_missing = round(sapply(1:ncol(acdata), function(x) #round
       sum(is.na(acdata[,x]))/length(acdata[,x])), digits=3)      
     if(!all(is.na(data_monthly[,1])) & any(perc_missing > 0)){
-      text(1,yaxmax, paste("(",paste(perc_missing,collapse=", "), ")% data missing", sep=""),
-           pos=4,offset=1, col="red")
+      text(1,yaxmax, paste(paste(perc_missing,collapse=","), "% data missing", sep=""),
+           pos=4,offset=1, col="red", cex=plot.cex)
     }
   }
   result=list(err=FALSE,errtext=errtext,metrics=metrics)
