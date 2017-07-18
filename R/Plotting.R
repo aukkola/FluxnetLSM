@@ -185,15 +185,16 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
     } else if(analysis_type[k]=="timeseries"){
 
       #Initialise file
-      if(no_vars > 3){
-        pdf(paste(outfile, "Timeseries.pdf", sep=""), height=no_vars*2.2*2.5, width=no_vars*1.4*2.5)
-      } else {
-        pdf(paste(outfile, "Timeseries.pdf", sep=""), height=no_vars*2.2, width=no_vars*1.4)        
-      }
+      pdf(paste(outfile, "Timeseries.pdf", sep=""), height=no_vars*2.2*4, width=no_vars*1.4*7.5)
       
-      par(mai=c(0.6,0.6,0.4,0.2))
-      par(omi=c(0.8,0.5,0.2,0.1))
-      par(mfrow=c(ceiling(no_vars/2), 2))
+      par(mai=c(0.6+(no_vars/7),1+(no_vars/15),0.7,0.2))
+      par(omi=c(0.8+(no_vars/10),0.5+(no_vars/10),0.2+(no_vars/10),0.1+(no_vars/10)))
+      
+      if(no_vars==1){
+        par(mfrow=c(ceiling(no_vars/2), 1))
+      } else {
+        par(mfrow=c(ceiling(no_vars/2), 2))
+      }
       
 
       #Plot
@@ -695,12 +696,12 @@ Timeseries <- function(obslabel,tsdata,varname,ytext,legendtext,
     # Draw plot:
     #All missing, plot empty
     if(all(is.na(data_smooth[,1]))){
-      plot(xloc,xloc,type="n",ylab=ytext, xaxt='n',cex.lab=plotcex,cex.axis=plotcex,xlab='',mgp = c(2.5,1,0))
+      plot(xloc,xloc,type="n",ylab=ytext, xaxt='n',cex.lab=plotcex,cex.axis=plotcex,xlab='',mgp = c(2.5+plotcex*0.9,0.8,0))
       mtext(side=3, "All values missing", col="red", line=-4)
     } else {
       plot(xloc,data_smooth[,1],type="l",ylab=ytext,lwd=3,
            col=plotcolours[1],ylim=c((ymin),(ymin + (ymax-ymin)*1.2)),
-           xaxt='n',cex.lab=plotcex,cex.axis=plotcex,xlab='',mgp = c(2.5,1,0))
+           xaxt='n',cex.lab=plotcex,cex.axis=plotcex,xlab='',mgp = c(2.5+plotcex*0.9,0.8,0))
     }
     # Calculate NME scores:
     if(ncurves>1){
@@ -787,7 +788,7 @@ Timeseries <- function(obslabel,tsdata,varname,ytext,legendtext,
       if(any(perc_missing > 0)){
         text(xmin-(xmax-xmin)*0.03,y=(ymin + (ymax-ymin)*(y_adj+0.24)),
              paste("(",paste(perc_missing,collapse=", "), ")% data missing", sep=""),
-             pos=4,offset=1, col="red")
+             pos=4,offset=1, col="red", cex=plotcex)
       }
     }
     # Calculate QC time series information, if it exists:
@@ -817,7 +818,7 @@ Timeseries <- function(obslabel,tsdata,varname,ytext,legendtext,
     if(all(is.na(tsdata[,1]))){
       plot(xloc,xloc,type="n",ylab=ytext,lwd=3,
            yaxt="n", xaxt='n',cex.lab=plotcex,cex.axis=plotcex,xlab='')
-      mtext(side=3, "All values missing", col="red", line=-4)
+      mtext(side=3, "All values missing", col="red", line=-4,mgp = c(2.5+plotcex*0.9,0.8,0))
     #Else plot
     } else {
       # this code not functioning but kept for future modification:
@@ -837,7 +838,7 @@ Timeseries <- function(obslabel,tsdata,varname,ytext,legendtext,
       
       plot(xloc,tsdata[,1],type="l",ylab=ytext,lwd=3,
            col=plotcolours[1],ylim=c(ymin,(ymin + (ymax-ymin)*1.3)),
-           xaxt='n',cex.lab=plotcex,cex.axis=plotcex,xlab='')
+           xaxt='n',cex.lab=plotcex,cex.axis=plotcex,xlab='',mgp = c(2.5+plotcex*0.9,0.8,0))
       # Add smoothed curve over whole timeseries:
       data_days=matrix(tsdata[,1],ncol=tstepinday,byrow=TRUE) 
       data_smooth = c()
@@ -875,7 +876,7 @@ Timeseries <- function(obslabel,tsdata,varname,ytext,legendtext,
         if(any(perc_missing > 0)){
           text((xmax-xmin)*0.5,y=(ymin + (ymax-ymin)*(y_adj+0.42)),
                paste("(",paste(perc_missing,collapse=", "), ")% data missing", sep=""),
-               pos=1,offset=1, col="red")
+               pos=1,offset=1, col="red",cex=plotcex)
         }
         # Calculate QC time series information, if it exists:
         if(vqcdata[1,1] != -1){
@@ -900,7 +901,7 @@ Timeseries <- function(obslabel,tsdata,varname,ytext,legendtext,
       xxlab[(2*l)]=paste('1 Jul',substr(as.character(timing$syear+l-1),3,4))
     }
     title(paste(obslabel,varname[1]),cex.main=plotcex)
-    axis(1,at=xxat,labels=xxlab,cex.axis=plotcex)
+    axis(1,at=xxat,labels=xxlab,cex.axis=plotcex,mgp = c(2.3,plot.cex*0.7,0))
     result = list(err=FALSE,errtext = errtext,metrics=metrics)
     return(result)
   }
