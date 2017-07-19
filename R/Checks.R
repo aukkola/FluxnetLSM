@@ -425,44 +425,59 @@ IsWholeYrs <- function(datain, gaps, site_log){
 
 #' Checks that data are within specified ranges
 #' @export
-CheckDataRanges <- function(datain, site_log){
-  
-  #Checks that variables are within acceptable ranges
-  # as set in the "variables" auxiliary file
-  
-  #Loop through variables
-  for(k in 1:length(datain$vars)){
-    
-    data <- datain$data[[k]]
-    
-    #If variable missing, skip (avoids warnings to be produced)
-    if(all(is.na(data))){
-      next
-    }
-    
-    #First mask out missing values so not included in
-    #determination of data range
-    data_range <- range(data, na.rm=TRUE)
-    
-    # Get acceptable ranges for variables:
-    valid_range <- datain$var_ranges[,k]
-    
-    
-    #Return error if variable outside specified range
-    if(data_range[1] < valid_range[1] | data_range[2] > valid_range[2]){
-      error <- paste("Variable outside expected ranges. Check variable ",
-                     datain$vars[k], "; data range is [", data_range[1], 
-                     ", ", data_range[2], "], valid range is [", 
-                     valid_range[1], ", ", valid_range[2],
-                     "]. Check data or change data range in variables auxiliary file",
-                     sep="")
-      stop_and_log(error, site_log)
-      return(site_log)
-    }
-    
-    
-    
-  } #variables
+CheckDataRanges <- function(datain, site_log, action="stop"){
+
+    #Checks that variables are within acceptable ranges
+    # as set in the "variables" auxiliary file
+
+    #Loop through variables
+    for (k in 1:length(datain$vars)){
+
+        data <- datain$data[[k]]
+
+        #If variable missing, skip (avoids warnings to be produced)
+        if (all(is.na(data))){
+            next
+        }
+
+        #First mask out missing values so not included in
+        #determination of data range
+        data_range <- range(data, na.rm=TRUE)
+
+        # Get acceptable ranges for variables:
+        valid_range <- datain$var_ranges[,k]
+
+
+        # Check if variable outside specified range
+        if (data_range[1] < valid_range[1] | data_range[2] > valid_range[2]){
+            warning_tpl <- paste("Variable outside expected ranges.",
+                                 "Check variable %s;",
+                                 "data range is [%f, %f], valid range is [%f, %f].",
+                                 "Check data or change data range in variables auxiliary file.\n")
+            error <- sprintf(fmt=warning_tpl,
+                             datain$vars[k],
+                             data_range[1], data_range[2],
+                             valid_range[1], valid_range[2]
+                             )
+
+            # And take action
+            if (action == "stop") {
+                stop_and_log(error, site_log)
+            } else if (action == "warn") {
+                warn_and_log(error, site_log)
+            } else if (action == "ignore") {
+                # Do nothing
+            } else if (action == "truncate") {
+                datain$data[[k]][datain$data[[k]] > valid_range[2]] <- valid_range[2]
+                datain$data[[k]][datain$data[[k]] < valid_range[1]] <- valid_range[1]
+            }
+
+            return(site_log)
+        }
+
+
+
+    } #variables
 } #function
 
 

@@ -369,7 +369,7 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   
   
   # Check that data are within acceptable ranges: 
-  CheckDataRanges(ConvertedData, site_log)
+  CheckDataRanges(ConvertedData, site_log, conv_opts$check_range_action)
   
   
   #Replace original data with converted data
@@ -583,7 +583,7 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   #Write log to file
   write_log(site_log)
   
-  return(cat("Site", site_code, "processed successfully. Refer to log file for details"))
+  return(cat("Site", site_code, "processed successfully. Refer to log file for details.\n"))
   
 } #function
 
@@ -630,6 +630,11 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
 #'        If gapfilling by copyfill is preferred, set regfill to NA.
 #' - lwdown_method: Method used to synthesize incoming longwave radiation.
 #'        One of "Abramowitz_2012" (default), "Swinbank_1963" or "Brutsaert_1975".
+#' - check_range_action: Action to take when input data falls outside of valid ranges
+#'        (as defined in data/Output_variables_*.csv).
+#'        One of "stop" (log error and stop processing, default),
+#'        "warn" (log error and continue), "ignore" (continue), or
+#'        "truncate" (set values outside the valid range to the range bounds).
 #' - include_all_eval: Should all evaluation values be included, regardless of data gaps?
 #'        If set to FALSE, any evaluation variables with missing or gap-filled values in
 #'        excess of the thresholds will be discarded.
@@ -659,6 +664,7 @@ get_default_conversion_options <- function() {
         copyfill = 10,
         regfill = 30,
         lwdown_method = "Abramowitz_2012",
+        check_range_action = "stop",
         include_all_eval = TRUE,
         aggregate = NA,
         model = NA
