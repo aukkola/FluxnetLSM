@@ -4,7 +4,7 @@
 \alias{get_site_metadata_CSV}
 \title{Tries to gather metadata from the included site CSV}
 \usage{
-get_site_metadata_CSV(metadata)
+get_site_metadata_CSV(metadata = NA)
 }
 \value{
 metadata list
