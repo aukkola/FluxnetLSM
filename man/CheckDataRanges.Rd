@@ -2,10 +2,12 @@
 % Please edit documentation in R/Checks.R
 \name{CheckDataRanges}
 \alias{CheckDataRanges}
-\title{Checks that data are within specified ranges}
+\title{Checks that data are within specified ranges
+as set in the "variables" auxiliary file}
 \usage{
 CheckDataRanges(datain, site_log, action = "stop")
 }
 \description{
 Checks that data are within specified ranges
+as set in the "variables" auxiliary file
 }

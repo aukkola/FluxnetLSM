@@ -424,18 +424,17 @@ IsWholeYrs <- function(datain, gaps, site_log){
 #-----------------------------------------------------------------------------
 
 #' Checks that data are within specified ranges
+#' as set in the "variables" auxiliary file
+#'
 #' @export
 CheckDataRanges <- function(datain, site_log, action="stop"){
 
-    #Checks that variables are within acceptable ranges
-    # as set in the "variables" auxiliary file
-
-    #Loop through variables
+    # Loop through variables
     for (k in 1:length(datain$vars)){
 
         data <- datain$data[[k]]
 
-        #If variable missing, skip (avoids warnings to be produced)
+        # If variable missing, skip (avoids warnings)
         if (all(is.na(data))){
             next
         }
@@ -476,13 +475,12 @@ CheckDataRanges <- function(datain, site_log, action="stop"){
                 datain$data[[k]][datain$data[[k]] < valid_range[1]] <- valid_range[1]
             }
 
-            return(site_log)
-        }
+        } # if bad data
 
+    } # variables
 
-
-    } #variables
-} #function
+    return(site_log)
+} # function
 
 
 #-----------------------------------------------------------------------------

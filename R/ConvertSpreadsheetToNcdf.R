@@ -369,7 +369,7 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   
   
   # Check that data are within acceptable ranges: 
-  CheckDataRanges(ConvertedData, site_log, conv_opts$check_range_action)
+  site_log <- CheckDataRanges(ConvertedData, site_log, conv_opts$check_range_action)
   
   
   #Replace original data with converted data
