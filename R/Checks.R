@@ -452,8 +452,8 @@ CheckDataRanges <- function(datain, site_log, action="stop"){
         if (data_range[1] < valid_range[1] | data_range[2] > valid_range[2]){
             warning_tpl <- paste("Variable outside expected ranges.",
                                  "Check variable %s;",
-                                 "data range is [%f, %f], valid range is [%f, %f].",
-                                 "Check data or change data range in variables auxiliary file.\n")
+                                 "data range is [%.1f, %.1f], valid range is [%.1f, %.1f].",
+                                 "Check data or change data range in variables auxiliary file.")
             error <- sprintf(fmt=warning_tpl,
                              datain$vars[k],
                              data_range[1], data_range[2],
@@ -462,12 +462,16 @@ CheckDataRanges <- function(datain, site_log, action="stop"){
 
             # And take action
             if (action == "stop") {
+                error <- paste(error, "Stopping.")
                 stop_and_log(error, site_log)
             } else if (action == "warn") {
+                error <- paste(error, "Continuing.")
                 warn_and_log(error, site_log)
             } else if (action == "ignore") {
                 # Do nothing
             } else if (action == "truncate") {
+                error <- paste(error, "Truncating.")
+                warn_and_log(error, site_log)
                 datain$data[[k]][datain$data[[k]] > valid_range[2]] <- valid_range[2]
                 datain$data[[k]][datain$data[[k]] < valid_range[1]] <- valid_range[1]
             }
