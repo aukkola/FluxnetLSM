@@ -466,12 +466,12 @@ CheckDataRanges <- function(datain, site_log, action="stop"){
                 stop_and_log(error, site_log)
             } else if (action == "warn") {
                 error <- paste(error, "Continuing.")
-                warn_and_log(error, site_log)
+                site_log <- warn_and_log(error, site_log)
             } else if (action == "ignore") {
                 # Do nothing
             } else if (action == "truncate") {
                 error <- paste(error, "Truncating.")
-                warn_and_log(error, site_log)
+                site_log <- warn_and_log(error, site_log)
                 datain$data[[k]][datain$data[[k]] > valid_range[2]] <- valid_range[2]
                 datain$data[[k]][datain$data[[k]] < valid_range[1]] <- valid_range[1]
             }
