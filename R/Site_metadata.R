@@ -140,28 +140,28 @@ site_csv_file <- system.file("data", "Site_metadata.csv", package = "FluxnetLSM"
 #' @export
 get_site_metadata_from_CSV <- function(metadata=NA) {
 
-    csv <- read.csv(site_csv_file, header = TRUE,
+    csv_data <- read.csv(site_csv_file, header = TRUE,
                     stringsAsFactors = FALSE)
 
     if (is.na(metadata)) {
         # get all existing metadata as a list of lists
-        message("Loading metadata for all sites from csv cache (", site_csv_file, ")")
-        metadata <- lapply(row.names(csv), function(row) {
-            as.list(csv[row, ])
+        message("Loading metadata for all sites from csv_data cache (", site_csv_file, ")")
+        metadata <- lapply(row.names(csv_data), function(row) {
+            as.list(csv_data[row, ])
         })
-        names(metadata) <- csv$SiteCode
+        names(metadata) <- csv_data$SiteCode
         return(metadata)
     }
 
     site_code <- get_site_code(metadata)
 
-    message("Loading metadata for ", site_code, " from csv cache (", site_csv_file, ")")
+    message("Loading metadata for ", site_code, " from csv_data cache (", site_csv_file, ")")
 
-    if (site_code %in% row.names(csv)) {
-        csv_row <- as.list(csv[site_code, ])
+    if (site_code %in% csv_data$SiteCode) {
+        csv_row <- as.list(csv_data[csv_data$SiteCode == site_code, ])
         metadata = update_metadata(metadata, csv_row)
     } else {
-        message("    ", site_code, " not found in CSV file")
+        message("    ", site_code, " not found in csv_data file")
     }
 
     return(metadata)
