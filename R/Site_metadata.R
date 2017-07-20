@@ -138,10 +138,10 @@ site_csv_file <- system.file("data", "Site_metadata.csv", package = "FluxnetLSM"
 #'
 #' @return metadata list
 #' @export
-get_site_metadata_CSV <- function(metadata=NA) {
+get_site_metadata_from_CSV <- function(metadata=NA) {
 
     csv <- read.csv(site_csv_file, header = TRUE,
-                    stringsAsFactors = FALSE, row.names = 1)
+                    stringsAsFactors = FALSE)
 
     if (is.na(metadata)) {
         # get all existing metadata as a list of lists
@@ -149,7 +149,7 @@ get_site_metadata_CSV <- function(metadata=NA) {
         metadata <- lapply(row.names(csv), function(row) {
             as.list(csv[row, ])
         })
-        names(metadata) <- row.names(csv)
+        names(metadata) <- csv$SiteCode
         return(metadata)
     }
 
@@ -179,15 +179,31 @@ save_metadata_to_csv <- function(metadata) {
 #' @export
 save_metadata_list_to_csv <- function(metadata_lists) {
     old_csv_data <- read.csv(site_csv_file, header = TRUE,
-                         stringsAsFactors = FALSE,
-                         row.names = 1)
+                         stringsAsFactors = FALSE)
 
     new_csv_data <- metadata_list_to_dataframe(metadata_lists)
 
-    csv_data <- merge(old_csv_data, new_csv_data, key="SiteCode", all=TRUE)
-    row.names(csv_data) <- csv_data$SiteCode
+    common_names <- intersect(names(old_csv_data), names(new_csv_data))
+    common_names <- common_names[common_names != "SiteCode"]
 
-    write.csv(csv_data, site_csv_file)
+    # Merge new and existing datasets, preferring new.
+    csv_data <- merge(new_csv_data, old_csv_data,
+                      all = TRUE, by = "SiteCode")
+    for (n in common_names) {
+        # Use old data only if new data is missing.
+        csv_data[[n]] <- ifelse(is.na(csv_data[[paste0(n, ".x")]]),
+                                csv_data[[paste0(n, ".y")]],
+                                csv_data[[paste0(n, ".x")]])
+        csv_data[[paste0(n, ".x")]] <- NULL
+        csv_data[[paste0(n, ".y")]] <- NULL
+    }
+
+    csv_data <- csv_data[order(csv_data$SiteCode), ]
+
+    # Fix new lines in Descriptions
+    csv_data$Description <- gsub("\\n", "\\\\n", csv_data$Description)
+
+    write.csv(csv_data, file = site_csv_file, row.names = FALSE)
 }
 
 
@@ -219,7 +235,7 @@ metadata_list_to_dataframe <- function(metadata_lists) {
 #' Reads all ORNL data into the CSV file
 #' @export
 update_csv_from_web <- function() {
-    csv_data <- get_site_metadata_CSV()
+    csv_data <- get_site_metadata_from_CSV()
 
     csv_site_codes <- names(csv_data)
 
@@ -525,7 +541,7 @@ get_site_metadata <- function(site_code, incl_processing=TRUE,
     metadata <- site_metadata_template(site_code)
 
     if (use_csv) {
-        metadata <- get_site_metadata_CSV(metadata)
+        metadata <- get_site_metadata_from_CSV(metadata)
     }
 
     if (any(check_missing(metadata))) {
