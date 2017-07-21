@@ -10,7 +10,7 @@ LW_IN_F_MDS_QC,-,integer,LWdown_qc,-,LWdown quality control flag,NULL,0,5,FALSE,
 VPD_F_MDS,hPa,numeric,VPD,hPa,Vapour pressure deficit,water_vapor_saturation_deficit_in_air,0,100,TRUE,FALSE,Met,VPD_ERA,mean
 VPD_F_MDS_QC,-,integer,VPD_qc,-,VPD quality control flag,NULL,0,5,FALSE,FALSE,Met,NA,NA
 PA,kPa,numeric,PSurf,Pa,Surface air pressure,air_pressure,50000,110000,FALSE,FALSE,Met,PA_ERA,mean
-P,mm,numeric,Precip,kg/m2/s,Precipitation rate,precipitation_flux,0,0.05,TRUE,FALSE,Met,P_ERA,sum
+P,mm,numeric,Rainf,kg/m2/s,Precipitation rate,precipitation_flux,0,0.05,TRUE,FALSE,Met,P_ERA,sum
 WS,m/s,numeric,Wind,m/s,Scalar windspeed,wind_speed,0,75,TRUE,FALSE,Met,WS_ERA,mean
 RH,%,numeric,RH,%,Near surface relative humidity,relative_humidty,0,100,FALSE,FALSE,Met,VPD_ERA,mean
 RH,%,numeric,Qair,kg/kg,Near surface specific humidity,specific_humidity,0,0.1,FALSE,FALSE,Met,VPD_ERA,mean

@@ -11,8 +11,8 @@ VPD_F,hPa,numeric,VPD,hPa,Vapour pressure deficit,water_vapor_saturation_deficit
 VPD_F_QC,-,integer,VPD_qc,-,VPD quality control flag,NULL,0,5,FALSE,FALSE,Met,NA,NA
 PA_F,kPa,numeric,PSurf,Pa,Surface air pressure,air_pressure,50000,110000,FALSE,FALSE,Met,PA_ERA,mean
 PA_F_QC,-,integer,PSurf_qc,-,PSurf quality control flag,NULL,0,5,FALSE,FALSE,Met,NA,NA
-P_F,mm,numeric,Precip,kg/m2/s,Precipitation rate,precipitation_flux,0,0.05,TRUE,FALSE,Met,P_ERA,sum
-P_F_QC,-,integer,Precip_qc,-,Precip quality control flag,NULL,0,5,FALSE,FALSE,Met,NA,NA
+P_F,mm,numeric,Rainf,kg/m2/s,Precipitation rate,precipitation_flux,0,0.05,TRUE,FALSE,Met,P_ERA,sum
+P_F_QC,-,integer,Rainf_qc,-,Precip quality control flag,NULL,0,5,FALSE,FALSE,Met,NA,NA
 WS_F,m/s,numeric,Wind,m/s,Scalar windspeed,wind_speed,0,75,TRUE,FALSE,Met,WS_ERA,mean
 WS_F_QC,-,integer,Wind_qc,-,Wind quality control flag,NULL,0,5,FALSE,FALSE,Met,NA,NA
 RH,%,numeric,RH,%,Near surface relative humidity,relative_humidty,0,100,FALSE,FALSE,Met,VPD_ERA,mean
@@ -36,6 +36,3 @@ NEE_VUT_REF_QC,-,integer,NEE_qc,-,NEE quality control flag,NULL,0,5,FALSE,FALSE,
 NEE_VUT_REF_RANDUNC,umol/m2/s,numeric,NEE_uc,umol/m2/s,NEE random uncertainty,NULL,-100,100,FALSE,FALSE,Eval,NA,mean
 GPP_DT_VUT_REF,umol/m2/s,numeric,GPP_DT,umol/m2/s,"Gross primary productivity of CO2 (variable ustar, daytime partitioning)",gross_primary_productivity_of_biomass_expressed_as_carbon,-200,200,FALSE,FALSE,Eval,NA,mean
 GPP_NT_VUT_REF,umol/m2/s,numeric,GPP,umol/m2/s,"Gross primary productivity of CO2 (variable ustar, nighttime partitioning)",gross_primary_productivity_of_biomass_expressed_as_carbon,-200,200,FALSE,FALSE,Eval,NA,mean
-
-
-
