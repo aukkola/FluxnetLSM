@@ -73,4 +73,3 @@ NEE_VUT_REF_RANDUNC,umol/m2/s,numeric,NEE_uc,umol/m2/s,NEE random uncertainty,NU
 GPP_DT_VUT_REF,umol/m2/s,numeric,GPP_DT,umol/m2/s,"Gross primary productivity of CO2 (variable ustar, daytime partitioning)",gross_primary_productivity_of_biomass_expressed_as_carbon,-200,200,FALSE,FALSE,Eval,NA,mean
 
 GPP_NT_VUT_REF,umol/m2/s,numeric,GPP,umol/m2/s,"Gross primary productivity of CO2 (variable ustar, nighttime partitioning)",gross_primary_productivity_of_biomass_expressed_as_carbon,-200,200,FALSE,FALSE,Eval,NA,mean
-

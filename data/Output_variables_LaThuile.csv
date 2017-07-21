@@ -45,4 +45,3 @@ NEE_f,umol/m2/s,numeric,NEE,umol/m2/s,Net ecosystem exchange of CO2,surface_upwa
 NEE_f_unc,umol/m2/s,numeric,NEE_uc,umol/m2/s,"Net ecosystem exchange of CO2 uncertainty (Net ecosystem exchange fill only; can be interpreted as an approx. expected value, where random error adds to get the real flux)",NULL,-200,200,FALSE,FALSE,Eval,NA,mean
 
 GPP_f,umol/m2/s,numeric,GPP,umol/m2/s,Gross primary productivity of CO2,gross_primary_productivity_of_biomass_expressed_as_carbon,-200,200,FALSE,FALSE,Eval,NA,mean
-
