@@ -3,6 +3,8 @@
 #' Converts data from a FLUXNET2015 formatted spreadsheet to
 #' NetCDF.
 #'
+#' See ?get_default_conversion_options for all conversion options.
+#' 
 #' Gapfilling options:
 #'
 #' EraInterim:
@@ -33,7 +35,7 @@
 #'        e.g. "FULLSET/FLX_AU-How_FLUXNET2015_ERAI_HH_1989-2014_1-3.csv"
 #' @param out_path output path e.g. "./FLUXNET2016_processing/"
 #' @param conv_opts options for the conversion.
-#'        See get\code{\link{get_default_conversion_options}}.
+#'        See \code{\link{get_default_conversion_options}}.
 #' @param plot Should annual, diurnal and/or 14-day running mean plots be produced?
 #'        Set to NA if not required.
 #'
@@ -369,7 +371,7 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   
   
   # Check that data are within acceptable ranges: 
-  CheckDataRanges(ConvertedData, site_log)
+  site_log <- CheckDataRanges(ConvertedData, site_log, conv_opts$check_range_action)
   
   
   #Replace original data with converted data
@@ -583,7 +585,7 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   #Write log to file
   write_log(site_log)
   
-  return(cat("Site", site_code, "processed successfully. Refer to log file for details"))
+  return(cat("Site", site_code, "processed successfully. Refer to log file for details.\n"))
   
 } #function
 
@@ -592,49 +594,75 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
 #' Default options for a dataset conversion
 #'
 #' @return options list, with values:
+#' 
 #' - datasetname: Name of the dataset, e.g. FLUXNET2015 or La Thuile. Defaults to FLUXNET2015,
 #'        and thus must be set if processing a dataset not compliant with FLUXNET2015 format.
+#'
 #' - datasetversion: Version of the dataset, e.g. "1-3"
+#' 
 #' - flx2015_version: Version of FLUXNET2015 data product being used, i.e. "FULLSET" or "SUBSET".
 #'        Required to set QC flags correctly.
+#'        
 #' - fair_use: La Thuile Fair Use policy that data should comply with, e.g. "LaThuile" or "Fair_Use" (default).
 #'        Can be a single entry or a vector of several policies. If this is set, code will only extract
 #'        years that comply with the required policy/policies. Must provide fair_use_vec to use this
 #'        functionality.
+#'        
 #' - fair_use_vec: A vector of Data Use policy for each year in the data file, e.g. "LaThuile" or "Fair_Use".
 #'        Should have years as vector column names.
+#'        
 #' - met_gapfill: Method to use for gap-filling meteorological data. Set to one of
 #'        "ERAinterim", "statistical" or NA (default; no gap-filling).
+#'        
 #' - flux_gapfill: Method to use for gap-filling flux data. Set to one of
 #'        "statistical" or NA (default; no gap-filling).
+#'        
 #' - missing: Maximum percentage of time steps allowed to be missing in any given year
+#' 
 #' - gapfill_all: Maximum percentage of time steps allowed to be gap-filled
 #'        (any quality) in any given year. Note if gapfill_all is set, any thresholds
 #'        for gapfill_good, gapfill_med or gapfill_poor are ignored. Set to NA if not required.
+#'        
 #' - gapfill_good: Maximum percentage of time steps allowed to be good-quality gap-filled
 #'        in any given year. Refer to package documentation for information on QC flags.
 #'        Set to NA if not required (default).
+#'        
 #' - gapfill_med: Maximum percentage of time steps allowed to be medium-quality gap-filled
 #'        in any given year. Refer to package documentation for information on QC flags.
 #'        Set to NA if not required (default).
+#'        
 #' - gapfill_poor: Maximum percentage of time steps allowed to be poor-quality gap-filled
 #'        in any given year. Refer to package documentation for information on QC flags.
 #'        Set to NA if not required (default).
+#'        
 #' - min_yrs: Minimum number of consecutive years to process
+#' 
 #' - linfill: Maximum consecutive length of time (in hours) to be gap-filled
 #'        using linear interpolation. Used for all variables except rainfall. Defaults to 4 hours.
+#'        
 #' - copyfill: Maximum consecutive length of time (in number of days) to be gap-filled using
 #'        copyfill. Defaults to 10 days.
+#'        
 #' - regfill: Maximum consecutive length of time (in number of days) to be gap-filled
 #'        using multiple linear regression. Defaults to 30 days. Default method used to gapfill flux variables.
 #'        If gapfilling by copyfill is preferred, set regfill to NA.
+#'        
 #' - lwdown_method: Method used to synthesize incoming longwave radiation.
 #'        One of "Abramowitz_2012" (default), "Swinbank_1963" or "Brutsaert_1975".
+#'        
+#' - check_range_action: Action to take when input data falls outside of valid ranges
+#'        (as defined in data/Output_variables_*.csv).
+#'        One of "stop" (log error and stop processing, default),
+#'        "warn" (log error and continue), "ignore" (continue), or
+#'        "truncate" (set values outside the valid range to the range bounds).
+#'        
 #' - include_all_eval: Should all evaluation values be included, regardless of data gaps?
 #'        If set to FALSE, any evaluation variables with missing or gap-filled values in
 #'        excess of the thresholds will be discarded.
+#'        
 #' - aggregate: Time step (in hours) that the data is aggregated to. Must be divisible by 24 and can be set to
 #'        a maximum 24 hours (daily). Defaults to NA (no aggregation).
+#'        
 #' - model: Name of land surface model. Used to retrieve model specific attributes, such as site
 #'        plant functional type.
 #'
@@ -659,6 +687,7 @@ get_default_conversion_options <- function() {
         copyfill = 10,
         regfill = 30,
         lwdown_method = "Abramowitz_2012",
+        check_range_action = "stop",
         include_all_eval = TRUE,
         aggregate = NA,
         model = NA

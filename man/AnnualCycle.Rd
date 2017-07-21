@@ -5,7 +5,7 @@
 \title{Plots an annual cycle}
 \usage{
 AnnualCycle(obslabel, acdata, varname, ytext, legendtext, timestepsize, whole,
-  plotcolours, modlabel = "no", na.rm = FALSE)
+  plotcolours, modlabel = "no", plot.cex, na.rm = FALSE)
 }
 \description{
 Plots an annual cycle

@@ -4,7 +4,7 @@
 # convert to native file endings on checkout.
 *.R text
 *.Rd text
-*.csv text
+*.csv filter=cr
 *.md text
 *.txt text
 DESCRIPTION text
@@ -15,4 +15,3 @@ NAMESPACE text
 # Denote all files that are truly binary and should not be modified.
 *.nc binary
 
-*.csv filter=cr

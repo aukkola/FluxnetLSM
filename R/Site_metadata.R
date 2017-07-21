@@ -129,10 +129,6 @@ update_metadata <- function(metadata, new_metadata, overwrite=TRUE) {
 # CSV-stored metadata
 ################################################
 
-# TODO: use system.file("help", "aliases.rds", package="FluxnetLSM")
-# when this is a proper package.
-# https://stackoverflow.com/questions/3433603/parsing-command-line-arguments-in-r-scripts
-
 #Find site info file path (not using data() command directly because reads a CSV with a
 #semicolon separator and this leads to incorrect table headers)
 
@@ -142,20 +138,30 @@ site_csv_file <- system.file("data", "Site_metadata.csv", package = "FluxnetLSM"
 #'
 #' @return metadata list
 #' @export
-get_site_metadata_CSV <- function(metadata) {
+get_site_metadata_from_CSV <- function(metadata=NA) {
+
+    csv_data <- read.csv(site_csv_file, header = TRUE,
+                    stringsAsFactors = FALSE)
+
+    if (is.na(metadata)) {
+        # get all existing metadata as a list of lists
+        message("Loading metadata for all sites from csv_data cache (", site_csv_file, ")")
+        metadata <- lapply(row.names(csv_data), function(row) {
+            as.list(csv_data[row, ])
+        })
+        names(metadata) <- csv_data$SiteCode
+        return(metadata)
+    }
 
     site_code <- get_site_code(metadata)
 
-    message("Loading metadata for ", site_code, " from csv cache (", site_csv_file, ")")
+    message("Loading metadata for ", site_code, " from csv_data cache (", site_csv_file, ")")
 
-    csv <- read.csv(site_csv_file, header = TRUE,
-                    stringsAsFactors = FALSE, row.names = 1)
-
-    if (site_code %in% row.names(csv)) {
-        csv_row <- as.list(csv[site_code, ])
+    if (site_code %in% csv_data$SiteCode) {
+        csv_row <- as.list(csv_data[csv_data$SiteCode == site_code, ])
         metadata = update_metadata(metadata, csv_row)
     } else {
-        message("    ", site_code, " not found in CSV file")
+        message("    ", site_code, " not found in csv_data file")
     }
 
     return(metadata)
@@ -173,14 +179,31 @@ save_metadata_to_csv <- function(metadata) {
 #' @export
 save_metadata_list_to_csv <- function(metadata_lists) {
     old_csv_data <- read.csv(site_csv_file, header = TRUE,
-                         stringsAsFactors = FALSE,
-                         row.names = 1)
+                         stringsAsFactors = FALSE)
 
     new_csv_data <- metadata_list_to_dataframe(metadata_lists)
 
-    csv_data <- merge(old_csv_data, new_metadata, key="SiteCode")
+    common_names <- intersect(names(old_csv_data), names(new_csv_data))
+    common_names <- common_names[common_names != "SiteCode"]
 
-    write.csv(csv_data, site_csv_file)
+    # Merge new and existing datasets, preferring new.
+    csv_data <- merge(new_csv_data, old_csv_data,
+                      all = TRUE, by = "SiteCode")
+    for (n in common_names) {
+        # Use old data only if new data is missing.
+        csv_data[[n]] <- ifelse(is.na(csv_data[[paste0(n, ".x")]]),
+                                csv_data[[paste0(n, ".y")]],
+                                csv_data[[paste0(n, ".x")]])
+        csv_data[[paste0(n, ".x")]] <- NULL
+        csv_data[[paste0(n, ".y")]] <- NULL
+    }
+
+    csv_data <- csv_data[order(csv_data$SiteCode), ]
+
+    # Fix new lines in Descriptions
+    csv_data$Description <- gsub("\\n", "\\\\n", csv_data$Description)
+
+    write.csv(csv_data, file = site_csv_file, row.names = FALSE)
 }
 
 
@@ -211,19 +234,36 @@ metadata_list_to_dataframe <- function(metadata_lists) {
 
 #' Reads all ORNL data into the CSV file
 #' @export
-update_csv_from_ornl <- function() {
-    ornl_site_codes <- get_ornl_site_codes()
-    ornl_url_list <- get_ornl_site_url_list(ornl_site_codes)
-    message(length(ornl_url_list), " sites found.")
+update_csv_from_web <- function() {
+    csv_data <- get_site_metadata_from_CSV()
 
-    metadata_lists <- list()
-    for (site_code in ornl_site_codes) {
-        metadata_lists[[site_code]] <- get_ornl_site_metadata(site_metadata_template(site_code),
-                                                              ornl_url_list[[site_code]])
+    csv_site_codes <- names(csv_data)
+
+    fluxdata_site_codes <- get_fluxdata_org_site_codes()
+    ornl_site_codes <- get_ornl_site_codes()
+
+    all_site_codes <- union(union(csv_site_codes, fluxdata_site_codes),
+                            ornl_site_codes)
+
+    metadata <- list()
+    for (sc in all_site_codes) {
+        site_md <- site_metadata_template(sc)
+        if (sc %in% csv_site_codes) {
+            site_md <- update_metadata(site_md, csv_data[[sc]])
+        }
+        if (any(check_missing(site_md)) && sc %in% fluxdata_site_codes) {
+            # Overwrite with fluxdata.org data
+            site_md <- get_fluxdata_org_site_metadata(site_md)
+        }
+        if (any(check_missing(site_md)) && sc %in% ornl_site_codes) {
+            # Don't overwrite with ORNL data, just gapfill
+            site_md <- get_ornl_site_metadata(site_md, overwrite = FALSE)
+        }
+        metadata[[sc]] <- site_md
     }
 
-    message("Saving ORNL metadata to ", site_csv_file)
-    save_metadata_list_to_csv(metadata_lists)
+    message("Saving metadata to ", site_csv_file)
+    save_metadata_list_to_csv(metadata)
 }
 
 ################################################
@@ -351,6 +391,23 @@ get_ornl_site_metadata <- function(metadata, site_url=NULL, overwrite=TRUE) {
 
 ### Fluxdata.org ###
 
+#' Get all available site codes from site_status table
+#' @export
+get_fluxdata_org_site_codes <- function() {
+
+    library(jsonlite)
+
+    status_JSON_url <-"https://ameriflux-data.lbl.gov/AmeriFlux/SiteSearch.svc/SiteMapData/Fluxnet"
+
+    site_data <- jsonlite::read_json(status_JSON_url)
+
+    site_codes <- unlist(lapply(site_data, '[[', "SITE_ID"))
+
+    return(site_codes)
+
+}
+
+
 #' Get a single fluxdata_org site URL from site_status table
 #' @export
 get_site_fluxdata_org_url <- function(site_code) {
@@ -426,6 +483,7 @@ get_site_metadata_web <- function(metadata) {
     metadata <- get_fluxdata_org_site_metadata(metadata)
 
     if (any(check_missing(metadata))) {
+        # Don't overwrite with ORNL data, only gap-fill Fluxnet Data
         metadata <- get_ornl_site_metadata(metadata, overwrite=FALSE)
     }
 
@@ -483,7 +541,7 @@ get_site_metadata <- function(site_code, incl_processing=TRUE,
     metadata <- site_metadata_template(site_code)
 
     if (use_csv) {
-        metadata <- get_site_metadata_CSV(metadata)
+        metadata <- get_site_metadata_from_CSV(metadata)
     }
 
     if (any(check_missing(metadata))) {
