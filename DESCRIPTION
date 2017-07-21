@@ -8,6 +8,7 @@ Maintainer: Who to complain to <a.ukkola@unsw.edu.au>
 URL: https://github.com/aukkola/FluxnetLSM
 Description: Scripts for quality control of FLUXNET data, and converting from CSV format to NetCDF, and managing metadata.
 License: TODO: What license is it under?
+Roxygen: list(markdown = TRUE)
 RoxygenNote: 6.0.0.9000
 Imports:
     R.utils,
