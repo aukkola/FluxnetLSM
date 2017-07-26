@@ -34,7 +34,7 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,            # outfile file 
     # Define x, y and z dimensions
     xd = ncdim_def('x',vals=c(1),units='')
     yd = ncdim_def('y',vals=c(1),units='')
-    zd = ncdim_def('z',vals=c(1),units='')
+    #zd = ncdim_def('z',vals=c(1),units='')
     dimnchar = ncdim_def("nchar", "", 1:200, create_dimvar=FALSE )
 
     # Determine data start date and time:
@@ -52,7 +52,8 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,            # outfile file 
     # Create variable definitions for time series variables
     var_defs <- lapply(var_ind, function(x) ncvar_def(name=datain$out_vars[x],
                                                       units=datain$units$target_units[x],
-                                                      dim=list(xd,yd,zd,td),
+                                                      #dim=list(xd,yd,zd,td),
+                                                      dim=list(xd,yd,td),
                                                       missval=Nc_MissingVal,
                                                       longname=datain$attributes[x,2]))
 
@@ -262,7 +263,7 @@ CreateMetNetcdfFile = function(metfilename, datain,             # outfile file a
     # Define x, y and z dimensions
     xd = ncdim_def('x',vals=c(1),units='')
     yd = ncdim_def('y',vals=c(1),units='')
-    zd = ncdim_def('z',vals=c(1),units='')
+    #zd = ncdim_def('z',vals=c(1),units='')
     dimnchar = ncdim_def("nchar", "", 1:200, create_dimvar=FALSE )
 
     # Determine data start date and time:
@@ -280,7 +281,8 @@ CreateMetNetcdfFile = function(metfilename, datain,             # outfile file a
     # Create variable definitions for time series variables
     var_defs <- lapply(var_ind, function(x) ncvar_def(name=datain$out_vars[x],
                                                       units=datain$units$target_units[x],
-                                                      dim=list(xd,yd,zd,td),
+                                                      #dim=list(xd,yd,zd,td),
+                                                      dim=list(xd,yd,td),
                                                       missval=Nc_MissingVal,
                                                       longname=datain$attributes[x,2]))
 
