@@ -514,15 +514,14 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
 
     # Limit Flux output vars, if necessary
     if (!is.na(conv_opts$limit_vars[1])) {
-        flux_limit_ind <- sapply(flux_ind, function(x) {
+        flux_limit_ind <- sapply(flux_ind[[k]], function(x) {
             if (DataFromText$out_vars[x] %in% conv_opts$limit_vars) {x} else {NA}
         })
         flux_limit_ind <- flux_limit_ind[!is.na(flux_limit_ind)]
     } else {
-        flux_limit_ind <- flux_ind
+        flux_limit_ind <- flux_ind[[k]]
     }
 
-    
     #Write flux file
     CreateFluxNetcdfFile(fluxfilename=fluxfilename, datain=DataFromText,
                          site_code=site_code,
@@ -530,11 +529,11 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
                          ind_start=gaps$tseries_start[k],
                          ind_end=gaps$tseries_end[k],
                          starttime=nc_starttime,
-                         total_missing=gaps$total_missing[[k]][flux_limit_ind[[k]]],
-                         total_gapfilled=gaps$total_gapfilled[[k]][flux_limit_ind[[k]]],
+                         total_missing=gaps$total_missing[[k]][flux_limit_ind],
+                         total_gapfilled=gaps$total_gapfilled[[k]][flux_limit_ind],
                          qcInfo=qc_flags$qc_info,
                          arg_info=arg_info,
-                         var_ind=flux_limit_ind[[k]],
+                         var_ind=flux_limit_ind,
                          modelInfo=model_params)
     
   }
