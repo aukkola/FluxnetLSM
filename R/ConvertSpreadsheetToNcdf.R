@@ -162,7 +162,7 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   #This option is set in the site info file (inside data folder)
   #Mainly excludes sites with mean annual ET excluding P, implying
   #irrigation or other additional water source.
-  if(site_info$Exclude){
+  if(!is.null(site_info$Exclude) & site_info$Exclude){
     
     error <- paste("Site not processed. Reason:", site_info$Exclude_reason,
                    ". This is set in site info file, change >Exclude< options",
@@ -248,7 +248,9 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
       #Gapfill with ERAinterim
       DataFromText <- GapfillMet_with_ERA(DataFromText, era_file,
                                           qc_name, dataset_vars,
-                                          qc_flags=qc_flags)
+                                          qc_flags=qc_flags,
+                                          site_log=site_log)
+      # Not sure if we need to return the site_log from this function? Seems to stop on every error anyway..
       
       #Cannot recognise method, stop
     } else {

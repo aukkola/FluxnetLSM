@@ -9,7 +9,7 @@
 
 #' Gapfills meteorological data with down-scaled ERAinterim estimates
 #' @export
-GapfillMet_with_ERA <- function(datain, ERA_file, qc_name, varnames, ...){
+GapfillMet_with_ERA <- function(datain, ERA_file, qc_name, varnames, site_log, ...){
   
   #Read ERA data and extract time steps corresponding to obs
   era_data <- read_era(ERA_file=ERA_file, datain=datain)
