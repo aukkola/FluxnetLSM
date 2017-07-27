@@ -124,7 +124,7 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
                     ytext=paste(data_vars[n], " (", data_units[n], ")", sep=""), 
                     legendtext=data_vars[n], 
                     timestepsize=timestepsize,
-                    whole=timing$whole, plotcolours="blue",
+                    whole=timing$whole, plotcolours="black",
                     plot.cex=no_vars/2, na.rm=TRUE)  
       }
   
@@ -174,7 +174,7 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
                      varname=data_vars[n], 
                      ytext=paste(data_vars[n], " (", data_units[n], ")", sep=""), 
                      legendtext=data_vars[n], timestepsize=timestepsize,
-                     whole=timing$whole, plotcolours="blue",
+                     whole=timing$whole, plotcolours="black",
                      #vqcdata=as.matrix(var_qc),
                      plot.cex=1, na.rm=TRUE)  
       }
@@ -236,7 +236,7 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
                    legendtext=data_vars[n],
                    plotcex=no_vars/2 + 1 , timing=timing, 
                    smoothed = FALSE, winsize = 1, 
-                   plotcolours="blue", 
+                   plotcolours="black",
                    vqcdata = as.matrix(var_qc),
                    na.rm=TRUE)
       
