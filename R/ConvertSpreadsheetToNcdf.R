@@ -127,13 +127,24 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   
   
   vars <- read.csv(var_file, header=TRUE,
-                   colClasses=c("character", "character", "character",
-                                "character", "character", "character",
-                                "character", "numeric", "numeric",
-                                "logical", "logical", "character"))
-  
-  
-  
+                   colClasses=c(
+                                "character",  # Fluxnet_variable
+                                "character",  # Fluxnet_unit
+                                "character",  # Fluxnet_class
+                                "character",  # Output_variable
+                                "character",  # Output_unit
+                                "character",  # Longname
+                                "character",  # Standard_name
+                                "numeric",    # Data_min
+                                "numeric",    # Data_max
+                                "logical",    # Essential_met
+                                "logical",    # Preferred_eval
+                                "character",  # Category
+                                "character",  # ERAinterim_variable
+                                "character"   # Aggregate_method
+                                ))
+
+
   #Read site information (lon, lat, elevation)
   site_info <- get_site_metadata(site_code)
   
