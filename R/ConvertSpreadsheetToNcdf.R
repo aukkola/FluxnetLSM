@@ -144,6 +144,11 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
                                 "character"   # Aggregate_method
                                 ))
 
+  if(is.character(conv_opts$limit_vars) & length(conv_opts$limit_vars) > 0){
+    limit_vars <- c(conv_opts$limit_vars, paste0(conv_opts$limit_vars, '_qc'))
+    vars <- vars[vars[['Output_variable']] %in% limit_vars, ]
+  }
+
 
   #Read site information (lon, lat, elevation)
   site_info <- get_site_metadata(site_code)
@@ -692,7 +697,8 @@ get_default_conversion_options <- function() {
         check_range_action = "stop",
         include_all_eval = TRUE,
         aggregate = NA,
-        model = NA
+        model = NA,
+        limit_vars = c()
         )
 
     return(conv_opts)
