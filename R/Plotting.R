@@ -189,23 +189,14 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
     ################################
     } else if(analysis_type[k]=="timeseries"){
 
-      #Initialise file
-      pdf(paste(outfile, "Timeseries.pdf", sep=""), height=no_vars*2.2*4, width=no_vars*1.4*7.5)
       
-      par(mai=c(0.6+(no_vars/7),1+(no_vars/15),0.7,0.2))
-      par(omi=c(0.8+(no_vars/10),0.5+(no_vars/10),0.2+(no_vars/10),0.1+(no_vars/10)))
-      
-      if(no_vars==1){
-        par(mfrow=c(ceiling(no_vars/2), 1))
-      } else {
-        par(mfrow=c(ceiling(no_vars/2), 2))
-      }
-      
-
       #Plot
       for(n in 1:length(data)){
   
-        
+        #Initialise file
+        filename <- paste0(outfile, "Timeseries_", data_vars[n], ".png")
+        png(filename, height=480, width=1200, res=30)
+
         #Find corresponding QC variable (if available)
         qc_ind <- which(qc_vars==paste(data_vars[n], "_qc", sep=""))
         
@@ -240,9 +231,9 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
                    vqcdata = as.matrix(var_qc),
                    na.rm=TRUE)
       
+        dev.off()
       }
 
-    dev.off()  
            
     
     ###################################################
