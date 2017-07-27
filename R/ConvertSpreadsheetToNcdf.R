@@ -126,28 +126,23 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   }
   
   
-  vars <- read.csv(var_file, header=TRUE,
-                   colClasses=c(
-                                "character",  # Fluxnet_variable
-                                "character",  # Fluxnet_unit
-                                "character",  # Fluxnet_class
-                                "character",  # Output_variable
-                                "character",  # Output_unit
-                                "character",  # Longname
-                                "character",  # Standard_name
-                                "numeric",    # Data_min
-                                "numeric",    # Data_max
-                                "logical",    # Essential_met
-                                "logical",    # Preferred_eval
-                                "character",  # Category
-                                "character",  # ERAinterim_variable
-                                "character"   # Aggregate_method
-                                ))
-
-  if(is.character(conv_opts$limit_vars) & length(conv_opts$limit_vars) > 0){
-    limit_vars <- c(conv_opts$limit_vars, paste0(conv_opts$limit_vars, '_qc'))
-    vars <- vars[vars[['Output_variable']] %in% limit_vars, ]
-  }
+  vars_csv <- read.csv(var_file, header=TRUE,
+                       colClasses=c(
+                                    "character",  # Fluxnet_variable
+                                    "character",  # Fluxnet_unit
+                                    "character",  # Fluxnet_class
+                                    "character",  # Output_variable
+                                    "character",  # Output_unit
+                                    "character",  # Longname
+                                    "character",  # Standard_name
+                                    "numeric",    # Data_min
+                                    "numeric",    # Data_max
+                                    "logical",    # Essential_met
+                                    "logical",    # Preferred_eval
+                                    "character",  # Category
+                                    "character",  # ERAinterim_variable
+                                    "character"   # Aggregate_method
+                                    ))
 
 
   #Read site information (lon, lat, elevation)
@@ -177,7 +172,7 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   
   
   # Read text file containing flux data
-  DataFromText <- ReadCSVFluxData(fileinname=infile, vars=vars, 
+  DataFromText <- ReadCSVFluxData(fileinname=infile, vars=vars_csv, 
                                   datasetname=conv_opts$datasetname,
                                   time_vars=time_vars, site_log,
                                   fair_usage=conv_opts$fair_use,
