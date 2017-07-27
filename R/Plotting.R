@@ -195,7 +195,7 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
   
         #Initialise file
         filename <- paste0(outfile, "Timeseries_", data_vars[n], ".png")
-        png(filename, height=480, width=1200, res=30)
+        png(filename, height=720, width=1800, res=50)
 
         #Find corresponding QC variable (if available)
         qc_ind <- which(qc_vars==paste(data_vars[n], "_qc", sep=""))
