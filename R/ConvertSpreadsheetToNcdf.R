@@ -720,7 +720,7 @@ get_default_conversion_options <- function() {
         include_all_eval = TRUE,
         aggregate = NA,
         model = NA,
-        limit_vars = c()
+        limit_vars = NA
         )
 
     return(conv_opts)
