@@ -52,6 +52,12 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   for (o in names(opt_args)) {
       conv_opts[o] = opt_args[o]
   }
+
+  # Add QC variables for each of the required variables
+  if(!is.na(conv_opts$limit_vars[1])){
+    conv_opts$limit_vars <- c(conv_opts$limit_vars, paste0(conv_opts$limit_vars, '_qc'))
+  }
+
   
   library(R.utils)  
   
@@ -475,8 +481,17 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
     
     #Find met variable indices
     met_ind <- which(DataFromText$categories=="Met")
-    
-    
+
+    # And limit them, if necessary
+    if (!is.na(conv_opts$limit_vars[1])) {
+        met_limit_ind <- sapply(met_ind, function(x) {
+            if (DataFromText$out_vars[x] %in% conv_opts$limit_vars) {x} else {NA}
+        })
+        met_limit_ind <- met_limit_ind[!is.na(met_limit_ind)]
+    } else {
+        met_limit_ind <- met_ind
+    }
+
     #Write met file
     CreateMetNetcdfFile(metfilename=metfilename, 
                         datain=DataFromText,
@@ -486,16 +501,27 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
                         ind_end=gaps$tseries_end[k],
                         starttime=nc_starttime,
                         av_precip=av_precip[[k]],
-                        total_missing=gaps$total_missing[[k]][met_ind],
-                        total_gapfilled=gaps$total_gapfilled[[k]][met_ind],
+                        total_missing=gaps$total_missing[[k]][met_limit_ind],
+                        total_gapfilled=gaps$total_gapfilled[[k]][met_limit_ind],
                         qcInfo=qc_flags$qc_info,
                         arg_info=arg_info,
-                        var_ind=met_ind,
+                        var_ind=met_limit_ind,
                         modelInfo=model_params)
     
     
     
     ###--- Create netcdf flux data file ---###
+
+    # Limit Flux output vars, if necessary
+    if (!is.na(conv_opts$limit_vars[1])) {
+        flux_limit_ind <- sapply(flux_ind, function(x) {
+            if (DataFromText$out_vars[x] %in% conv_opts$limit_vars) {x} else {NA}
+        })
+        flux_limit_ind <- flux_limit_ind[!is.na(flux_limit_ind)]
+    } else {
+        flux_limit_ind <- flux_ind
+    }
+
     
     #Write flux file
     CreateFluxNetcdfFile(fluxfilename=fluxfilename, datain=DataFromText,
@@ -504,11 +530,11 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
                          ind_start=gaps$tseries_start[k],
                          ind_end=gaps$tseries_end[k],
                          starttime=nc_starttime,
-                         total_missing=gaps$total_missing[[k]][flux_ind[[k]]],
-                         total_gapfilled=gaps$total_gapfilled[[k]][flux_ind[[k]]],
+                         total_missing=gaps$total_missing[[k]][flux_limit_ind[[k]]],
+                         total_gapfilled=gaps$total_gapfilled[[k]][flux_limit_ind[[k]]],
                          qcInfo=qc_flags$qc_info,
                          arg_info=arg_info,
-                         var_ind=flux_ind[[k]],
+                         var_ind=flux_limit_ind[[k]],
                          modelInfo=model_params)
     
   }
