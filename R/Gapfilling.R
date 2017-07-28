@@ -9,7 +9,7 @@
 
 #' Gapfills meteorological data with down-scaled ERAinterim estimates
 #' @export
-GapfillMet_with_ERA <- function(datain, ERA_file, qc_name, varnames, ...){
+GapfillMet_with_ERA <- function(datain, ERA_file, qc_name, varnames, site_log, ...){
   
   #Read ERA data and extract time steps corresponding to obs
   era_data <- read_era(ERA_file=ERA_file, datain=datain)
@@ -22,8 +22,9 @@ GapfillMet_with_ERA <- function(datain, ERA_file, qc_name, varnames, ...){
   vpd_units  <- datain$units$original_units[varnames$vpd]
   
   #If not found, set to unknown
-  if(length(tair_units)==0){ tair_units = "UNKNOWN" } 
-  if(length(vpd_units)==0){ vpd_units = "UNKNOWN" }
+  if (is.na(tair_units) | length(tair_units) == 0){ tair_units = "UNKNOWN" }
+  #If not found, assume hectopascals
+  if (is.na(vpd_units) | length(vpd_units) == 0){ vpd_units = "hPa" }
   
   #Gapfill met variables
   temp_data <- gapfill_with_ERA(datain=datain$data[,ind], era_data=era_data,

@@ -17,6 +17,12 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
   #Initialise warnings
   warnings <- ""
   
+  vars <- na.omit(sapply(vars, function(x) { if (x %in% names(ncfile$var)) x }))
+  if (length(attr(vars, 'na.action')) > 0) {
+      warn("Some variables missing from netcdf file: ", attr(vars, 'na.action'))
+  }
+  vars <- unlist(vars)
+
   #Separate data and QC variables
   #TODO: hard coding "_qc" here, need to change
   data_vars <- vars[!grepl("_qc", vars)]
