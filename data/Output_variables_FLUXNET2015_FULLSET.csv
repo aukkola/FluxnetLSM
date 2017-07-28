@@ -29,6 +29,7 @@ H_F_MDS_QC,-,integer,Qh_qc,-,Qh quality control flag,NULL,0,5,FALSE,FALSE,Eval,N
 H_CORR,W/m2,numeric,Qh_cor,W/m2,"Sensible heat flux from surface, corrected for energy balance closure",surface_upward_sensible_heat_flux,-1000,1000,FALSE,FALSE,Eval,NA,mean
 H_CORR_JOINTUNC,W/m2,numeric,Qh_cor_uc,W/m2,Qh_cor joint uncertainty,NULL,-1000,1000,FALSE,FALSE,Eval,NA,mean
 NEE_VUT_REF,umol/m2/s,numeric,NEE,umol/m2/s,Net ecosystem exchange of CO2 (variable ustar),surface_upward_mole_flux_of_carbon_dioxide,-100,100,FALSE,TRUE,Eval,NA,mean
+NEE_VUT_REF_QC,-,integer,NEE_qc,-,NEE quality control flag,NULL,0,5,FALSE,FALSE,Eval,NA,NA
 NEE_VUT_REF_JOINTUNC,umol/m2/s,numeric,NEE_uc,umol/m2/s,Net ecosystem exchange of CO2 uncertainty (variable ustar),NULL,-200,200,FALSE,FALSE,Eval,NA,mean
 GPP_DT_VUT_REF,umol/m2/s,numeric,GPP_DT,umol/m2/s,"Gross primary productivity of CO2 (variable ustar, daytime partitioning)",gross_primary_productivity_of_biomass_expressed_as_carbon,-200,200,FALSE,FALSE,Eval,NA,mean
 GPP_DT_VUT_SE,umol/m2/s,numeric,GPP_DT_se,umol/m2/s,"Gross primary productivity of CO2 standard error (variable ustar, daytime partitioning)",NULL,-200,200,FALSE,FALSE,Eval,NA,mean
