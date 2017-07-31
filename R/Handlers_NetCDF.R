@@ -8,7 +8,6 @@
 
 
 #' Creates a netcdf file for flux variables
-#' @export
 CreateFluxNetcdfFile = function(fluxfilename, datain,            # outfile file and data
                                 site_code,                       # Fluxnet site code
                                 siteInfo,                        # Site attributes
@@ -234,7 +233,6 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,            # outfile file 
 
 # TODO: This function exists in palsR/Gab and has a different signature. Merge?
 #' Creates a netcdf file for met variables
-#' @export
 CreateMetNetcdfFile = function(metfilename, datain,             # outfile file and data
                                site_code,                       # Fluxnet site code
                                siteInfo,                        # Site attributes
@@ -465,7 +463,6 @@ CreateMetNetcdfFile = function(metfilename, datain,             # outfile file a
 #-----------------------------------------------------------------------------
 
 #' Writes model parameters as global attribute to NetCDF file
-#' @export
 define_model_params <- function(modelInfo, dims){
 
     nc_vars <- list()
@@ -501,7 +498,6 @@ define_model_params <- function(modelInfo, dims){
 #-----------------------------------------------------------------------------
 
 #' Writes attributes common to met and flux NC files
-#' @export
 add_processing_info <- function(ncid, arg_info, datain, cat){
 
     # Input file

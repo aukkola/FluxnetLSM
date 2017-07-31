@@ -6,7 +6,6 @@
 
 
 #' Aggregates original time resolution to a coarser time step
-#' @export
 aggregate_tsteps <- function(datain, new_tstep, qc_flags, qc_name){
   
   #First save old original tstep
@@ -110,7 +109,6 @@ aggregate_tsteps <- function(datain, new_tstep, qc_flags, qc_name){
 
 #' Calculates fraction of good quality gapfilled and observed data
 #' for aggregated time steps
-#' @export
 qc_frac <- function(data, good_data){
   
   good_frac <- which(sapply(good_data, function(x) data==x))

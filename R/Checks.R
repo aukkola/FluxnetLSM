@@ -23,7 +23,6 @@
 #' @param showWarn Print warning?
 #' @param site_log Site log
 #' @return out
-#' @export
 CheckDataGaps <- function(datain, qc_flags, missing, gapfill_all, 
                           gapfill_good, gapfill_med, gapfill_poor,
                           min_yrs, qc_name, showWarn=TRUE, 
@@ -407,7 +406,6 @@ CheckDataGaps <- function(datain, qc_flags, missing, gapfill_all,
 #-----------------------------------------------------------------------------
 
 #' Checks that whole years were extracted
-#' @export
 IsWholeYrs <- function(datain, gaps, site_log){
   
   start_times <- sapply(gaps$tseries_start, function(x) format(strptime(datain$time[x,1], 
@@ -426,7 +424,6 @@ IsWholeYrs <- function(datain, gaps, site_log){
 #' Checks that data are within specified ranges
 #' as set in the "variables" auxiliary file
 #'
-#' @export
 CheckDataRanges <- function(datain, site_log, action="stop"){
 
     # Loop through variables
@@ -486,7 +483,6 @@ CheckDataRanges <- function(datain, site_log, action="stop"){
 #-----------------------------------------------------------------------------
 
 #' Performs initial checks on function arguments
-#' @export
 InitialChecks <- function(met_gapfill, era_file, missing, aggregate,
                           datasetname, flx2015_version){
   

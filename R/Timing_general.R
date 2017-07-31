@@ -4,7 +4,6 @@
 #'
 #' TODO: Check and merge back in to palsR
 #'
-#' @export
 #' 
 findStartTime <- function(start){
   
@@ -26,7 +25,6 @@ findStartTime <- function(start){
 #-----------------------------------------------------------------------------
 
 #' Checks that have whole number of days in dataset
-#' @export
 CheckCSVTiming <- function(datain, site_log) 
 {
   #This is equivalent to PALS CheckSpreadsheetTiming function
@@ -52,7 +50,6 @@ CheckCSVTiming <- function(datain, site_log)
 
 
 #' Utility function to convert minutes to HHMM format
-#' @export
 convertToHoursMins <- function(time, format = '%02d%02d') 
 {
   hours  <-  floor(time / 60)
@@ -64,7 +61,6 @@ convertToHoursMins <- function(time, format = '%02d%02d')
 
 
 #' Converts La Thuile time format to Fluxnet2015 time format
-#' @export
 convert_LaThuile_time <- function(timestep, tstepsize){
   #Last time step of each year uses the next year, fix this
   if( timestep["DoY"] > 364 & timestep["Time"] == 0){
@@ -118,7 +114,6 @@ convert_LaThuile_time <- function(timestep, tstepsize){
 #-----------------------------------------------------------------------------
 
 #' Function for filling missing years in La Thuile dataframe
-#' @export
 create_dummy_year <- function(year, tstep, time_vars){
   
   #Create a matrix for elements Year, DoY, Time and DTIME
@@ -158,7 +153,6 @@ create_dummy_year <- function(year, tstep, time_vars){
 #-----------------------------------------------------------------------------
 
 #' Finds day and night time steps
-#' @export
 DayNight <- function (SWdown, units) 
 {
   
@@ -190,7 +184,6 @@ DayNight <- function (SWdown, units)
 # Author: Gab Abramowitz UNSW 2014 (palshelp at gmail dot com)
 
 #' Finds number of days per year
-#' @export
 Yeardays <- function(startyear,ndays) {
   # Returns: an integer vector of possible number of days in each year of a 
   # dataset, and whether it contains a whole number of years
@@ -236,7 +229,6 @@ Yeardays <- function(startyear,ndays) {
 #----
 
 #' Gets month indices
-#' @export
 getMonthDays = function(leap=FALSE) {
   # The days on which each month begins:
   if (leap) {    #  J   F   M   A    M    J    J    A    S    O    N    D    J
@@ -254,7 +246,6 @@ getMonthDays = function(leap=FALSE) {
 #----
 
 #' Finds leap years
-#' @export
 is.leap = function(year){
   if((((year %% 4)==0) & ((year %% 100)!=0)) || 
        (((year %% 4)==0) & ((year %% 400)==0))){
@@ -268,7 +259,6 @@ is.leap = function(year){
 #----
 
 #' Creates time unit
-#' @export
 CreateTimeunits = function(starttime) {
   # Determine data start date and time:
   shour = floor(starttime$shod)
@@ -284,7 +274,6 @@ CreateTimeunits = function(starttime) {
 #----
 
 #' Creates time stamp string
-#' @export
 Create2Uchar = function(intin){
   # Creates string of length 2 from integer of length 1 or 2
   if(intin<10){
@@ -302,7 +291,6 @@ Create2Uchar = function(intin){
 #----
 
 #' Gets NC file timing
-#' @export
 GetTimingNcfile = function(fid){
   # This function gets the time step size, number of timesteps
   # and start date and time details from a netcdf file.
@@ -338,7 +326,6 @@ GetTimingNcfile = function(fid){
 #----
 
 #' Finds time variable name
-#' @export
 FindTimeVarName = function(fid){
   # Finds the name of the time variable in an open netcdf file.
   errtext='ok' 
@@ -392,7 +379,6 @@ FindTimeVarName = function(fid){
 #----
 
 #' Gets time units
-#' @export
 GetTimeUnits = function(fid,timevarname){
   # Fetches and processes time units from a netcdf file.
   errtext = 'ok'
@@ -433,7 +419,6 @@ GetTimeUnits = function(fid,timevarname){
 #----
 
 #' Gets time step size
-#' @export
 GetTimestepSize = function(fid,timevarname,tunits,ntsteps){
   # Fetches time step size
   errtext = 'ok'
@@ -505,7 +490,6 @@ GetTimestepSize = function(fid,timevarname,tunits,ntsteps){
 #----
 
 #' Gets the number of time steps
-#' @export
 GetNumberTimesteps = function(fid,timevar){		
   # Gets the number of time steps in a netcdf file
   ndims = length(fid$dim)
@@ -522,7 +506,6 @@ GetNumberTimesteps = function(fid,timevar){
 #----
 
 #' Gets the day of month and month, given day of year
-#' @export
 doydate = function(doy,leap=FALSE){
   # Doydate returns the day of month and month, given day of year:
   month=getMonthDays(leap)
