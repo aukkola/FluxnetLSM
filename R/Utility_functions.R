@@ -4,7 +4,6 @@
 
 
 #' Append error message to log
-#' @export
 log_error <- function(errtext, site_log){
   
   site_log["Errors"] <- paste(site_log["Errors"], errtext, sep="")
@@ -16,7 +15,6 @@ log_error <- function(errtext, site_log){
 #-----------------------------------------------------------------------------
 
 #' Appends warning to site log
-#' @export
 log_warning <- function(warn, site_log){
   
   if(nchar(warn) > 0){
@@ -34,7 +32,6 @@ log_warning <- function(warn, site_log){
 #-----------------------------------------------------------------------------
 
 #' Checks if an error has occurred
-#' @export
 no_error <- function(site_log){
  
  no_error_found <- nchar(site_log["Errors"]) < 1
@@ -44,7 +41,6 @@ no_error <- function(site_log){
 #-----------------------------------------------------------------------------
 
 #' Writes site log
-#' @export
 write_log <- function(site_log){
   
   #extract output path
@@ -63,7 +59,6 @@ write_log <- function(site_log){
 #-----------------------------------------------------------------------------
 
 #' Writes site log and then aborts, reporting error
-#' @export
 stop_and_log <- function(error, site_log){
   
   #remove plot path
@@ -77,7 +72,6 @@ stop_and_log <- function(error, site_log){
 #-----------------------------------------------------------------------------
 
 #' Writes site log and then aborts, reporting error
-#' @export
 warn_and_log <- function(warn, site_log){
   if(nchar(warn) > 0){
     site_log <- log_warning(warn, site_log)
@@ -89,7 +83,6 @@ warn_and_log <- function(warn, site_log){
 #-----------------------------------------------------------------------------
 
 #' Appends warning message and calls warning
-#' @export
 append_and_warn <- function(warn, warnings, call=TRUE){
   if(nchar(warn) > 0){ 
     
@@ -108,7 +101,6 @@ append_and_warn <- function(warn, warnings, call=TRUE){
 #-----------------------------------------------------------------------------
 
 #' Creates output directories and returns log output path
-#' @export
 create_outdir <- function(outdir, site, plots){
   
   #NetCDF files
@@ -135,7 +127,6 @@ create_outdir <- function(outdir, site, plots){
 #-----------------------------------------------------------------------------
 
 #' Initialises site log
-#' @export
 initialise_sitelog <- function(site, paths){
   
   site_log <- vector(length=12)
@@ -160,7 +151,6 @@ initialise_sitelog <- function(site, paths){
 #-----------------------------------------------------------------------------
 
 #' Retrieves QC flag information
-#' @export
 get_qc_flags <- function(dataset, subset=NA){
   
   #FLUXNET2015 subset
@@ -219,7 +209,6 @@ get_qc_flags <- function(dataset, subset=NA){
 #-----------------------------------------------------------------------------
 
 #' Checks  that FLUXNET2015 version defined correctly
-#' @export
 check_flx2015_version <- function(dataset, version){
   
   if(dataset=="FLUXNET2015" & (is.na(version) | 
@@ -233,7 +222,6 @@ check_flx2015_version <- function(dataset, version){
 #-----------------------------------------------------------------------------
 
 #' Gets possible varnames for FLUXNET FULLSET/SUBSET and La Thuile
-#' @export
 get_varnames <- function(datasetname, flx2015_version){
   
   #These are used for unit conversions etc.

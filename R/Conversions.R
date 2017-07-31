@@ -7,7 +7,6 @@
 
 #' Converts units from original Fluxnet to target ALMA units
 #' @return datain
-#' @export
 ChangeUnits <- function(datain, varnames, site_log){
     
   #Loop through variables. If original and target units do not match,
@@ -123,7 +122,6 @@ ChangeUnits <- function(datain, varnames, site_log){
 
 #' Converts VPD (hPa) to relative humidity (percentage)
 #' @return relative humidity as percentage
-#' @export
 VPD2RelHum <- function(VPD, airtemp, vpd_units, tair_units, site_log){
 
   
@@ -159,7 +157,6 @@ VPD2RelHum <- function(VPD, airtemp, vpd_units, tair_units, site_log){
 
 #' Converts relative humidity to specific humidity.
 #' @return specific humidity in kg/kg
-#' @export
 Rel2SpecHumidity <- function(relHum, airtemp, tair_units, 
                              pressure, psurf_units, site_log){
   
@@ -203,7 +200,6 @@ Rel2SpecHumidity <- function(relHum, airtemp, tair_units,
 
 #' Calculates saturation vapour pressure
 #' @return saturation vapour pressure
-#' @export
 calc_esat <- function(airtemp){
   #Tair in degrees C
   
@@ -217,7 +213,6 @@ calc_esat <- function(airtemp){
 #-----------------------------------------------------------------------------
 
 #' Convert air temperature from Celsius to Kelvin
-#' @export
 celsius_to_kelvin <- function(data){
   data <- data + 273.15
   return(data)

@@ -12,7 +12,6 @@
 #' @param vars data.table of variables and their attributes
 #' @param time_vars vector of time variables
 #' @return list of flux data, variables and timing information
-#' @export
 ReadCSVFluxData <- function(fileinname, vars, datasetname, time_vars, site_log, ...){
 
     ####### First read available variables, corresponding units and ranges ####
@@ -183,7 +182,6 @@ ReadCSVFluxData <- function(fileinname, vars, datasetname, time_vars, site_log, 
 #-----------------------------------------------------------------------------
 
 #' Reads ERA data and extracts time steps corresponding to obs
-#' @export
 read_era <- function(ERA_file, datain){
 
     # read data
@@ -206,7 +204,6 @@ read_era <- function(ERA_file, datain){
 #-----------------------------------------------------------------------------
 
 #' Converts La Thuile files to FLUXNET2015 format
-#' @export
 convert_LaThuile <- function(infiles, fair_usage=NA, fair_usage_vec=NA,
                              min_yrs, tcol, site_log, site_code){
 
