@@ -8,7 +8,6 @@
 
 #' Finds model-specific parameters to be written 
 #' to output NetCDF files 
-#' @export
 initialise_model <- function(model, site_info){
   
   if(is.na(model)){

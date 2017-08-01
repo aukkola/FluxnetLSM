@@ -8,7 +8,6 @@
 
 
 #' Gapfills meteorological data with down-scaled ERAinterim estimates
-#' @export
 GapfillMet_with_ERA <- function(datain, ERA_file, qc_name, varnames, site_log, ...){
   
   #Read ERA data and extract time steps corresponding to obs
@@ -84,7 +83,6 @@ GapfillMet_with_ERA <- function(datain, ERA_file, qc_name, varnames, site_log, .
 #-----------------------------------------------------------------------------
 
 #' Gapfill meteorological variables using statistical methods
-#' @export
 GapfillMet_statistical <- function(datain, qc_name, qc_flags,
                                    copyfill, linfill, lwdown_method,
                                    elevation, gaps, varnames, site_log){
@@ -291,7 +289,6 @@ GapfillMet_statistical <- function(datain, qc_name, qc_flags,
 #-----------------------------------------------------------------------------
 
 #' Gapfill flux variables using statistical methods
-#' @export
 GapfillFlux <- function(datain, qc_name, qc_flags, regfill, 
                         linfill, copyfill, gaps, varnames, site_log){
   
@@ -430,7 +427,6 @@ GapfillFlux <- function(datain, qc_name, qc_flags, regfill,
 #' Fills QC flags with 3 (poor gap-filling) when
 #' QC flag missing but data variable available
 #' @return datain
-#' @export
 FillQCvarMissing <- function(datain, gapfillVal, qc_name){
   
   #Find QC variables and corresponding data variables
@@ -461,7 +457,6 @@ FillQCvarMissing <- function(datain, gapfillVal, qc_name){
 #-----------------------------------------------------------------------------
 
 #' Calculates mean annual precipitation
-#' @export
 calc_avPrecip <- function(datain, gaps){
   
   ind_start <- gaps$tseries_start
@@ -490,7 +485,6 @@ calc_avPrecip <- function(datain, gaps){
 #-----------------------------------------------------------------------------
 
 #' Finds indices for flux variables to be outputted
-#' @export
 FindFluxInd <- function(datain, exclude_eval, k, site_log){
   
   #initialise warnings
@@ -527,7 +521,6 @@ FindFluxInd <- function(datain, exclude_eval, k, site_log){
 #-----------------------------------------------------------------------------
 
 #' Finds evaluation variables to exlude
-#' @export
 FindExcludeEval <- function(datain, all_missing, gaps, include_all, qc_name){
   
   #Extract names of evaluation variables
@@ -569,7 +562,6 @@ FindExcludeEval <- function(datain, all_missing, gaps, include_all, qc_name){
 #-----------------------------------------------------------------------------
 
 #' Find index for a variable and its QC flag
-#' @export
 find_ind_and_qc <- function(inds, var, qc_name=NA){
   
   #Find variable index/indices  
@@ -600,7 +592,6 @@ find_ind_and_qc <- function(inds, var, qc_name=NA){
 
 #'Creates attributes for a new QC variable
 #' @return datain
-#' @export
 create_qc_var <- function(datain, qc_name, qc_flags, outname, cat){
   
   #Appends attributes for new QC variable to indata
@@ -647,7 +638,6 @@ create_qc_var <- function(datain, qc_name, qc_flags, outname, cat){
 #-----------------------------------------------------------------------------
 
 #' Updates QC flags after gap-filling
-#' @export
 update_qc <- function(data, temp_data, varname, qc_name, qc_value, qc_flags,...){
   
   #Find index for QC variable
@@ -689,7 +679,6 @@ update_qc <- function(data, temp_data, varname, qc_name, qc_value, qc_flags,...)
 #-----------------------------------------------------------------------------
 
 #' Appends information for new QC flag
-#' @export
 append_qc <- function(old_data, new_value, new_name){
   
   old_data <- append(old_data, new_value)

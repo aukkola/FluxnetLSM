@@ -7,7 +7,6 @@
 
 #' Gapfills met data
 #' @return out
-#' @export
 gapfill_with_ERA <- function(datain, era_data, era_vars, tair_units, vpd_units,
                              out_vars, qc_name, qc_flags, varnames, 
                              site_log){
@@ -143,7 +142,6 @@ gapfill_with_ERA <- function(datain, era_data, era_vars, tair_units, vpd_units,
 #-----------------------------------------------------------------------------
 
 #' Performs linear interpolation gapfilling
-#' @export
 linfill_data <- function(data, tstepsize,
                         linfill=10){
   
@@ -198,7 +196,6 @@ linfill_data <- function(data, tstepsize,
 #-----------------------------------------------------------------------------
 
 #' Performs copyfill gapfilling
-#' @export
 copyfill_data <- function(data, tsteps, tstepsize, copyfill=10,
                           start, end, varname, site_log){
   
@@ -265,7 +262,6 @@ copyfill_data <- function(data, tsteps, tstepsize, copyfill=10,
 
 #-----------------------------------------------------------------------------
 #' Synthesizes incoming longwave radiation and air pressure
-#' @export
 gapfill_LWdown_Pair <- function(data, var, var_ind, TairK=NA, RH=NA, 
                                technique=NA, elev=NA, varnames, site_log){
   
@@ -341,7 +337,6 @@ gapfill_LWdown_Pair <- function(data, var, var_ind, TairK=NA, RH=NA,
 #-----------------------------------------------------------------------------
 
 #' Gapfills flux data using linear regression against met variables
-#' @export
 regfill_flux <- function(ydata, traindata, tstepsize, regfill, varname, 
                          swdown_ind, tair_ind, rh_ind,
                          start, end, site_log, ...){
@@ -450,7 +445,6 @@ regfill_flux <- function(ydata, traindata, tstepsize, regfill, varname,
 
 #' Trains multiple linear regression for flux gap-filling 
 #' separately for day and night
-#' @export
 regtrain <- function(traindata, ydata, ...){
     
   # Separate day and night:
@@ -485,7 +479,6 @@ regtrain <- function(traindata, ydata, ...){
 #-----------------------------------------------------------------------------
 
 #' Predict flux values using linear regression parameters
-#' @export
 regpredict <- function(rgrp,traindata, dayn){
   
   # Use existing parameters to make empirical prediction:
@@ -516,7 +509,6 @@ regpredict <- function(rgrp,traindata, dayn){
 #-----------------------------------------------------------------------------
 
 #' Synthesises downward longwave radiation based on Tair and rel humidity
-#' @export
 SynthesizeLWdown <- function(TairK,RH,technique){
   
   #Three techniques available, see Abramowitz et al. (2012),
@@ -558,7 +550,6 @@ SynthesizeLWdown <- function(TairK,RH,technique){
 #-----------------------------------------------------------------------------
 
 #' Synthesises air pressure based on Tair and elevation
-#' @export
 SynthesizePSurf <- function(TairK, elevation, pair_units){
   # Synthesizes PSurf based on temperature and elevation
   

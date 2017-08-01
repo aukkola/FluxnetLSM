@@ -11,7 +11,6 @@
 
 #' Finds variables present in input file
 #' @return list of variables and their attributes
-#' @export
 # Variable names in spreadsheet to be processed:
 findColIndices = function(fileinname, var_names, var_classes, 
                           essential_vars, preferred_vars,
@@ -101,7 +100,6 @@ findColIndices = function(fileinname, var_names, var_classes,
 
 #' Extract time stamp information
 #' @return time stamp variables
-#' @export
 findTimeInfo <- function(time_vars, headers, site_log, datasetname){
     
   ind <- sapply(time_vars, function(x) which(headers==x))
@@ -137,7 +135,6 @@ findTimeInfo <- function(time_vars, headers, site_log, datasetname){
 
 #' Retrieves variable information
 #' @return variable information
-#' @export
 retrieve_varinfo <- function(vars_present, all_vars, attribute){
   
   #Find index for fluxnet variables present in file
@@ -159,7 +156,6 @@ retrieve_varinfo <- function(vars_present, all_vars, attribute){
 
 #' Retrieves original and target variable units
 #' @return original and target units
-#' @export
 retrieve_units <- function(vars_present, all_vars){
   
   #Find index for fluxnet variables present in file
@@ -187,7 +183,6 @@ retrieve_units <- function(vars_present, all_vars){
 
 #' Retrieve variables longnames to be written in NetCDF
 #' @return Long name attributes
-#' @export
 retrieve_atts <- function(vars_present, all_vars){
   
   #Find index for fluxnet variables present in file
@@ -212,7 +207,6 @@ retrieve_atts <- function(vars_present, all_vars){
 
 #' Retrieves acceptable variable ranges
 #' @return variable ranges
-#' @export
 retrieve_ranges <- function(vars_present, all_vars){
 
   #Find index for fluxnet variables present in file
@@ -239,7 +233,6 @@ retrieve_ranges <- function(vars_present, all_vars){
 
 #' Removes duplicate indices if a Fluxnet variable is processed more than once
 #' @return duplicate indices
-#' @export
 remove_duplicates <- function(indices){
   
   #Determine how many variables duplicated
@@ -264,7 +257,6 @@ remove_duplicates <- function(indices){
 
 #' Duplicates columns in Fluxnet data if a variable is being processes multiple times
 #' @return data with duplicated columns
-#' @export
 duplicate_columns <- function(data, vars){
   
   #Find variables that are duplicated

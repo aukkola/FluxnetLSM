@@ -10,7 +10,6 @@
 #' @param vars vector of variable names to plot
 #' @param outfile output path prefix, including directory
 #'
-#' @export
 #' 
 plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
   
@@ -272,7 +271,6 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
 ### The following three functions are reproduced from PALS ###
 
 #' Plots a diurnal cycle
-#' @export
 DiurnalCycle <- function(obslabel,dcdata,varname,ytext,legendtext,
                          timestepsize,whole,plotcolours,modlabel='no',
                          vqcdata=matrix(-1,nrow=1,ncol=1),
@@ -532,7 +530,6 @@ DiurnalCycle <- function(obslabel,dcdata,varname,ytext,legendtext,
 #-----------------------------------------------------------------------------
 
 #' Plots an annual cycle
-#' @export
 AnnualCycle <- function(obslabel,acdata,varname,ytext,legendtext,timestepsize,
                         whole,plotcolours,modlabel='no',plot.cex,na.rm=FALSE){
   ######
@@ -646,7 +643,6 @@ AnnualCycle <- function(obslabel,acdata,varname,ytext,legendtext,timestepsize,
 #-----------------------------------------------------------------------------
 
 #' Plots a smoothed and non-smoothed time seris
-#' @export
 Timeseries <- function(obslabel,tsdata,varname,ytext,legendtext,
                        plotcex,timing,smoothed=FALSE,winsize=1,plotcolours,modlabel='no',
                        vqcdata=matrix(-1,nrow=1,ncol=1),na.rm=FALSE){
