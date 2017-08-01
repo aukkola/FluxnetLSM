@@ -35,27 +35,27 @@ ChangeUnits <- function(datain, varnames, site_log){
       #Recognises original FLUXNET2015 and LaThuile variable names
       
       ## Air temperature (C to K)
-      if(datain$vars[k] == varnames$tair & flx_units[k]=="C" & alma_units[k]=="K"){
+      if(datain$vars[k] %in% varnames$tair & flx_units[k]=="C" & alma_units[k]=="K"){
         datain$data[[k]] <- celsius_to_kelvin(datain$data[[k]])
         
         
       ## CO2: different but equivalent units, do nothing
-      } else if(datain$vars[k] == varnames$co2 & flx_units[k]=="umolCO2/mol" & alma_units[k]=="ppm"){
+      } else if(datain$vars[k] %in% varnames$co2 & flx_units[k]=="umolCO2/mol" & alma_units[k]=="ppm"){
         next
         
         
       ## Rainfall (mm/timestep to mm/s)
-      } else if(datain$vars[k] == varnames$precip & flx_units[k]=="mm" & alma_units[k]=="kg/m2/s"){
+      } else if(datain$vars[k] %in% varnames$precip & flx_units[k]=="mm" & alma_units[k]=="kg/m2/s"){
         datain$data[[k]] <- datain$data[[k]] / tstep
         
         
       ## Air pressure (kPa to Pa) (Not in La Thuile dataset)
-      } else if(datain$vars[k] == varnames$airpressure & flx_units[k]=="kPa" & alma_units[k]=="Pa"){  
+      } else if(datain$vars[k] %in% varnames$airpressure & flx_units[k]=="kPa" & alma_units[k]=="Pa"){  
         datain$data[[k]] <- datain$data[[k]] * 1000
       
         
       ## Photosynthetically Active Radiation (PAR) to SWdown
-      } else if(datain$vars[k]== varnames$par & flx_units[k]=="umol/m2/s" & alma_units[k]=="W/m2"){  
+      } else if(datain$vars[k] %in% varnames$par & flx_units[k]=="umol/m2/s" & alma_units[k]=="W/m2"){  
         
         #Conversion following Monteith & Unsworth (1990), Principles of Environmental Physics
         datain$data[[k]] <- datain$data[[k]] * (1 / 2.3)
@@ -65,24 +65,24 @@ ChangeUnits <- function(datain, varnames, site_log){
         
         
       ## Specific humidity (in kg/kg, calculate from tair, rel humidity and psurf)
-      } else if(datain$vars[k] == varnames$relhumidity & flx_units[k]=="%" & alma_units[k]=="kg/kg"){  
+      } else if(datain$vars[k] %in% varnames$relhumidity & flx_units[k]=="%" & alma_units[k]=="kg/kg"){  
         
         #Find Tair and PSurf units
-        psurf_units <- flx_units[varnames$airpressure]
-        tair_units  <- flx_units[varnames$tair]
+        psurf_units <- flx_units[names(flx_units) %in% varnames$airpressure]
+        tair_units  <- flx_units[names(flx_units) %in% varnames$tair]
         
         #If already converted, reset units to new converted units
-        if(converted[which(datain$vars == varnames$airpressure)]) {
-          psurf_units <- alma_units[varnames$airpressure]         
+        if(converted[which(datain$vars %in% varnames$airpressure)]) {
+          psurf_units <- alma_units[names(alma_units) %in% varnames$airpressure]         
         } 
-        if (converted[which(datain$vars == varnames$tair)]){
-          tair_units <- alma_units[varnames$tair]
+        if (converted[which(datain$vars %in% varnames$tair)]){
+          tair_units <- alma_units[names(alma_units) %in% varnames$tair]
         }          
 
-        datain$data[[k]] <- Rel2SpecHumidity(relHum=datain$data[,varnames$relhumidity], 
-                                             airtemp=datain$data[,varnames$tair], 
+        datain$data[[k]] <- Rel2SpecHumidity(relHum=datain$data[,colnames(datain$data) %in% varnames$relhumidity], 
+                                             airtemp=datain$data[,colnames(datain$data) %in% varnames$tair], 
                                              tair_units=tair_units, 
-                                             pressure=datain$data[,varnames$airpressure], 
+                                             pressure=datain$data[,colnames(datain$data) %in% varnames$airpressure], 
                                              psurf_units=psurf_units,
                                              site_log)
       

@@ -17,8 +17,8 @@ GapfillMet_with_ERA <- function(datain, ERA_file, qc_name, varnames, site_log, .
   ind <- which(datain$categories=="Met")
   
   #Retrieve VPD and air temp units. Used to convert ERAinterim VPD to RH in gapfill function
-  tair_units <- datain$units$original_units[varnames$tair]
-  vpd_units  <- datain$units$original_units[varnames$vpd]
+  tair_units <- datain$units$original_units[names(datain$units$original_units) %in% varnames$tair]
+  vpd_units  <- datain$units$original_units[names(datain$units$original_units) %in% varnames$vpd]
   
   #If not found, set to unknown
   if (is.na(tair_units) | length(tair_units) == 0){ tair_units = "UNKNOWN" }
@@ -321,14 +321,14 @@ GapfillFlux <- function(datain, qc_name, qc_flags, regfill,
   
   #Find Tair, RH/VPD and SWdown index for regression gapfilling
   all_vars   <- datain$vars
-  tair_ind   <- which(all_vars==varnames$tair)[1]
+  tair_ind   <- which(all_vars %in% varnames$tair)[1]
   swdown_ind <- which(all_vars=="SW_IN_F_MDS" | all_vars=="SW_IN_F" | all_vars=="PPFD_f")[1] #leaving this in case of swdown/par issues elsewhere
   
   #Find indices for rel humidity/VPD
-  rh_ind   <- which(all_vars==varnames$relhumidity)[1]
+  rh_ind   <- which(all_vars %in% varnames$relhumidity)[1]
   
   if(length(rh_ind) ==0){
-    rh_ind <- which(all_vars==varnames$vpd)[1]
+    rh_ind <- which(all_vars %in% varnames$vpd)[1]
   }
   
   
@@ -564,14 +564,19 @@ FindExcludeEval <- function(datain, all_missing, gaps, include_all, qc_name){
 #' Find index for a variable and its QC flag
 find_ind_and_qc <- function(inds, var, qc_name=NA){
   
-  var_ind <- sapply(var, function(x) which(names(inds)==x))
+  #Find variable index/indices  
+  var_ind <- sapply(var, function(x)  which(names(inds)==x), simplify=FALSE)
+  
+  #Remove possible empty list elements
+  var_ind <- var_ind[lapply(var_ind,length)>0]
+
   
   #Remove any possible duplicate indices (happens if variable 
   #outputted several times, e.g. RH)
-  if(length(var_ind) > 1) { var_ind <- var_ind[1,] }
+  if(length(var_ind[[1]]) > 1) { var_ind[[1]] <- var_ind[[1]][1] }
   
   if(!is.na(qc_name)){
-    qc_ind  <- sapply(var, function(x) which(names(ind)==paste(x, qc_name, sep=""))) 
+    qc_ind  <- sapply(var, function(x) which(names(inds)==paste(x, qc_name, sep=""))) 
     
     #combine and remove empty entries
     inds <- c(unlist(var_ind), unlist(qc_ind))

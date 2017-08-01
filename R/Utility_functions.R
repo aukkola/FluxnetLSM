@@ -241,18 +241,38 @@ get_varnames <- function(datasetname, flx2015_version){
     ind <- 1
   } 
   
-  tair   <- c("TA_F_MDS", "TA_F", "Ta_f")
-  precip <- c("P", "P_F", "Precip_f")
-  airpressure <- c("PA", "PA_F", "NULL")
-  co2 <- c("CO2_F_MDS", "CO2_F_MDS", "CO2")
-  par <- c("NULL", "NULL", "PPFD_f")
-  relhumidity <- c("RH","RH", "Rh")  
-  lwdown <- c("LW_IN_F_MDS", "LW_IN_F", "LWin")
-  vpd <- c("VPD_F_MDS", "VPD_F", "VPD_f")
+  tair        <- list(c("TA_F_MDS", "TA_F", "TA_ERA"),
+                      c("TA_F"),
+                      c("Ta_f"))
+  precip      <- list(c("P", "P_F", "P_ERA"),
+                      c("P_F"), 
+                      c("Precip_f"))
+  airpressure <- list(c("PA", "PA_ERA", "PA_F"), 
+                      c("PA_F"), 
+                      c("NULL"))
+  co2         <- list(c("CO2_F_MDS"),
+                      c("CO2_F_MDS"),
+                      c("CO2"))
+  par         <- list(c("PPFD_IN"),
+                      c("PPFD_IN"),
+                      c("PPFD_f"))
+  relhumidity <- list(c("RH"),
+                      c("RH"),
+                      c("Rh"))
+  lwdown      <- list(c("LW_IN_F_MDS", "LW_IN_ERA", "LW_IN_F"),
+                      c("LW_IN_F"),
+                      c("LWin"))
+  vpd         <- list(c("VPD_F_MDS", "VPD_ERA", "VPD_F"),
+                      c("VPD_F"),
+                      c("VPD_f"))
+  wind        <- list(c("WS", "WS_ERA", "WS_F"),
+                      c("WS_F"),
+                      c("WS_f"))
   
-  outs <- list(tair=tair[ind], precip=precip[ind], airpressure=airpressure[ind],
-               co2=co2[ind], par=par[ind], relhumidity=relhumidity[ind],
-               lwdown=lwdown[ind], vpd=vpd[ind])
+  
+  outs <- list(tair=tair[[ind]], precip=precip[[ind]], airpressure=airpressure[[ind]],
+               co2=co2[[ind]], par=par[[ind]], relhumidity=relhumidity[[ind]],
+               lwdown=lwdown[[ind]], vpd=vpd[[ind]], wind=wind[[ind]])
   
   return(outs)
   

@@ -64,7 +64,7 @@ gapfill_with_ERA <- function(datain, era_data, era_vars, tair_units, vpd_units,
       
       ### Relative humidity ###
       #If Flux variable relative humidity, but ERA variable VPD, convert
-      if(avail_flux[k] == varnames$relhumidity & avail_era[k]=="VPD_ERA"){
+      if(avail_flux[k] %in% varnames$relhumidity & avail_era[k]=="VPD_ERA"){
         
         era_tair_col <- which(colnames(era_data)=="TA_ERA")
         
@@ -292,7 +292,7 @@ gapfill_LWdown_Pair <- function(data, var, var_ind, TairK=NA, RH=NA,
     rh   <- data$data[,names(RH)]
     
     #First check that have relative humidity in %, not VPD
-    if(names(RH)==varnames$vpd){
+    if(names(RH) %in% varnames$vpd){
       vpd_units  <- data$units$original_units[names(RH)]
       rh         <- VPD2RelHum(VPD=rh, airtemp=tair, vpd_units, tair_units, site_log)
     }
@@ -320,7 +320,8 @@ gapfill_LWdown_Pair <- function(data, var, var_ind, TairK=NA, RH=NA,
       
       #Synthesize
       for(i in missing){
-        data_to_fill[i] <- SynthesizePSurf(tair[i], elev, data$units$original_units[varnames$airpressure])
+        data_to_fill[i] <- SynthesizePSurf(tair[i], elev, data$units$original_units[names(data$units$original_units) %in% 
+                                                                                      varnames$airpressure])
       }
     }
   }
