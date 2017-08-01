@@ -4,7 +4,7 @@
 #'
 #' Converts useful variables from a FLUXNET2015 "FULLSET" spreatsheet format into two
 #' netcdf files, one for fluxes, and one for met forcings. For "SUBSET" data,
-#' set subset="SUBSET" in the main function.
+#' set flx2015_version="SUBSET" in the main function.
 #' 
 #' The user must provide the input directory path, output directory path 
 #' and site code. All other settings are optional. This example uses ERAinterim gapfilling for

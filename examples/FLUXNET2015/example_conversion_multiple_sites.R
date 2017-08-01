@@ -2,8 +2,9 @@
 #'
 #' See LaThuile/example_conversion_multiple_sites.R for the corresponding La Thuile example.
 #'
-#' Converts useful variables from a FLUXNET2015 spreatsheet format into two
-#' netcdf files, one for fluxes, and one for met forcings.
+#' Converts useful variables from a FLUXNET2015 "FULLSET" spreatsheet format into two
+#' netcdf files, one for fluxes, and one for met forcings. For "SUBSET" data,
+#' set flx2015_version="SUBSET" in the main function.
 #' 
 #' The user must provide the input directory path and
 #' output directory path. Code will automatically retrieve
