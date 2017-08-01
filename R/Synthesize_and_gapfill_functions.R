@@ -217,11 +217,11 @@ copyfill_data <- function(data, tsteps, tstepsize, copyfill=10,
     #One or several gaps too large, skip time period
     if(any(consec[,2] - consec[,1] + 1 > max_gap)){
     
-      warn <- paste("Data gap too long in variable ",
-                     varname, " to be gapfilled. Currently set to a maximum ",
-                     "consecutive gap of ", copyfill,
-                     " days. Amend parameter 'copyfill' to ",
-                     "change this.", sep="")
+      warn <- paste("Data gap too long in variable ", varname,
+                    " to be gapfilled. Largest gap is ",
+                    max(consec[,2] - consec[,1] + 1) / (60 * 60 * 20) * tstepsize,
+                    " days, but maximum consecutive gap is set to ", copyfill, " days.",
+                    "Amend parameter 'conv_opts$copyfill' to change this.", sep="")
       site_log <- warn_and_log(warn=warn, site_log=site_log)
       next
     }
@@ -361,10 +361,11 @@ regfill_flux <- function(ydata, traindata, tstepsize, regfill, varname,
       #One or several gaps too large, return warning
       if(any(consec[,2] - consec[,1] + 1 > max_gap)){
         
-        warn <- paste("Data gap too long in variable ",
-                      varname, " to be gapfilled using regfill. Currently set to a maximum ",
-                      "consecutive gap of ", regfill," days. Amend parameter 'regfill' to ",
-                      "change this.", sep="")
+        warn <- paste("Data gap too long in variable ", varname,
+                      " to be gapfilled. Largest gap is ",
+                      max(consec[,2] - consec[,1] + 1) / (60 * 60 * 20) * tstepsize,
+                      " days, but maximum consecutive gap is set to ", regfill, " days.",
+                     "Amend parameter 'conv_opts$regfill' to change this.", sep="")
         site_log <- warn_and_log(warn, site_log)
       }
       
