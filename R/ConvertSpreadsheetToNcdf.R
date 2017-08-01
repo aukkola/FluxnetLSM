@@ -309,14 +309,14 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   
   if(!is.na(conv_opts$met_gapfill) | !is.na(conv_opts$flux_gapfill) | !is.na(conv_opts$aggregate)){
     
-    #If used gapfilling, set missing to zero
+    #If used gapfilling, set missing to 100
     if(!is.na(conv_opts$met_gapfill) | !is.na(conv_opts$flux_gapfill)){
-      miss    <- 0
-      gap_all <- sum(conv_opts$gapfill_all, conv_opts$gapfill_good, conv_opts$gapfill_med,
+      miss    <- 100
+      gap_all <- max(conv_opts$gapfill_all, conv_opts$gapfill_good, conv_opts$gapfill_med,
                      conv_opts$gapfill_poor, conv_opts$missing, na.rm=TRUE)
     } else{
       miss    <- conv_opts$missing
-      gap_all <- sum(conv_opts$gapfill_all, conv_opts$gapfill_good, conv_opts$gapfill_med,
+      gap_all <- max(conv_opts$gapfill_all, conv_opts$gapfill_good, conv_opts$gapfill_med,
                      conv_opts$gapfill_poor, na.rm=TRUE)
     }
     
