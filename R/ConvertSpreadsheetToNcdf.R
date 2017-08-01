@@ -360,10 +360,11 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   # Written as an attribute to file. Calculated before converting
   # data units, i.e. assumes rainfall units mm/timestep
   
-  if(any(DataFromText$attributes[,1]==dataset_vars$precip)){
+  if(any(DataFromText$attributes[,1] %in% dataset_vars$precip)){
     
     #Check that units in mm
-    if(DataFromText$units$original_units[dataset_vars$precip] == "mm"){
+    if(DataFromText$units$original_units[names(DataFromText$units$original_units)
+                                         %in% dataset_vars$precip] == "mm"){
       
       av_precip <- calc_avPrecip(datain=DataFromText, gaps=gaps)
       
@@ -506,6 +507,7 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
                         qcInfo=qc_flags$qc_info,
                         arg_info=arg_info,
                         var_ind=met_limit_ind,
+                        varnames=dataset_vars,
                         modelInfo=model_params)
     
     
@@ -534,6 +536,7 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
                          qcInfo=qc_flags$qc_info,
                          arg_info=arg_info,
                          var_ind=flux_limit_ind,
+                         varnames=dataset_vars,
                          modelInfo=model_params)
     
   }

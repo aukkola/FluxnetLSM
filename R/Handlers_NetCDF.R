@@ -19,6 +19,7 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,            # outfile file 
                                 qcInfo,                          # QC flag values
                                 arg_info,                        # Processing information
                                 var_ind,                         # Indices to extract variables to be written
+                                varnames,                        # Original FLUXNET names corresponding to dataset
                                 modelInfo){                      # Model parameters
 
 
@@ -246,6 +247,7 @@ CreateMetNetcdfFile = function(metfilename, datain,             # outfile file a
                                qcInfo,                          # QC flag values
                                arg_info,                        # Arguments passed to main function
                                var_ind,                         # Indices to extract variables to be written
+                               varnames,                        # Original FLUXNET names corresponding to dataset
                                modelInfo){                      # Model parameters
 
 
@@ -261,6 +263,7 @@ CreateMetNetcdfFile = function(metfilename, datain,             # outfile file a
     # Define x, y and z dimensions
     xd = ncdim_def('x',vals=c(1),units='')
     yd = ncdim_def('y',vals=c(1),units='')
+    zd = ncdim_def('z',vals=c(1),units='')
     dimnchar = ncdim_def("nchar", "", 1:200, create_dimvar=FALSE )
 
     # Determine data start date and time:
@@ -275,12 +278,18 @@ CreateMetNetcdfFile = function(metfilename, datain,             # outfile file a
 
     # VARIABLE DEFINITIONS ##############################################
 
+    #First set correct dimensions (Tair, Qair and Wind need an extra z-dimension)
+    ind_dim <- which(names(datain$out_vars) %in% c(varnames$tair, varnames$relhumidity, varnames$wind))
+    
+    dims    <- lapply(var_ind, function(x) if(x %in% ind_dim) list(xd,yd,zd,td) else list(xd,yd,td))
+    
+    
     # Create variable definitions for time series variables
-    var_defs <- lapply(var_ind, function(x) ncvar_def(name=datain$out_vars[x],
-                                                      units=datain$units$target_units[x],
-                                                      dim=list(xd,yd,td),
-                                                      missval=Nc_MissingVal,
-                                                      longname=datain$attributes[x,2]))
+    var_defs <- mapply(function(i, dim) ncvar_def(name=datain$out_vars[i],
+                                                  units=datain$units$target_units[i],
+                                                  dim=dim, missval=Nc_MissingVal,
+                                                  longname=datain$attributes[i,2]), 
+                       i=var_ind, dim=dims, SIMPLIFY=FALSE)
 
     # Create model variable definitions if applicable
     if(any(!is.na(modelInfo))){

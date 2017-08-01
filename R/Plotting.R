@@ -67,8 +67,8 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
   
   ## If rainfall and air temp being plotted, ##
   ## convert to units mm/timestepsize and deg C             ##
-  if(any(fluxnet_names==varnames$precip)){
-    ind <- which(fluxnet_names==varnames$precip)
+  if(any(fluxnet_names %in% varnames$precip)){
+    ind <- which(fluxnet_names %in% varnames$precip)
     
     #If recognised units, convert to mm/timestep
     if(data_units[[ind]]=="mm/s" | data_units[[ind]]=="mm s-1" | 
@@ -78,8 +78,8 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
       data_units[[ind]] <- paste("mm/", timestepsize/60, "min", sep="")
     }
   }
-  if(any(fluxnet_names==varnames$tair)){
-    ind <- which(fluxnet_names==varnames$tair)
+  if(any(fluxnet_names %in% varnames$tair)){
+    ind <- which(fluxnet_names %in% varnames$tair)
     
     #If recognised units, convert to mm/timestep
     if(data_units[[ind]]=="K"){
