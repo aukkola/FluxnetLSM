@@ -134,7 +134,11 @@ site_csv_file <- system.file("data", "Site_metadata.csv", package = "FluxnetLSM"
 #'
 #' @return metadata list
 #' @export
-get_site_metadata_from_CSV <- function(metadata=NA) {
+get_site_metadata_from_CSV <- function(metadata=NA, incl_processing=TRUE) {
+
+    if (!is.list(metadata)) {
+        metadata <- site_metadata_template(metadata)
+    }
 
     csv_data <- read.csv(site_csv_file, header = TRUE,
                     stringsAsFactors = FALSE)
@@ -160,7 +164,18 @@ get_site_metadata_from_CSV <- function(metadata=NA) {
         message("    ", site_code, " not found in csv_data file")
     }
 
-    return(metadata)
+    if (incl_processing) {
+        warnings <- ""
+        warn_missing_metadata(metadata)
+
+        metadata <- add_processing_metadata(metadata)
+        warnings <- append_and_warn(warn=metadata$warn, warnings, call=FALSE)
+        metadata <- metadata$out
+
+        return(list(out=metadata,warn=warnings))
+    } else {
+        return(metadata)
+    }
 }
 
 
@@ -228,7 +243,7 @@ metadata_list_to_dataframe <- function(metadata_lists) {
 #' Reads all ORNL data into the CSV file
 #' @export
 update_csv_from_web <- function() {
-    csv_data <- get_site_metadata_from_CSV()
+    csv_data <- get_site_metadata_from_CSV(incl_processing=FALSE)
 
     csv_site_codes <- names(csv_data)
 
@@ -465,7 +480,12 @@ get_fluxdata_org_site_metadata <- function(metadata, site_url=NULL) {
 #'
 #' @return metadata list
 #' @export
-get_site_metadata_web <- function(metadata) {
+get_site_metadata_web <- function(metadata, incl_processing=TRUE) {
+
+    if (!is.list(metadata)) {
+        metadata <- site_metadata_template(metadata)
+    }
+
     metadata <- get_fluxdata_org_site_metadata(metadata)
 
     if (any(check_missing(metadata))) {
@@ -475,7 +495,18 @@ get_site_metadata_web <- function(metadata) {
 
     # TODO: Add loaders for OzFlux, AmeriFlux, etc.
 
-    return(metadata)
+    if (incl_processing) {
+        warnings <- ""
+        warn_missing_metadata(metadata)
+
+        metadata <- add_processing_metadata(metadata)
+        warnings <- append_and_warn(warn=metadata$warn, warnings, call=FALSE)
+        metadata <- metadata$out
+
+        return(list(out=metadata,warn=warnings))
+    } else {
+        return(metadata)
+    }
 }
 
 
@@ -525,11 +556,11 @@ get_site_metadata <- function(site_code, incl_processing=TRUE,
     metadata <- site_metadata_template(site_code)
 
     if (use_csv) {
-        metadata <- get_site_metadata_from_CSV(metadata)
+        metadata <- get_site_metadata_from_CSV(metadata, incl_processing=FALSE)
     }
 
     if (any(check_missing(metadata))) {
-        metadata <- get_site_metadata_web(metadata)
+        metadata <- get_site_metadata_web(metadata, incl_processing=FALSE)
     }
 
     warn_missing_metadata(metadata)
