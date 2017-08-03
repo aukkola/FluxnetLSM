@@ -202,7 +202,7 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
   
         #Initialise file
         filename <- paste0(outfile, "Timeseries_", data_vars[n], ".png")
-        png(filename, height=720, width=1800, res=50)
+        png(filename, height=720, width=1800, res=50, pointsize=20)
 
         #Find corresponding QC variable (if available)
         qc_ind <- which(qc_vars==paste(data_vars[n], "_qc", sep=""))
@@ -801,7 +801,7 @@ Timeseries <- function(obslabel,tsdata,varname,ytext,legendtext,
       gapline = (qcliney/(vqcdata[,1]-1))*-1 # 1s will become 'Inf'
       # Plot qc time series line:
       xloc_qc = c(1:length(origline))/length(origline) * length(xloc)
-        lines(xloc_qc,origline,lwd=20,col='gray80', lend=1)
+      lines(xloc_qc,origline,lwd=20,col='gray80', lend=1)
       lines(xloc_qc,gapline,lwd=10,col='indianred', lend=1)
       text(x=xmin,y=qctexty,cex=max((plotcex*0.75),0.85),pos=4,
            labels=paste(qcpc,'% of observed ',varname[1],' is gap-filled:',sep=''))
@@ -887,8 +887,8 @@ Timeseries <- function(obslabel,tsdata,varname,ytext,legendtext,
           origline =	qcliney/(vqcdata[,1]) # 0s will become 'Inf'
           gapline = (qcliney/(vqcdata[,1]-1))*-1 # 1s will become 'Inf'
           # Plot qc time series line:
-          lines(origline,lwd=5,col='gray80')
-          lines(gapline,lwd=2,col='red')
+          lines(origline,lwd=20,col='gray80', lend=1)
+          lines(gapline,lwd=10,col='red', lend=1)
           text(x=stattextx[1],y=qctexty,cex=max((plotcex*0.75),1),pos=4,
                labels=paste(qcpc,'% of time series is gap-filled:',sep=''))
         }
