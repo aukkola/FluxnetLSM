@@ -59,6 +59,7 @@ excess of the thresholds will be discarded.
 a maximum 24 hours (daily). Defaults to NA (no aggregation).
 \item model: Name of land surface model. Used to retrieve model specific attributes, such as site
 plant functional type.
+\item metadata_source: Sources to check for metadata. One of 'all', 'csv', or 'web'.
 }
 }
 \description{

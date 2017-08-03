@@ -4,7 +4,7 @@
 \alias{get_site_metadata_web}
 \title{Tries to load metadata from known Fluxnet info sources on the 'web}
 \usage{
-get_site_metadata_web(metadata)
+get_site_metadata_web(metadata, incl_processing = TRUE)
 }
 \value{
 metadata list
