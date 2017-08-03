@@ -801,8 +801,8 @@ Timeseries <- function(obslabel,tsdata,varname,ytext,legendtext,
       gapline = (qcliney/(vqcdata[,1]-1))*-1 # 1s will become 'Inf'
       # Plot qc time series line:
       xloc_qc = c(1:length(origline))/length(origline) * length(xloc)
-      lines(xloc_qc,origline,lwd=6,col='gray80')
-      lines(xloc_qc,gapline,lwd=3,col='indianred')
+        lines(xloc_qc,origline,lwd=20,col='gray80', lend=1)
+      lines(xloc_qc,gapline,lwd=10,col='indianred', lend=1)
       text(x=xmin,y=qctexty,cex=max((plotcex*0.75),0.85),pos=4,
            labels=paste(qcpc,'% of observed ',varname[1],' is gap-filled:',sep=''))
     }	
