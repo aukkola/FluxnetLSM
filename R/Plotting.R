@@ -97,6 +97,11 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
   
   ## Number of variables to plot ##
   no_vars <- length(data_vars)
+
+
+  ## Site name:
+  site_name <- paste0(ncatt_get(ncfile, 0, attname='site_name')$value, ' (',
+                      ncatt_get(ncfile, 0, attname='site_code')$value, ')')
  
   ### Loop through analysis types ###
   for(k in 1:length(analysis_type)){
@@ -106,6 +111,7 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
     ## Annual cycle ##
     ##################
     if(analysis_type[k]=="annual"){
+      message("Plotting annual cycles")
       
       #Initialise file
       pdf(paste(outfile, "AnnualCycle.pdf", sep=""), height=no_vars*5,
@@ -119,7 +125,7 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
       #Plot
       for(n in 1:length(data)){
         
-        AnnualCycle(obslabel="", acdata=as.matrix(data[[n]]),
+        AnnualCycle(obslabel=site_name, acdata=as.matrix(data[[n]]),
                     varname=data_vars[n], 
                     ytext=paste(data_vars[n], " (", data_units[n], ")", sep=""), 
                     legendtext=data_vars[n], 
@@ -139,6 +145,7 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
     ## Diurnal cycle ## 
     ###################
     } else if(analysis_type[k]=="diurnal"){
+      message("Plotting diurnal cycles")
       
       #Initialise file
       #Each variable is plotted as a separate figure so dimensions handled differently
@@ -188,7 +195,7 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
     ## 14-day running time series ##
     ################################
     } else if(analysis_type[k]=="timeseries"){
-
+      message("Plotting timeseries")
       
       #Plot
       for(n in 1:length(data)){
@@ -221,7 +228,7 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
         }
         
         
-        Timeseries(obslabel="", tsdata=as.matrix(data[[n]]), 
+        Timeseries(obslabel=site_name, tsdata=as.matrix(data[[n]]),
                    varname=data_vars[n],
                    ytext=paste(data_vars[n], " (", data_units[n], ")", sep=""), 
                    legendtext=data_vars[n],
