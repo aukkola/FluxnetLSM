@@ -9,3 +9,4 @@ get_lathuile_datapolicy(site_code, site_use)
 \description{
 Gets La Thuile data policy for each site year
 }
+

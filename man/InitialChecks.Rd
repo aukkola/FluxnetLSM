@@ -10,3 +10,4 @@ InitialChecks(met_gapfill, era_file, missing, aggregate, datasetname,
 \description{
 Performs initial checks on function arguments
 }
+

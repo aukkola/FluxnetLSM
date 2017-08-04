@@ -12,3 +12,4 @@ variable ranges
 \description{
 Retrieves acceptable variable ranges
 }
+

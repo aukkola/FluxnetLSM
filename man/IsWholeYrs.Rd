@@ -9,3 +9,4 @@ IsWholeYrs(datain, gaps, site_log)
 \description{
 Checks that whole years were extracted
 }
+

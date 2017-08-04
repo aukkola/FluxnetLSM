@@ -4,9 +4,9 @@
 \alias{copyfill_data}
 \title{Performs copyfill gapfilling}
 \usage{
-copyfill_data(data, tsteps, tstepsize, copyfill = 10, start, end, varname,
-  site_log)
+copyfill_data(data, tsteps, tstepsize, copyfill = 10, varname, site_log)
 }
 \description{
 Performs copyfill gapfilling
 }
+

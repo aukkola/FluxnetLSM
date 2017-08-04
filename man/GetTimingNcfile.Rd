@@ -9,3 +9,4 @@ GetTimingNcfile(fid)
 \description{
 Gets NC file timing
 }
+

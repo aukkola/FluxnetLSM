@@ -9,3 +9,4 @@ FindExcludeEval(datain, all_missing, gaps, include_all, qc_name)
 \description{
 Finds evaluation variables to exlude
 }
+

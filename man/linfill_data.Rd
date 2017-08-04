@@ -9,3 +9,4 @@ linfill_data(data, tstepsize, linfill = 10)
 \description{
 Performs linear interpolation gapfilling
 }
+

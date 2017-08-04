@@ -9,3 +9,4 @@ no_error(site_log)
 \description{
 Checks if an error has occurred
 }
+

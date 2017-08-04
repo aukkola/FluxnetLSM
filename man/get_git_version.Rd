@@ -11,3 +11,4 @@ get_git_version()
 Gets the git version from the installed package
 See src/zzz.R for how git revision is discovered
 }
+

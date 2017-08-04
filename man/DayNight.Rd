@@ -9,3 +9,4 @@ DayNight(SWdown, units)
 \description{
 Finds day and night time steps
 }
+

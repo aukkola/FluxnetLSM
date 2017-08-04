@@ -4,9 +4,10 @@
 \alias{GapfillFlux}
 \title{Gapfill flux variables using statistical methods}
 \usage{
-GapfillFlux(datain, qc_name, qc_flags, regfill, linfill, copyfill, gaps,
-  varnames, site_log)
+GapfillFlux(datain, qc_name, qc_flags, regfill, linfill, copyfill, varnames,
+  site_log)
 }
 \description{
 Gapfill flux variables using statistical methods
 }
+

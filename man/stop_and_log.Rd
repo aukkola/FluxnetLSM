@@ -9,3 +9,4 @@ stop_and_log(error, site_log)
 \description{
 Writes site log and then aborts, reporting error
 }
+

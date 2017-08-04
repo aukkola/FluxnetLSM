@@ -5,7 +5,8 @@
 \title{Checks for missing and gap-filled data and determines output years}
 \usage{
 CheckDataGaps(datain, qc_flags, missing, gapfill_all, gapfill_good, gapfill_med,
-  gapfill_poor, min_yrs, qc_name, showWarn = TRUE, aggregate = NA, site_log)
+  gapfill_poor, gapfill_era, gapfill_stat, min_yrs, qc_name, aggregate = NA,
+  site_log)
 }
 \arguments{
 \item{datain}{Input data list}
@@ -16,22 +17,22 @@ CheckDataGaps(datain, qc_flags, missing, gapfill_all, gapfill_good, gapfill_med,
 
 \item{gapfill_all}{Threshold for all gap_filling per year (as percentage)}
 
-\item{gapfill_good}{Threshold for good quality gap_filling
+\item{gapfill_good}{Threshold for good quality gap_filling 
 per year (as percentage, ignored if gapfill_all set)}
 
-\item{gapfill_med}{Threshold for medium quality
+\item{gapfill_med}{Threshold for medium quality 
 gap_filling per year (as percentage, ignored if gapfill_all set)}
 
-\item{gapfill_poor}{Threshold for poor quality gap_filling
+\item{gapfill_poor}{Threshold for poor quality gap_filling 
 per year (as percentage, ignored if gapfill_all set)}
 
 \item{min_yrs}{Minimum number of consecutive years}
 
 \item{qc_name}{Name of QC variable of dataset}
 
-\item{showWarn}{Print warning?}
-
 \item{site_log}{Site log}
+
+\item{showWarn}{Print warning?}
 }
 \value{
 out
@@ -39,3 +40,4 @@ out
 \description{
 Checks for missing and gap-filled data and determines output years
 }
+

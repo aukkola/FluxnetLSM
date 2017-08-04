@@ -9,3 +9,4 @@ log_warning(warn, site_log)
 \description{
 Appends warning to site log
 }
+

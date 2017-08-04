@@ -9,3 +9,4 @@ append_and_warn(warn, warnings, call = TRUE)
 \description{
 Appends warning message and calls warning
 }
+

@@ -9,3 +9,4 @@ define_model_params(modelInfo, dims)
 \description{
 Writes model parameters as global attribute to NetCDF file
 }
+

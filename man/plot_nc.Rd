@@ -18,3 +18,4 @@ plot_nc(ncfile, analysis_type, vars, varnames, outfile)
 \description{
 Plots standard analysis plots from netcdf data
 }
+

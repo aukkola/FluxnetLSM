@@ -12,3 +12,4 @@ boolean metadata availability vector
 \description{
 Checks which metadata are missing (correcting for OK NAs)
 }
+

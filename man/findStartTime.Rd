@@ -12,3 +12,4 @@ Functions that assess or convert timing variables.
 \details{
 TODO: Check and merge back in to palsR
 }
+

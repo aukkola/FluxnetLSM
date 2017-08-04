@@ -9,3 +9,4 @@ doydate(doy, leap = FALSE)
 \description{
 Gets the day of month and month, given day of year
 }
+

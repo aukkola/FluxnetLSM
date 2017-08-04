@@ -9,3 +9,4 @@ add_processing_info(ncid, arg_info, datain, cat)
 \description{
 Writes attributes common to met and flux NC files
 }
+
