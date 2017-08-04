@@ -25,7 +25,8 @@
 #' @return out
 CheckDataGaps <- function(datain, qc_flags, missing, gapfill_all, 
                           gapfill_good, gapfill_med, gapfill_poor,
-                          min_yrs, qc_name, aggregate=NA, site_log){
+                          gapfill_era, gapfill_stat, min_yrs, 
+                          qc_name, aggregate=NA, site_log){
   
   #Checks the existence of data gaps and determines which
   #years should be outputted depending on the percentage of missing
@@ -69,9 +70,11 @@ CheckDataGaps <- function(datain, qc_flags, missing, gapfill_all,
     
     #Else use any of good/medium/poor gapfilling thresholds if set
   } else if(any(!is.na(c(gapfill_good, gapfill_med,
-                         gapfill_poor)))){
+                         gapfill_poor, gapfill_era,
+                         gapfill_stat)))){
     
-    threshold <- c(gapfill_good, gapfill_med, gapfill_poor)
+    threshold <- c(gapfill_good, gapfill_med, gapfill_poor,
+                   gapfill_era, gapfill_stat)
     threshold[is.na(threshold)] <- 100 #if any NA, set to 100 (unlimited)
     
     #If none of these are set, return a warning      
@@ -80,15 +83,15 @@ CheckDataGaps <- function(datain, qc_flags, missing, gapfill_all,
     threshold <- NA
     warn <-  paste("Cannot check for the percentage of",
                    "gap-filled data, no thresholds set.",
-                   "Set at least one of 'gapfill_all',",
-                   "'gapfill_good', 'gapfill_med' or",
-                   "'gapfill_poor' to check for gapfilling")
+                   "Set at least one of 'gapfill_all' (default),",
+                   "'gapfill_good', 'gapfill_med',",
+                   "'gapfill_poor', 'gapfill_era' or",
+                   "'gapfill_stat' to check for gapfilling")
     
     warnings <- append_and_warn(warn=warn, warnings)    
   }
   
-  
-  
+
   #Find indices for each start and end of year
   secs_per_day   <- 60*60*24
   tsteps_per_day <- secs_per_day/datain$timestepsize

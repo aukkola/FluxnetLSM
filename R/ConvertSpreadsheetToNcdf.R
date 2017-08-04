@@ -290,14 +290,12 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   }
   
   
-  #################################################################
-  ### Update info on data gaps after gapfilling and aggregating ###
-  #################################################################
+  #######################
+  ### Check data gaps ###
+  #######################
   
-  #Update gaps after gapfilling and/or aggregating. Setting missing to 0 here to make sure
-  #missing met variables not passed through
-  #Setting gapfill_all to gapfill_all+missing so matches the level of missing and
-  #gap-filling originally passed to the function
+  #Check gaps after gapfilling to determine output data periods
+  #according to user-defined thresholds
 
   gaps  <- CheckDataGaps(datain=DataFromText, qc_flags=qc_flags, 
                          missing=conv_opts$missing, 
@@ -305,6 +303,8 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
                          gapfill_good=conv_opts$gapfill_good, 
                          gapfill_med=conv_opts$gapfill_med,
                          gapfill_poor=conv_opts$gapfill_poor,
+                         gapfill_era=conv_opts$gapfill_era,
+                         gapfill_stat=conv_opts$gapfill_stat,                         
                          min_yrs=conv_opts$min_yrs,
                          qc_name=qc_name, 
                          aggregate=conv_opts$aggregate, 
@@ -652,7 +652,15 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
 #' - gapfill_poor: Maximum percentage of time steps allowed to be poor-quality gap-filled
 #'        in any given year. Refer to package documentation for information on QC flags.
 #'        Set to NA if not required (default).
-#'        
+#'     
+#' - gapfill_era: Maximum percentage of time steps allowed to be ERA-Interim gap-filled
+#'        in any given year. Refer to package documentation for information on QC flags.
+#'        Set to NA if not required (default).
+#'     
+#' - gapfill_stat: Maximum percentage of time steps allowed to be statistically gap-filled
+#'        in any given year. Refer to package documentation for information on QC flags.
+#'        Set to NA if not required (default).
+#'                   
 #' - min_yrs: Minimum number of consecutive years to process
 #' 
 #' - linfill: Maximum consecutive length of time (in hours) to be gap-filled
@@ -702,6 +710,8 @@ get_default_conversion_options <- function() {
         gapfill_good = NA,
         gapfill_med = NA,
         gapfill_poor = NA,
+        gapfill_era = NA,
+        gapfill_stat = NA,        
         min_yrs = 2,
         linfill = 4,
         copyfill = 10,
