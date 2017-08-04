@@ -247,13 +247,12 @@ CheckDataGaps <- function(datain, qc_flags, missing, gapfill_all,
         
         #As above, but loop through the three thresholds
         #The square brackets `[[` extract the x-th value from each list element in gaps[essential_ind]
-        exclude_yr <- sapply(1:length(threshold), function(x) any(sapply(gaps[essential_ind], `[[`, x) > threshold[x]) | 
-                               all(sapply(gaps[preferred_ind], `[[`, x) > threshold[x]))
+        exclude_yr <- sapply(1:length(threshold), function(x) any(gaps[x,essential_ind] > threshold[x]) | 
+                               all(gaps[x,preferred_ind] > threshold[x]))
         
         #Check if any evaluation variables have too much gap-filling
         eval_remove[[k]] <- append(eval_remove[[k]], sapply(1:length(threshold), 
-                                  function(x) which(sapply(gaps[eval_ind],
-                                                           `[[`, x)  > threshold[x])))
+                                  function(x) which(gaps[x,eval_ind] > threshold[x])))
         
         if(any(exclude_yr)){
           message("Removing ", year, " due to too much gapfilling in one or more Eval variables.")
