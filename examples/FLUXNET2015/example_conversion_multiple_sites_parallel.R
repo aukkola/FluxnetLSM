@@ -28,6 +28,7 @@ rm(list=ls(all=TRUE))
 # This directory should contain appropriate data from 
 # http://fluxnet.fluxdata.org/data/fluxnet2015-dataset/
 in_path <- "./Inputs"
+ERA_path <- "./ERA_inputs"
 
 #Outputs will be saved to this directory
 out_path <- "./Outputs"
@@ -58,7 +59,7 @@ site_codes <- sapply(infiles, get_path_site_code)
 # Find ERA-files corresponding to site codes
 ERA_gapfill  <- TRUE
 ERA_files <- sapply(site_codes, function(x) {
-                    get_fluxnet_erai_files(in_path, site_code = x,
+                    get_fluxnet_erai_files(ERA_path, site_code = x,
                                            datasetname = conv_opts$datasetname)
                     })
 

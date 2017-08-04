@@ -152,7 +152,15 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
 
 
   #Read site information (lon, lat, elevation)
-  site_info <- get_site_metadata(site_code)
+  if (conv_opts$metadata_source == 'all') {
+      site_info <- get_site_metadata(site_code)
+  } else if (conv_opts$metadata_source == 'csv') {
+      site_info <- get_site_metadata_from_CSV(site_code)
+  } else if (conv_opts$metadata_source == 'web') {
+      site_info <- get_site_metadata_web(site_code)
+  } else {
+      stop("Unknown metadata source '", conv_opts$metadata_source, "'")
+  }
   
   #Log possible warnings and remove warnings from output var
   site_log  <- log_warning(warn=site_info$warn, site_log)
@@ -700,6 +708,8 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
 #' - model: Name of land surface model. Used to retrieve model specific attributes, such as site
 #'        plant functional type.
 #'
+#' - metadata_source: Sources to check for metadata. One of 'all', 'csv', or 'web'.
+#'
 #' @export
 #'
 get_default_conversion_options <- function() {
@@ -725,7 +735,8 @@ get_default_conversion_options <- function() {
         include_all_eval = TRUE,
         aggregate = NA,
         model = NA,
-        limit_vars = NA
+        limit_vars = NA,
+        metadata_source = 'all'
         )
 
     return(conv_opts)

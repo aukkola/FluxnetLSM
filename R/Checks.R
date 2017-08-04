@@ -204,6 +204,8 @@ CheckDataGaps <- function(datain, qc_flags, missing, gapfill_all,
 
   #Loop through years
   for(k in 1:length(start)){
+
+    year = datain$starttime$syear + k - 1
     
     #Extract gap lengths for the year
     gaps <- sapply(perc_gapfilled, function(x) x[,k])
@@ -215,6 +217,7 @@ CheckDataGaps <- function(datain, qc_flags, missing, gapfill_all,
     #First check if too many missing values
     if(any(miss[essential_ind] > missing) | all(miss[preferred_ind] > missing))
     {
+      message("Removing ", year, " due to too many missing values.")
       yr_keep[k] <- FALSE 
     }
     
@@ -233,6 +236,7 @@ CheckDataGaps <- function(datain, qc_flags, missing, gapfill_all,
         # ALL preferred vars have too many gapfilled or missing values,
         # don't process year 
         if(any(gaps[essential_ind] > threshold) | all(gaps[preferred_ind] > threshold)){
+          message("Removing ", year, " due to too many gapfilled or missing values.")
           yr_keep[k] <- FALSE 
         }
         
@@ -251,6 +255,7 @@ CheckDataGaps <- function(datain, qc_flags, missing, gapfill_all,
                                                             function (x) which(gaps[x,eval_ind] > threshold[x])))
         
         if(any(exclude_yr)){
+          message("Removing ", year, " due to too much gapfilling in one or more Eval variables.")
           yr_keep[k] <- FALSE
         }
       }

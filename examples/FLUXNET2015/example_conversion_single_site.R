@@ -29,6 +29,7 @@ site_code <- "AU-How"
 # This directory should contain appropriate data from 
 # http://fluxnet.fluxdata.org/data/fluxnet2015-dataset/
 in_path <- "./Inputs"
+ERA_path <- "./ERA_inputs"
 
 #Outputs will be saved to this directory
 out_path <- "./Outputs"
@@ -43,7 +44,7 @@ infile <- get_fluxnet_files(in_path, site_code)
 datasetversion <- get_fluxnet_version_no(infile)
   
 #Retrieve ERAinterim file
-era_file <- get_fluxnet_erai_files(in_path, site_code)
+era_file <- get_fluxnet_erai_files(ERA_path, site_code)
 
 
 ###############################

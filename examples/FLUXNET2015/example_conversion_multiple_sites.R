@@ -28,6 +28,7 @@ rm(list=ls(all=TRUE))
 # This directory should contain appropriate data from 
 # http://fluxnet.fluxdata.org/data/fluxnet2015-dataset/
 in_path <- "./Inputs"
+ERA_path <- "./ERA_inputs"
 
 #Outputs will be saved to this directory
 out_path <- "./Outputs"
@@ -54,7 +55,7 @@ conv_opts <- get_default_conversion_options()
 # ERAinterim meteo file for gap-filling met data (set to NA if not desired)
 # Find ERA-files corresponding to site codes
 conv_opts$met_gapfill  <- "ERAinterim"
-ERA_files     <- sapply(site_codes, function(x) get_fluxnet_erai_files(in_path, site_code=x))
+ERA_files     <- sapply(site_codes, function(x) get_fluxnet_erai_files(ERA_path, site_code=x))
 
 #Stop if didn't find ERA files
 if(any(sapply(ERA_files, length)==0) & conv_opts$met_gapfill=="ERAinterim"){

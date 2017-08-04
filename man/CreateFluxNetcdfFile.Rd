@@ -6,7 +6,7 @@
 \usage{
 CreateFluxNetcdfFile(fluxfilename, datain, site_code, siteInfo, ind_start,
   ind_end, starttime, flux_varname, cf_name, total_missing, total_gapfilled,
-  qcInfo, arg_info, var_ind, modelInfo)
+  qcInfo, arg_info, var_ind, varnames, modelInfo)
 }
 \description{
 Creates a netcdf file for flux variables
