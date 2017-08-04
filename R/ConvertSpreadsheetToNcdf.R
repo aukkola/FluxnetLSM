@@ -219,10 +219,7 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   site_log <- log_warning(warn=gaps$warn, site_log)
   gaps     <- gaps$out
   
-  
-  ## Check that gap check found whole years ##
-  IsWholeYrs(datain=DataFromText, gaps, site_log)
-  
+    
   
   
   ##############################################
@@ -334,6 +331,11 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   }
   
 
+  
+  ## Check that gap check found whole years ##
+  IsWholeYrs(datain=DataFromText, gaps, site_log)
+  
+  
   ### Save info on which evaluation variables have all values missing ###
   
   #These are excluded when writing NetCDF file
