@@ -214,21 +214,7 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   DataFromText <- FillQCvarMissing(datain=DataFromText, 
                                    gapfillVal=qc_flags$QC_gapfilled, 
                                    qc_name=qc_name)
-  
-  
-  # Check if variables have gaps in the time series and determine what years to output:
-  gaps  <- CheckDataGaps(datain = DataFromText, qc_flags=qc_flags, 
-                         missing=conv_opts$missing, gapfill_all=conv_opts$gapfill_all,
-                         gapfill_good=NA, gapfill_med=NA, gapfill_poor=NA, min_yrs=conv_opts$min_yrs,
-                         qc_name=qc_name, showWarn=FALSE, site_log=site_log)
-  
-  
-  #Log possible warnings and remove warnings from output var
-  site_log <- log_warning(warn=gaps$warn, site_log)
-  gaps     <- gaps$out
-  
     
-  
   
   ##############################################
   ###--- Gapfill meteorological variables ---###
@@ -241,9 +227,10 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
       
       gapfilled_met <- GapfillMet_statistical(datain=DataFromText, qc_name=qc_name, 
                                               qc_flags=qc_flags, copyfill=conv_opts$copyfill,
-                                              linfill=conv_opts$linfill, lwdown_method=conv_opts$lwdown_method,
+                                              linfill=conv_opts$linfill, 
+                                              lwdown_method=conv_opts$lwdown_method,
                                               elevation=site_info$SiteElevation,
-                                              gaps=gaps, varnames=dataset_vars, site_log=site_log)
+                                              varnames=dataset_vars, site_log=site_log)
       
       DataFromText <- gapfilled_met$data
       site_log     <- gapfilled_met$site_log        
@@ -276,7 +263,7 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
     
     gapfilled_flux <- GapfillFlux(DataFromText, qc_name, qc_flags,
                                   conv_opts$regfill, conv_opts$linfill, conv_opts$copyfill,
-                                  gaps, varnames=dataset_vars, site_log)      
+                                  varnames=dataset_vars, site_log)      
     
     DataFromText <- gapfilled_flux$dataout
     site_log     <- gapfilled_flux$site_log
@@ -311,32 +298,17 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   #missing met variables not passed through
   #Setting gapfill_all to gapfill_all+missing so matches the level of missing and
   #gap-filling originally passed to the function
+
+  gaps  <- CheckDataGaps(datain=DataFromText, qc_flags=qc_flags, 
+                         missing=miss, gapfill_all=gap_all,
+                         gapfill_good=NA, gapfill_med=NA,
+                         gapfill_poor=NA, min_yrs=conv_opts$min_yrs,
+                         qc_name=qc_name, showWarn=FALSE, 
+                         aggregate=conv_opts$aggregate, site_log=site_log)
   
-  if(!is.na(conv_opts$met_gapfill) | !is.na(conv_opts$flux_gapfill) | !is.na(conv_opts$aggregate)){
-    
-    #If used gapfilling, set missing to zero
-    if(!is.na(conv_opts$met_gapfill) | !is.na(conv_opts$flux_gapfill)){
-      miss    <- 0
-      gap_all <- sum(conv_opts$gapfill_all, conv_opts$gapfill_good, conv_opts$gapfill_med,
-                     conv_opts$gapfill_poor, conv_opts$missing, na.rm=TRUE)
-    } else{
-      miss    <- conv_opts$missing
-      gap_all <- sum(conv_opts$gapfill_all, conv_opts$gapfill_good, conv_opts$gapfill_med,
-                     conv_opts$gapfill_poor, na.rm=TRUE)
-    }
-    
-    gaps  <- CheckDataGaps(datain=DataFromText, qc_flags=qc_flags, 
-                           missing=miss, gapfill_all=gap_all,
-                           gapfill_good=NA, gapfill_med=NA,
-                           gapfill_poor=NA, min_yrs=conv_opts$min_yrs,
-                           qc_name=qc_name, showWarn=FALSE, 
-                           aggregate=conv_opts$aggregate, site_log=site_log)
-    
-    #Log possible warnings and remove warnings from output var
-    site_log <- log_warning(warn=gaps$warn, site_log)
-    gaps     <- gaps$out
-    
-  }
+  #Log possible warnings and remove warnings from output var
+  site_log <- log_warning(warn=gaps$warn, site_log)
+  gaps     <- gaps$out
   
 
   

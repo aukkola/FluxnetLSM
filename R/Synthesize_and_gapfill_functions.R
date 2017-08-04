@@ -197,7 +197,7 @@ linfill_data <- function(data, tstepsize,
 
 #' Performs copyfill gapfilling
 copyfill_data <- function(data, tsteps, tstepsize, copyfill=10,
-                          start, end, varname, site_log){
+                          varname, site_log){
   
   
   #Max number of consecutive time steps allowed
@@ -206,35 +206,47 @@ copyfill_data <- function(data, tsteps, tstepsize, copyfill=10,
   
   
   #First check that no gaps are longer than "copyfill"
-  for(n in 1:length(start)){
     
-    #Find missing values
-    missing <- which(is.na(data[start[n]:end[n]]))
+  #Find missing values
+  missing <- which(is.na(data))
+  
+  #If found missing, gapfill
+  if(length(missing) > 0){
     
     consec <- seqToIntervals(missing)
     consec <- matrix(consec, ncol=2) #convert to matrix
     
-    #One or several gaps too large, skip time period
+    #One or several gaps too large, warn
     if(any(consec[,2] - consec[,1] + 1 > max_gap)){
     
       warn <- paste("Data gap too long in variable ", varname,
-                    " to be gapfilled. Largest gap is ",
+                    " to be fully gapfilled. Largest gap is ",
                     max(consec[,2] - consec[,1] + 1) / (60 * 60 * 20) * tstepsize,
                     " days, but maximum consecutive gap is set to ", copyfill, " days.",
                     "Amend parameter 'conv_opts$copyfill' to change this.", sep="")
       site_log <- warn_and_log(warn=warn, site_log=site_log)
-      next
     }
     
+    #Only use missing indices for time periods shorter than copyfill
+    rm_ind <- which((consec[,2] - consec[,1] + 1) > max_gap)
+    if(length(rm_ind) > 0) { 
+      consec <- consec[-rm_ind,] 
+    }
     
-    #If found missing, gapfill
-    if(length(missing) > 0){
+    #convert to matrix
+    consec <- matrix(consec, ncol=2) 
+    
+    #Create sequences
+    seq    <- apply(consec, MARGIN=1, function(x) seq(from=x[1], to=x[2]))
+    
+    #Save time periods shorter than copyfill for use in gapfilling
+    missing_all <- unlist(seq)
+
       
+    #If found gaps < copyfill, gapfill
+    if(length(missing_all) > 0){
       #Loop through missing values
-      for(k in missing){
-        
-        #add start to k
-        k <- k + start[n] -1 
+      for(k in missing_all){
         
         #Find same time step for other years
         eqv_tsteps <- which(tsteps==tsteps[k])
@@ -244,16 +256,14 @@ copyfill_data <- function(data, tsteps, tstepsize, copyfill=10,
         
         #Calculate average
         fill_value <- mean(fill_data, na.rm=TRUE)
-                
-        #Replace missing value with this
-        data[k] <- fill_value
         
+        #Replace missing value with this
+        data[k] <- fill_value   
       } 
     }
+  }
     
-  } # time periods
   
-
   #Return gap-filled data and index of missing values
   return(list(data=data, missing=missing, site_log=site_log))
   
@@ -339,7 +349,7 @@ gapfill_LWdown_Pair <- function(data, var, var_ind, TairK=NA, RH=NA,
 #' Gapfills flux data using linear regression against met variables
 regfill_flux <- function(ydata, traindata, tstepsize, regfill, varname, 
                          swdown_ind, tair_ind, rh_ind,
-                         start, end, site_log, ...){
+                         site_log, ...){
   
 
   #Max number of consecutive time steps allowed
@@ -349,43 +359,43 @@ regfill_flux <- function(ydata, traindata, tstepsize, regfill, varname,
   missing_all <- vector()
   
   #First check that no gaps are longer than "regfill"
-  for(n in 1:length(start)){
     
-    #Find missing values
-    missing <- which(is.na(ydata[start[n]:end[n]]))
+  #Find missing values
+  missing <- which(is.na(ydata))
+  
+  if(length(missing) > 0){
     
-    if(length(missing) > 0){
+    consec <- seqToIntervals(missing)
+    
+    #One or several gaps too large, return warning
+    if(any(consec[,2] - consec[,1] + 1 > max_gap)){
       
-      consec <- seqToIntervals(missing)
-      
-      #One or several gaps too large, return warning
-      if(any(consec[,2] - consec[,1] + 1 > max_gap)){
-        
-        warn <- paste("Data gap too long in variable ", varname,
-                      " to be gapfilled. Largest gap is ",
-                      max(consec[,2] - consec[,1] + 1) / (60 * 60 * 20) * tstepsize,
-                      " days, but maximum consecutive gap is set to ", regfill, " days.",
-                     "Amend parameter 'conv_opts$regfill' to change this.", sep="")
-        site_log <- warn_and_log(warn, site_log)
-      }
-      
-      
-      #Only add indices for time periods shorter than regfill
-      rm_ind <- which((consec[,2] - consec[,1] + 1) > max_gap)
-      if(length(rm_ind) > 0) { 
-        consec <- consec[-rm_ind,] 
-      }
-      
-      consec <- matrix(consec, ncol=2) #convert to matrix
-      
-      #Create sequences
-      seq    <- apply(consec, MARGIN=1, function(x) seq(from=x[1], to=x[2]))
-      
-      #Append to missing
-      missing_all <- append(missing_all, unlist(seq)+start[n]-1)    
-      
+      warn <- paste("Data gap too long in variable ", varname,
+                    " to be fully gapfilled. Largest gap is ",
+                    max(consec[,2] - consec[,1] + 1) / (60 * 60 * 20) * tstepsize,
+                    " days, but maximum consecutive gap is set to ", regfill, " days.",
+                    " Amend parameter 'conv_opts$regfill' to change this.", sep="")
+      site_log <- warn_and_log(warn, site_log)
     }
-   }
+    
+    
+    #Only use missing indices for time periods shorter than regfill
+    rm_ind <- which((consec[,2] - consec[,1] + 1) > max_gap)
+    if(length(rm_ind) > 0) { 
+      consec <- consec[-rm_ind,] 
+    }
+    
+    #convert to matrix
+    consec <- matrix(consec, ncol=2) 
+    
+    #Create sequences
+    seq    <- apply(consec, MARGIN=1, function(x) seq(from=x[1], to=x[2]))
+    
+    #Append to missing
+    missing_all <- append(missing_all, unlist(seq))    
+    
+  }
+  
     
   
   #If found missing values:

@@ -85,7 +85,7 @@ GapfillMet_with_ERA <- function(datain, ERA_file, qc_name, varnames, site_log, .
 #' Gapfill meteorological variables using statistical methods
 GapfillMet_statistical <- function(datain, qc_name, qc_flags,
                                    copyfill, linfill, lwdown_method,
-                                   elevation, gaps, varnames, site_log){
+                                   elevation, varnames, site_log){
   
   #Uses several gapfilling methods depending on variable:
   #LWdown and air pressure: synthesis
@@ -161,9 +161,8 @@ GapfillMet_statistical <- function(datain, qc_name, qc_flags,
     #Then use copyfill for longer gaps
     temp_data <- copyfill_data(data=temp_data$data, tsteps=tsteps,
                               tstepsize=datain$timestepsize,
-                              copyfill, start=gaps$tseries_start,
-                              end=gaps$tseries_end,
-                              varname=vars_other[k], site_log)
+                              copyfill, varname=vars_other[k], 
+                              site_log)
     
     
     if(length(temp_data$missing) > 0) {
@@ -232,8 +231,9 @@ GapfillMet_statistical <- function(datain, qc_name, qc_flags,
     if(length(temp_data$missing) > 0){
       
       #Save information to QC flags (creat qc flag if doesn't exist)
-      datain <- update_qc(datain, temp_data, names(lwdown_ind), qc_name, qc_value, 
-                          qc_flags, outname=datain$out_vars[names(lwdown_ind)], cat="Met")  
+      datain <- update_qc(datain, temp_data, names(lwdown_ind), qc_name, 
+                          qc_value, qc_flags, outname=datain$out_vars[names(lwdown_ind)], 
+                          cat="Met")  
     
       #Add gapfilling method 
       datain$gapfill_met[names(lwdown_ind)] <- paste("Synthesis based on", lwdown_method)
@@ -290,7 +290,7 @@ GapfillMet_statistical <- function(datain, qc_name, qc_flags,
 
 #' Gapfill flux variables using statistical methods
 GapfillFlux <- function(datain, qc_name, qc_flags, regfill, 
-                        linfill, copyfill, gaps, varnames, site_log){
+                        linfill, copyfill, varnames, site_log){
   
   #Gapfills short gaps (up to linfill length of time) using
   #linear interpolation
@@ -367,7 +367,6 @@ GapfillFlux <- function(datain, qc_name, qc_flags, regfill,
                                 tstepsize=datain$timestepsize,
                                 regfill, varname=vars[k], 
                                 swdown_ind, tair_ind, rh_ind,
-                                start=gaps$tseries_start, end=gaps$tseries_end, 
                                 site_log=site_log, units=datain$units$original_units[swdown_ind])
     
       
@@ -384,9 +383,7 @@ GapfillFlux <- function(datain, qc_name, qc_flags, regfill,
       #Then use copyfill for longer gaps
       temp_data <- copyfill_data(data=temp_data$data, tsteps=tsteps,
                                  tstepsize=datain$timestepsize,
-                                 copyfill, start=gaps$tseries_start,
-                                 end=gaps$tseries_end,
-                                 varname=vars[k], site_log)
+                                 copyfill, varname=vars[k], site_log)
       
       #Save method info
       if(length(temp_data$missing) > 0) { method <- append(method,"copyfill") } 
