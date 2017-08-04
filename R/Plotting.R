@@ -97,6 +97,11 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
   
   ## Number of variables to plot ##
   no_vars <- length(data_vars)
+
+
+  ## Site name:
+  site_name <- paste0(ncatt_get(ncfile, 0, attname='site_name')$value, ' (',
+                      ncatt_get(ncfile, 0, attname='site_code')$value, ')')
  
   ### Loop through analysis types ###
   for(k in 1:length(analysis_type)){
@@ -106,6 +111,7 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
     ## Annual cycle ##
     ##################
     if(analysis_type[k]=="annual"){
+      message("Plotting annual cycles")
       
       #Initialise file
       pdf(paste(outfile, "AnnualCycle.pdf", sep=""), height=no_vars*5,
@@ -119,12 +125,12 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
       #Plot
       for(n in 1:length(data)){
         
-        AnnualCycle(obslabel="", acdata=as.matrix(data[[n]]),
+        AnnualCycle(obslabel=site_name, acdata=as.matrix(data[[n]]),
                     varname=data_vars[n], 
                     ytext=paste(data_vars[n], " (", data_units[n], ")", sep=""), 
                     legendtext=data_vars[n], 
                     timestepsize=timestepsize,
-                    whole=timing$whole, plotcolours="blue",
+                    whole=timing$whole, plotcolours="black",
                     plot.cex=no_vars/2, na.rm=TRUE)  
       }
   
@@ -139,6 +145,7 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
     ## Diurnal cycle ## 
     ###################
     } else if(analysis_type[k]=="diurnal"){
+      message("Plotting diurnal cycles")
       
       #Initialise file
       #Each variable is plotted as a separate figure so dimensions handled differently
@@ -174,7 +181,7 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
                      varname=data_vars[n], 
                      ytext=paste(data_vars[n], " (", data_units[n], ")", sep=""), 
                      legendtext=data_vars[n], timestepsize=timestepsize,
-                     whole=timing$whole, plotcolours="blue",
+                     whole=timing$whole, plotcolours="black",
                      #vqcdata=as.matrix(var_qc),
                      plot.cex=1, na.rm=TRUE)  
       }
@@ -188,24 +195,15 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
     ## 14-day running time series ##
     ################################
     } else if(analysis_type[k]=="timeseries"){
-
-      #Initialise file
-      pdf(paste(outfile, "Timeseries.pdf", sep=""), height=no_vars*2.2*4, width=no_vars*1.4*7.5)
+      message("Plotting timeseries")
       
-      par(mai=c(0.6+(no_vars/7),1+(no_vars/15),0.7,0.2))
-      par(omi=c(0.8+(no_vars/10),0.5+(no_vars/10),0.2+(no_vars/10),0.1+(no_vars/10)))
-      
-      if(no_vars==1){
-        par(mfrow=c(ceiling(no_vars/2), 1))
-      } else {
-        par(mfrow=c(ceiling(no_vars/2), 2))
-      }
-      
-
       #Plot
       for(n in 1:length(data)){
   
-        
+        #Initialise file
+        filename <- paste0(outfile, "Timeseries_", data_vars[n], ".png")
+        png(filename, height=720, width=1800, res=50, pointsize=20)
+
         #Find corresponding QC variable (if available)
         qc_ind <- which(qc_vars==paste(data_vars[n], "_qc", sep=""))
         
@@ -230,19 +228,19 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
         }
         
         
-        Timeseries(obslabel="", tsdata=as.matrix(data[[n]]), 
+        Timeseries(obslabel=site_name, tsdata=as.matrix(data[[n]]),
                    varname=data_vars[n],
                    ytext=paste(data_vars[n], " (", data_units[n], ")", sep=""), 
                    legendtext=data_vars[n],
                    plotcex=no_vars/2 + 1 , timing=timing, 
                    smoothed = FALSE, winsize = 1, 
-                   plotcolours="blue", 
+                   plotcolours="black",
                    vqcdata = as.matrix(var_qc),
                    na.rm=TRUE)
       
+        dev.off()
       }
 
-    dev.off()  
            
     
     ###################################################
@@ -512,8 +510,8 @@ DiurnalCycle <- function(obslabel,dcdata,varname,ytext,legendtext,
       #Print percentage of data missing if na.rm=TRUE and some data missing
       if(na.rm){
         if(!all(is.na(avday[k,,1])) & any(perc_missing[k,] > 0)){
-          rounded=round(perc_missing[k,],digits=3)
-          text(-1,yaxmax,paste("(",paste(rounded,collapse=", "), ")% data missing", sep=""),
+          rounded=round(100 * perc_missing[k,],digits=1)
+          text(-1,yaxmax,paste(paste(rounded,collapse=", "), "% data missing", sep=""),
                pos=4, col="red")
         }
       }
@@ -803,8 +801,8 @@ Timeseries <- function(obslabel,tsdata,varname,ytext,legendtext,
       gapline = (qcliney/(vqcdata[,1]-1))*-1 # 1s will become 'Inf'
       # Plot qc time series line:
       xloc_qc = c(1:length(origline))/length(origline) * length(xloc)
-      lines(xloc_qc,origline,lwd=6,col='gray80')
-      lines(xloc_qc,gapline,lwd=3,col='indianred')
+      lines(xloc_qc,origline,lwd=20,col='gray80', lend=1)
+      lines(xloc_qc,gapline,lwd=10,col='indianred', lend=1)
       text(x=xmin,y=qctexty,cex=max((plotcex*0.75),0.85),pos=4,
            labels=paste(qcpc,'% of observed ',varname[1],' is gap-filled:',sep=''))
     }	
@@ -889,8 +887,8 @@ Timeseries <- function(obslabel,tsdata,varname,ytext,legendtext,
           origline =	qcliney/(vqcdata[,1]) # 0s will become 'Inf'
           gapline = (qcliney/(vqcdata[,1]-1))*-1 # 1s will become 'Inf'
           # Plot qc time series line:
-          lines(origline,lwd=5,col='gray80')
-          lines(gapline,lwd=2,col='red')
+          lines(origline,lwd=20,col='gray80', lend=1)
+          lines(gapline,lwd=10,col='red', lend=1)
           text(x=stattextx[1],y=qctexty,cex=max((plotcex*0.75),1),pos=4,
                labels=paste(qcpc,'% of time series is gap-filled:',sep=''))
         }
