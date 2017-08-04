@@ -402,7 +402,7 @@ regfill_flux <- function(ydata, traindata, tstepsize, regfill, varname,
   if(length(missing_all) > 0){  
     
     #SWdown, Tair and humidity available
-    if(length(swdown_ind)>0 & length(tair_ind)>0 & length(rh_ind)>0){
+    if(all(is.finite(c(swdown_ind, tair_ind, rh_ind)))){
       
       #Collate training data
       train_data <- as.matrix(cbind(traindata[swdown_ind], traindata[tair_ind],
@@ -410,7 +410,7 @@ regfill_flux <- function(ydata, traindata, tstepsize, regfill, varname,
       colnames(train_data) <- c("SWdown", "Tair", "RH")
       
       #Only SWdown available
-    } else if (length(swdown_ind)>0){
+    } else if (is.finite(swdown_ind)){
       
       #Collate training data
       train_data <- as.matrix(traindata[swdown_ind])
