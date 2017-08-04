@@ -510,8 +510,8 @@ DiurnalCycle <- function(obslabel,dcdata,varname,ytext,legendtext,
       #Print percentage of data missing if na.rm=TRUE and some data missing
       if(na.rm){
         if(!all(is.na(avday[k,,1])) & any(perc_missing[k,] > 0)){
-          rounded=round(perc_missing[k,],digits=3)
-          text(-1,yaxmax,paste("(",paste(rounded,collapse=", "), ")% data missing", sep=""),
+          rounded=round(100 * perc_missing[k,],digits=1)
+          text(-1,yaxmax,paste(paste(rounded,collapse=", "), "% data missing", sep=""),
                pos=4, col="red")
         }
       }
