@@ -580,7 +580,7 @@ AnnualCycle <- function(obslabel,acdata,varname,ytext,legendtext,timestepsize,
   #If all missing, plot empty
   if(all(is.na(data_monthly[,1]))){
     plot(xloc,xloc,type="n",xaxt="n",xlab='Month',ylab=ytext,yaxt="n",
-         cex,cex.axis=plot.cex*1.08,mgp = c(2.5+plot.cex*0.9,0.8,0))
+         cex=plot.cex,cex.axis=plot.cex*1.08,mgp = c(2.5+plot.cex*0.9,0.8,0))
     mtext(side=3, "All values missing", col="red", line=-4, cex=plot.cex)
   } else{
     # Plot model output result:
