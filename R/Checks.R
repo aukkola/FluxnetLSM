@@ -155,11 +155,11 @@ CheckDataGaps <- function(datain, qc_flags, missing, gapfill_all,
           } else {
             
             #Loop through the three gap-filling flags
-            percs <- matrix(NA, nrow=3, ncol=length(start))
-            for(g in 1:3){
+            percs <- matrix(NA, nrow=length(threshold), ncol=length(start))
+            for(g in 1:length(threshold)){
               percs[g,] <- sapply(1:length(start), function(x)
-                length( which(qcdata[start[x]:end[x]] == qc_flags$QC_gapfilled[g])) /
-                  length(start[x]:end[x]) * 100)
+                           length( which(qcdata[start[x]:end[x]] == qc_flags$QC_gapfilled[g])) /
+                           length(start[x]:end[x]) * 100)
             }
             
             perc_gapfilled[[k]] <- percs
@@ -246,12 +246,14 @@ CheckDataGaps <- function(datain, qc_flags, missing, gapfill_all,
       } else {
         
         #As above, but loop through the three thresholds
-        exclude_yr <- sapply(1:length(threshold), function(x) any(gaps[x,essential_ind] > threshold[x]) | 
-                               all(gaps[x,preferred_ind] > threshold[x]))
+        #The square brackets `[[` extract the x-th value from each list element in gaps[essential_ind]
+        exclude_yr <- sapply(1:length(threshold), function(x) any(sapply(gaps[essential_ind], `[[`, x) > threshold[x]) | 
+                               all(sapply(gaps[preferred_ind], `[[`, x) > threshold[x]))
         
         #Check if any evaluation variables have too much gap-filling
         eval_remove[[k]] <- append(eval_remove[[k]], sapply(1:length(threshold), 
-                                                            function (x) which(gaps[x,eval_ind] > threshold[x])))
+                                  function(x) which(sapply(gaps[eval_ind],
+                                                           `[[`, x)  > threshold[x])))
         
         if(any(exclude_yr)){
           message("Removing ", year, " due to too much gapfilling in one or more Eval variables.")
