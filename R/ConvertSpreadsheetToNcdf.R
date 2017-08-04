@@ -300,11 +300,15 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   #gap-filling originally passed to the function
 
   gaps  <- CheckDataGaps(datain=DataFromText, qc_flags=qc_flags, 
-                         missing=miss, gapfill_all=gap_all,
-                         gapfill_good=NA, gapfill_med=NA,
-                         gapfill_poor=NA, min_yrs=conv_opts$min_yrs,
-                         qc_name=qc_name, showWarn=FALSE, 
-                         aggregate=conv_opts$aggregate, site_log=site_log)
+                         missing=conv_opts$missing, 
+                         gapfill_all=conv_opts$gapfill_all,
+                         gapfill_good=conv_opts$gapfill_good, 
+                         gapfill_med=conv_opts$gapfill_med,
+                         gapfill_poor=conv_opts$gapfill_poor,
+                         min_yrs=conv_opts$min_yrs,
+                         qc_name=qc_name, 
+                         aggregate=conv_opts$aggregate, 
+                         site_log=site_log)
   
   #Log possible warnings and remove warnings from output var
   site_log <- log_warning(warn=gaps$warn, site_log)
