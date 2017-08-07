@@ -204,6 +204,9 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
         filename <- paste0(outfile, "Timeseries_", data_vars[n], ".png")
         png(filename, height=720, width=1800, res=50, pointsize=20)
 
+        #Increasing leftside margin to fit y-label
+        par(mai=c(1.7, 2.2, 1.366667, 0.7))
+        
         #Find corresponding QC variable (if available)
         qc_ind <- which(qc_vars==paste(data_vars[n], "_qc", sep=""))
         
@@ -232,7 +235,7 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
                    varname=data_vars[n],
                    ytext=paste(data_vars[n], " (", data_units[n], ")", sep=""), 
                    legendtext=data_vars[n],
-                   plotcex=1.5 , timing=timing, 
+                   plotcex=2 , timing=timing, 
                    smoothed = FALSE, winsize = 1, 
                    plotcolours="black",
                    vqcdata = as.matrix(var_qc),
