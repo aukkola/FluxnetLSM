@@ -232,7 +232,7 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
                    varname=data_vars[n],
                    ytext=paste(data_vars[n], " (", data_units[n], ")", sep=""), 
                    legendtext=data_vars[n],
-                   plotcex=no_vars/2 + 1 , timing=timing, 
+                   plotcex=1.5 , timing=timing, 
                    smoothed = FALSE, winsize = 1, 
                    plotcolours="black",
                    vqcdata = as.matrix(var_qc),
