@@ -112,6 +112,7 @@ clusterMap(cl = cl, function(site_code, infile, ERA_file, datasetversion) {
             site_code = site_code,
             infile = infile,
             era_file = ERA_file,
+            out_path=out_path,
             conv_opts = conv_opts,
             plot = plot,
             datasetversion = datasetversion  # overrides conv_opts
