@@ -492,8 +492,10 @@ InitialChecks <- function(met_gapfill, era_file, missing, aggregate,
                           datasetname, flx2015_version){
   
   #Check that ERA file supplied if using ERAinterim met_gapfilling
-  if(!is.na(met_gapfill) && met_gapfill=="ERAinterim" && is.na(era_file)){
-    stop("Must provide era_file when using ERAinterim gapfilling!")
+  if(!is.na(met_gapfill) && met_gapfill=="ERAinterim"){
+    if (length(era_file) == 0 || is.na(era_file)){
+      stop("Must provide era_file when using ERAinterim gapfilling!")
+    }
   }
   
   #Check that missing is between 0-100
