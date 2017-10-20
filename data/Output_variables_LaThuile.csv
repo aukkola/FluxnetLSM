@@ -2,6 +2,7 @@ Fluxnet_variable,Fluxnet_unit,Fluxnet_class,Output_variable,Output_unit,Longname
 Ta_f,C,numeric,Tair,K,Near surface air temperature,air_temperature,200,333,TRUE,FALSE,Met,TA_ERA,mean
 Ta_fqc,-,numeric,Tair_qc,-,Tair quality control flag,NULL,0,5,FALSE,FALSE,Met,NA,NA
 PPFD_f,umol/m2/s,numeric,SWdown,W/m2,Surface incident shortwave radiation,surface_downwelling_shortwave_flux_in_air,0,1360,TRUE,FALSE,Met,SW_IN_ERA,mean
+PPFD_fqc,-,numeric,SWdown_qc,-,Swdown quality control flag,NULL,0,5,FALSE,FALSE,Met,NA,NA
 SWout,W/m2,numeric,SWup,W/m2,Reflected shortwave radiation,surface_upwelling_shortwave_flux_in_air,-100,1360,FALSE,FALSE,Eval,NA,mean
 LWin,W/m2,numeric,LWdown,W/m2,Surface incident longwave radiation,surface_downwelling_longwave_flux_in_air,0,750,FALSE,FALSE,Met,LW_IN_ERA,mean
 VPD_f,hPa,numeric,VPD,hPa,Vapour pressure deficit,water_vapor_saturation_deficit_in_air,0,100,TRUE,FALSE,Met,VPD_ERA,mean
@@ -9,6 +10,7 @@ VPD_fqc,-,numeric,VPD_qc,-,VPD quality control flag,NULL,0,5,FALSE,FALSE,Met,NA,
 Precip_f,mm,numeric,Rainf,kg/m2/s,Precipitation rate,precipitation_flux,0,0.05,TRUE,FALSE,Met,P_ERA,sum
 Precip_fqc,-,numeric,Rainf_qc,-,Precip quality control flag,NULL,0,5,FALSE,FALSE,Met,NA,NA
 WS_f,m/s,numeric,Wind,m/s,Scalar windspeed,wind_speed,0,75,TRUE,FALSE,Met,WS_ERA,mean
+WS_fqc,-,numeric,Wind_qc,-,Wind quality control flag,NULL,0,5,FALSE,FALSE,Met,NA,NA
 Rh,%,numeric,RH,%,Near surface relative humidity,relative_humidty,0,100,FALSE,FALSE,Met,VPD_ERA,mean
 Rn_f,W/m2,numeric,Rnet,W/m2,Net absorbed radiation,surface_net_downward_radiative_flux,-1000,1360,FALSE,TRUE,Eval,NA,mean
 Rn_fqc,-,numeric,Rnet_qc,-,Rnet quality control flag,NULL,0,5,FALSE,FALSE,Eval,NA,NA
