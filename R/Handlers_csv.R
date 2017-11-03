@@ -212,7 +212,8 @@ convert_LaThuile <- function(infiles, fair_usage=NA, fair_usage_vec=NA,
     ### Find files to process ###
 
     # Find all available data years
-    all_years <- sapply(infiles, function(x) strsplit(x, "[.]")[[1]][2])
+    # TODO: could be improved with package string_r
+    all_years <- regmatches(infiles, regexpr("[0-9]{4}", infiles))
 
     # Find Fair Use years if applicable
     if(!is.na(fair_usage)){

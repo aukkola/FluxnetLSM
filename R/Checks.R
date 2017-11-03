@@ -492,12 +492,14 @@ InitialChecks <- function(met_gapfill, era_file, missing, aggregate,
                           datasetname, flx2015_version){
   
   #Check that ERA file supplied if using ERAinterim met_gapfilling
-  if(!is.na(met_gapfill) & met_gapfill=="ERAinterim" & is.na(era_file)){s
-    stop("Must provide era_file when using ERAinterim gapfilling!")
+  if(!is.na(met_gapfill) && met_gapfill=="ERAinterim"){
+    if (length(era_file) == 0 || is.na(era_file)){
+      stop("Must provide era_file when using ERAinterim gapfilling!")
+    }
   }
   
   #Check that missing is between 0-100
-  if(missing <0 | missing >100 | is.na(missing)){
+  if(missing < 0 || missing >100 || is.na(missing)){
     stop("Argument 'missing' not set correctly, must be a number between 0-100")
   }
   
@@ -508,7 +510,7 @@ InitialChecks <- function(met_gapfill, era_file, missing, aggregate,
     }
   }
   
-  if(datasetname=="FLUXNET2015" & flx2015_version!="FULLSET" & flx2015_version!="SUBSET"){
+  if(datasetname=="FLUXNET2015" && flx2015_version!="FULLSET" && flx2015_version!="SUBSET"){
     stop("Argument 'flx2015_version' not set correctly, please use one of 'FULLSET' and 'SUBSET'.")
   }
   

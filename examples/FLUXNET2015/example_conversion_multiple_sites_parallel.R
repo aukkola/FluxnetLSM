@@ -78,6 +78,7 @@ conv_opts$gapfill_good <- NA #max. percent good-quality gapfilled (optional, ign
 conv_opts$gapfill_med  <- NA #max. percent medium-quality gapfilled (optional, ignored if gapfill_all set)
 conv_opts$gapfill_poor <- NA #max. percent poor-quality gapfilled (optional, ignored if gapfill_all set)
 conv_opts$min_yrs      <- 2  #min. number of consecutive years
+conv_opts$met_gapfill  <- "ERAinterim"  #min. number of consecutive years
 
 #Should code produce plots to visualise outputs? Set to NA if not desired.
 #(annual: average monthly cycle; diurnal: average diurnal cycle by season;
@@ -110,7 +111,8 @@ clusterMap(cl = cl, function(site_code, infile, ERA_file, datasetversion) {
         convert_fluxnet_to_netcdf(
             site_code = site_code,
             infile = infile,
-            ERA_file = ERA_file,
+            era_file = ERA_file,
+            out_path=out_path,
             conv_opts = conv_opts,
             plot = plot,
             datasetversion = datasetversion  # overrides conv_opts
