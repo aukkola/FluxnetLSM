@@ -35,3 +35,5 @@ GPP_DT_VUT_REF,umol/m2/s,numeric,GPP_DT,umol/m2/s,"Gross primary productivity of
 GPP_DT_VUT_SE,umol/m2/s,numeric,GPP_DT_se,umol/m2/s,"Gross primary productivity of CO2 standard error (variable ustar, daytime partitioning)",NULL,-200,200,FALSE,FALSE,Eval,NA,mean
 GPP_NT_VUT_REF,umol/m2/s,numeric,GPP,umol/m2/s,"Gross primary productivity of CO2 (variable ustar, nighttime partitioning)",gross_primary_productivity_of_biomass_expressed_as_carbon,-200,200,FALSE,FALSE,Eval,NA,mean
 GPP_NT_VUT_SE,umol/m2/s,numeric,GPP_se,umol/m2/s,"Gross primary productivity of CO2 standard error (variable ustar, nighttime partitioning)",NULL,-200,200,FALSE,FALSE,Eval,NA,mean
+RECO_NT_VUT_REF,umol/m2/s,numeric,Resp,umol/m2/s,"Ecosystem respiration (variable ustar, nighttime partitioning)",NULL,-200,200,FALSE,FALSE,Eval,NA,mean
+RECO_NT_VUT_SE,umol/m2/s,numeric,Resp_se,umol/m2/s,"Ecosystem respiration standard error (variable ustar, nighttime partitioning)",NULL,-200,200,FALSE,FALSE,Eval,NA,mean
