@@ -164,9 +164,9 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,            # outfile file 
     if(!is.na(siteInfo$CanopyHeight)) {
         ncvar_put(ncid,canheight,vals=siteInfo$CanopyHeight)}
     if(!is.na(siteInfo$IGBP_vegetation_short)) {
-        ncvar_put(ncid,short_veg,vals=siteInfo$IGBP_vegetation_short)}
+        ncvar_put(ncid,short_veg,vals=sprintf("%-200s", siteInfo$IGBP_vegetation_short))}
     if(!is.na(siteInfo$IGBP_vegetation_long)) {
-        ncvar_put(ncid,long_veg,vals=siteInfo$IGBP_vegetation_long)}
+        ncvar_put(ncid,long_veg,vals=sprintf("%-200s", siteInfo$IGBP_vegetation_long))}
 
 
     # Time dependent variables:
@@ -400,9 +400,9 @@ CreateMetNetcdfFile = function(metfilename, datain,             # outfile file a
     if(!is.na(siteInfo$CanopyHeight)) {
         ncvar_put(ncid,canheight,vals=siteInfo$CanopyHeight)}
     if(!is.na(siteInfo$IGBP_vegetation_short)) {
-        ncvar_put(ncid,short_veg,vals=siteInfo$IGBP_vegetation_short)}
+        ncvar_put(ncid,short_veg,vals=sprintf("%-200s", siteInfo$IGBP_vegetation_short))}
     if(!is.na(siteInfo$IGBP_vegetation_long)) {
-        ncvar_put(ncid,long_veg,vals=siteInfo$IGBP_vegetation_long)}
+        ncvar_put(ncid,long_veg,vals=sprintf("%-200s", siteInfo$IGBP_vegetation_long))}
 
 
     # Time dependent variables:
