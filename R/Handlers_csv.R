@@ -391,12 +391,13 @@ convert_OzFlux <- function(infile, tcol) {
   #Get time origin (should be of format "days since 1800-01-01 00:00:00.0")
   time_origin <- strsplit(ncatt_get(nc, tcol$time_names)$units,
                           "days since ")[[1]][2]
+
     
-  #Convert decimal days to date-time (set time zone to GMT to make sure times correct)
+  #Convert decimal days to date-time
   start_time_dates <- as.POSIXct(time_var * 24*60*60,  origin=time_origin, tz="GMT")
   
   #Calculate end time
-  end_time_dates <- start_time_dates + (time_dates[2]-time_dates[1])
+  end_time_dates <- start_time_dates + (start_time_dates[2]-start_time_dates[1])
   
   #Then convert to FLUXNET2015 format
   new_start_time <- format(start_time_dates, "%Y%m%d%H%M")

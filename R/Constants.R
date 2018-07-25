@@ -14,7 +14,7 @@
 # Variable names in spreadsheet to be processed:
 findColIndices <-  function(fileinname, var_names, var_classes, 
                             essential_vars, preferred_vars,
-                            time_vars, site_log, ...) {
+                            time_vars, site_log, datasetname, ...) {
   
   #CSV files in Fluxnet2015 Nov '16 release do not follow a set template
   #and not all files include all variables
@@ -78,7 +78,7 @@ findColIndices <-  function(fileinname, var_names, var_classes,
   
   #Find time information
   #Returns time variables and column classes
-  time_info <- findTimeInfo(time_vars, headers, site_log, ...)
+  time_info <- findTimeInfo(time_vars, headers, site_log, datasetname)
   
   #Check that column indices for time and other variables don't overlap
   if(length(intersect(time_info$ind, ind)) > 0){
