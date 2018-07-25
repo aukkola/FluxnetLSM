@@ -40,8 +40,7 @@ ReadCSVFluxData <- function(fileinname, vars, datasetname, time_vars, site_log, 
           
         } else if (datasetname == "OzFlux") {
           
-          FluxData <- convert_OzFlux(infile=fileinname, tcol=tcol,
-                                     site_log=site_log, ...)
+          FluxData <- convert_OzFlux(infile=fileinname, tcol=tcol)
           
         }
       
