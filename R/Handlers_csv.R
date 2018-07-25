@@ -12,7 +12,7 @@
 #' @param vars data.table of variables and their attributes
 #' @param time_vars vector of time variables
 #' @return list of flux data, variables and timing information
-ReadCSVFluxData <- function(fileinname, vars, datasetname, time_vars, site_log, ...){
+ReadCSVFluxData <- function(fileinname, vars, datasetname, time_vars, site_log, ...) {
 
     ####### First read available variables, corresponding units and ranges ####
 
@@ -28,13 +28,23 @@ ReadCSVFluxData <- function(fileinname, vars, datasetname, time_vars, site_log, 
                            datasetname=datasetname)
 
 
-    # If using La Thuile dataset, convert to Fluxnet2015 format
-    if(datasetname=="LaThuile"){
+    # If using La Thuile or OzFlux dataset, convert time to Fluxnet2015 format
+    if (datasetname=="LaThuile" | datasetname == "OzFlux") {
 
-        FluxData <- convert_LaThuile(infiles=fileinname,
-                                     tcol=tcol,
+      
+        if (datasetname == "LaThuile") {
+          
+          FluxData <- convert_LaThuile(infiles=fileinname,
+                                       tcol=tcol,
+                                       site_log=site_log, ...)
+          
+        } else if (datasetname == "OzFlux") {
+          
+          FluxData <- convert_OzFlux(infile=fileinname, tcol=tcol,
                                      site_log=site_log, ...)
-
+          
+        }
+      
         # Rename time vars and column names to match new structure
         time_vars <- c("TIMESTAMP_START", "TIMESTAMP_END")
 
@@ -42,19 +52,19 @@ ReadCSVFluxData <- function(fileinname, vars, datasetname, time_vars, site_log, 
         tcol$all_names  <- c(tcol$time_names, tcol$names)
 
         colnames(FluxData) <- c(time_vars, colnames(FluxData)[(length(time_vars)+1):ncol(FluxData)])
-
-        # Else assume Fluxnet2015 format
+        
+    # Else assume Fluxnet2015 format
     } else {
-
-        # Read flux tower data (skips unwanted columns):
-        FluxData <- read.csv(file=fileinname, header=TRUE,	colClasses=tcol$classes)
-
+      
+      # Read flux tower data (skips unwanted columns):
+      FluxData <- read.csv(file=fileinname, header=TRUE,	colClasses=tcol$classes)
+      
     }
 
 
     # Sanity check, does variable order in file match that specified in tcols?
     # Ignore any possible duplicates in tcol$all_names before check
-    if(any(colnames(FluxData) != unique(tcol$all_names))) {
+    if (any(colnames(FluxData) != unique(tcol$all_names))) {
         error <- paste("Check variable ordering, variables don't match data",
                        "retrieved from file [ function:", match.call()[[1]], "]")
         stop_and_log(error, site_log)
@@ -76,7 +86,7 @@ ReadCSVFluxData <- function(fileinname, vars, datasetname, time_vars, site_log, 
 
     # Duplicate Fluxnet data column if the same variable needs to be
     # processed several times (e.g. RH converted to RH and Qair)
-    if(ncol(FluxData) != length(tcol$names))
+    if (ncol(FluxData) != length(tcol$names))
     {
 
         FluxData <- duplicate_columns(data=FluxData, vars=tcol$names)
@@ -134,7 +144,7 @@ ReadCSVFluxData <- function(fileinname, vars, datasetname, time_vars, site_log, 
     # Note number of time steps in data:
     ntsteps <- nrow(FluxTime)
 
-    if(!(ntsteps>=12 && ntsteps < 1e9)){
+    if (!(ntsteps>=12 && ntsteps < 1e9)) {
         error <- paste('Unable to determine number of time steps in:',
                        stripFilename(fileinname))
         stop_and_log(error, site_log)
@@ -147,7 +157,7 @@ ReadCSVFluxData <- function(fileinname, vars, datasetname, time_vars, site_log, 
 
     timestepsize <- as.numeric(end) - as.numeric(start)
 
-    if( !(timestepsize>=300 && timestepsize<=86400) ){
+    if ( !(timestepsize>=300 && timestepsize<=86400) ) {
         error <- paste("Time step size must be between",
                        "300 and 86400 seconds. Time step size",
                        timestepsize, "found in file")
@@ -182,7 +192,7 @@ ReadCSVFluxData <- function(fileinname, vars, datasetname, time_vars, site_log, 
 #-----------------------------------------------------------------------------
 
 #' Reads ERA data and extracts time steps corresponding to obs
-read_era <- function(ERA_file, datain){
+read_era <- function(ERA_file, datain) {
 
     # read data
     era_data <- read.csv(ERA_file, header=TRUE, colClasses=c("character", "character",
@@ -205,7 +215,7 @@ read_era <- function(ERA_file, datain){
 
 #' Converts La Thuile files to FLUXNET2015 format
 convert_LaThuile <- function(infiles, fair_usage=NA, fair_usage_vec=NA,
-                             min_yrs, tcol, site_log, site_code){
+                             min_yrs, tcol, site_log, site_code) {
 
     library(R.utils) # seqToIntervals
 
@@ -213,10 +223,12 @@ convert_LaThuile <- function(infiles, fair_usage=NA, fair_usage_vec=NA,
 
     # Find all available data years
     # TODO: could be improved with package string_r
-    all_years <- regmatches(infiles, regexpr("[0-9]{4}", infiles))
+
+    #get years
+    all_years <- regmatches(basename(infiles), regexpr("[0-9]{4}", infiles))
 
     # Find Fair Use years if applicable
-    if(!is.na(fair_usage)){
+    if (!is.na(fair_usage)) {
 
         # Find indices for years that comply with fair use policy
         fair_ind <- unlist(sapply(fair_usage, function(x) which(fair_usage_vec==x)))
@@ -243,11 +255,11 @@ convert_LaThuile <- function(infiles, fair_usage=NA, fair_usage_vec=NA,
     # Find and remove consecutive time periods that are shorter than min_yrs
     rm_ind <- apply(consec, MARGIN=1, function(x) length(x[1]:x[2]) < min_yrs)
 
-    if(any(rm_ind)) consec <- consec[-which(rm_ind), ]
+    if (any(rm_ind)) consec <- consec[-which(rm_ind), ]
 
 
     # If no periods to process, return error
-    if(nrow(consec)==0){
+    if (nrow(consec)==0) {
 
         error <- paste("No years to process,",
                        "available time period too short.")
@@ -263,7 +275,7 @@ convert_LaThuile <- function(infiles, fair_usage=NA, fair_usage_vec=NA,
     data <- vector()
 
     ### If all years consecutive
-    if(nrow(consec)==1){
+    if (nrow(consec)==1) {
 
         # Loop through years
         for(y in consec[1,1]:consec[1,2]){
@@ -296,10 +308,10 @@ convert_LaThuile <- function(infiles, fair_usage=NA, fair_usage_vec=NA,
         # being read
         infile_short <- sapply(infiles, function(x) strsplit(x, site_code)[[1]][2])
 
-        for(y in 1:length(tperiod)){
+        for (y in 1:length(tperiod)) {
 
             # Year available
-            if(any(avail_yrs==tperiod[y])){
+            if (any(avail_yrs==tperiod[y])) {
 
                 # Find file corresponding to year
                 file_to_read <- which(grepl(tperiod[y], infile_short))
@@ -342,7 +354,7 @@ convert_LaThuile <- function(infiles, fair_usage=NA, fair_usage_vec=NA,
 
 
     # Check that time and data matrices have same dimensions
-    if(nrow(new_time) != nrow(data)){
+    if (nrow(new_time) != nrow(data)) {
         stop("Problem appending La Thuile data into a Fluxnet2015 format")
     }
 
@@ -353,3 +365,51 @@ convert_LaThuile <- function(infiles, fair_usage=NA, fair_usage_vec=NA,
     return(converted_data)
 
 }
+
+
+#-----------------------------------------------------------------------------
+
+#' Converts OzFlux files to FLUXNET2015 format
+convert_OzFlux <- function(infile, tcol) {
+  
+  library(ncdf4)
+  
+  #Open file handle
+  nc <- nc_open(infile)
+  
+  #Get data variables
+  data_vars <- as.data.frame(lapply(tcol$names, function(var) ncvar_get(nc, var)))
+  
+  #Set column names
+  colnames(data_vars) <- tcol$names
+  
+  #Get time stamps (this is the start time)
+  time_var <- ncvar_get(nc, tcol$time_names)
+  
+  
+  ### Convert time stamps to FLUXNET2015 format ###
+  
+  #Get time origin (should be of format "days since 1800-01-01 00:00:00.0")
+  time_origin <- strsplit(ncatt_get(nc, tcol$time_names)$units,
+                          "days since ")[[1]][2]
+    
+  #Convert decimal days to date-time (set time zone to GMT to make sure times correct)
+  time_dates <- as.POSIXct(time_var * 24*60*60,  origin=time_origin, tz="GMT")
+  
+  #Then convert to FLUXNET2015 format
+  new_time <- format(time_dates, "%Y%m%d%H%M")
+  
+  
+  #Append new time and data
+  converted_data <- cbind(new_time, data_vars)
+  
+    
+  #Close file
+  nc_close(nc)
+
+  return(converted_data)
+
+}
+
+
+
