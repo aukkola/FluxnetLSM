@@ -85,6 +85,11 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
     time_vars <- c("Year", "DoY", "Time", "DTIME")
     qc_name <- "qc"
     
+  } else if (conv_opts$datasetname=="OzFlux") { 
+    
+    time_vars <- c("time")
+    qc_name <- "_QCFlag"
+    
   } else {
     time_vars <- c("TIMESTAMP_START", "TIMESTAMP_END")
     qc_name <- "_QC"
@@ -115,14 +120,22 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   #Find variable file path (not using data() command directly because reads a CSV with a
   #semicolon separator and this leads to incorrect table headers)
   
-  if(conv_opts$datasetname=="LaThuile"){
-    var_file     <- system.file("data","Output_variables_LaThuile.csv", package="FluxnetLSM")
+  #La Thuile or OzFlux
+  if(conv_opts$datasetname %in% c("LaThuile", "OzFlux")){
     
-    #Fair use information
-    fair_use_file          <- system.file("data","LaThuile_site_policy.csv", package="FluxnetLSM")
-    fair_use_vec           <- read.csv(fair_use_file, header=TRUE, check.names=FALSE)
-    conv_opts$fair_use_vec <- fair_use_vec[fair_use_vec$site==site_code,]
+    var_file     <- system.file("data", paste0("Output_variables_", conv_opts$datasetname, 
+                                               ".csv"), package="FluxnetLSM")
     
+    #Fair use information for La Thuile
+    if(conv_opts$datasetname == "LaThuile") {
+      
+      fair_use_file          <- system.file("data","LaThuile_site_policy.csv", package="FluxnetLSM")
+      fair_use_vec           <- read.csv(fair_use_file, header=TRUE, check.names=FALSE)
+      conv_opts$fair_use_vec <- fair_use_vec[fair_use_vec$site==site_code,]
+      
+      }
+
+  #Fluxnet2015
   } else {
     if(conv_opts$flx2015_version=="SUBSET"){
       var_file <- system.file("data","Output_variables_FLUXNET2015_SUBSET.csv", package="FluxnetLSM")

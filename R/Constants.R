@@ -12,17 +12,32 @@
 #' Finds variables present in input file
 #' @return list of variables and their attributes
 # Variable names in spreadsheet to be processed:
-findColIndices = function(fileinname, var_names, var_classes, 
-                          essential_vars, preferred_vars,
-                          time_vars, site_log, ...) {
+findColIndices <-  function(fileinname, var_names, var_classes, 
+                            essential_vars, preferred_vars,
+                            time_vars, site_log, ...) {
   
   #CSV files in Fluxnet2015 Nov '16 release do not follow a set template
   #and not all files include all variables
   #This function finds which desired variables are present in file
   #and creates a column name and class vector for reading in data
    
-  #Read headers (variable names) of CSV file
-  headers <- read.csv(fileinname, header=FALSE, nrows=1)
+  #Read headers (variable names) of CSV/NetCDF file
+  
+  #NetCDF file
+  if (datasetname == "OzFlux") {
+  
+    #Open file handle
+    nc <- nc_open(fileinname)
+    
+    #Get variable names
+    headers <- c(names(nc$var), names(nc$dim))
+    
+    nc_close(nc)
+    
+  #CSV file
+  } else {
+    headers <- read.csv(fileinname, header=FALSE, nrows=1)
+  }
   
   #Find file header indices corresponding to desired variables
   #(returns an empty integer if cannot find variable)
@@ -102,8 +117,10 @@ findColIndices = function(fileinname, var_names, var_classes,
 #' @return time stamp variables
 findTimeInfo <- function(time_vars, headers, site_log, datasetname){
     
+  #Find index of time variables
   ind <- sapply(time_vars, function(x) which(headers==x))
   
+  #Check that found correct variables
   if(length(ind)!=length(time_vars)) {
     error <- paste("Cannot find time stamp variables in input file.",
                     "Looking for variables", paste(time_vars, collapse=" and "))

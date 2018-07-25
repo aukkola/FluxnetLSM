@@ -151,10 +151,10 @@ initialise_sitelog <- function(site, paths){
 #-----------------------------------------------------------------------------
 
 #' Retrieves QC flag information
-get_qc_flags <- function(dataset, subset=NA){
+get_qc_flags <- function(dataset, subset=NA) {
   
   #FLUXNET2015 subset
-  if(dataset=="FLUXNET2015" & subset=="SUBSET"){
+  if (dataset=="FLUXNET2015" & subset=="SUBSET") {
 
     #1: good quality gapfill, 2: ERA gapfilling, 3: statistical gapfilling
     QCmeasured  <- 0
@@ -169,7 +169,7 @@ get_qc_flags <- function(dataset, subset=NA){
                      sep="")
  
   #FLUXNET2015 fullset or La Thuile
-  } else if ((dataset=="FLUXNET2015" & subset=="FULLSET") | dataset=="LaThuile"){
+  } else if ((dataset=="FLUXNET2015" & subset=="FULLSET") | dataset=="LaThuile") {
     
     #1: good quality gapfill, 2: medium, 3: poor, 
     #4: ERA gapfilling, 5: statistical gapfilling
@@ -187,6 +187,53 @@ get_qc_flags <- function(dataset, subset=NA){
                      ", ERA-Interim gapfilling: ", QCgapfilled[4], 
                      ", Statistical gapfilling: ", QCgapfilled[5],
                      sep="")
+    
+  } else if (dataset == "OzFlux") {  
+    
+    
+    #QC flags in original data
+    qc_flags <- c("QA/QC: Missing value in L1 dataset", 
+                  "QA/QC: L2 Range Check",
+                  "QA/QC: CSAT Diagnostic", 
+                  "QA/QC: LI7500 Diagnostic",
+                  "QA/QC: L2 Diurnal SD Check", 
+                  "QA/QC: Excluded Dates",
+                  "QA/QC: Excluded Hours", 
+                  "QA/QC: Missing value found with QC flag = 0",
+                  "Corrections: Apply Linear",
+                  "Corrections/Combinations: Coordinate Rotation (Ux, Uy, Uz, UxT, UyT, UzT, UxA, UyA, UzA, UxC, UyC, UzC, UxUz, UxUx, UxUy, UyUz, UxUy, UyUy)",
+                  "Corrections/Combinations: Massman Frequency Attenuation Correction (Coord Rotation, Tv_CSAT, Ah_HMP, ps)",
+                  "Corrections/Combinations: Virtual to Actual Fh (Coord Rotation, Massman, Ta_HMP)",
+                  "Corrections/Combinations: WPL correction for flux effects on density measurements (Coord Rotation, Massman, Fhv to Fh, Cc_7500_Av)",
+                  "Corrections/Combinations: Ta from Tv",
+                  "Corrections/Combinations: L3 Range Check",
+                  "Corrections/Combinations: L3 Diurnal SD Check",
+                  "Corrections/Combinations: u* filter",
+                  "Corrections/Combinations: Gap coordination",
+                  "GapFilling: Driver gap filled using ACCESS",
+                  "GapFilling: Used non-rotated covariance",
+                  "GapFilling: Flux gap filled by ANN (SOLO)",
+                  "GapFilling: Flux gap not filled by ANN",
+                  "GapFilling: L4 Range Check",
+                  "GapFilling: L4 Diurnal SD Check",
+                  "GapFilling: Gap filled by climatology",
+                  "GapFilling: Gap filled by interpolation",
+                  "GapFilling: Flux gap filled using ratios",
+                  "Statistical gapfilling performed by FluxnetLSM") #added for package-performed gapfilling
+    
+    
+    #QC flags (70 added for statistical gapfilling, others provided with original data)
+    QCmeasured <- 0
+    
+    QCgapfilled <- c(1:8, 10:21, 30:31, 38:40, 50, 60, 70)
+    
+    #Append qc flags
+    qc_info <- paste0("Measured: ", QCmeasured, ", ", 
+                      paste(mapply(function(qc, name) paste0(name, ": ", qc),
+                            qc=QCgapfilled, name=qc_flags), collapse=(", ")))
+    
+
+    
     
   #Dataset not known  
   } else {
@@ -209,20 +256,20 @@ get_qc_flags <- function(dataset, subset=NA){
 #-----------------------------------------------------------------------------
 
 #' Checks  that FLUXNET2015 version defined correctly
-check_flx2015_version <- function(dataset, version){
+check_flx2015_version <- function(dataset, version) {
   
-  if(dataset=="FLUXNET2015" & (is.na(version) | 
-     (version!="SUBSET" & version!="FULLSET"))){
-    stop(paste("Version of FLUXNET2015 data product not",
-               "specified correctly. Please set parameter",
-               "flx2015_version to 'FULLSET' or 'SUBSET'"))
+  if (dataset=="FLUXNET2015" & (is.na(version) | 
+     (version!="SUBSET" & version!="FULLSET"))) {
+            stop(paste("Version of FLUXNET2015 data product not",
+            "specified correctly. Please set parameter",
+            "flx2015_version to 'FULLSET' or 'SUBSET'"))
   }
 }
 
 #-----------------------------------------------------------------------------
 
 #' Gets possible varnames for FLUXNET FULLSET/SUBSET and La Thuile
-get_varnames <- function(datasetname, flx2015_version){
+get_varnames <- function(datasetname, flx2015_version) {
   
   #These are used for unit conversions etc.
   
@@ -230,44 +277,53 @@ get_varnames <- function(datasetname, flx2015_version){
   #Second FLUXNET2015 SUBSET
   #Third La Thuile
   
-  if(datasetname=="FLUXNET2015" & flx2015_version=="FULLSET"){
-    ind <- 1
-  } else if(datasetname=="FLUXNET2015" & flx2015_version=="SUBSET"){
+  if(datasetname=="FLUXNET2015" & flx2015_version=="SUBSET"){
     ind <- 2
   } else if (datasetname=="LaThuile"){
     ind <- 3
+  } else if (datasetname=="OzFlux"){
+    ind <- 4
   } else {
-    #Else assume FLUXNET2015 fullset format
+    #Else assume FLUXNET2015 fullset format, i.e. if (datasetname=="FLUXNET2015" & flx2015_version=="FULLSET")
     ind <- 1
   } 
   
   tair        <- list(c("TA_F_MDS", "TA_F", "TA_ERA"),
                       c("TA_F"),
-                      c("Ta_f"))
+                      c("Ta_f"),
+                      c("Ta"))
   precip      <- list(c("P", "P_F", "P_ERA"),
                       c("P_F"), 
-                      c("Precip_f"))
+                      c("Precip_f"),
+                      c("Precip"))
   airpressure <- list(c("PA", "PA_ERA", "PA_F"), 
                       c("PA_F"), 
-                      c("NULL"))
+                      c("NULL"),
+                      c("ps"))
   co2         <- list(c("CO2_F_MDS"),
                       c("CO2_F_MDS"),
-                      c("CO2"))
+                      c("CO2"),
+                      c("C_ppm"))
   par         <- list(c("PPFD_IN"),
                       c("PPFD_IN"),
-                      c("PPFD_f"))
+                      c("PPFD_f"),
+                      c("NULL")) #check if available?
   relhumidity <- list(c("RH"),
                       c("RH"),
-                      c("Rh"))
+                      c("Rh"),
+                      c("RH"))
   lwdown      <- list(c("LW_IN_F_MDS", "LW_IN_ERA", "LW_IN_F"),
                       c("LW_IN_F"),
-                      c("LWin"))
+                      c("LWin"),
+                      c("Fld"))
   vpd         <- list(c("VPD_F_MDS", "VPD_ERA", "VPD_F"),
                       c("VPD_F"),
-                      c("VPD_f"))
+                      c("VPD_f"),
+                      c("VPD"))
   wind        <- list(c("WS", "WS_ERA", "WS_F"),
                       c("WS_F"),
-                      c("WS_f"))
+                      c("WS_f"),
+                      c("Ws"))
   
   
   outs <- list(tair=tair[[ind]], precip=precip[[ind]], airpressure=airpressure[[ind]],
