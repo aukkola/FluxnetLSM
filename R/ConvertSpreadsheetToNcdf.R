@@ -402,6 +402,32 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   
   
   
+  ###########################
+  ### Get OzFlux metadata ###
+  ###########################
+  
+  
+  #Original OzFlux files have lots of useful metadata in NC files
+  #Copy these to the new files
+  
+  if (conv_opts$datasetname == "OzFlux") {
+    
+    #Open file handle
+    nc_oz <- nc_open(infile)
+    
+    #Get global attributes
+    global_atts <- ncatt_get(nc, varid=0)
+    
+    #Close file
+    nc_close(nc_oz)
+    
+  } else {
+    global_atts <- NA
+  }
+  
+  
+  
+  
   ####################################################
   ###--- Write output met and flux NetCDF files ---###
   ####################################################
@@ -492,6 +518,7 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
         met_limit_ind <- met_ind
     }
 
+    
     #Write met file
     CreateMetNetcdfFile(metfilename=metfilename, 
                         datain=DataFromText,
@@ -507,7 +534,8 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
                         arg_info=arg_info,
                         var_ind=met_limit_ind,
                         varnames=dataset_vars,
-                        modelInfo=model_params)
+                        modelInfo=model_params,
+                        global_atts=global_atts)
     
     
     
@@ -536,7 +564,8 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
                          arg_info=arg_info,
                          var_ind=flux_limit_ind,
                          varnames=dataset_vars,
-                         modelInfo=model_params)
+                         modelInfo=model_params,
+                         global_atts=global_atts)
     
   }
   

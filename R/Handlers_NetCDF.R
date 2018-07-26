@@ -19,7 +19,8 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,            # outfile file 
                                 arg_info,                        # Processing information
                                 var_ind,                         # Indices to extract variables to be written
                                 varnames,                        # Original FLUXNET names corresponding to dataset
-                                modelInfo){                      # Model parameters
+                                modelInfo,                       # Model parameters
+                                global_atts){                    # Global attributes from original OzFlux nc-files
 
 
     # load netcdf library
@@ -224,6 +225,15 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,            # outfile file 
     }
 
 
+    # Add OzFlux global attributes if using this dataset
+    if (!is.na(global_atts[1])) {
+      
+      lapply(global_atts, function(x) ncatt_put(nc=ncid, varid=0, attname=names(x),
+                                                attval=x))
+    }
+
+    
+    
     # Close netcdf file:
     nc_close(ncid)
 }
@@ -246,8 +256,8 @@ CreateMetNetcdfFile = function(metfilename, datain,             # outfile file a
                                arg_info,                        # Arguments passed to main function
                                var_ind,                         # Indices to extract variables to be written
                                varnames,                        # Original FLUXNET names corresponding to dataset
-                               modelInfo){                      # Model parameters
-
+                               modelInfo,                       # Model parameters
+                               global_atts){                    # Global attributes from original OzFlux nc-files
 
     # load netcdf library
     library(ncdf4)
@@ -465,6 +475,15 @@ CreateMetNetcdfFile = function(metfilename, datain,             # outfile file a
         }
     }
 
+    
+    # Add OzFlux global attributes if using this dataset
+    if (!is.na(global_atts[1])) {
+      
+      lapply(global_atts, function(x) ncatt_put(nc=ncid, varid=0, attname=names(x),
+                                                attval=x))
+    }
+    
+    
     # Close netcdf file:
     nc_close(ncid)
 }
