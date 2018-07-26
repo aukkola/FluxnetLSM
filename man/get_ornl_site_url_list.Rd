@@ -9,4 +9,3 @@ get_ornl_site_url_list(site_code_list)
 \description{
 Get a list of ORNL site URLs from site_status table
 }
-

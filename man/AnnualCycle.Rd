@@ -10,4 +10,3 @@ AnnualCycle(obslabel, acdata, varname, ytext, legendtext, timestepsize, whole,
 \description{
 Plots an annual cycle
 }
-

@@ -9,4 +9,3 @@ GetTimestepSize(fid, timevarname, tunits, ntsteps)
 \description{
 Gets time step size
 }
-

@@ -9,4 +9,3 @@ write_log(site_log)
 \description{
 Writes site log
 }
-

@@ -9,4 +9,3 @@ Yeardays(startyear, ndays)
 \description{
 Finds number of days per year
 }
-

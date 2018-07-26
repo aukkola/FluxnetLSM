@@ -9,4 +9,3 @@ FindTimeVarName(fid)
 \description{
 Finds time variable name
 }
-

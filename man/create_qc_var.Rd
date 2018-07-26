@@ -12,4 +12,3 @@ datain
 \description{
 Creates attributes for a new QC variable
 }
-

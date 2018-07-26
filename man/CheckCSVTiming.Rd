@@ -9,4 +9,3 @@ CheckCSVTiming(datain, site_log)
 \description{
 Checks that have whole number of days in dataset
 }
-

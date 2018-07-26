@@ -10,4 +10,3 @@ GapfillFlux(datain, qc_name, qc_flags, regfill, linfill, copyfill, varnames,
 \description{
 Gapfill flux variables using statistical methods
 }
-

@@ -9,4 +9,3 @@ get_fluxnet_erai_template(site_code, ...)
 \description{
 Gets a Fluxnet ERA interim file template (or full file name if site codes and years are specified)
 }
-

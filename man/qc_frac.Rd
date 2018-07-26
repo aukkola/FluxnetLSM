@@ -11,4 +11,3 @@ qc_frac(data, good_data)
 Calculates fraction of good quality gapfilled and observed data
 for aggregated time steps
 }
-

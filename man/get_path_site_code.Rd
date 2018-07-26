@@ -11,4 +11,3 @@ get_path_site_code(path)
 Gets Fluxnet site_code from Fluxnet file.
 Useful when processing multiple files
 }
-

@@ -9,4 +9,3 @@ update_qc(data, temp_data, varname, qc_name, qc_value, qc_flags, ...)
 \description{
 Updates QC flags after gap-filling
 }
-

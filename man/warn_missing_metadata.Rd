@@ -9,4 +9,3 @@ warn_missing_metadata(metadata)
 \description{
 Warns about missing metadata for the site
 }
-

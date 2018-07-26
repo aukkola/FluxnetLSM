@@ -9,4 +9,3 @@ calc_avPrecip(datain, gaps)
 \description{
 Calculates mean annual precipitation
 }
-

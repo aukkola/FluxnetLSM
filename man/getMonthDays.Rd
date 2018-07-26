@@ -9,4 +9,3 @@ getMonthDays(leap = FALSE)
 \description{
 Gets month indices
 }
-

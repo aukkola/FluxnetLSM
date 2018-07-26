@@ -12,4 +12,3 @@ metadata list
 \description{
 Empty site metadata template, including only the site code
 }
-

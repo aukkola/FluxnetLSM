@@ -9,4 +9,3 @@ append_qc(old_data, new_value, new_name)
 \description{
 Appends information for new QC flag
 }
-

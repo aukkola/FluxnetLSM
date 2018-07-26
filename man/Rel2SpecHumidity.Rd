@@ -12,4 +12,3 @@ specific humidity in kg/kg
 \description{
 Converts relative humidity to specific humidity.
 }
-

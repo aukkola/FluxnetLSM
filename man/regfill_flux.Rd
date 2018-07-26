@@ -10,4 +10,3 @@ regfill_flux(ydata, traindata, tstepsize, regfill, varname, swdown_ind,
 \description{
 Gapfills flux data using linear regression against met variables
 }
-

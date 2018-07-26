@@ -9,4 +9,3 @@ log_error(errtext, site_log)
 \description{
 Append error message to log
 }
-

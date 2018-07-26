@@ -9,4 +9,3 @@ copyfill_data(data, tsteps, tstepsize, copyfill = 10, varname, site_log)
 \description{
 Performs copyfill gapfilling
 }
-

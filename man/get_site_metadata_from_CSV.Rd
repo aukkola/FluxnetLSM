@@ -12,4 +12,3 @@ metadata list
 \description{
 Tries to gather metadata from the included site CSV
 }
-

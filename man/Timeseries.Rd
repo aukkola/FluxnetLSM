@@ -11,4 +11,3 @@ Timeseries(obslabel, tsdata, varname, ytext, legendtext, plotcex, timing,
 \description{
 Plots a smoothed and non-smoothed time seris
 }
-

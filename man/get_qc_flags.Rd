@@ -9,4 +9,3 @@ get_qc_flags(dataset, subset = NA)
 \description{
 Retrieves QC flag information
 }
-

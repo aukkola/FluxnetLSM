@@ -13,4 +13,3 @@ get_fluxnet_file_template(site_code = "[A-Z]{2}-[A-Za-z0-9]{3}",
 \description{
 Gets a Fluxnet file template (or full file name if site codes and years are specified)
 }
-

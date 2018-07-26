@@ -9,4 +9,3 @@ GetTimeUnits(fid, timevarname)
 \description{
 Gets time units
 }
-

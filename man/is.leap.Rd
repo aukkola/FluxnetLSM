@@ -9,4 +9,3 @@ is.leap(year)
 \description{
 Finds leap years
 }
-

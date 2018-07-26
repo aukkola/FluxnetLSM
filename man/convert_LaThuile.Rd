@@ -10,4 +10,3 @@ convert_LaThuile(infiles, fair_usage = NA, fair_usage_vec = NA, min_yrs,
 \description{
 Converts La Thuile files to FLUXNET2015 format
 }
-

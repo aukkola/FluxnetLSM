@@ -9,4 +9,3 @@ regpredict(rgrp, traindata, dayn)
 \description{
 Predict flux values using linear regression parameters
 }
-

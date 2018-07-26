@@ -9,4 +9,3 @@ get_site_code(metadata)
 \description{
 Get site name from metadata
 }
-

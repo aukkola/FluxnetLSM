@@ -12,4 +12,3 @@ data with duplicated columns
 \description{
 Duplicates columns in Fluxnet data if a variable is being processes multiple times
 }
-

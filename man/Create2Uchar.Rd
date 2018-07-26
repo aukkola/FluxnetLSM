@@ -9,4 +9,3 @@ Create2Uchar(intin)
 \description{
 Creates time stamp string
 }
-

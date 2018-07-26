@@ -9,4 +9,3 @@ create_outdir(outdir, site, plots)
 \description{
 Creates output directories and returns log output path
 }
-

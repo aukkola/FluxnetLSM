@@ -9,4 +9,3 @@ get_fluxdata_org_site_codes()
 \description{
 Get all available site codes from site_status table
 }
-

@@ -9,4 +9,3 @@ convertToHoursMins(time, format = "\%02d\%02d")
 \description{
 Utility function to convert minutes to HHMM format
 }
-

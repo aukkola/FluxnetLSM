@@ -9,4 +9,3 @@ save_metadata_list_to_csv(metadata_lists)
 \description{
 Write multiple site metadata to list at once
 }
-

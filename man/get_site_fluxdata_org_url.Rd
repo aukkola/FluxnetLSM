@@ -9,4 +9,3 @@ get_site_fluxdata_org_url(site_code)
 \description{
 Get a single fluxdata_org site URL from site_status table
 }
-

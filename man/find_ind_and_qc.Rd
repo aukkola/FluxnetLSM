@@ -9,4 +9,3 @@ find_ind_and_qc(inds, var, qc_name = NA)
 \description{
 Find index for a variable and its QC flag
 }
-

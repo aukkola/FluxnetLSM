@@ -14,4 +14,3 @@ datain
 Fills QC flags with 3 (poor gap-filling) when
 QC flag missing but data variable available
 }
-

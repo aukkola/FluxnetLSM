@@ -9,4 +9,3 @@ initialise_sitelog(site, paths)
 \description{
 Initialises site log
 }
-

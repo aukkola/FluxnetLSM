@@ -11,4 +11,3 @@ DiurnalCycle(obslabel, dcdata, varname, ytext, legendtext, timestepsize, whole,
 \description{
 Plots a diurnal cycle
 }
-

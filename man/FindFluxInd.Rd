@@ -9,4 +9,3 @@ FindFluxInd(datain, exclude_eval, k, site_log)
 \description{
 Finds indices for flux variables to be outputted
 }
-

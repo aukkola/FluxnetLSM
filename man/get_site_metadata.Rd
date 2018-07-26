@@ -13,4 +13,3 @@ metadata list
 \description{
 Get site metadata. Tries multiple methods to retrieve full metadata
 }
-

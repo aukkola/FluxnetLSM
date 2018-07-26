@@ -10,4 +10,3 @@ GapfillMet_statistical(datain, qc_name, qc_flags, copyfill, linfill,
 \description{
 Gapfill meteorological variables using statistical methods
 }
-

@@ -12,4 +12,3 @@ metadata list
 \description{
 Adds processor metadata, including processor version
 }
-
