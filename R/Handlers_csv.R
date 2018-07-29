@@ -382,7 +382,7 @@ convert_OzFlux <- function(infile, tcol) {
   #Set column names
   colnames(data_vars) <- tcol$names
   
-  #Get time stamps (this is the start time)
+  #Get time stamps (this is the END time; pers. comm. Peter Isaac)
   time_var <- ncvar_get(nc, tcol$time_names)
   
   
@@ -394,10 +394,10 @@ convert_OzFlux <- function(infile, tcol) {
 
     
   #Convert decimal days to date-time
-  start_time_dates <- as.POSIXct(time_var * 24*60*60,  origin=time_origin, tz="GMT")
+  end_time_dates <- as.POSIXct(time_var * 24*60*60,  origin=time_origin, tz="GMT")
   
-  #Calculate end time
-  end_time_dates <- start_time_dates + (start_time_dates[2]-start_time_dates[1])
+  #Calculate start time
+  start_time_dates <- end_time_dates - (end_time_dates[2]-end_time_dates[1])
   
   #Then convert to FLUXNET2015 format
   new_start_time <- format(start_time_dates, "%Y%m%d%H%M")
