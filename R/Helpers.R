@@ -301,8 +301,8 @@ preprocess_OzFlux <- function(infile, outpath) {
   if (any(c(start_day, end_day) != "0101")) {
     
 
-    #Find first instance of Jan 1
-    start_ind <- which(day_month == "0101")[1]
+    #Find second instance of Jan 1 (time stamp at 00:30)
+    start_ind <- which(day_month == "0101")[2]
     
     #Find last instance of Dec 31
     end_ind <- tail(which(day_hour == "0101 00:00"), n=1)
@@ -451,10 +451,6 @@ preprocess_OzFlux <- function(infile, outpath) {
     
     
   }
-  
-  
-  
-
   
 }
 
