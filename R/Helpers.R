@@ -111,6 +111,7 @@ get_lathuile_datapolicy <- function(site_code, site_use){
 #-----------------------------------------------------------------------------
 
 #' Pre-processes OzFlux files that have missing time steps or incomplete years
+#' First gapfills data to complete days (using copyfill) and then removes incomplete years
 #' @export
 preprocess_OzFlux <- function(infile, outpath) {
   
@@ -128,12 +129,19 @@ preprocess_OzFlux <- function(infile, outpath) {
   ### Get timing information ###
   
   #Read time data and origin
+  #Time stamps are the END time of each time step (pers. comm. Peter Isaac)
   time_var <- ncvar_get(nc, "time")
   
   time_origin <- strsplit(ncatt_get(nc, "time")$units, "days since ")[[1]][2]
   
   #Convert to Y-M-D h-m-s
   time_date <- as.POSIXct(time_var * 24*60*60,  origin=time_origin, tz="GMT")
+  
+  #Time step size
+  tstep_size <- time_date[2] - time_date[1]
+  
+  #No. of time steps per day
+  tsteps_per_day <- (24*60) / as.numeric(time_date[2]-time_date[1])
   
   
   
@@ -155,34 +163,121 @@ preprocess_OzFlux <- function(infile, outpath) {
   names(var_data) <- vars[var_inds]  
   
   
-  ### First check if missing first time step ###
   
-  start_time <- format(time_date[1], "%H%M")
+  ### First check if starts/ends at midnight  ###
   
-  #First time step missing
-  if (start_time == "0030") {
+  #time stamp "0030" for start and "0000" for end
+  
+  #Convert time vectors to hours and minutes
+  time_hours_mins <- format(time_date, "%H%M")
+  
+  #Doesn't start at midnight
+  if (as.numeric(time_hours_mins[1]) != as.numeric(tstep_size)) {
     
-    #Fix missing time step by duplicating first available time step
     
-    #First fix time variable (round first available time step to the nearest whole number, i.e. 00:00 start time)
-    time_var <- append(floor(time_var[1]), time_var)
-    
-    #Convert new time vector to Y-M-D h-m-s
-    time_date <- as.POSIXct(time_var * 24*60*60,  origin=time_origin, tz="GMT")
+    #Create midnight time stamp for start day
+    midnight_start <- as.POSIXct(paste(format(time_date[1], "%Y-%m-%d"), "00:00:00 GMT"), 
+                                 tz="GMT") 
 
+    #Calculate number of missing time steps (calculate difference to midnight, accounting for the fact time stamp 
+    #is end time so substract one time step size). Probably a neater way...
+    no_missing_start <- as.numeric(time_date[1] - midnight_start - tstep_size)/ (as.numeric(tstep_size) * 60)
     
-    #For each time-varying variable, copy first time step
-    var_data <- lapply(var_data, function(x) append(x[1], x))
     
-    #Data amended, set rewrite flag to TRUE
-    rewrite_data <- TRUE
+    #Sanity check (no. of missing time steps should be less than time steps per day)
+    if (no_missing_start >= tsteps_per_day) {
+      stop("Not checking for missing time steps correctly!")
+    }
+    
+    
+    #Gapfill if missing tsteps
+    if (no_missing_start > 0) {
+      
+      #Print warning to say modifying data
+      warning(paste0("Modifying start time in file: ", infile))
+      
+      
+      #Fix missing time steps by duplicating first available time step
+      
+      #First fix time variable by adding missing time steps
+      #Calculate new time steps (use next days tsteps for correct decimals and deduct 1 day)
+      new_tsteps <- time_var[(tsteps_per_day - no_missing_start + 1) : (tsteps_per_day)] - 1
+      
+      #Append to time variable
+      time_var <- append(new_tsteps, time_var)
+      
+      
+      #Convert new time vector to Y-M-D h-m-s
+      time_date <- as.POSIXct(time_var * 24*60*60,  origin=time_origin, tz="GMT")
     
       
-  #Else if not midnight, stop to decide what to do
-  } else if (start_time != "0000") {
+      #For each time-varying variable, copy first time step
+      var_data <- lapply(var_data, function(x) append(rep(x[1], no_missing_start), x))
+      
+      #Data amended, set rewrite flag to TRUE
+      rewrite_data <- TRUE
+      
+      
+    }
     
-    stop("Start time unknown, decide on action")
   }
+  
+  ### Then check if ends at midnight ###
+  
+  
+  #Check if ends at midnight (hours "0000")
+  if (time_hours_mins[length(time_hours_mins)] != "0000") {
+  
+
+    #Create midnight time stamp for start day (using next day's midnight)
+    midnight_end <- as.POSIXct(paste(format(time_date[length(time_date)] + tsteps_per_day * tstep_size, "%Y-%m-%d"), 
+                                     "00:00:00 GMT"), tz="GMT") 
+    
+    #Calculate number of missing time steps (calculate difference to midnight, accounting for the fact time stamp 
+    #is end time so substract one time step size). Probably a neater way...
+    no_missing_end <- (as.numeric(midnight_end - time_date[length(time_date)]) * 60) / as.numeric(tstep_size)
+    
+    
+    #Sanity check (no. of missing time steps should be less than time steps per day)
+    if (no_missing_end >= tsteps_per_day) {
+      stop("Not checking for missing time steps correctly!")
+    }
+    
+    
+    #Gapfill if missing tsteps
+    if (no_missing_end > 0) {
+      
+      #Print warning to say modifying data
+      warning(paste0("Modifying end time in file: ", infile))
+              
+              
+      #Fix missing time steps by duplicating last available time step
+      
+      #First calculate no. of time steps available for last day
+      avail_last_day <- tsteps_per_day - no_missing_end
+      
+      #Calculate new time steps (use previous days tsteps for correct decimals and add 1 day)
+      new_end_tsteps <- time_var[(length(time_var) - avail_last_day - no_missing_end + 1) : (length(time_var) - avail_last_day)] + 1
+        
+      
+      #Append to time variable
+      time_var <- append(time_var, new_end_tsteps)
+      
+      
+      #Convert new time vector to Y-M-D h-m-s
+      time_date <- as.POSIXct(time_var * 24*60*60,  origin=time_origin, tz="GMT")
+      
+      
+      #For each time-varying variable, copy first time step
+      var_data <- lapply(var_data, function(x) append(x, rep(x[length(x)], no_missing_end)))
+      
+      #Data amended, set rewrite flag to TRUE
+      rewrite_data <- TRUE
+          
+    }
+      
+  }
+  
   
   
   
@@ -210,8 +305,6 @@ preprocess_OzFlux <- function(infile, outpath) {
     
     #Check that have a whole number of days
     
-    #No. of time steps per day
-    tsteps_per_day <- (24*60) / as.numeric(time_date[2]-time_date[1])
     
     #Total no. of time tsteps
     no_tsteps <- length(start_ind:end_ind)
