@@ -283,7 +283,11 @@ preprocess_OzFlux <- function(infile, outpath) {
   
   ### Then check if have incomplete years ###
   
+  #Day and month
   day_month <- format(time_date, "%m%d")
+  
+  #Day and month, with hour and mins
+  day_hour <- format(time_date, "%m%d %H:%M")
   
   #Get start date
   start_day <- day_month[1]
@@ -293,14 +297,15 @@ preprocess_OzFlux <- function(infile, outpath) {
   
   
   #If not full years, remove incomplete years
-  if (start_day != "0101" | end_day != "1231") {
+  #Because time stamp is the end time, end_day should also be 1 Jan
+  if (any(c(start_day, end_day) != "0101")) {
     
 
     #Find first instance of Jan 1
     start_ind <- which(day_month == "0101")[1]
     
     #Find last instance of Dec 31
-    end_ind <- tail(which(day_month == "1231"), n=1)
+    end_ind <- tail(which(day_hour == "0101 00:00"), n=1)
     
     
     #Check that have a whole number of days
