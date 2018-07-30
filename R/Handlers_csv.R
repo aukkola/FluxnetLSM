@@ -393,7 +393,7 @@ convert_OzFlux <- function(infile, tcol) {
                           "days since ")[[1]][2]
 
     
-  #Convert decimal days to date-time
+  #Convert decimal days to date-time (use GMT as time zone to avoid time offsets)
   end_time_dates <- as.POSIXct(time_var * 24*60*60,  origin=time_origin, tz="GMT")
   
   #Calculate start time
