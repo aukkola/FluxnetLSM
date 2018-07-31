@@ -138,10 +138,10 @@ preprocess_OzFlux <- function(infile, outpath) {
   time_date <- as.POSIXct(time_var * 24*60*60,  origin=time_origin, tz="GMT")
   
   #Time step size
-  tstep_size <- time_date[2] - time_date[1]
+  tstep_size <- difftime(time_date[2], time_date[1], units="mins")
   
   #No. of time steps per day
-  tsteps_per_day <- (24*60) / as.numeric(time_date[2]-time_date[1])
+  tsteps_per_day <- (24*60) / as.numeric(difftime(time_date[2], time_date[1], units="mins"))
   
   
   
@@ -166,23 +166,24 @@ preprocess_OzFlux <- function(infile, outpath) {
   
   ### First check if starts/ends at midnight  ###
   
-  #time stamp "0030" for start and "0000" for end
+  #time stamp "0030" (halfhourly) or "0100" (hourly) for start and "0000" for end
   
-  #Convert time vectors to hours and minutes
-  time_hours_mins <- format(time_date, "%H%M")
+  
+  #Create midnight time stamp for start day
+  midnight_start <- as.POSIXct(paste(format(time_date[1], "%Y-%m-%d"), "00:00:00 GMT"), 
+                               tz="GMT") 
+  
   
   #Doesn't start at midnight
-  if (as.numeric(time_hours_mins[1]) != as.numeric(tstep_size)) {
+  if (as.numeric(difftime(time_date[1], midnight_start, units="mins")) != as.numeric(tstep_size)) {
     
-    
-    #Create midnight time stamp for start day
-    midnight_start <- as.POSIXct(paste(format(time_date[1], "%Y-%m-%d"), "00:00:00 GMT"), 
-                                 tz="GMT") 
 
     #Calculate number of missing time steps (calculate difference to midnight, accounting for the fact  
     #time stamp is end time so substract one time step size). Probably a neater way...
+    #NB. this can become negative when first time step is "0000", in this case remove first 
+    #time step instead of gapfilling a whole day
     no_missing_start <- as.numeric(difftime(time_date[1] -tstep_size, midnight_start, units="mins")) / 
-      as.numeric(tstep_size)
+                        as.numeric(tstep_size)
     
     
     #Sanity check (no. of missing time steps should be less than time steps per day)
@@ -219,11 +220,33 @@ preprocess_OzFlux <- function(infile, outpath) {
       rewrite_data <- TRUE
       
       
+    #If no. of missing time steps negative (i.e. first time stamp is "00:00").
+    #remove first time step
+    } else if (no_missing_start < 0) {
+      
+      #Remove first stamp from time variable
+      time_var <- time_var[-abs(no_missing_start)]
+      
+      #Convert new time vector to Y-M-D h-m-s
+      time_date <- as.POSIXct(time_var * 24*60*60,  origin=time_origin, tz="GMT")
+      
+      
+      #For each time-varying variable, copy first time step
+      var_data <- lapply(var_data, function(x) x[-abs(no_missing_start)])
+      
+      #Data amended, set rewrite flag to TRUE
+      rewrite_data <- TRUE
+      
+      
     }
     
   }
   
   ### Then check if ends at midnight ###
+  
+  
+  #Convert time vectors to hours and minutes
+  time_hours_mins <- format(time_date, "%H%M")
   
   
   #Check if ends at midnight (hours "0000")
@@ -236,7 +259,8 @@ preprocess_OzFlux <- function(infile, outpath) {
     
     #Calculate number of missing time steps (calculate difference to midnight, accounting for the fact time stamp 
     #is end time so substract one time step size). Probably a neater way...
-    no_missing_end <- as.numeric(difftime(midnight_end , time_date[length(time_date)], units="mins")) / as.numeric(tstep_size)
+    no_missing_end <- as.numeric(difftime(midnight_end, time_date[length(time_date)], units="mins")) / 
+                      as.numeric(tstep_size)
     
     
     #Sanity check (no. of missing time steps should be less than time steps per day)
