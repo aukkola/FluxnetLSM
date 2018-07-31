@@ -179,9 +179,10 @@ preprocess_OzFlux <- function(infile, outpath) {
     midnight_start <- as.POSIXct(paste(format(time_date[1], "%Y-%m-%d"), "00:00:00 GMT"), 
                                  tz="GMT") 
 
-    #Calculate number of missing time steps (calculate difference to midnight, accounting for the fact time stamp 
-    #is end time so substract one time step size). Probably a neater way...
-    no_missing_start <- as.numeric(time_date[1] - midnight_start - tstep_size)/ (as.numeric(tstep_size) * 60)
+    #Calculate number of missing time steps (calculate difference to midnight, accounting for the fact  
+    #time stamp is end time so substract one time step size). Probably a neater way...
+    no_missing_start <- as.numeric(difftime(time_date[1] -tstep_size, midnight_start, units="mins")) / 
+      as.numeric(tstep_size)
     
     
     #Sanity check (no. of missing time steps should be less than time steps per day)
@@ -235,7 +236,7 @@ preprocess_OzFlux <- function(infile, outpath) {
     
     #Calculate number of missing time steps (calculate difference to midnight, accounting for the fact time stamp 
     #is end time so substract one time step size). Probably a neater way...
-    no_missing_end <- (as.numeric(midnight_end - time_date[length(time_date)]) * 60) / as.numeric(tstep_size)
+    no_missing_end <- as.numeric(difftime(midnight_end , time_date[length(time_date)], units="mins")) / as.numeric(tstep_size)
     
     
     #Sanity check (no. of missing time steps should be less than time steps per day)
@@ -301,15 +302,20 @@ preprocess_OzFlux <- function(infile, outpath) {
   if (any(c(start_day, end_day) != "0101")) {
     
 
-    #Find second instance of Jan 1 (time stamp at 00:30)
-    start_ind <- which(day_month == "0101")[2]
+    
+    #Create target start time (0101 00:00:00 plus time step size, normally 00:30)
+    #Year not used but included so posixct works
+    target_start <- format(as.POSIXct(paste("2018-01-01 00:00:00 GMT")) + tstep_size, "%m%d %H:%M")
+               
+    
+    #Find first instance of Jan 1 (time stamp at 00:30)
+    start_ind <- which(day_hour == target_start)[1]
     
     #Find last instance of Dec 31
     end_ind <- tail(which(day_hour == "0101 00:00"), n=1)
     
     
     #Check that have a whole number of days
-    
     
     #Total no. of time tsteps
     no_tsteps <- length(start_ind:end_ind)
