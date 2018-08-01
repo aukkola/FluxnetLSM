@@ -458,7 +458,7 @@ preprocess_OzFlux <- function(infile, outpath) {
     
     #For some reason this crashes if using lapply, loop works ok-ish    
     for(a in 1:length(new_atts)){
-      ncatt_put(out_nc, varid=0, attname=names(new_atts[a]), 
+      ncatt_put(out_nc, varid=0, attname=names(new_atts)[a], 
                 attval=unlist(new_atts[a]))
     }
     

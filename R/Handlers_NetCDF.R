@@ -229,12 +229,9 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,            # outfile file 
     if (!is.na(global_atts[1])) {
       
       for(n in 1:length(global_atts)) {
-        print(n)
-        ncatt_put(nc=ncid, varid=0, attname=names(global_atts[[n]]),
+        ncatt_put(nc=ncid, varid=0, attname=names(global_atts)[n],
                   attval=global_atts[[n]])
       }
-      # lapply(global_atts, function(x) ncatt_put(nc=ncid, varid=0, attname=names(x),
-                                                # attval=x))
     }
 
     
@@ -482,17 +479,12 @@ CreateMetNetcdfFile = function(metfilename, datain,             # outfile file a
 
     
     # Add OzFlux global attributes if using this dataset
-    browser()
     if (!is.na(global_atts[1])) {
+      
       for(n in 1:length(global_atts)) {
-        print(n)
- 
-        ncatt_put(nc=ncid, varid=0, attname=names(global_atts[[n]]),
+        ncatt_put(nc=ncid, varid=0, attname=names(global_atts)[n],
                   attval=global_atts[[n]])
       }
-      # 
-      # lapply(global_atts, function(x) ncatt_put(nc=ncid, varid=0, attname=names(x),
-      #                                           attval=x))
     }
     
     
