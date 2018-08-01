@@ -320,6 +320,7 @@ GapfillFlux <- function(datain, qc_name, qc_flags, regfill,
   vars     <- names(ind)
   out_vars <- datain$out_vars[ind]
   
+  browser()
   
   #Find Tair, RH/VPD and SWdown index for regression gapfilling
   all_vars   <- datain$vars
