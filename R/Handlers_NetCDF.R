@@ -35,7 +35,7 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,            # outfile file 
     # Define x, y and z dimensions
     xd = ncdim_def('x',vals=c(1),units='')
     yd = ncdim_def('y',vals=c(1),units='')
-    dimnchar = ncdim_def("nchar", "", 1:200, create_dimvar=FALSE )
+    dimnchar = ncdim_def("nchar", "", 3, unlim=TRUE, create_dimvar=FALSE )
 
     # Determine data start date and time:
     timeunits = CreateTimeunits(starttime)
@@ -110,7 +110,7 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,            # outfile file 
         opt_vars[[ctr]] = long_veg
         ctr <- ctr + 1
     }
-
+    
 
     # END VARIABLE DEFINITIONS #########################################
 
@@ -133,6 +133,8 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,            # outfile file 
               attval=site_code, prec="text")
     ncatt_put(ncid,varid=0,attname='site_name',
               attval=as.character(siteInfo$Fullname), prec="text")
+    ncatt_put(ncid,varid=0,attname='site_description',
+              attval=as.character(siteInfo$Description), prec="text")
     ncatt_put(ncid,varid=0,attname='Fluxnet_dataset_version',
               attval=arg_info$datasetversion, prec="text")
     ncatt_put(ncid,varid=0,attname='QC_flag_descriptions',
