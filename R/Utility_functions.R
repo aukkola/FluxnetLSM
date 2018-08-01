@@ -191,42 +191,82 @@ get_qc_flags <- function(dataset, subset=NA) {
   } else if (dataset == "OzFlux") {  
     
     
-    #QC flags in original data
-    qc_flags <- c(L1_missing      = "QA/QC: Missing value in L1 dataset", 
-                  csat_diag       = "QA/QC: CSAT Diagnostic", 
-                  li7500_diag     = "QA/QC: LI7500 Diagnostic",
-                  L2_diurnal      = "QA/QC: L2 Diurnal SD Check", 
-                  excl_dates      = "QA/QC: Excluded Dates",
-                  excl_hrs        = "QA/QC: Excluded Hours", 
-                  missing_qc      = "QA/QC: Missing value found with QC flag = 0",
-                  linear          = "Corrections: Apply Linear",
-                  coor_rot        = "Corrections/Combinations: Coordinate Rotation (Ux, Uy, Uz, UxT, UyT, UzT, UxA, UyA, UzA, UxC, UyC, UzC, UxUz, UxUx, UxUy, UyUz, UxUy, UyUy)",
-                  atten_corr      = "Corrections/Combinations: Massman Frequency Attenuation Correction (Coord Rotation, Tv_CSAT, Ah_HMP, ps)",
-                  actual_fh       = "Corrections/Combinations: Virtual to Actual Fh (Coord Rotation, Massman, Ta_HMP)",
-                  density_corr    = "Corrections/Combinations: WPL correction for flux effects on density measurements (Coord Rotation, Massman, Fhv to Fh, Cc_7500_Av)",
-                  ta_tv           = "Corrections/Combinations: Ta from Tv",
-                  L3_range        = "Corrections/Combinations: L3 Range Check",
-                  L3_diurnal      = "Corrections/Combinations: L3 Diurnal SD Check",
-                  ustar_filter    = "Corrections/Combinations: u* filter",
-                  gap_coord       = "Corrections/Combinations: Gap coordination",
-                  driver_access   = "GapFilling: Driver gap filled using ACCESS",
-                  non_rotated_cov = "GapFilling: Used non-rotated covariance",
-                  flux_ann        = "GapFilling: Flux gap filled by ANN (SOLO)",
-                  flux_not_ann    = "GapFilling: Flux gap not filled by ANN",
-                  L4_range        = "GapFilling: L4 Range Check",
-                  L4_diurnal      = "GapFilling: L4 Diurnal SD Check",
-                  climatology     = "GapFilling: Gap filled by climatology",
-                  interpolated    = "GapFilling: Gap filled by interpolation",
-                  flux_ratios     = "GapFilling: Flux gap filled using ratios",
-                  statistical     = "Statistical gapfilling performed by FluxnetLSM") #added for package-performed gapfilling
+    #QC flags in original data (this not may be a complete list, combined info from L3 and L6)
+    qc_flags <- c(L1_missing      = "QA/QC: Missing value in L1 dataset",                 #1
+                  L2_range        = "QA/QC: L2 Range Check",                              #2
+                  csat_diag       = "QA/QC: CSAT Diagnostic",                             #3
+                  li7500_diag     = "QA/QC: LI7500 Diagnostic",                           #4
+                  L2_diurnal      = "QA/QC: L2 Diurnal SD Check",                         #5
+                  excl_dates      = "QA/QC: Excluded Dates",                              #6
+                  excl_hrs        = "QA/QC: Excluded Hours",                              #7
+                  missing_qc      = "QA/QC: Missing value found with QC flag = 0",        #8
+                  linear          = "Corrections: Apply Linear",                          #10
+                  coor_rot        = paste0("Corrections/Combinations: Coordinate ",       #11
+                                           "Rotation (Ux, Uy, Uz, UxT, UyT, UzT, UxA,",
+                                           " UyA, UzA, UxC, UyC, UzC, UxUz, UxUx, ",
+                                           "UxUy, UyUz, UxUy, UyUy)"),
+                  atten_corr      = paste0("Corrections/Combinations: Massman ",          #12
+                                           "Frequency Attenuation Correction (Coord ",
+                                           "Rotation, Tv_CSAT, Ah_HMP, ps)"),
+                  actual_fh       = paste0("Corrections/Combinations: Virtual to Actual", #13
+                                           " Fh (Coord Rotation, Massman, Ta_HMP)"),
+                  density_corr    = paste0("Corrections/Combinations: WPL correction ",   #14
+                                           "for flux effects on density "),
+                                           "measurements (Coord Rotation, Massman, ",
+                                           "Fhv to Fh, Cc_7500_Av)"),
+                  ta_tv           = "Corrections/Combinations: Ta from Tv",               #15
+                  L3_range        = "Corrections/Combinations: L3 Range Check",           #16
+                  L3_diurnal      = "Corrections/Combinations: L3 Diurnal SD Check",      #17
+                  ustar_filter    = "Corrections/Combinations: u* filter",                #18
+                  gap_coord       = "Corrections/Combinations: Gap coordination",         #19
+                  driver_access   = "GapFilling: Driver gap filled using ACCESS",         #20
+                  non_rotated_cov = "GapFilling: Used non-rotated covariance",            #21
+                  flux_ann        = "GapFilling: Flux gap filled by ANN (SOLO)",          #30
+                  flux_not_ann    = "GapFilling: Flux gap not filled by ANN",             #31
+                  met_clim        = "GapFilling: Met Gap Filled from Climatology",        #32
+                  met_ratios      = "GapFilling: Gap Filled from Ratios",                 #33
+                  met_interp      = "GapFilling: Gap Filled by Interpolation",            #34
+                  met_replaced    = "GapFilling: Gap Filled by Replacement",              #35
+                  ustar_from_fh   = "GapFilling: u* from Fh",                             #36
+                  ustar_not_fh    = "GapFilling: u* not from Fh",                         #37
+                  L4_range        = "GapFilling: L4 Range Check",                         #38
+                  L4_diurnal      = "GapFilling: L4 Diurnal SD Check",                    #39
+                  climatology     = "GapFilling: Gap filled by climatology",              #40
+                  interpolated    = "GapFilling: Gap filled by interpolation",            #50
+                  albedo_fsd      = paste0("albedo: bad Fsd < threshold (290 W/m2 ",      #51
+                                           "default) only if bad time flag (31) not set"),
+                  albedo_time     = "albedo: bad time flag (not midday 10.00 to 14.00)",  #52
+                  flux_ratios     = "GapFilling: Flux gap filled using ratios",           #60
+                  pm_rst          = paste0("Penman-Monteith: bad rst (rst < 0) only if ", #61
+                                           "bad Uavg (35), bad Fe (33) and bad Fsd (34) ",
+                                           "flags not set"),
+                  pm_fe           = paste0("Penman-Monteith: bad Fe < threshold (0 W/m2 ",#62
+                                           "default) only if bad Fsd (34) flag not set"),
+                  pm_fsd          = paste0("Penman-Monteith: bad Fsd < threshold (10 ",   #63
+                                           "W/m2 default)"),
+                  pm_uavg         = paste0("Penman-Monteith: Uavg == 0 (undefined ",      #64
+                                           "aerodynamic resistance under calm ",
+                                           "conditions) only if bad Fe (33) and bad ",
+                                           "Fsd (34) flags not set"),
+                  part_night      = paste0("Partitioning Night: Re computed from ",       #70
+                                           "exponential temperature response curves"),    
+                  part_day        = paste0("Partitioning Day: GPP/Re computed from ",     #80
+                                           "light-response curves, GPP = Re - Fc"),
+                  part_day_night  = "Partitioning Day: GPP night mask",                   #81
+                  part_day_fc     = "Partitioning Day: Fc > Re, GPP = 0, Re = Fc",        #82
+                  
+                  statistical     = paste0("Statistical gapfilling performed by ",        #100, added for package-performed gapfilling
+                                           "FluxnetLSM")
+                  
+                  ) 
     
     
-    #QC flags (70 added for statistical gapfilling, others provided with original data)
+    #QC flags (100 added for statistical gapfilling, others provided with original data)
     #Measured
     QCmeasured <- 0
     
     #Gapfilled
-    QCgapfilled <- c(1:8, 10:21, 30:31, 38:40, 50, 60, 70)
+    QCgapfilled <- c(1:8, 10:21, 30:40, 50:52, 60:64, 70, 80:82, 100)
     names(QCgapfilled) <- names(qc_flags)
     
     #Append qc flags
