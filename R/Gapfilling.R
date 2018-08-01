@@ -298,7 +298,7 @@ GapfillFlux <- function(datain, qc_name, qc_flags, regfill,
   #Gapfills longer gaps (up to regfill length of time) using
   #linear regression against met variables
   
-  browser()
+  
   
   #QC value for statistical gapfilling
   qc_value <- qc_flags$QC_gapfilled["statistical"]
@@ -311,8 +311,8 @@ GapfillFlux <- function(datain, qc_name, qc_flags, regfill,
     return()
   }
   
-  #Remove QC vars
-  qc_ind <- which(grepl(qc_name, substr(names(ind), (nchar(qc_name)-1), nchar(names(ind)))))
+  #Remove QC vars (extract last characters corresponding to length of qc_name)
+  qc_ind <- which(grepl(qc_name, substr(names(ind), start=nchar(names(ind)) - (nchar(qc_name)-1), end=nchar(names(ind)))))
   if(length(qc_ind) > 0) {ind <- ind[-qc_ind]}
   
   
