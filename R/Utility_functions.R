@@ -320,6 +320,10 @@ get_varnames <- function(datasetname, flx2015_version) {
                       c("LW_IN_F"),
                       c("LWin"),
                       c("Fld"))
+  swdown      <- list(c("SW_IN_F_MDS", "SW_IN_ERA", "SW_IN_F"),
+                      c("SW_IN_F"),
+                      c("SWin"),
+                      c("Fsd"))
   vpd         <- list(c("VPD_F_MDS", "VPD_ERA", "VPD_F"),
                       c("VPD_F"),
                       c("VPD_f"),

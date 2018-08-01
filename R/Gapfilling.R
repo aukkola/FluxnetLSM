@@ -324,7 +324,7 @@ GapfillFlux <- function(datain, qc_name, qc_flags, regfill,
   #Find Tair, RH/VPD and SWdown index for regression gapfilling
   all_vars   <- datain$vars
   tair_ind   <- which(all_vars %in% varnames$tair)[1]
-  swdown_ind <- which(all_vars=="SW_IN_F_MDS" | all_vars=="SW_IN_F" | all_vars=="PPFD_f")[1] #leaving this in case of swdown/par issues elsewhere
+  swdown_ind <- which(all_vars %in% c(varnames$swdown,varnames$par))[1] #leaving this in case of swdown/par issues elsewhere
   
   #Find indices for rel humidity/VPD
   rh_ind   <- which(all_vars %in% varnames$relhumidity)[1]
@@ -343,8 +343,6 @@ GapfillFlux <- function(datain, qc_name, qc_flags, regfill,
   #Add new category to indata for saving gapfilling method
   datain$gapfill_flux <- rep(NA, length(ind))
   names(datain$gapfill_flux) <- vars
-  
-  browser()
   
   #Loop throug variables
   for (k in 1:length(ind)) {  
@@ -399,6 +397,8 @@ GapfillFlux <- function(datain, qc_name, qc_flags, regfill,
       temp_data$missing <- append(temp_data$missing, gapfilled)
     }
     
+    
+    browser()
     #Replace data with gapfilled data
     datain$data[,vars[k]] <- temp_data$data
     
