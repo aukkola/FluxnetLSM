@@ -312,8 +312,8 @@ GapfillFlux <- function(datain, qc_name, qc_flags, regfill,
   }
   
   #Remove QC vars (extract last characters corresponding to length of qc_name)
-  qc_ind <- which(grepl(qc_name, substr(names(ind), start=nchar(names(ind)) - (nchar(qc_name)-1), end=nchar(names(ind)))))
-  if(length(qc_ind) > 0) {ind <- ind[-qc_ind]}
+  qc_ind <- which(grepl(qc_name, substr(names(ind), start=nchar(names(ind)) - (nchar(qc_name)-1), stop=nchar(names(ind)))))
+  if(length(qc_ind) > 0) { ind <- ind[-qc_ind] }
   
   
   #Var names and their corresponding output var names
@@ -329,7 +329,7 @@ GapfillFlux <- function(datain, qc_name, qc_flags, regfill,
   #Find indices for rel humidity/VPD
   rh_ind   <- which(all_vars %in% varnames$relhumidity)[1]
   
-  if(length(rh_ind) ==0){
+  if (length(rh_ind) ==0) {
     rh_ind <- which(all_vars %in% varnames$vpd)[1]
   }
   
@@ -346,7 +346,7 @@ GapfillFlux <- function(datain, qc_name, qc_flags, regfill,
   
   
   #Loop throug variables
-  for(k in 1:length(ind)){  
+  for (k in 1:length(ind)) {  
       
     #Save method for each variable
     method <- vector()
@@ -361,7 +361,7 @@ GapfillFlux <- function(datain, qc_name, qc_flags, regfill,
     gapfilled <- temp_data$missing
     
     #If regfill chosen, do that
-    if(!is.na(regfill)){
+    if (!is.na(regfill)) {
       
       #Then use regfill for longer gaps
       temp_data <- regfill_flux(ydata=temp_data$data,
@@ -373,7 +373,7 @@ GapfillFlux <- function(datain, qc_name, qc_flags, regfill,
     
       
       #Save method info is used regression fill
-      if(length(temp_data$missing) > 0 & !is.na(temp_data$method)[1]) {
+      if (length(temp_data$missing) > 0 & !is.na(temp_data$method)[1]) {
         method <- append(method, paste("regfill based on", paste(temp_data$method, 
                                                                  collapse=", "))) 
       }
@@ -393,7 +393,7 @@ GapfillFlux <- function(datain, qc_name, qc_flags, regfill,
      
     
     #Append gapfilled with new temp_data
-    if(length(gapfilled) > 0){
+    if (length(gapfilled) > 0) {
       method <- append(method, "linfill")
       temp_data$missing <- append(temp_data$missing, gapfilled)
     }
@@ -401,7 +401,7 @@ GapfillFlux <- function(datain, qc_name, qc_flags, regfill,
     #Replace data with gapfilled data
     datain$data[,vars[k]] <- temp_data$data
     
-    if(length(temp_data$missing) > 0){
+    if (length(temp_data$missing) > 0) {
 
       #Save information to QC flags (creat qc flag if doesn't exist)
       datain <- update_qc(datain, temp_data, vars[k], qc_name, qc_value, 
@@ -426,7 +426,7 @@ GapfillFlux <- function(datain, qc_name, qc_flags, regfill,
 #' Fills QC flags with 3 (poor gap-filling) when
 #' QC flag missing but data variable available
 #' @return datain
-FillQCvarMissing <- function(datain, gapfillVal, qc_name){
+FillQCvarMissing <- function(datain, gapfillVal, qc_name) {
   
   #Find QC variables and corresponding data variables
   qc_ind  <- which(grepl(qc_name, datain$vars))  
@@ -435,7 +435,7 @@ FillQCvarMissing <- function(datain, gapfillVal, qc_name){
   
   
   #Check when flag missing but data available
-  for(k in 1:length(data_vars)){
+  for (k in 1:length(data_vars)) {
     
     #Find these instances
     ind <- which(!is.na(datain$data[data_vars[k]]) & 
@@ -456,7 +456,7 @@ FillQCvarMissing <- function(datain, gapfillVal, qc_name){
 #-----------------------------------------------------------------------------
 
 #' Calculates mean annual precipitation
-calc_avPrecip <- function(datain, gaps){
+calc_avPrecip <- function(datain, gaps) {
   
   ind_start <- gaps$tseries_start
   ind_end   <- gaps$tseries_end
@@ -466,7 +466,7 @@ calc_avPrecip <- function(datain, gaps){
   #Find unique time perios
   no_periods <- unique(gaps$consec)
   
-  for(k in 1:length(no_periods)){
+  for (k in 1:length(no_periods)) {
     
     #total of all years
     total <- sum(datain$data$P[ind_start[k]:ind_end[k]])
@@ -484,7 +484,7 @@ calc_avPrecip <- function(datain, gaps){
 #-----------------------------------------------------------------------------
 
 #' Finds indices for flux variables to be outputted
-FindFluxInd <- function(datain, exclude_eval, k, site_log){
+FindFluxInd <- function(datain, exclude_eval, k, site_log) {
   
   #initialise warnings
   warnings <- ""
@@ -493,7 +493,7 @@ FindFluxInd <- function(datain, exclude_eval, k, site_log){
   flux_ind <- which(datain$categories=="Eval")
   
   #If eval variables to exclude, remove these now
-  if(any(!is.na(exclude_eval))){    
+  if (any(!is.na(exclude_eval))) {    
     
     rm_ind   <- sapply(1:length(exclude_eval), function(x) 
                        which(datain$vars[flux_ind]==exclude_eval[x]))
@@ -503,7 +503,7 @@ FindFluxInd <- function(datain, exclude_eval, k, site_log){
   
   
   #Check that have at least one eval variable to write, skip time period if not
-  if(length(flux_ind)==0){
+  if (length(flux_ind)==0) {
     
       #Return warning and skip time period
       warn <- (paste("File ", k, ": No evaluation variables to process, ",
