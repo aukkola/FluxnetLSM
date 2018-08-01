@@ -416,7 +416,7 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
     nc_oz <- nc_open(infile)
     
     #Get global attributes
-    global_atts <- ncatt_get(nc, varid=0)
+    global_atts <- ncatt_get(nc_oz, varid=0)
     
     #Close file
     nc_close(nc_oz)
