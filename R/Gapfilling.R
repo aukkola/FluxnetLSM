@@ -397,8 +397,6 @@ GapfillFlux <- function(datain, qc_name, qc_flags, regfill,
       temp_data$missing <- append(temp_data$missing, gapfilled)
     }
     
-    
-    browser()
     #Replace data with gapfilled data
     datain$data[,vars[k]] <- temp_data$data
     
