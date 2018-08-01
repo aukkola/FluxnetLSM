@@ -202,7 +202,6 @@ GapfillMet_statistical <- function(datain, qc_name, qc_flags,
   #Find Tair index
   tair_ind <- find_ind_and_qc(ind, var=varnames$tair)
   
-  browser()
   ## LWdown ##s
   if(length(lwdown_ind) > 0){
     
@@ -213,8 +212,8 @@ GapfillMet_statistical <- function(datain, qc_name, qc_flags,
       rh_ind <- find_ind_and_qc(ind, var=varnames$vpd)
     }
     
-    #Do not have both available, stop
-    if(length(tair_ind)==0 | length(rh_ind)==0){
+    #Do not have both available, stop (but only stop when using limit_vars if this is one of the variables wanted)
+    if((length(tair_ind)==0 | length(rh_ind)==0) & datain$out_vars[names(lwdown_ind)] %in% limit_vars){
       error <- paste("Cannot gapfill incoming longwave radiation",
                      "do not have both air temperature and relative",
                      "humidity or vapour pressure deficit available.")
@@ -249,8 +248,8 @@ GapfillMet_statistical <- function(datain, qc_name, qc_flags,
   ## Air Pressure ##
   if(length(pair_ind) > 0){
     
-    #Do not have both available, stop
-    if(length(tair_ind)==0 | is.na(elevation)){
+    #Do not have both available, stop (but only stop when using limit_vars if this is one of the variables wanted)
+    if((length(tair_ind)==0 | is.na(elevation)) & datain$out_vars[names(pair_ind)] %in% limit_vars){
       error <- paste("Cannot gapfill air pressure, do not have",
                      "both air temperature and elevation available.",
                      "Elevation is set in site metadata file, please",
