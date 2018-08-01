@@ -231,7 +231,7 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,            # outfile file 
       for(n in 1:length(global_atts)) {
         print(n)
         ncatt_put(nc=ncid, varid=0, attname=names(global_atts[[n]]),
-                  attval=global_atts[[n]]))
+                  attval=global_atts[[n]])
       }
       # lapply(global_atts, function(x) ncatt_put(nc=ncid, varid=0, attname=names(x),
                                                 # attval=x))
@@ -488,7 +488,7 @@ CreateMetNetcdfFile = function(metfilename, datain,             # outfile file a
         print(n)
  
         ncatt_put(nc=ncid, varid=0, attname=names(global_atts[[n]]),
-                  attval=global_atts[[n]]))
+                  attval=global_atts[[n]])
       }
       # 
       # lapply(global_atts, function(x) ncatt_put(nc=ncid, varid=0, attname=names(x),
