@@ -319,8 +319,7 @@ GapfillFlux <- function(datain, qc_name, qc_flags, regfill,
   #Var names and their corresponding output var names
   vars     <- names(ind)
   out_vars <- datain$out_vars[ind]
-  
-  browser()
+
   
   #Find Tair, RH/VPD and SWdown index for regression gapfilling
   all_vars   <- datain$vars
@@ -404,6 +403,7 @@ GapfillFlux <- function(datain, qc_name, qc_flags, regfill,
     
     if (length(temp_data$missing) > 0) {
 
+      browser()
       #Save information to QC flags (creat qc flag if doesn't exist)
       datain <- update_qc(datain, temp_data, vars[k], qc_name, qc_value, 
                           qc_flags, outname=out_vars[k], cat="Eval")  

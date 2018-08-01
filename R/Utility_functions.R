@@ -192,47 +192,51 @@ get_qc_flags <- function(dataset, subset=NA) {
     
     
     #QC flags in original data
-    qc_flags <- c("QA/QC: Missing value in L1 dataset", 
-                  "QA/QC: L2 Range Check",
-                  "QA/QC: CSAT Diagnostic", 
-                  "QA/QC: LI7500 Diagnostic",
-                  "QA/QC: L2 Diurnal SD Check", 
-                  "QA/QC: Excluded Dates",
-                  "QA/QC: Excluded Hours", 
-                  "QA/QC: Missing value found with QC flag = 0",
-                  "Corrections: Apply Linear",
-                  "Corrections/Combinations: Coordinate Rotation (Ux, Uy, Uz, UxT, UyT, UzT, UxA, UyA, UzA, UxC, UyC, UzC, UxUz, UxUx, UxUy, UyUz, UxUy, UyUy)",
-                  "Corrections/Combinations: Massman Frequency Attenuation Correction (Coord Rotation, Tv_CSAT, Ah_HMP, ps)",
-                  "Corrections/Combinations: Virtual to Actual Fh (Coord Rotation, Massman, Ta_HMP)",
-                  "Corrections/Combinations: WPL correction for flux effects on density measurements (Coord Rotation, Massman, Fhv to Fh, Cc_7500_Av)",
-                  "Corrections/Combinations: Ta from Tv",
-                  "Corrections/Combinations: L3 Range Check",
-                  "Corrections/Combinations: L3 Diurnal SD Check",
-                  "Corrections/Combinations: u* filter",
-                  "Corrections/Combinations: Gap coordination",
-                  "GapFilling: Driver gap filled using ACCESS",
-                  "GapFilling: Used non-rotated covariance",
-                  "GapFilling: Flux gap filled by ANN (SOLO)",
-                  "GapFilling: Flux gap not filled by ANN",
-                  "GapFilling: L4 Range Check",
-                  "GapFilling: L4 Diurnal SD Check",
-                  "GapFilling: Gap filled by climatology",
-                  "GapFilling: Gap filled by interpolation",
-                  "GapFilling: Flux gap filled using ratios",
-                  "Statistical gapfilling performed by FluxnetLSM") #added for package-performed gapfilling
+    qc_flags <- c(L!_missing      = "QA/QC: Missing value in L1 dataset", 
+                  csat_diag       = "QA/QC: CSAT Diagnostic", 
+                  li7500_diag     = "QA/QC: LI7500 Diagnostic",
+                  L2_diurnal      = "QA/QC: L2 Diurnal SD Check", 
+                  excl_dates      = "QA/QC: Excluded Dates",
+                  excl_hrs        = "QA/QC: Excluded Hours", 
+                  missing_qc      = "QA/QC: Missing value found with QC flag = 0",
+                  linear          = "Corrections: Apply Linear",
+                  coor_rot        = "Corrections/Combinations: Coordinate Rotation (Ux, Uy, Uz, UxT, UyT, UzT, UxA, UyA, UzA, UxC, UyC, UzC, UxUz, UxUx, UxUy, UyUz, UxUy, UyUy)",
+                  atten_corr      = "Corrections/Combinations: Massman Frequency Attenuation Correction (Coord Rotation, Tv_CSAT, Ah_HMP, ps)",
+                  actual_fh       = "Corrections/Combinations: Virtual to Actual Fh (Coord Rotation, Massman, Ta_HMP)",
+                  density_corr    = "Corrections/Combinations: WPL correction for flux effects on density measurements (Coord Rotation, Massman, Fhv to Fh, Cc_7500_Av)",
+                  ta_tv           = "Corrections/Combinations: Ta from Tv",
+                  L3_range        = "Corrections/Combinations: L3 Range Check",
+                  L3_diurnal      = "Corrections/Combinations: L3 Diurnal SD Check",
+                  ustar_filter    = "Corrections/Combinations: u* filter",
+                  gap_coord       = "Corrections/Combinations: Gap coordination",
+                  driver_access   = "GapFilling: Driver gap filled using ACCESS",
+                  non_rotated_cov = "GapFilling: Used non-rotated covariance",
+                  flux_ann        = "GapFilling: Flux gap filled by ANN (SOLO)",
+                  flux_not_ann    = "GapFilling: Flux gap not filled by ANN",
+                  L4_range        = "GapFilling: L4 Range Check",
+                  L4_diurnal      = "GapFilling: L4 Diurnal SD Check",
+                  climatology     = "GapFilling: Gap filled by climatology",
+                  interpolated    = "GapFilling: Gap filled by interpolation",
+                  flux_ratios     = "GapFilling: Flux gap filled using ratios",
+                  statistical     = "Statistical gapfilling performed by FluxnetLSM") #added for package-performed gapfilling
     
     
     #QC flags (70 added for statistical gapfilling, others provided with original data)
+    #Measured
     QCmeasured <- 0
     
+    #Gapfilled
     QCgapfilled <- c(1:8, 10:21, 30:31, 38:40, 50, 60, 70)
+    names(QCgapfilled) <- names(qc_flags)
     
     #Append qc flags
     qc_info <- paste0("Measured: ", QCmeasured, ", ", 
                       paste(mapply(function(qc, name) paste0(name, ": ", qc),
                             qc=QCgapfilled, name=qc_flags), collapse=(", ")))
     
+    
 
+    
     
     
   #Dataset not known  

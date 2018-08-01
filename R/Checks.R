@@ -488,30 +488,38 @@ CheckDataRanges <- function(datain, site_log, action="stop"){
 #-----------------------------------------------------------------------------
 
 #' Performs initial checks on function arguments
-InitialChecks <- function(met_gapfill, era_file, missing, aggregate,
-                          datasetname, flx2015_version){
+InitialChecks <- function(opts, era_file){
+
   
   #Check that ERA file supplied if using ERAinterim met_gapfilling
-  if(!is.na(met_gapfill) && met_gapfill=="ERAinterim"){
-    if (length(era_file) == 0 || is.na(era_file)){
+  if(!is.na(opts$met_gapfill) && opts$met_gapfill=="ERAinterim"){
+    if (length(opts$era_file) == 0 || is.na(opts$era_file)){
       stop("Must provide era_file when using ERAinterim gapfilling!")
     }
   }
   
   #Check that missing is between 0-100
-  if(missing < 0 || missing >100 || is.na(missing)){
+  if(opts$missing < 0 || opts$missing >100 || is.na(opts$missing)){
     stop("Argument 'missing' not set correctly, must be a number between 0-100")
   }
   
   #Check that aggregate time step is divisible by 24
-  if(!is.na(aggregate)){
-    if(24 %% aggregate != 0){
+  if(!is.na(opts$aggregate)){
+    if(24 %% opts$aggregate != 0){
     stop("Aggregate time step must be divisible by 24 and greater than original data timestep, please amend.")
     }
   }
   
-  if(datasetname=="FLUXNET2015" && flx2015_version!="FULLSET" && flx2015_version!="SUBSET"){
+  #Check that using FULLSET or SUBSET as FLUXNET2015 version
+  if(opts$datasetname=="FLUXNET2015" && opts$flx2015_version!="FULLSET" && opts$flx2015_version!="SUBSET"){
     stop("Argument 'flx2015_version' not set correctly, please use one of 'FULLSET' and 'SUBSET'.")
+  }
+  
+  #Check that using gapfill_all with OzFlux. gapfill_good, gapfill_med and gapfill_poor not enabled
+  #with OzFlux due to different QC flag convention
+  if (opts$datasetname == "OzFlux" & any(!is.na(c(opts$gapfill_good, opts$gapfill_med, opts$gapfill_poor)))){
+    stop(paste0("Checking for good/medium/poor gap-filling not enabled for OzFlux due to different QC flags. ",
+                "Please use conv_opts$gapfill_all and set conv_opts$gapfill_good/med/poor to NA")
   }
   
 }

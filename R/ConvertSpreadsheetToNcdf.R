@@ -98,8 +98,7 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   
   
   #Do some initial checks that arguments set correctly
-  InitialChecks(conv_opts$met_gapfill, era_file, conv_opts$missing, conv_opts$aggregate,
-                conv_opts$datasetname, conv_opts$flx2015_version)
+  InitialChecks(conv_opts, era_file)
   
   
   #Get variable names specific for the dataset (fluxnet2015, lathuile)
