@@ -26,6 +26,8 @@ findColIndices <-  function(fileinname, var_names, var_classes,
   #NetCDF file
   if (datasetname == "OzFlux") {
   
+    library(ncdf4) 
+    
     #Open file handle
     nc <- nc_open(fileinname)
     
