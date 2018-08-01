@@ -211,7 +211,6 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   # Make sure whole number of days in dataset
   CheckCSVTiming(DataFromText, site_log)
   
-  browser()
   #Replace vars with those found in file
   vars <- DataFromText$vars
   

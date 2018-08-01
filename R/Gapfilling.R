@@ -298,6 +298,8 @@ GapfillFlux <- function(datain, qc_name, qc_flags, regfill,
   #Gapfills longer gaps (up to regfill length of time) using
   #linear regression against met variables
   
+  browser()
+  
   #QC value for statistical gapfilling
   qc_value <- qc_flags$QC_gapfilled["statistical"]
   
