@@ -245,7 +245,7 @@ GapfillMet_statistical <- function(datain, qc_name, qc_flags,
   
 
   ## Air Pressure ##
-  if(length(pair_ind) >0){
+  if(length(pair_ind) > 0){
     
     #Do not have both available, stop
     if(length(tair_ind)==0 | is.na(elevation)){
