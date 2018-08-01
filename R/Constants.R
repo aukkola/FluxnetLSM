@@ -45,6 +45,8 @@ findColIndices <-  function(fileinname, var_names, var_classes,
   #(returns an empty integer if cannot find variable)
   ind <- sapply(var_names, function(x) which(headers==x))
   
+  
+  browser()
   #List variables that could not be found in file (instances where ind length equals 0)
   #and remove failed variables from var_name and var_classes vectors
   failed_ind  <- which(sapply(ind, length)==0)
