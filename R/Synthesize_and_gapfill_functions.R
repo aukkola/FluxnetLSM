@@ -424,7 +424,7 @@ regfill_flux <- function(ydata, traindata, tstepsize, regfill, varname,
                     "no SWdown or PAR available")
       
       site_log <- log_warning(warn, site_log)
-      outs     <- list(y=ydata, site_log=site_log, method=NA, missing=c())
+      outs     <- list(data=ydata, site_log=site_log, method=NA, missing=c())
       return(outs)
     }
         

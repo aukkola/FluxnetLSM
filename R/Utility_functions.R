@@ -335,7 +335,8 @@ get_varnames <- function(datasetname, flx2015_version) {
   
   
   outs <- list(tair=tair[[ind]], precip=precip[[ind]], airpressure=airpressure[[ind]],
-               co2=co2[[ind]], par=par[[ind]], relhumidity=relhumidity[[ind]],
+               co2=co2[[ind]], par=par[[ind]], swdown=swdown[[ind]], 
+               relhumidity=relhumidity[[ind]],
                lwdown=lwdown[[ind]], vpd=vpd[[ind]], wind=wind[[ind]])
   
   return(outs)
