@@ -517,9 +517,9 @@ InitialChecks <- function(opts, era_file){
   
   #Check that using gapfill_all with OzFlux. gapfill_good, gapfill_med and gapfill_poor not enabled
   #with OzFlux due to different QC flag convention
-  if (opts$datasetname == "OzFlux" & any(!is.na(c(opts$gapfill_good, opts$gapfill_med, opts$gapfill_poor)))){
+  if (opts$datasetname == "OzFlux" & any(!is.na(c(opts$gapfill_good, opts$gapfill_med, opts$gapfill_poor)))) {
     stop(paste0("Checking for good/medium/poor gap-filling not enabled for OzFlux due to different QC flags. ",
-                "Please use conv_opts$gapfill_all and set conv_opts$gapfill_good/med/poor to NA")
+                "Please use conv_opts$gapfill_all and set conv_opts$gapfill_good/med/poor to NA"))
   }
   
 }
