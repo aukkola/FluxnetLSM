@@ -192,7 +192,7 @@ get_qc_flags <- function(dataset, subset=NA) {
     
     
     #QC flags in original data
-    qc_flags <- c(L!_missing      = "QA/QC: Missing value in L1 dataset", 
+    qc_flags <- c(L1_missing      = "QA/QC: Missing value in L1 dataset", 
                   csat_diag       = "QA/QC: CSAT Diagnostic", 
                   li7500_diag     = "QA/QC: LI7500 Diagnostic",
                   L2_diurnal      = "QA/QC: L2 Diurnal SD Check", 
