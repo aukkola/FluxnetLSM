@@ -344,6 +344,7 @@ GapfillFlux <- function(datain, qc_name, qc_flags, regfill,
   datain$gapfill_flux <- rep(NA, length(ind))
   names(datain$gapfill_flux) <- vars
   
+  browser()
   
   #Loop throug variables
   for (k in 1:length(ind)) {  
@@ -403,7 +404,6 @@ GapfillFlux <- function(datain, qc_name, qc_flags, regfill,
     
     if (length(temp_data$missing) > 0) {
 
-      browser()
       #Save information to QC flags (creat qc flag if doesn't exist)
       datain <- update_qc(datain, temp_data, vars[k], qc_name, qc_value, 
                           qc_flags, outname=out_vars[k], cat="Eval")  
