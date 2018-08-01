@@ -35,7 +35,7 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,            # outfile file 
     # Define x, y and z dimensions
     xd = ncdim_def('x',vals=c(1),units='')
     yd = ncdim_def('y',vals=c(1),units='')
-    dimnchar = ncdim_def("nchar", "", 3, unlim=TRUE, create_dimvar=FALSE )
+    dimnchar = ncdim_def("nchar", "", 1:3, unlim=TRUE, create_dimvar=FALSE )
 
     # Determine data start date and time:
     timeunits = CreateTimeunits(starttime)
