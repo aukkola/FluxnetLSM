@@ -230,7 +230,6 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,            # outfile file 
       
       for(n in 1:length(global_atts)) {
         print(n)
-        browser()
         ncatt_put(nc=ncid, varid=0, attname=names(global_atts[[n]]),
                   attval=global_atts[[n]]))
       }
@@ -486,6 +485,7 @@ CreateMetNetcdfFile = function(metfilename, datain,             # outfile file a
     if (!is.na(global_atts[1])) {
       for(n in 1:length(global_atts)) {
         print(n)
+        browser()
         ncatt_put(nc=ncid, varid=0, attname=names(global_atts[[n]]),
                   attval=global_atts[[n]]))
       }
