@@ -2,10 +2,12 @@
 % Please edit documentation in R/Helpers.R
 \name{preprocess_OzFlux}
 \alias{preprocess_OzFlux}
-\title{Pre-processes OzFlux files that have missing time steps or incomplete years}
+\title{Pre-processes OzFlux files that have missing time steps or incomplete years
+First gapfills data to complete days (using copyfill) and then removes incomplete years}
 \usage{
 preprocess_OzFlux(infile, outpath)
 }
 \description{
 Pre-processes OzFlux files that have missing time steps or incomplete years
+First gapfills data to complete days (using copyfill) and then removes incomplete years
 }

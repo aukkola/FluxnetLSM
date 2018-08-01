@@ -211,7 +211,7 @@ get_qc_flags <- function(dataset, subset=NA) {
                   actual_fh       = paste0("Corrections/Combinations: Virtual to Actual", #13
                                            " Fh (Coord Rotation, Massman, Ta_HMP)"),
                   density_corr    = paste0("Corrections/Combinations: WPL correction ",   #14
-                                           "for flux effects on density "),
+                                           "for flux effects on density ",
                                            "measurements (Coord Rotation, Massman, ",
                                            "Fhv to Fh, Cc_7500_Av)"),
                   ta_tv           = "Corrections/Combinations: Ta from Tv",               #15

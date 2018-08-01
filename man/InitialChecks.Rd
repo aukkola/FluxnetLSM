@@ -4,8 +4,7 @@
 \alias{InitialChecks}
 \title{Performs initial checks on function arguments}
 \usage{
-InitialChecks(met_gapfill, era_file, missing, aggregate, datasetname,
-  flx2015_version)
+InitialChecks(opts, era_file)
 }
 \description{
 Performs initial checks on function arguments
