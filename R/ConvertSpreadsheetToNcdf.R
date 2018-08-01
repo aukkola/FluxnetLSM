@@ -207,19 +207,6 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
                                   site_code=site_code)
   
   
-  browser()
-  # Remove extra variables if limit_vars selected
-  if (!is.na(conv_opts$limit_vars[1])) {
-    met_limit_ind <- sapply(met_ind, function(x) {
-      if (DataFromText$out_vars[x] %in% conv_opts$limit_vars) {x} else {NA}
-    })
-    met_limit_ind <- met_limit_ind[!is.na(met_limit_ind)]
-  } else {
-    met_limit_ind <- met_ind
-  }
-  
-  
-  
   # Make sure whole number of days in dataset
   CheckCSVTiming(DataFromText, site_log)
   
@@ -254,7 +241,8 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
                                               linfill=conv_opts$linfill, 
                                               lwdown_method=conv_opts$lwdown_method,
                                               elevation=site_info$SiteElevation,
-                                              varnames=dataset_vars, site_log=site_log)
+                                              varnames=dataset_vars, conv_opts$limit_vars,
+                                              site_log=site_log)
       
       DataFromText <- gapfilled_met$data
       site_log     <- gapfilled_met$site_log        

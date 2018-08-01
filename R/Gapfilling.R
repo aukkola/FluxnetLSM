@@ -85,7 +85,8 @@ GapfillMet_with_ERA <- function(datain, ERA_file, qc_name, varnames, site_log, .
 #' Gapfill meteorological variables using statistical methods
 GapfillMet_statistical <- function(datain, qc_name, qc_flags,
                                    copyfill, linfill, lwdown_method,
-                                   elevation, varnames, site_log){
+                                   elevation, varnames, limit_vars, 
+                                   site_log){
   
   #Uses several gapfilling methods depending on variable:
   #LWdown and air pressure: synthesis
@@ -201,6 +202,7 @@ GapfillMet_statistical <- function(datain, qc_name, qc_flags,
   #Find Tair index
   tair_ind <- find_ind_and_qc(ind, var=varnames$tair)
   
+  browser()
   ## LWdown ##s
   if(length(lwdown_ind) > 0){
     
