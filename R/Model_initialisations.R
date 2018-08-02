@@ -23,7 +23,7 @@ initialise_model <- function(model, site_info){
                        longname = "CABLE veg type",
                        units    = "-"
                        )
-    browser()
+
     #Collate to list (this will allow more params to be added later)
     outs <- list(pft)
     

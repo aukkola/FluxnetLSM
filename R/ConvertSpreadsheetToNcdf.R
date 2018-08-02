@@ -162,7 +162,7 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
                                     "character"   # Aggregate_method
                                     ))
 
-
+browser()
   #Read site information (lon, lat, elevation)
   if (conv_opts$metadata_source == 'all') {
       site_info <- get_site_metadata(site_code)
