@@ -247,7 +247,7 @@ convert_LaThuile <- function(infiles, fair_usage=NA, fair_usage_vec=NA,
 
     }
 
-
+browser()
     # Check what years are consecutive
     consec <- seqToIntervals(years)
 
