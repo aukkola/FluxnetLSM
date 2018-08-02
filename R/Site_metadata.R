@@ -142,7 +142,7 @@ get_site_metadata_from_CSV <- function(metadata=NA, incl_processing=TRUE) {
 
     csv_data <- read.csv(site_csv_file, header = TRUE,
                     stringsAsFactors = FALSE)
-
+browser()
     if (is.na(metadata[1])) {  # [1] to skip if site_code is set
         # get all existing metadata as a list of lists
         message("Loading metadata for all sites from csv_data cache (", site_csv_file, ")")
@@ -559,7 +559,6 @@ get_site_metadata <- function(site_code, incl_processing=TRUE,
         metadata <- get_site_metadata_from_CSV(metadata, incl_processing=FALSE)
     }
 
-    browser()
     if (any(check_missing(metadata))) {
         metadata <- get_site_metadata_web(metadata, incl_processing=FALSE)
     }
