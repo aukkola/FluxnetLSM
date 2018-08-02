@@ -114,7 +114,15 @@ update_metadata <- function(metadata, new_metadata, overwrite=TRUE) {
             } else {  # old data is empty, or doesn't exist
                 metadata[n] <- new_metadata[n]
             }
+          
+        #Metadata value is missing but the field doesn't exist in metadata, 
+        #save as is to avoid losing metadata field
+        } else if (is.na(new_metadata[[n]]) & !(n %in% names(metadata))){
+          metadata[n] <- new_metadata[n]
+          
         }
+      
+      }
     }
 
     return(metadata)
