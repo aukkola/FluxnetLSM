@@ -84,7 +84,6 @@ add_processing_metadata <- function(metadata) {
 #' @return metadata list
 update_metadata <- function(metadata, new_metadata, overwrite=TRUE) {
   
-  browser()
     for (n in names(new_metadata)) {
         if (!is.na(new_metadata[[n]])) {  # Don't overwrite with empty data
             if (n %in% names(metadata) && !is.na(metadata[[n]])) { # Old data already exists, check
@@ -159,6 +158,7 @@ get_site_metadata_from_CSV <- function(metadata=NA, incl_processing=TRUE) {
 
     message("Loading metadata for ", site_code, " from csv_data cache (", site_csv_file, ")")
 
+    browser()
     if (site_code %in% csv_data$SiteCode) {
         csv_row <- as.list(csv_data[csv_data$SiteCode == site_code, ])
         metadata = update_metadata(metadata, csv_row)
