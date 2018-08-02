@@ -508,6 +508,7 @@ define_model_params <- function(modelInfo, dims){
     # Loop through model variables
     for(k in 1:length(modelInfo)){
 
+      browser()
         val <- modelInfo[[k]]$varvalue
 
         # Check that value is not missing
