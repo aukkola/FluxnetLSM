@@ -559,6 +559,7 @@ get_site_metadata <- function(site_code, incl_processing=TRUE,
         metadata <- get_site_metadata_from_CSV(metadata, incl_processing=FALSE)
     }
 
+    browser()
     if (any(check_missing(metadata))) {
         metadata <- get_site_metadata_web(metadata, incl_processing=FALSE)
     }
