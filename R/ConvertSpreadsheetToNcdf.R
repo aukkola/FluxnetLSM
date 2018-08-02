@@ -162,14 +162,20 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
                                     "character"   # Aggregate_method
                                     ))
 
-browser()
+
   #Read site information (lon, lat, elevation)
   if (conv_opts$metadata_source == 'all') {
       site_info <- get_site_metadata(site_code)
   } else if (conv_opts$metadata_source == 'csv') {
       site_info <- get_site_metadata_from_CSV(site_code)
   } else if (conv_opts$metadata_source == 'web') {
+      
+      #Stop if using this option and trying to pass model information
+      if(!is.na(conv_opts$model)) { stop(paste0("Cannot read model parameters when ",
+                                                "metadata source set to web. Use csv or all ",
+                                                "for conv_opts$metadata_source")}
       site_info <- get_site_metadata_web(site_code)
+      
   } else {
       stop("Unknown metadata source '", conv_opts$metadata_source, "'")
   }
