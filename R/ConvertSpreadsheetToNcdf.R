@@ -173,7 +173,7 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
       #Stop if using this option and trying to pass model information
       if(!is.na(conv_opts$model)) { stop(paste0("Cannot read model parameters when ",
                                                 "metadata source set to web. Use csv or all ",
-                                                "for conv_opts$metadata_source")}
+                                                "for conv_opts$metadata_source"))}
       site_info <- get_site_metadata_web(site_code)
       
   } else {
