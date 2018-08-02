@@ -224,7 +224,7 @@ convert_LaThuile <- function(infiles, fair_usage=NA, fair_usage_vec=NA,
     # TODO: could be improved with package string_r
 
     #get years
-    all_years <- regmatches(basename(infiles), regexpr("[0-9]{4}", infiles))
+    all_years <- regmatches(basename(infiles), regexpr("[0-9]{4}", basename(infiles)))
 
     # Find Fair Use years if applicable
     if (!is.na(fair_usage)) {
@@ -247,7 +247,7 @@ convert_LaThuile <- function(infiles, fair_usage=NA, fair_usage_vec=NA,
 
     }
 
-browser()
+
     # Check what years are consecutive
     consec <- seqToIntervals(years)
 
