@@ -497,9 +497,9 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
     
     
     ### Create output file names ###
-    metfilename  <- paste(out_paths$nc, "/", site_code, "_", start_yr[k], 
+    metfilename  <- paste(out_paths$nc_met, "/", site_code, "_", start_yr[k], 
                           "-", end_yr[k], "_", conv_opts$datasetname, "_Met.nc", sep="")
-    fluxfilename <- paste(out_paths$nc, "/", site_code, "_", start_yr[k], 
+    fluxfilename <- paste(out_paths$nc_flx, "/", site_code, "_", start_yr[k], 
                           "-", end_yr[k], "_", conv_opts$datasetname, "_Flux.nc", sep="")
 
     

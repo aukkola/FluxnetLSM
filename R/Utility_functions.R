@@ -104,14 +104,22 @@ append_and_warn <- function(warn, warnings, call=TRUE){
 create_outdir <- function(outdir, site, plots){
   
   #NetCDF files
-  outpath_nc <- paste(outdir, "/Nc_files", sep="")
+  
+  #Met
+  outpath_met <- paste(outdir, "/Nc_files/Met/", sep="")
   dir.create(outpath_nc, showWarnings = FALSE, recursive=TRUE)
+  
+  #Flux  
+  outpath_flx <- paste(outdir, "/Nc_files/Flux/", sep="")
+  dir.create(outpath_nc, showWarnings = FALSE, recursive=TRUE)
+  
   
   #Log 
   outpath_log <- paste(outdir, "/Logs", sep="")
   dir.create(outpath_log, showWarnings = FALSE, recursive=TRUE)
   
-  paths <- list(nc=outpath_nc, log=outpath_log)
+  #List
+  paths <- list(nc_met=outpath_met, nc_flx=outpath_flx, log=outpath_log)
 
   #Plots (if code set to plot)
   if(!any(is.na(plots))){
