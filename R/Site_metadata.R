@@ -566,7 +566,7 @@ get_site_metadata <- function(site_code, incl_processing=TRUE,
     metadata <- site_metadata_template(site_code)
 
     if (use_csv) {
-        metadata <- get_site_metadata_from_CSV(metadata, incl_processing=FALSE, model=model)
+        metadata <- get_site_metadata_from_CSV(metadata, incl_processing=FALSE, ...)
     }
 
     if (any(check_missing(metadata))) {
