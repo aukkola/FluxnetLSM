@@ -141,7 +141,7 @@ site_csv_file <- system.file("data", "Site_metadata.csv", package = "FluxnetLSM"
 #'
 #' @return metadata list
 #' @export
-get_site_metadata_from_CSV <- function(metadata=NA, incl_processing=TRUE) {
+get_site_metadata_from_CSV <- function(metadata=NA, incl_processing=TRUE, model) {
 
     if (!is.list(metadata)) {
         metadata <- site_metadata_template(metadata)
@@ -150,7 +150,6 @@ get_site_metadata_from_CSV <- function(metadata=NA, incl_processing=TRUE) {
     csv_data <- read.csv(site_csv_file, header = TRUE,
                     stringsAsFactors = FALSE)
 
-    browser()
     if (is.na(metadata[1])) {  # [1] to skip if site_code is set
         # get all existing metadata as a list of lists
         message("Loading metadata for all sites from csv_data cache (", site_csv_file, ")")
@@ -169,7 +168,9 @@ get_site_metadata_from_CSV <- function(metadata=NA, incl_processing=TRUE) {
         csv_row <- as.list(csv_data[csv_data$SiteCode == site_code, ])
         metadata = update_metadata(metadata, csv_row)
     } else {
-        message("    ", site_code, " not found in csv_data file")
+        message("    ", site_code, " not found in csv_data file.")
+       if(!is.na(model)) stop("Cannot read model parameters, site not found in CSV metadata file. ",
+                              "Please amend CSV file or set model=NA")
     }
 
     if (incl_processing) {
@@ -557,14 +558,15 @@ warn_missing_metadata <- function(metadata) {
 #' @return metadata list
 #' @export
 get_site_metadata <- function(site_code, incl_processing=TRUE,
-                              use_csv=TRUE, update_csv=FALSE) {
+                              use_csv=TRUE, update_csv=FALSE,
+                              ...) {
     #Initialise warnings
     warnings <- ""
 
     metadata <- site_metadata_template(site_code)
 
     if (use_csv) {
-        metadata <- get_site_metadata_from_CSV(metadata, incl_processing=FALSE)
+        metadata <- get_site_metadata_from_CSV(metadata, incl_processing=FALSE, model)
     }
 
     if (any(check_missing(metadata))) {

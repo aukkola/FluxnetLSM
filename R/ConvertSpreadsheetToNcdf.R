@@ -165,9 +165,9 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
 
   #Read site information (lon, lat, elevation)
   if (conv_opts$metadata_source == 'all') {
-      site_info <- get_site_metadata(site_code)
+      site_info <- get_site_metadata(site_code, model=conv_opts$model)
   } else if (conv_opts$metadata_source == 'csv') {
-      site_info <- get_site_metadata_from_CSV(site_code)
+      site_info <- get_site_metadata_from_CSV(site_code, model=conv_opts$model)
   } else if (conv_opts$metadata_source == 'web') {
       
       #Stop if using this option and trying to pass model information
