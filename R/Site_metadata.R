@@ -150,6 +150,7 @@ get_site_metadata_from_CSV <- function(metadata=NA, incl_processing=TRUE) {
     csv_data <- read.csv(site_csv_file, header = TRUE,
                     stringsAsFactors = FALSE)
 
+    browser()
     if (is.na(metadata[1])) {  # [1] to skip if site_code is set
         # get all existing metadata as a list of lists
         message("Loading metadata for all sites from csv_data cache (", site_csv_file, ")")
