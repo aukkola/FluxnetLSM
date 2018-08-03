@@ -133,8 +133,8 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,            # outfile file 
               attval=site_code, prec="text")
     ncatt_put(ncid,varid=0,attname='site_name',
               attval=as.character(siteInfo$Fullname), prec="text")
-    ncatt_put(ncid,varid=0,attname='site_description',
-              attval=as.character(siteInfo$Description), prec="text")
+   if(!is.na(siteInfo$Description)) { ncatt_put(ncid,varid=0,attname='site_description',
+              attval=as.character(siteInfo$Description), prec="text") }
     ncatt_put(ncid,varid=0,attname='Fluxnet_dataset_version',
               attval=arg_info$datasetversion, prec="text")
     ncatt_put(ncid,varid=0,attname='QC_flag_descriptions',

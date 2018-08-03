@@ -23,7 +23,8 @@ site_metadata_template <- function(site_code) {
         CanopyHeight = NA,
         Tier = NA,
         Exclude = FALSE,
-        Exclude_reason = NA
+        Exclude_reason = NA,
+        Description = NA
     )
 
     return(metadata)
