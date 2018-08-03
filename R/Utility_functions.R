@@ -107,11 +107,11 @@ create_outdir <- function(outdir, site, plots){
   
   #Met
   outpath_met <- paste(outdir, "/Nc_files/Met/", sep="")
-  dir.create(outpath_nc, showWarnings = FALSE, recursive=TRUE)
+  dir.create(outpath_met, showWarnings = FALSE, recursive=TRUE)
   
   #Flux  
   outpath_flx <- paste(outdir, "/Nc_files/Flux/", sep="")
-  dir.create(outpath_nc, showWarnings = FALSE, recursive=TRUE)
+  dir.create(outpath_flx, showWarnings = FALSE, recursive=TRUE)
   
   
   #Log 
