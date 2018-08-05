@@ -290,8 +290,10 @@ CreateMetNetcdfFile = function(metfilename, datain,             # outfile file a
 
     # VARIABLE DEFINITIONS ##############################################
 
-    #First set correct dimensions (Tair, Qair and Wind need an extra z-dimension)
-    ind_dim <- which(names(datain$out_vars) %in% c(varnames$tair, varnames$relhumidity, varnames$wind))
+    #First set correct dimensions (Tair, Qair, CO2air and Wind need an extra z-dimension)
+    #NOTE this might be CABLE-specific and should get looked into!
+    ind_dim <- which(names(datain$out_vars) %in% c(varnames$tair, varnames$relhumidity, varnames$wind,
+                                                   varnames$co2))
     
     dims    <- lapply(var_ind, function(x) if(x %in% ind_dim) list(xd,yd,zd,td) else list(xd,yd,td))
     
