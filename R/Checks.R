@@ -493,7 +493,7 @@ InitialChecks <- function(opts, era_file){
   
   #Check that ERA file supplied if using ERAinterim met_gapfilling
   if(!is.na(opts$met_gapfill) && opts$met_gapfill=="ERAinterim"){
-    if (length(opts$era_file) == 0 || is.na(opts$era_file)){
+    if (length(era_file) == 0 || is.na(era_file)){
       stop("Must provide era_file when using ERAinterim gapfilling!")
     }
   }
