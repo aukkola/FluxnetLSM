@@ -248,7 +248,7 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
           colnames(DataFromText$data)[ind_nee_gpp[[v]]] <- new_varnames[v]
           
           #Finally need to fix QC values to match other QC flags
-          temp_data <- DataFromText$data[ind_nee_gpp[[v]]
+          temp_data <- DataFromText$data[ind_nee_gpp[[v]]]
           
           #Set values 1-2 to 0 (observed)
           temp_data[temp_data %in% c(1,2)] <- 0
