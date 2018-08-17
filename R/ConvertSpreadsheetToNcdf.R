@@ -216,6 +216,27 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   # Make sure whole number of days in dataset
   CheckCSVTiming(DataFromText, site_log)
   
+  
+  #Adding temporary La Thuile fix here (Only works if output variables called NEE and GPP !!!)
+  #La Thuile has the same QC flag for NEE and GPP (NEE_GPP_qc),
+  #Need to rename it here or causes an error later on
+  if (conv_opts$datasetname == "LaThuile") {
+    
+    if(any(DataFromText$vars == "NEE_GPP_qcOK")) {
+      
+      #NEE flag
+      ind_nee <- which(DataFromText$out_vars == "NEE_qc")
+      if(length(ind_nee) > 0) { DataFromText$vars[ind_nee] <- "NEE_fqc"}
+      
+      #GPP flag
+      ind_gpp <- which(DataFromText$out_vars == "GPP_qc")
+      if(length(ind_nee) > 0) { DataFromText$vars[ind_nee] <- "GPP_fqc"}
+      
+    }
+    
+  }
+  
+  
   #Replace vars with those found in file
   vars <- DataFromText$vars
   
