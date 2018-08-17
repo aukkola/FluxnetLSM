@@ -260,7 +260,7 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
           temp_data[temp_data %in% c(5,6)] <- 3
           
           #Replace with new values
-          DataFromText$data[ind_nee_gpp[[v]] <- temp_data
+          DataFromText$data[ind_nee_gpp[[v]]] <- temp_data
         }
       }
     }
