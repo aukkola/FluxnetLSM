@@ -230,10 +230,9 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
       
       #GPP flag
       ind_gpp <- which(DataFromText$out_vars == "GPP_qc")
-      if(length(ind_nee) > 0) { DataFromText$vars[ind_nee] <- "GPP_fqc"}
+      if(length(ind_nee) > 0) { DataFromText$vars[ind_gpp] <- "GPP_fqc"}
       
     }
-    
   }
   
   
