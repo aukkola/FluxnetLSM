@@ -227,7 +227,7 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
     if(any(DataFromText$vars == "NEE_GPP_qc")) {
       
       #Variables to check
-      check_vars < - c("NEE_qc", "GPP_qc")
+      check_vars <- c("NEE_qc", "GPP_qc")
       
       #New variable names
       new_varnames <- c("NEE_fqc", "GPP_fqc")
