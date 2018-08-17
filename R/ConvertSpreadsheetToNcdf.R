@@ -217,28 +217,52 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   CheckCSVTiming(DataFromText, site_log)
   
   
-  #Adding temporary La Thuile fix here (Only works if output variables called NEE and GPP !!!)
+  #Adding temporary La Thuile fix here (Only works if output variables called NEE_qc and GPP_qc !!!!)
   #La Thuile has the same QC flag for NEE and GPP (NEE_GPP_qc),
-  #Need to rename it here or causes an error later on
+  #Need to rename it here or causes an error later on and change values 
+  #(which range 1-6, not 0-3 like the rest of La Thuile QC flags)
+
   if (conv_opts$datasetname == "LaThuile") {
     
-    if(any(DataFromText$vars == "NEE_GPP_qcOK")) {
+    if(any(DataFromText$vars == "NEE_GPP_qc")) {
       
-      #Change variable name and column header in data frame
-      #NEE flag
-      ind_nee <- which(DataFromText$out_vars == "NEE_qc")
-      if(length(ind_nee) > 0) { 
-        DataFromText$vars[ind_nee] <- "NEE_fqc"
-        colnames(DataFromText$data)[ind_nee] <- "NEE_fqc"
+      #Variables to check
+      check_vars < - c("NEE_qc", "GPP_qc")
+      
+      #New variable names
+      new_varnames <- c("NEE_fqc", "GPP_fqc")
+        
+      #Get indices
+      ind_nee_gpp <-lapply(check_vars, function(x) which(DataFromText$out_vars == x))
+      
+      #Loop through vars
+      for(v in 1:length(check_vars)) {
+        
+        #If found this variable
+        if(length(ind_nee_gpp[[v]]) > 0) { 
+          
+          #Replace name
+          DataFromText$vars[ind_nee_gpp[[v]]] <- new_varnames[v]
+          
+          #Repalce column name in data
+          colnames(DataFromText$data)[ind_nee_gpp[[v]]] <- new_varnames[v]
+          
+          #Finally need to fix QC values to match other QC flags
+          temp_data <- DataFromText$data[ind_nee_gpp[[v]]
+          
+          #Set values 1-2 to 0 (observed)
+          temp_data[temp_data %in% c(1,2)] <- 0
+          
+          #SEt values 3-4 to 1 (good gapfilling)
+          temp_data[temp_data %in% c(3,4)] <- 1
+          
+          #Set values 5-6 to 3 (poor gapfilling)
+          temp_data[temp_data %in% c(5,6)] <- 3
+          
+          #Replace with new values
+          DataFromText$data[ind_nee_gpp[[v]] <- temp_data
         }
-      
-      #GPP flag
-      ind_gpp <- which(DataFromText$out_vars == "GPP_qc")
-      if(length(ind_nee) > 0) { 
-        DataFromText$vars[ind_gpp] <- "GPP_fqc"
-        colnames(DataFromText$data)[ind_gpp] <- "NEE_fqc"
       }
-      
     }
   }
   
