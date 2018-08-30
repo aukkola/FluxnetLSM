@@ -64,7 +64,7 @@ ChangeUnits <- function(datain, varnames, site_log){
         datain$data[[k]][datain$data[[k]] < 0] <- 5 * (1 / 2.3)
         
         
-      ## Specific humidity (in kg/kg, calculate from tair, rel humidity and psurf)
+      ## Specific humidity from relative humidity (in kg/kg, calculate from tair, rel humidity and psurf)
       } else if(datain$vars[k] %in% varnames$relhumidity & flx_units[k]=="%" & alma_units[k]=="kg/kg"){  
         
         #Find Tair and PSurf units
@@ -86,6 +86,36 @@ ChangeUnits <- function(datain, varnames, site_log){
                                              psurf_units=psurf_units,
                                              site_log)
       
+        
+      ## Specific humidity from VPD (in kg/kg, calculate from tair, VPD and psurf)
+      } else if(datain$vars[k] %in% varnames$vpd & flx_units[k]=="hPa" & alma_units[k]=="kg/kg"){  
+        
+        #Find Tair and PSurf units
+        psurf_units <- flx_units[names(flx_units) %in% varnames$airpressure]
+        tair_units  <- flx_units[names(flx_units) %in% varnames$tair]
+        
+        #If already converted, reset units to new converted units
+        if(converted[which(datain$vars %in% varnames$airpressure)]) {
+          psurf_units <- alma_units[names(alma_units) %in% varnames$airpressure]         
+        } 
+        if (converted[which(datain$vars %in% varnames$tair)]){
+          tair_units <- alma_units[names(alma_units) %in% varnames$tair]
+        }          
+        
+        temp_relhumidity <- VPD2RelHum(VPD=datain$data[,colnames(datain$data) %in% varnames$vpd],  
+                                       airtemp=datain$data[,colnames(datain$data) %in% varnames$tair],  
+                                       vpd_units=flx_units[names(flx_units) %in% varnames$vpd], 
+                                       tair_units=tair_units, 
+                                       site_log)
+        
+        datain$data[[k]] <- Rel2SpecHumidity(relHum=temp_relhumidity, 
+                                             airtemp=datain$data[,colnames(datain$data) %in% varnames$tair], 
+                                             tair_units=tair_units, 
+                                             pressure=datain$data[,colnames(datain$data) %in% varnames$airpressure], 
+                                             psurf_units=psurf_units,
+                                             site_log)
+        
+
         
       ###--- Template for adding a new conversion ---###
       #Use the Fluxnet variable name and unit, and output unit as specified in data/Output_variables_xxx.csv
