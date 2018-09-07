@@ -94,7 +94,7 @@ ChangeUnits <- function(datain, varnames, site_log){
         
         #Use first Tair and VPD variable if passing multiple
         tair_name <- varnames$tair[1]
-        vpd_name  <- varnames$vpd[1]
+        vpd_name  <- datain$vars[k]
         
         #Find Tair and PSurf units
         psurf_units <- flx_units[names(flx_units) %in% varnames$airpressure]
@@ -109,10 +109,10 @@ ChangeUnits <- function(datain, varnames, site_log){
           tair_units <- alma_units[names(alma_units) %in% tair_name]
         }          
         
-        browser()
+        
         temp_relhumidity <- VPD2RelHum(VPD=datain$data[,colnames(datain$data) %in% vpd_name],  
                                        airtemp=datain$data[,colnames(datain$data) %in% tair_name],  
-                                       vpd_units=flx_units[names(flx_units) %in% vpd_name], 
+                                       vpd_units=flx_units[k], 
                                        tair_units=tair_units, 
                                        site_log)
         
