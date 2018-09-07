@@ -17,8 +17,9 @@ GapfillMet_with_ERA <- function(datain, ERA_file, qc_name, varnames, site_log, .
   ind <- which(datain$categories=="Met")
   
   #Retrieve VPD and air temp units. Used to convert ERAinterim VPD to RH in gapfill function
-  tair_units <- datain$units$original_units[names(datain$units$original_units) %in% varnames$tair]
-  vpd_units  <- datain$units$original_units[names(datain$units$original_units) %in% varnames$vpd]
+  #(adding indexing [1] in case passing multiple tair or vpd variables)
+  tair_units <- datain$units$original_units[names(datain$units$original_units) %in% varnames$tair][1]
+  vpd_units  <- datain$units$original_units[names(datain$units$original_units) %in% varnames$vpd][1]
   
   #If not found, set to unknown
   if (is.na(tair_units) | length(tair_units) == 0){ tair_units = "UNKNOWN" }
@@ -116,8 +117,8 @@ GapfillMet_statistical <- function(datain, qc_name, qc_flags,
   
   
   #Find lwdown and air pressure indices (note, no air pressure in La Thuile)
-  lwdown_ind <- find_ind_and_qc(ind, var=varnames$lwdown)
-  pair_ind   <- find_ind_and_qc(ind, var=varnames$airpressure)
+  lwdown_ind <- find_ind_and_qc(ind, var=varnames$lwdown[1])
+  pair_ind   <- find_ind_and_qc(ind, var=varnames$airpressure[1])
   
   
   #Find indices for other variables
@@ -200,7 +201,7 @@ GapfillMet_statistical <- function(datain, qc_name, qc_flags,
   ### Then gapfill LWdown and air pressure ###
 
   #Find Tair index
-  tair_ind <- find_ind_and_qc(ind, var=varnames$tair)
+  tair_ind <- find_ind_and_qc(ind, var=varnames$tair[1])
   
   ## LWdown ##s
   if(length(lwdown_ind) > 0){
@@ -209,7 +210,7 @@ GapfillMet_statistical <- function(datain, qc_name, qc_flags,
     rh_ind   <- find_ind_and_qc(ind, var=varnames$relhumidity)
     
     if(length(rh_ind) ==0){
-      rh_ind <- find_ind_and_qc(ind, var=varnames$vpd)
+      rh_ind <- find_ind_and_qc(ind, var=varnames$vpd[1])
     }
     
     #Do not have both available, stop (but only stop when using limit_vars if this is one of the variables wanted)
@@ -313,7 +314,8 @@ GapfillFlux <- function(datain, qc_name, qc_flags, regfill,
   }
   
   #Remove QC vars (extract last characters corresponding to length of qc_name)
-  qc_ind <- which(grepl(qc_name, substr(names(ind), start=nchar(names(ind)) - (nchar(qc_name)-1), stop=nchar(names(ind)))))
+  qc_ind <- which(grepl(qc_name, substr(names(ind), start=nchar(names(ind)) - 
+                        (nchar(qc_name)-1), stop=nchar(names(ind)))))
   if(length(qc_ind) > 0) { ind <- ind[-qc_ind] }
   
   
