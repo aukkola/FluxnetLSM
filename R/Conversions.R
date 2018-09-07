@@ -90,27 +90,31 @@ ChangeUnits <- function(datain, varnames, site_log){
       ## Specific humidity from VPD (in kg/kg, calculate from tair, VPD and psurf)
       } else if(datain$vars[k] %in% varnames$vpd & flx_units[k]=="hPa" & alma_units[k]=="kg/kg"){  
         
-        browser()
+        #Use first Tair and VPD variable if passing multiple
+        tair_name <- varnames$tair[1]
+        vpd_name  <- varnames$vpd[1]
+        
         #Find Tair and PSurf units
         psurf_units <- flx_units[names(flx_units) %in% varnames$airpressure]
-        tair_units  <- flx_units[names(flx_units) %in% varnames$tair]
+        tair_units  <- flx_units[names(flx_units) %in% tair_name]
         
+          
         #If already converted, reset units to new converted units
         if(converted[which(datain$vars %in% varnames$airpressure)]) {
           psurf_units <- alma_units[names(alma_units) %in% varnames$airpressure]         
         } 
-        if (converted[which(datain$vars %in% varnames$tair)]){
-          tair_units <- alma_units[names(alma_units) %in% varnames$tair]
+        if (converted[which(datain$vars %in% tair_name)]){
+          tair_units <- alma_units[names(alma_units) %in% tair_name]
         }          
         
-        temp_relhumidity <- VPD2RelHum(VPD=datain$data[,colnames(datain$data) %in% varnames$vpd],  
-                                       airtemp=datain$data[,colnames(datain$data) %in% varnames$tair],  
-                                       vpd_units=flx_units[names(flx_units) %in% varnames$vpd], 
+        temp_relhumidity <- VPD2RelHum(VPD=datain$data[,colnames(datain$data) %in% vpd_name],  
+                                       airtemp=datain$data[,colnames(datain$data) %in% tair_name],  
+                                       vpd_units=flx_units[names(flx_units) %in% vpd_name], 
                                        tair_units=tair_units, 
                                        site_log)
         
         datain$data[[k]] <- Rel2SpecHumidity(relHum=temp_relhumidity, 
-                                             airtemp=datain$data[,colnames(datain$data) %in% varnames$tair], 
+                                             airtemp=datain$data[,colnames(datain$data) %in% tair_name], 
                                              tair_units=tair_units, 
                                              pressure=datain$data[,colnames(datain$data) %in% varnames$airpressure], 
                                              psurf_units=psurf_units,
