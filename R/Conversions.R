@@ -90,9 +90,10 @@ ChangeUnits <- function(datain, varnames, site_log){
       ## Specific humidity from VPD (in kg/kg, calculate from tair, VPD and psurf)
       } else if(datain$vars[k] %in% varnames$vpd & flx_units[k]=="hPa" & alma_units[k]=="kg/kg"){  
         
+        browser()
         #Find Tair and PSurf units
         psurf_units <- flx_units[names(flx_units) %in% varnames$airpressure]
-        tair_units  <- flx_units[names(flx_units) %in% varnames$tair]
+        tair_units  <- flx_units[names(flx_units) %in% varnames$tair
         
         #If already converted, reset units to new converted units
         if(converted[which(datain$vars %in% varnames$airpressure)]) {
