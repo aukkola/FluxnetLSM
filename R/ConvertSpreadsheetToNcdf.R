@@ -488,6 +488,7 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   ###--- Write output met and flux NetCDF files ---###
   ####################################################
   
+  browser()
   #Set all NA values to Nc missing value
   DataFromText$data[is.na(DataFromText$data)] <- Nc_MissingVal
 
