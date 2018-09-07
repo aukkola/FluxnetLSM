@@ -109,6 +109,7 @@ ChangeUnits <- function(datain, varnames, site_log){
           tair_units <- alma_units[names(alma_units) %in% tair_name]
         }          
         
+        browser()
         temp_relhumidity <- VPD2RelHum(VPD=datain$data[,colnames(datain$data) %in% vpd_name],  
                                        airtemp=datain$data[,colnames(datain$data) %in% tair_name],  
                                        vpd_units=flx_units[names(flx_units) %in% vpd_name], 
