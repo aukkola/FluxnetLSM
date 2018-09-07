@@ -67,20 +67,22 @@ ChangeUnits <- function(datain, varnames, site_log){
       ## Specific humidity from relative humidity (in kg/kg, calculate from tair, rel humidity and psurf)
       } else if(datain$vars[k] %in% varnames$relhumidity & flx_units[k]=="%" & alma_units[k]=="kg/kg"){  
         
+        tair_name <- varnames$tair[1]
+        
         #Find Tair and PSurf units
         psurf_units <- flx_units[names(flx_units) %in% varnames$airpressure]
-        tair_units  <- flx_units[names(flx_units) %in% varnames$tair]
+        tair_units  <- flx_units[names(flx_units) %in% tair_name]
         
         #If already converted, reset units to new converted units
         if(converted[which(datain$vars %in% varnames$airpressure)]) {
           psurf_units <- alma_units[names(alma_units) %in% varnames$airpressure]         
         } 
         if (converted[which(datain$vars %in% varnames$tair)]){
-          tair_units <- alma_units[names(alma_units) %in% varnames$tair]
+          tair_units <- alma_units[names(alma_units) %in% tair_name]
         }          
 
         datain$data[[k]] <- Rel2SpecHumidity(relHum=datain$data[,colnames(datain$data) %in% varnames$relhumidity], 
-                                             airtemp=datain$data[,colnames(datain$data) %in% varnames$tair], 
+                                             airtemp=datain$data[,colnames(datain$data) %in% tair_name], 
                                              tair_units=tair_units, 
                                              pressure=datain$data[,colnames(datain$data) %in% varnames$airpressure], 
                                              psurf_units=psurf_units,
