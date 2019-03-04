@@ -296,13 +296,13 @@ gapfill_LWdown_Pair <- function(data, var, var_ind, TairK=NA, RH=NA,
   
   
   ### LWdown ###
-  if(var=="LWdown"){
+  if (var=="LWdown") {
     
     #Extract rel humidity data    
     rh   <- data$data[,names(RH)]
     
     #First check that have relative humidity in %, not VPD
-    if(names(RH) %in% varnames$vpd){
+    if (names(RH) %in% varnames$vpd) {
       vpd_units  <- data$units$original_units[names(RH)]
       rh         <- VPD2RelHum(VPD=rh, airtemp=tair, vpd_units, tair_units, site_log)
     }
@@ -310,10 +310,10 @@ gapfill_LWdown_Pair <- function(data, var, var_ind, TairK=NA, RH=NA,
     #Find missing indices
     missing <- which(is.na(data_to_fill))
     
-    if(length(missing) > 0){
+    if (length(missing) > 0) {
     
       #Synthesize
-      for(i in missing){
+      for (i in missing) {
         data_to_fill[i] <- SynthesizeLWdown(tair[i], rh[i], technique)  
       }
 
@@ -321,15 +321,15 @@ gapfill_LWdown_Pair <- function(data, var, var_ind, TairK=NA, RH=NA,
       
       
   ### Air pressure ### 
-  } else if (var=="Pair"){
+  } else if (var=="Pair") {
     
     #Find missing indices
     missing <- which(is.na(data_to_fill))
     
-    if(length(missing) > 0){
+    if (length(missing) > 0) {
       
       #Synthesize
-      for(i in missing){
+      for (i in missing) {
         data_to_fill[i] <- SynthesizePSurf(tair[i], elev, data$units$original_units[names(data$units$original_units) %in% 
                                                                                       varnames$airpressure])
       }
@@ -349,7 +349,7 @@ gapfill_LWdown_Pair <- function(data, var, var_ind, TairK=NA, RH=NA,
 #' Gapfills flux data using linear regression against met variables
 regfill_flux <- function(ydata, traindata, tstepsize, regfill, varname, 
                          swdown_ind, tair_ind, rh_ind,
-                         site_log, ...){
+                         site_log, ...) {
   
 
   #Max number of consecutive time steps allowed
@@ -363,12 +363,12 @@ regfill_flux <- function(ydata, traindata, tstepsize, regfill, varname,
   #Find missing values
   missing <- which(is.na(ydata))
   
-  if(length(missing) > 0){
+  if (length(missing) > 0) {
     
     consec <- seqToIntervals(missing)
     
     #One or several gaps too large, return warning
-    if(any(consec[,2] - consec[,1] + 1 > max_gap)){
+    if (any(consec[,2] - consec[,1] + 1 > max_gap)) {
       
       warn <- paste("Data gap too long in variable ", varname,
                     " to be fully gapfilled. Largest gap is ",
@@ -381,7 +381,7 @@ regfill_flux <- function(ydata, traindata, tstepsize, regfill, varname,
     
     #Only use missing indices for time periods shorter than regfill
     rm_ind <- which((consec[,2] - consec[,1] + 1) > max_gap)
-    if(length(rm_ind) > 0) { 
+    if (length(rm_ind) > 0) { 
       consec <- consec[-rm_ind,] 
     }
     
@@ -399,10 +399,10 @@ regfill_flux <- function(ydata, traindata, tstepsize, regfill, varname,
     
   
   #If found missing values:
-  if(length(missing_all) > 0){  
+  if (length(missing_all) > 0) {  
     
     #SWdown, Tair and humidity available
-    if(all(is.finite(c(swdown_ind, tair_ind, rh_ind)))){
+    if (all(is.finite(c(swdown_ind, tair_ind, rh_ind)))) {
       
       #Collate training data
       train_data <- as.matrix(cbind(traindata[swdown_ind], traindata[tair_ind],
@@ -456,7 +456,7 @@ regfill_flux <- function(ydata, traindata, tstepsize, regfill, varname,
 
 #' Trains multiple linear regression for flux gap-filling 
 #' separately for day and night
-regtrain <- function(traindata, ydata, ...){
+regtrain <- function(traindata, ydata, ...) {
     
   # Separate day and night:
   dayn <- DayNight(as.double(traindata[,"SWdown"]), ...)
@@ -490,7 +490,7 @@ regtrain <- function(traindata, ydata, ...){
 #-----------------------------------------------------------------------------
 
 #' Predict flux values using linear regression parameters
-regpredict <- function(rgrp,traindata, dayn){
+regpredict <- function(rgrp,traindata, dayn) {
   
   # Use existing parameters to make empirical prediction:
   daycoefs   <- coef(rgrp$day)
@@ -500,7 +500,7 @@ regpredict <- function(rgrp,traindata, dayn){
   x_vals_day   <- traindata
   x_vals_night <- traindata
   
-  for(k in 1:ncol(traindata)){
+  for (k in 1:ncol(traindata)) {
     x_vals_day[,k]   <- x_vals_day[,k] * daycoefs[1+k]
     x_vals_night[,k] <- x_vals_night[,k] * nightcoefs[1+k]
   }
@@ -520,7 +520,7 @@ regpredict <- function(rgrp,traindata, dayn){
 #-----------------------------------------------------------------------------
 
 #' Synthesises downward longwave radiation based on Tair and rel humidity
-SynthesizeLWdown <- function(TairK,RH,technique){
+SynthesizeLWdown <- function(TairK,RH,technique) {
   
   #Three techniques available, see Abramowitz et al. (2012),
   #Geophysical Research Letters, 39, L04808 for details
@@ -528,28 +528,28 @@ SynthesizeLWdown <- function(TairK,RH,technique){
   zeroC <- 273.15
   
   #Inputs missing, set lwdown missing
-  if(is.na(TairK) | is.na(RH)){
+  if (is.na(TairK) | is.na(RH)) {
     lwdown <- NA
 
   #Else synthesise value
   } else {
       
-    if(technique=='Swinbank_1963'){
+    if (technique=='Swinbank_1963') {
       # Synthesise LW down from air temperature only:
       lwdown <- 0.0000094*0.0000000567*TairK^6
       
-    }else if(technique=='Brutsaert_1975'){
+    } else if(technique=='Brutsaert_1975') {
       satvapres <- 611.2*exp(17.67*((TairK-zeroC)/(TairK-29.65)))
       vapres    <- pmax(5,RH)/100*satvapres
       emiss     <- 0.642*(vapres/TairK)^(1/7)
       lwdown    <- emiss*0.0000000567*TairK^4
       
-    }else if(technique=='Abramowitz_2012'){
+    } else if(technique=='Abramowitz_2012') {
       satvapres <- 611.2*exp(17.67*((TairK-zeroC)/(TairK-29.65)))
       vapres    <- pmax(5,RH)/100*satvapres
       lwdown    <- 2.648*TairK + 0.0346*vapres - 474
       
-    }else{
+    } else {
       CheckError('S4: Unknown requested LWdown synthesis technique.')
     }
   }
@@ -561,15 +561,15 @@ SynthesizeLWdown <- function(TairK,RH,technique){
 #-----------------------------------------------------------------------------
 
 #' Synthesises air pressure based on Tair and elevation
-SynthesizePSurf <- function(TairK, elevation, pair_units){
+SynthesizePSurf <- function(TairK, elevation, pair_units) {
   # Synthesizes PSurf based on temperature and elevation
   
   #If Tair missing, set Pair missing
-  if(is.na(TairK)){
+  if (is.na(TairK)) {
     PSurf <- NA
     
   #Else synthesise (in Pa)
-  }else {
+  } else {
     PSurf <- 101325 * (TairK / (TairK + 0.0065*elevation))^(9.80665/287.04/0.0065)
   }
   

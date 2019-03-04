@@ -66,6 +66,8 @@ a maximum 24 hours (daily). Defaults to NA (no aggregation).
 \item model: Name of land surface model. Used to retrieve model specific attributes, such as site
 plant functional type.
 \item metadata_source: Sources to check for metadata. One of 'all', 'csv', or 'web'.
+\item add_psurf: La Thuile dataset does not include surface air pressure (PSurf). When set to TRUE,
+it will be synthesised from air temperature and elevation.
 }
 }
 \description{

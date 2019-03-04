@@ -4,7 +4,7 @@
 \alias{get_varnames}
 \title{Gets possible varnames for FLUXNET FULLSET/SUBSET and La Thuile}
 \usage{
-get_varnames(datasetname, flx2015_version)
+get_varnames(datasetname, flx2015_version, add_psurf)
 }
 \description{
 Gets possible varnames for FLUXNET FULLSET/SUBSET and La Thuile

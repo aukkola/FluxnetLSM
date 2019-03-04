@@ -258,7 +258,7 @@ GapfillMet_statistical <- function(datain, qc_name, qc_flags,
     }
     
     
-    #Synthesize LWdown
+    #Synthesize air pressure
     temp_data <- gapfill_LWdown_Pair(datain, var="Pair", var_ind=pair_ind, 
                                      TairK=tair_ind, elev=elevation,
                                      varnames=varnames,

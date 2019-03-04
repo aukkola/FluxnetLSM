@@ -5,7 +5,7 @@
 \title{Gapfill meteorological variables using statistical methods}
 \usage{
 GapfillMet_statistical(datain, qc_name, qc_flags, copyfill, linfill,
-  lwdown_method, elevation, varnames, site_log)
+  lwdown_method, elevation, varnames, limit_vars, site_log)
 }
 \description{
 Gapfill meteorological variables using statistical methods

@@ -321,7 +321,7 @@ check_flx2015_version <- function(dataset, version) {
 #-----------------------------------------------------------------------------
 
 #' Gets possible varnames for FLUXNET FULLSET/SUBSET and La Thuile
-get_varnames <- function(datasetname, flx2015_version) {
+get_varnames <- function(datasetname, flx2015_version, add_psurf) {
   
   #These are used for unit conversions etc.
   
@@ -333,6 +333,9 @@ get_varnames <- function(datasetname, flx2015_version) {
     ind <- 2
   } else if (datasetname=="LaThuile"){
     ind <- 3
+    
+    if (add_psurf) { lt_psurf <- "PSurf_synth" } else { lt_psurf <- NULL }
+    
   } else if (datasetname=="OzFlux"){
     ind <- 4
   } else {
@@ -350,7 +353,7 @@ get_varnames <- function(datasetname, flx2015_version) {
                       c("Precip"))
   airpressure <- list(c("PA", "PA_ERA", "PA_F"), 
                       c("PA_F"), 
-                      c("NULL"),
+                      c(lt_psurf),
                       c("ps"))
   co2         <- list(c("CO2_F_MDS"),
                       c("CO2_F_MDS"),

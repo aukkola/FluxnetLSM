@@ -12,7 +12,7 @@
 #' @param vars data.table of variables and their attributes
 #' @param time_vars vector of time variables
 #' @return list of flux data, variables and timing information
-ReadCSVFluxData <- function(fileinname, vars, datasetname, time_vars, site_log, ...) {
+ReadCSVFluxData <- function(fileinname, vars, datasetname, time_vars, add_psurf, site_log, ...) {
 
     ####### First read available variables, corresponding units and ranges ####
 
@@ -37,6 +37,15 @@ ReadCSVFluxData <- function(fileinname, vars, datasetname, time_vars, site_log, 
           FluxData <- convert_LaThuile(infiles=fileinname,
                                        tcol=tcol,
                                        site_log=site_log, ...)
+          
+          #Add synthesised air pressure (PSurf) as missing values. Also add to tcol and
+          #remove from failed vars
+          if (add_psurf) {
+            FluxData         <- cbind(FluxData, PSurf_synth=rep(NA, nrow(FluxData)))
+            tcol$names       <- append(tcol$names, "PSurf_synth")
+            tcol$failed_vars <- tcol$failed_vars[-which(tcol$failed_vars== "PSurf_synth")]
+          }
+          
           
         } else if (datasetname == "OzFlux") {
           
@@ -214,7 +223,7 @@ read_era <- function(ERA_file, datain) {
 
 #' Converts La Thuile files to FLUXNET2015 format
 convert_LaThuile <- function(infiles, fair_usage=NA, fair_usage_vec=NA,
-                             min_yrs, tcol, site_log, site_code) {
+                             min_yrs, tcol, add_psurf, site_log, site_code) {
 
     library(R.utils) # seqToIntervals
 
@@ -357,7 +366,7 @@ convert_LaThuile <- function(infiles, fair_usage=NA, fair_usage_vec=NA,
         stop("Problem appending La Thuile data into a Fluxnet2015 format")
     }
 
-
+    
     # Append new time and data
     converted_data <- cbind(new_time, data[,-time_cols])
 

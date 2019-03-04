@@ -190,7 +190,12 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,            # outfile file 
                                                       attval=datain$attributes[var_ind[x],3],
                                                       prec="text"))
 
-
+    # Add CMIP name to file (if not missing)
+    lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]],
+                                                     attname="CMIP_short_name",
+                                                     attval=datain$attributes[var_ind[x],4],
+                                                     prec="text"))
+    
     # Add missing percentage to file
     lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]],
                                                      attname="Missing_%",
@@ -438,6 +443,14 @@ CreateMetNetcdfFile = function(metfilename, datain,             # outfile file a
                                                      attname="Standard_name",
                                                      attval=datain$attributes[var_ind[x],3],
                                                      prec="text"))
+  
+      
+    # Add CMIP name to file (if not missing)
+    lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]],
+                                                     attname="CMIP_short_name",
+                                                     attval=datain$attributes[var_ind[x],4],
+                                                     prec="text"))
+    
 
     # Add ERA-Interim name to file when available (if used)
     if(!is.na(arg_info$met_gapfill) & (arg_info$met_gapfill=="ERAinterim")){
@@ -582,7 +595,7 @@ add_processing_info <- function(ncid, arg_info, datain, cat){
         }
 
 
-        # Flux data
+    # Flux data
     } else if(cat=="Flux" & !is.na(arg_info$flux_gapfill)){
 
         ncatt_put(ncid,varid=0,attname='Gapfilling_method',

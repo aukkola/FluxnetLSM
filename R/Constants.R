@@ -48,6 +48,8 @@ findColIndices <-  function(fileinname, var_names, var_classes,
   #List variables that could not be found in file (instances where ind length equals 0)
   #and remove failed variables from var_name and var_classes vectors
   failed_ind  <- which(sapply(ind, length)==0)
+  
+  #List failed variables
   failed_vars <- var_names[failed_ind]
   
 
@@ -214,9 +216,11 @@ retrieve_atts <- function(vars_present, all_vars){
   
   attributes <- cbind(all_vars$Fluxnet_variable, 
                       all_vars$Longname,
-                      all_vars$Standard_name)[ind_present,]
+                      all_vars$Standard_name,
+                      all_vars$CMIP_short_name)[ind_present,]
       
-  colnames(attributes) <- c("Fluxnet_variable", "Longname", "CF_name")
+  colnames(attributes) <- c("Fluxnet_variable", "Longname", "CF_name",
+                            "CMIP_name")
   
   return(attributes)
 }
