@@ -262,6 +262,7 @@ CreateMetNetcdfFile = function(metfilename, datain,             # outfile file a
                                av_precip=NA,                    # average annual rainfall
                                total_missing, total_gapfilled,  # Percentage missing and gap-filled
                                qcInfo,                          # QC flag values
+                               qc_name,                         # Name of qc flag in original dataset
                                arg_info,                        # Arguments passed to main function
                                var_ind,                         # Indices to extract variables to be written
                                varnames,                        # Original FLUXNET names corresponding to dataset
@@ -295,10 +296,13 @@ CreateMetNetcdfFile = function(metfilename, datain,             # outfile file a
 
     # VARIABLE DEFINITIONS ##############################################
 
-    #First set correct dimensions (Tair, Qair, CO2air and Wind need an extra z-dimension)
-    #NOTE this might be CABLE-specific and should get looked into!
-    ind_dim <- which(names(datain$out_vars) %in% c(varnames$tair, varnames$relhumidity, varnames$wind,
-                                                   varnames$co2))
+    #First set correct dimensions (Tair, Qair, CO2air and Wind need an extra z-dimension, as well
+    #as their QC flags)
+    #NOTE this follows previous PLUMBER protocol and should probably get looked into
+    ind_dim <- which(names(datain$out_vars) %in% c(varnames$tair, paste0(varnames$tair, qc_name),
+                                                   varnames$relhumidity, paste0(varnames$relhumidity, qc_name),
+                                                   varnames$wind, paste0(varnames$wind, qc_name),
+                                                   varnames$co2, paste0(varnames$co2, qc_name)))
     
     dims    <- lapply(var_ind, function(x) if(x %in% ind_dim) list(xd,yd,zd,td) else list(xd,yd,td))
     
