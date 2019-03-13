@@ -10,6 +10,18 @@ Contributors: Anna Ukkola, Ned Haughton and Martin De Kauwe
 
 Requires: R ≥ 3.1.0
 
+Package is described in:
+Ukkola, A. M., Haughton, N., De Kauwe, M. G., Abramowitz, G., and Pitman, A. J.: [FluxnetLSM R package (v1.0):
+a community tool for processing FLUXNET data for use in land surface modelling](https://doi.org/10.5194/gmd-10-3379-2017),
+Geosci. Model Dev., 10, 3379-3390, 2017
+
+
+N.B. options to check for level of gap-filling have changed since v1.0
+
+Now using separate "missing" thresholds for met and flux variables, as well as
+two tiers of gapfilling thresholds for met variables and
+a separate gap-fill check for flux variables
+
 
 ### Installation
 
