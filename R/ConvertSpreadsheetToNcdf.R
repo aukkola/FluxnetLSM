@@ -157,7 +157,7 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
                                     "character",  # Short_name_cmip
                                     "numeric",    # Data_min
                                     "numeric",    # Data_max
-                                    "logical",    # Essential_met
+                                    "numeric",    # Essential_met
                                     "logical",    # Preferred_eval
                                     "character",  # Category
                                     "character",  # ERAinterim_variable
@@ -174,7 +174,7 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
                       Fluxnet_class="numeric", Output_variable="Psurf",
                       Output_unit="Pa", Longname="Surface air pressure (synthesised)",
                       Standard_name="surface_air_pressure", CMIP_short_name="ps", 
-                      Data_min=50000, Data_max=110000, Essential_met=FALSE, Preferred_eval=FALSE, 
+                      Data_min=50000, Data_max=110000, Essential_met=NA, Preferred_eval=FALSE, 
                       Category="Met", ERAinterim_variable=NA, Aggregate_method="mean")
     
     if (!all(names(psurf_var) %in% colnames(vars_csv))) stop("PSurf variable not defined correctly!")
@@ -331,7 +331,7 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
       DataFromText <- gapfilled_met$data
       site_log     <- gapfilled_met$site_log        
       
-      # Gapfill using ERA-interim data provided as part of FLUXNET2015      
+    # Gapfill using ERA-interim data provided as part of FLUXNET2015      
     } else if(conv_opts$met_gapfill == "ERAinterim") {
       
       #Gapfill with ERAinterim
@@ -341,7 +341,7 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
                                           site_log=site_log)
       # Not sure if we need to return the site_log from this function? Seems to stop on every error anyway..
       
-      #Cannot recognise method, stop
+    #Cannot recognise method, stop
     } else {
       
       stop(paste("Cannot ascertain met_gapfill method. Choose one of",
@@ -394,8 +394,11 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   #according to user-defined thresholds
 
   gaps  <- CheckDataGaps(datain=DataFromText, qc_flags=qc_flags, 
-                         missing=conv_opts$missing, 
-                         gapfill_all=conv_opts$gapfill_all,
+                         missing_met=conv_opts$missing_met, 
+                         missing_flux=conv_opts$missing_flux, 
+                         gapfill_met_tier1=conv_opts$gapfill_met_tier1,
+                         gapfill_met_tier2=conv_opts$gapfill_met_tier2,
+                         gapfill_flux=conv_opts$gapfill_flux,
                          gapfill_good=conv_opts$gapfill_good, 
                          gapfill_med=conv_opts$gapfill_med,
                          gapfill_poor=conv_opts$gapfill_poor,
@@ -770,10 +773,15 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
 #'        "statistical" or NA (default; no gap-filling).
 #'        
 #' - missing: Maximum percentage of time steps allowed to be missing in any given year
-#' 
-#' - gapfill_all: Maximum percentage of time steps allowed to be gap-filled
-#'        (any quality) in any given year. Note if gapfill_all is set, any thresholds
-#'        for gapfill_good, gapfill_med or gapfill_poor are ignored. Set to NA if not required.
+#'           
+#' - gapfill_met_tier1: Maximum percentage of time steps allowed to be gap-filled
+#'        (any quality) in any given year in Tier 1 met variables. Set to NA if not required.
+#'        
+#' - gapfill_met_tier2: Maximum percentage of time steps allowed to be gap-filled
+#'        (any quality) in any given year in Tier 2 met variables. Set to NA if not required.
+#'        
+#' - gapfill_flux: Maximum percentage of time steps allowed to be gap-filled
+#'        (any quality) in any given year in flux variables. Set to NA if not required.
 #'        
 #' - gapfill_good: Maximum percentage of time steps allowed to be good-quality gap-filled
 #'        in any given year. Refer to package documentation for information on QC flags.
@@ -841,8 +849,11 @@ get_default_conversion_options <- function() {
         fair_use_vec = NA,
         met_gapfill = NA,
         flux_gapfill = NA,
-        missing = 15,
-        gapfill_all = 20,
+        missing_met = 0,
+        missing_flux = 20,
+        gapfill_met_tier1 = 10,
+        gapfill_met_tier2 = 100,
+        gapfill_flux = 100,
         gapfill_good = NA,
         gapfill_med = NA,
         gapfill_poor = NA,

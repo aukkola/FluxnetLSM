@@ -10,8 +10,11 @@
 #' Checks for missing and gap-filled data and determines output years
 #' @param datain Input data list
 #' @param qc_flags Values of qc flags
-#' @param missing Threshold for missing values per year (as percentage)
-#' @param gapfill_all Threshold for all gap_filling per year (as percentage)
+#' @param missing_met Threshold for missing values per year for met variables (as percentage)
+#' @param missing_flux Threshold for missing values per year for flux variables (as percentage)
+#' @param gapfill_met_tier1 Threshold for all gap_filling per year for Tier 1 met variables (as percentage)
+#' @param gapfill_met_tier2 Threshold for all gap_filling per year for Tier 2 met variables (as percentage) 
+#' @param gapfill_flux Threshold for all gap_filling per year for flux variables (as percentage)
 #' @param gapfill_good Threshold for good quality gap_filling 
 #' per year (as percentage, ignored if gapfill_all set)
 #' @param gapfill_med Threshold for medium quality 
@@ -23,7 +26,8 @@
 #' @param showWarn Print warning?
 #' @param site_log Site log
 #' @return out
-CheckDataGaps <- function(datain, qc_flags, missing, gapfill_all, 
+CheckDataGaps <- function(datain, qc_flags, missing_met, missing_flux, 
+                          gapfill_met_tier1, gapfill_met_tier2, gapfill_flux,
                           gapfill_good, gapfill_med, gapfill_poor,
                           gapfill_era, gapfill_stat, min_yrs, 
                           qc_name, aggregate=NA, site_log){
@@ -31,7 +35,7 @@ CheckDataGaps <- function(datain, qc_flags, missing, gapfill_all,
   #Checks the existence of data gaps and determines which
   #years should be outputted depending on the percentage of missing
   #and/or gapfilled data (set by thresholds) and the number of consecutive 
-  #years available (at lseast the number of yrs set by min_yrs)
+  #years available (at least the number of yrs set by min_yrs)
   
   #Years with too many gapfilled/missing values in ANY essential met variables
   # or ALL preferred evaluation variables will not be processed and outputted.
@@ -44,7 +48,7 @@ CheckDataGaps <- function(datain, qc_flags, missing, gapfill_all,
   # 'Missing' percentage must be set, return
   # an error if it is not. Cannot check for data 
   # gaps otherwise as not all variables come with QC flags
-  if(is.na(missing)){
+  if(any(is.na(c(missing_met, missing_flux)))){
     error <- paste("Cannot check for missing time steps in data,",
                    "set 'missing' to a value between 0",
                    "(no missing values allowed) and 100",
@@ -55,29 +59,53 @@ CheckDataGaps <- function(datain, qc_flags, missing, gapfill_all,
   
   
   #Find essential and preferred vars
-  essential_met  <- datain$vars[which(datain$essential_met)] 
-  preferred_eval <- datain$vars[which(datain$preferred_eval)]
-  all_eval       <- datain$vars[which(datain$categories=="Eval")]
+  all_met   <- datain$vars[which(datain$categories=="Met")] 
+  tier1_met <- datain$vars[which(datain$essential_met==1)] 
+  tier2_met <- datain$vars[which(datain$essential_met==2)] 
+  all_eval  <- datain$vars[which(datain$categories=="Eval")]
+  preferred_eval  <- datain$vars[which(datain$preferred_eval)]
+  
   
   #Determine what gapfilling thresholds to use
   #If 'gapfill_all' is set, use that
   #Otherwise, use good/medium/poor thresholds
   
-  #If gaps_all is set, use that
-  if(!is.na(gapfill_all)){
+  met_flx_gapfill_flags <- c(tier1 = gapfill_met_tier1, tier2 = gapfill_met_tier2,
+                             flux = gapfill_flux)
+  
+  good_med_poor_gapfill_flags <- c(gapfill_good, gapfill_med,
+                                   gapfill_poor, gapfill_era,
+                                   gapfill_stat)
+  
+  #Can't use general met and flux flags, as well as good/med/poor
+  #quality flags
+  if (any(!is.na(met_flx_gapfill_flags)) & any(!is.na(good_med_poor_gapfill_flags))) {
+    stop("Cannot use gapfill_met_tier1/2 and gapfill_flux flags with gapfill_good/med/poor.")
+  }
+  
+  #If met tier1/2 or flux gapfilling options set
+  if(any(!is.na(met_flx_gapfill_flags))){
     
-    threshold <- gapfill_all
+    threshold <- met_flx_gapfill_flags
+  
+    #if any NA, set to 100 (unlimited)
+    threshold[is.na(threshold)] <- 100 
     
-    #Else use any of good/medium/poor gapfilling thresholds if set
-  } else if(any(!is.na(c(gapfill_good, gapfill_med,
-                         gapfill_poor, gapfill_era,
-                         gapfill_stat)))){
+    #Set method
+    method <- "met_flux"
     
-    threshold <- c(gapfill_good, gapfill_med, gapfill_poor,
-                   gapfill_era, gapfill_stat)
-    threshold[is.na(threshold)] <- 100 #if any NA, set to 100 (unlimited)
+  #Use flags checking for gapfilling quality (good, med, poor etc.)
+  } else if (any(!is.na(good_med_poor_gapfill_flags))) {
     
-    #If none of these are set, return a warning      
+    threshold <- good_med_poor_gapfill_flags
+    
+    #if any NA, set to 100 (unlimited)
+    threshold[is.na(threshold)] <- 100 
+    
+    #Set method
+    method <- "gc_quality"
+    
+  #If none of these are set, return a warning      
   } else {
     
     threshold <- NA
@@ -99,72 +127,77 @@ CheckDataGaps <- function(datain, qc_flags, missing, gapfill_all,
   
   end   <- cumsum(tsteps_per_yr)
   start <- end - tsteps_per_yr + 1
-  
+
+    
   ### Check how many missing and gapfilled values per year, per variable ###
   
   perc_missing  <- list()
   perc_gapfilled <- list()
-  for(k in 1:ncol(datain$data)){
+  for (k in 1:ncol(datain$data)) {
     
     data <- datain$data[,k]
     
     
     ### Missing ###
+    
     #Calculate the percentage of data missing each year
     perc_missing[[k]] <- sapply(1:length(start), function(x)
                          length(which(is.na(data[start[x]:end[x]] ))) /
                          length(start[x]:end[x]) * 100)
     
     ### Gap-filled ###
+    
     #Initialise gapfilled percentage as zeros
-    if(is.na(aggregate)){
+    if (is.na(aggregate) & method == "qc_quality") {
       perc_gapfilled[[k]] <- matrix(0, nrow=length(threshold), ncol=length(start))
-    } else{
+    } else {
       perc_gapfilled[[k]] <- matrix(0, nrow=1, ncol=length(start))
     }
     
     #If threshold set, check for gap-filling
-    if(any(!is.na(threshold))){
+    if (any(!is.na(threshold))) {
       
       #Check if QC variable exists
       qc_var <- which(datain$vars==paste(datain$vars[k], qc_name, sep="")) 
       
       #If found QC variable, calculate percentage of gap-filling
-      if(length(qc_var) > 0){
+      if (length(qc_var) > 0) {
         
         #Extract QC flag data
         qcdata <- datain$data[,qc_var] 
         
         #Time steps not aggregated
-        if(is.na(aggregate)){
+        if (is.na(aggregate)) {
           
-          #If using gapfill_all
-          if(length(threshold)==1){  
+          #If using gapfill_met_tier1/2 or gapfill_flux
+          if (method == "met_flux") {
             
             #Find values that are not measured or missing
             perc_gapfilled[[k]] <- sapply(1:length(start), function(x)
-              length( which(qcdata[start[x]:end[x]] != qc_flags$QC_measured &
-                              !is.na(qcdata[start[x]:end[x]]))) /
-                length(start[x]:end[x]) * 100)
+                                          length( which(qcdata[start[x]:end[x]] != qc_flags$QC_measured &
+                                          !is.na(qcdata[start[x]:end[x]]))) /
+                                          length(start[x]:end[x]) * 100)
             
             #Convert to matrix so compatible with vars without QC
             perc_gapfilled[[k]] <- matrix(perc_gapfilled[[k]], nrow=1)
             
             
-            #If using gapfill_good/med/poor         
-          } else {
+          #If using gapfill_good/med/poor         
+          } else if (method == "qc_quality") {
             
-            #Loop through the three gap-filling flags
+            #Loop through the five gap-filling flags
             percs <- matrix(NA, nrow=length(threshold), ncol=length(start))
             for(g in 1:length(threshold)){
               percs[g,] <- sapply(1:length(start), function(x)
-                           length( which(qcdata[start[x]:end[x]] == qc_flags$QC_gapfilled[g])) /
-                           length(start[x]:end[x]) * 100)
+                                                   length( which(qcdata[start[x]:end[x]] == qc_flags$QC_gapfilled[g])) /
+                                                   length(start[x]:end[x]) * 100)
             }
             
             perc_gapfilled[[k]] <- percs
             
-          } 
+          } else {
+              stop ("gapfill check method not recognised")
+          }
         
           
         #Time steps aggregated
@@ -188,7 +221,10 @@ CheckDataGaps <- function(datain, qc_flags, missing, gapfill_all,
   ### Check that essential variables have at least one common year of data
   ### without too many gaps
   ### and the year has one or more evaluation variables available
-  essential_ind <- sapply(essential_met, function(x) which(names(perc_missing) == x))
+  all_met_ind   <- sapply(all_met, function(x) which(names(perc_missing) == x))
+  tier1_met_ind <- sapply(tier1_met, function(x) which(names(perc_missing) == x))
+  tier2_met_ind <- sapply(tier2_met, function(x) which(names(perc_missing) == x))
+  
   preferred_ind <- sapply(preferred_eval, function(x) which(names(perc_missing) == x))
   eval_ind      <- sapply(all_eval, function(x) which(names(perc_missing)==x))
   
@@ -214,7 +250,7 @@ CheckDataGaps <- function(datain, qc_flags, missing, gapfill_all,
     #have too many missing or gapfilled values, skip year
     
     #First check if too many missing values
-    if(any(miss[essential_ind] > missing) | all(miss[preferred_ind] > missing))
+    if(any(miss[all_met_ind] > missing_met) | all(miss[preferred_ind] > missing_flux))
     {
       message("Removing ", year, " due to too many missing values.")
       yr_keep[k] <- FALSE 
@@ -222,28 +258,31 @@ CheckDataGaps <- function(datain, qc_flags, missing, gapfill_all,
     
     #Check if any evaluation variables have too many gaps
     eval_remove[[k]] <- vector() #initialise
-    eval_remove[[k]] <- append(eval_remove[[k]], which(miss[eval_ind] > missing))
+    eval_remove[[k]] <- append(eval_remove[[k]], which(miss[eval_ind] > missing_flux))
     
     
     #If missing value threshold not exceeded, check for gapfilling (if threshold set)
     if(yr_keep[k] & any(!is.na(threshold))){
       
       #Using gapfill_all or aggregated
-      if(length(threshold)==1 | !is.na(aggregate)){
+      if(!is.na(aggregate) | method == "met_flux"){
         
-        # If ANY essential vars have too many gapfilled or missing values OR 
-        # ALL preferred vars have too many gapfilled or missing values,
+        # If ANY Tier 1/2 met vars have too many gapfilled or missing values OR 
+        # ALL preferred flux vars have too many gapfilled or missing values,
         # don't process year 
-        if(any(gaps[essential_ind] > threshold) | all(gaps[preferred_ind] > threshold)){
+        if(any(gaps[tier1_met_ind] > threshold["tier1"] | gaps[tier2_met_ind] > threshold["tier2"] ) | 
+           all(gaps[preferred_ind] > threshold["flux"])){
+          
           message("Removing ", year, " due to too many gapfilled or missing values.")
           yr_keep[k] <- FALSE 
         }
         
         #Check if any evaluation variables have too much gap-filling
-        eval_remove[[k]] <- append(eval_remove[[k]], which(gaps[eval_ind] > threshold))
-        
-        #Using gapfill_good/med/poor
-      } else {
+        eval_remove[[k]] <- append(eval_remove[[k]], which(gaps[eval_ind] > threshold["flux"]))
+      
+          
+      #Using gapfill_good/med/poor
+      } else if (method == "qc_quality") {
         
         #As above, but loop through the three thresholds
         #The square brackets `[[` extract the x-th value from each list element in gaps[essential_ind]
@@ -264,7 +303,7 @@ CheckDataGaps <- function(datain, qc_flags, missing, gapfill_all,
     
   } #years
   
-  
+
   #Indices of year(s) to keep
   yr_ind <- which(yr_keep)
   
@@ -498,8 +537,13 @@ InitialChecks <- function(opts, era_file){
     }
   }
   
+  #Check that missing_met is between 0-100
+  if(opts$missing_met < 0 || opts$missing_met >100 || is.na(opts$missing_met)){
+    stop("Argument 'missing' not set correctly, must be a number between 0-100")
+  }
+  
   #Check that missing is between 0-100
-  if(opts$missing < 0 || opts$missing >100 || is.na(opts$missing)){
+  if(opts$missing_flux < 0 || opts$missing_flux >100 || is.na(opts$missing_flux)){
     stop("Argument 'missing' not set correctly, must be a number between 0-100")
   }
   

@@ -614,7 +614,9 @@ create_qc_var <- function(datain, qc_name, qc_flags, outname, cat){
   Fluxnet_var <- "NULL"
   Longname    <- paste(outname, "quality control flag")
   CF_name     <- "NULL"
-  datain$attributes <- rbind(datain$attributes, c(Fluxnet_var, Longname, CF_name))  
+  CMIP_short_name <- "NULL"
+  
+  datain$attributes <- rbind(datain$attributes, c(Fluxnet_var, Longname, CF_name, CMIP_short_name))  
   
   #units
   datain$units$original_units <- append_qc(datain$units$original_units, "-", qc_name)  
@@ -630,7 +632,7 @@ create_qc_var <- function(datain, qc_name, qc_flags, outname, cat){
   datain$categories <- append_qc(datain$categories, cat, qc_name)  
   
   #Essential met / preferred eval
-  datain$essential_met  <- append_qc(datain$essential_met, FALSE, qc_name)
+  datain$essential_met  <- append_qc(datain$essential_met, NA, qc_name)
   datain$preferred_eval <- append_qc(datain$preferred_eval, FALSE, qc_name)
   
   return(datain)

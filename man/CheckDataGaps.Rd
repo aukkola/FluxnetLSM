@@ -4,18 +4,24 @@
 \alias{CheckDataGaps}
 \title{Checks for missing and gap-filled data and determines output years}
 \usage{
-CheckDataGaps(datain, qc_flags, missing, gapfill_all, gapfill_good, gapfill_med,
-  gapfill_poor, gapfill_era, gapfill_stat, min_yrs, qc_name, aggregate = NA,
-  site_log)
+CheckDataGaps(datain, qc_flags, missing_met, missing_flux, gapfill_met_tier1,
+  gapfill_met_tier2, gapfill_flux, gapfill_good, gapfill_med, gapfill_poor,
+  gapfill_era, gapfill_stat, min_yrs, qc_name, aggregate = NA, site_log)
 }
 \arguments{
 \item{datain}{Input data list}
 
 \item{qc_flags}{Values of qc flags}
 
-\item{missing}{Threshold for missing values per year (as percentage)}
+\item{missing_met}{Threshold for missing values per year for met variables (as percentage)}
 
-\item{gapfill_all}{Threshold for all gap_filling per year (as percentage)}
+\item{missing_flux}{Threshold for missing values per year for flux variables (as percentage)}
+
+\item{gapfill_met_tier1}{Threshold for all gap_filling per year for Tier 1 met variables (as percentage)}
+
+\item{gapfill_met_tier2}{Threshold for all gap_filling per year for Tier 2 met variables (as percentage)}
+
+\item{gapfill_flux}{Threshold for all gap_filling per year for flux variables (as percentage)}
 
 \item{gapfill_good}{Threshold for good quality gap_filling
 per year (as percentage, ignored if gapfill_all set)}

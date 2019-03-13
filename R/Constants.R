@@ -57,9 +57,9 @@ findColIndices <-  function(fileinname, var_names, var_classes,
   if(length(failed_ind) > 0){
 
     #Check if any essential meteorological variables missing, abort if so
-    if(any(essential_vars[failed_ind])){
+    if(any(!is.na(essential_vars[failed_ind]))){
       error <- paste("Cannot find all essential variables in input file (missing: ", 
-                     paste(var_names[failed_ind[which(essential_vars[failed_ind])]], collapse=","),
+                     paste(var_names[failed_ind[which(!is.na(essential_vars[failed_ind]))]], collapse=","),
                      "), aborting", sep="")
       stop_and_log(error, site_log)
     }
@@ -67,7 +67,7 @@ findColIndices <-  function(fileinname, var_names, var_classes,
     #Check if no desired evaluation variables present, abort if so
     if(all(preferred_vars[failed_ind]==TRUE)){
       error <- paste("Cannot find any evaluation variables in input file (missing: ", 
-                     paste(var_names[failed_ind[which(essential_vars[failed_ind])]], collapse=","),
+                     paste(var_names[failed_ind[which(!is.na(essential_vars[failed_ind]))]], collapse=","),
                      "), aborting", sep="")
       stop_and_log(error, site_log)
     }

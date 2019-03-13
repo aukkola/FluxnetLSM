@@ -25,9 +25,12 @@ Should have years as vector column names.
 \item flux_gapfill: Method to use for gap-filling flux data. Set to one of
 "statistical" or NA (default; no gap-filling).
 \item missing: Maximum percentage of time steps allowed to be missing in any given year
-\item gapfill_all: Maximum percentage of time steps allowed to be gap-filled
-(any quality) in any given year. Note if gapfill_all is set, any thresholds
-for gapfill_good, gapfill_med or gapfill_poor are ignored. Set to NA if not required.
+\item gapfill_met_tier1: Maximum percentage of time steps allowed to be gap-filled
+(any quality) in any given year in Tier 1 met variables. Set to NA if not required.
+\item gapfill_met_tier2: Maximum percentage of time steps allowed to be gap-filled
+(any quality) in any given year in Tier 2 met variables. Set to NA if not required.
+\item gapfill_flux: Maximum percentage of time steps allowed to be gap-filled
+(any quality) in any given year in flux variables. Set to NA if not required.
 \item gapfill_good: Maximum percentage of time steps allowed to be good-quality gap-filled
 in any given year. Refer to package documentation for information on QC flags.
 Set to NA if not required (default).
