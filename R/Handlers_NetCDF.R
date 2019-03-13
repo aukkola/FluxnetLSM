@@ -281,7 +281,7 @@ CreateMetNetcdfFile = function(metfilename, datain,             # outfile file a
     # Define x, y and z dimensions
     xd = ncdim_def('x',vals=c(1),units='')
     yd = ncdim_def('y',vals=c(1),units='')
-    zd = ncdim_def('z',vals=c(1),units='')
+    #zd = ncdim_def('z',vals=c(1),units='')
     dimnchar = ncdim_def("nchar", "", 1:200, create_dimvar=FALSE )
 
     # Determine data start date and time:
@@ -296,15 +296,17 @@ CreateMetNetcdfFile = function(metfilename, datain,             # outfile file a
 
     # VARIABLE DEFINITIONS ##############################################
 
-    #First set correct dimensions (Tair, Qair, CO2air and Wind need an extra z-dimension, as well
-    #as their QC flags)
-    #NOTE this follows previous PLUMBER protocol and should probably get looked into
-    ind_dim <- which(names(datain$out_vars) %in% c(varnames$tair, paste0(varnames$tair, qc_name),
-                                                   varnames$relhumidity, paste0(varnames$relhumidity, qc_name),
-                                                   varnames$wind, paste0(varnames$wind, qc_name),
-                                                   varnames$co2, paste0(varnames$co2, qc_name)))
-    
-    dims    <- lapply(var_ind, function(x) if(x %in% ind_dim) list(xd,yd,zd,td) else list(xd,yd,td))
+    # #First set correct dimensions (Tair, Qair, CO2air and Wind need an extra z-dimension, as well
+    # #as their QC flags)
+    # N.B. not using this anymore as ALMA convention specifies these as simple x-y variables
+    # ind_dim <- which(names(datain$out_vars) %in% c(varnames$tair, paste0(varnames$tair, qc_name),
+    #                                                varnames$relhumidity, paste0(varnames$relhumidity, qc_name),
+    #                                                varnames$wind, paste0(varnames$wind, qc_name),
+    #                                                varnames$co2, paste0(varnames$co2, qc_name)))
+    # 
+    # dims    <- lapply(var_ind, function(x) if(x %in% ind_dim) list(xd,yd,zd,td) else list(xd,yd,td))
+
+    dims    <- lapply(var_ind, function(x) list(xd,yd,td))
     
     
     # Create variable definitions for time series variables
