@@ -89,6 +89,13 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,            # outfile file 
         opt_vars[[ctr]] = canheight
         ctr <- ctr + 1
     }
+    # Define site measurement height:
+    if(!is.na(siteInfo$MeasurementHeight)){
+      measheight=ncvar_def('measurement_height','m',dim=list(xd,yd),
+                          missval=Nc_MissingVal,longname='Measurement height')
+      opt_vars[[ctr]] = measheight
+      ctr <- ctr + 1
+    }
     # Define site elevation:
     if(!is.na(siteInfo$SiteElevation)){
         elev=ncvar_def('elevation','m',dim=list(xd,yd),
@@ -125,6 +132,7 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,            # outfile file 
 
 
     #### Write global attributes ###
+    
     ncatt_put(ncid,varid=0,attname='Production_time',
               attval=as.character(Sys.time()))
     ncatt_put(ncid,varid=0,attname='Github_revision',
@@ -133,21 +141,43 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,            # outfile file 
               attval=site_code, prec="text")
     ncatt_put(ncid,varid=0,attname='site_name',
               attval=as.character(siteInfo$Fullname), prec="text")
-   if(!is.na(siteInfo$Description)) { ncatt_put(ncid,varid=0,attname='site_description',
-              attval=as.character(siteInfo$Description), prec="text") }
+    ncatt_put(ncid,varid=0,attname='country',
+              attval=as.character(siteInfo$Country), prec="text")
     ncatt_put(ncid,varid=0,attname='Fluxnet_dataset_version',
               attval=arg_info$datasetversion, prec="text")
+    if(!is.na(siteInfo$Tier)) {
+              ncatt_put(ncid,varid=0,attname='Fluxnet site tier',
+              attval=siteInfo$Tier)}
+    if(!is.na(siteInfo$Description)) { 
+              ncatt_put(ncid,varid=0,attname='site_description',
+              attval=as.character(siteInfo$Description), prec="text") }
+    if(!is.na(siteInfo$VegetationDescription)) { 
+              ncatt_put(ncid,varid=0,attname='vegetation_description',
+              attval=as.character(siteInfo$VegetationDescription), prec="text") }
+    if(!is.na(siteInfo$SoilType)) { 
+              ncatt_put(ncid,varid=0,attname='soil_type',
+              attval=as.character(siteInfo$SoilType), prec="text") }
+    if(!is.na(siteInfo$Disturbance)) { 
+              ncatt_put(ncid,varid=0,attname='disturbance',
+              attval=as.character(siteInfo$Disturbance), prec="text") }
+    if(!is.na(siteInfo$CropDescription)) { 
+              ncatt_put(ncid,varid=0,attname='crop_description',
+              attval=as.character(siteInfo$CropDescription), prec="text") }
+    if(!is.na(siteInfo$Irrigation)) { 
+              ncatt_put(ncid,varid=0,attname='irrigation',
+              attval=as.character(siteInfo$Irrigation), prec="text") }
+    if(!is.na(siteInfo$TowerStatus)) { 
+      ncatt_put(ncid,varid=0,attname='tower_status',
+                attval=as.character(siteInfo$TowerStatus), prec="text") }
+    
+    #Qc flag descriptions
     ncatt_put(ncid,varid=0,attname='QC_flag_descriptions',
               attval=qcInfo, prec="text")
 
+    
     # args info
     add_processing_info(ncid, arg_info, datain, cat="Flux")
 
-    # tier
-    if(!is.na(siteInfo$Tier)) {
-        ncatt_put(ncid,varid=0,attname='Fluxnet site tier',
-                  attval=siteInfo$Tier)
-    }
 
     # contact info
     ncatt_put(ncid,varid=0,attname='Package contact',
@@ -166,6 +196,8 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,            # outfile file 
         ncvar_put(ncid,towheight,vals=siteInfo$TowerHeight)}
     if(!is.na(siteInfo$CanopyHeight)) {
         ncvar_put(ncid,canheight,vals=siteInfo$CanopyHeight)}
+    if(!is.na(siteInfo$MeasurementHeight)) {
+      ncvar_put(ncid,measheight,vals=siteInfo$MeasurementHeight)}
     if(!is.na(siteInfo$IGBP_vegetation_short)) {
         ncvar_put(ncid,short_veg,vals=sprintf("%-200s", siteInfo$IGBP_vegetation_short))}
     if(!is.na(siteInfo$IGBP_vegetation_long)) {
@@ -336,40 +368,47 @@ CreateMetNetcdfFile = function(metfilename, datain,             # outfile file a
     ctr <- 1
     # Define measurement height on tower:
     if(!is.na(siteInfo$TowerHeight)){
-        towheight=ncvar_def('tower_height','m',dim=list(xd,yd),
-                            missval=Nc_MissingVal,longname='Height of flux tower')
-        opt_vars[[ctr]] = towheight
-        ctr <- ctr + 1
+      towheight=ncvar_def('tower_height','m',dim=list(xd,yd),
+                          missval=Nc_MissingVal,longname='Height of flux tower')
+      opt_vars[[ctr]] = towheight
+      ctr <- ctr + 1
     }
     # Define site canopy height:
     if(!is.na(siteInfo$CanopyHeight)){
-        canheight=ncvar_def('canopy_height','m',dim=list(xd,yd),
-                            missval=Nc_MissingVal,longname='Canopy height')
-        opt_vars[[ctr]] = canheight
-        ctr <- ctr + 1
+      canheight=ncvar_def('canopy_height','m',dim=list(xd,yd),
+                          missval=Nc_MissingVal,longname='Canopy height')
+      opt_vars[[ctr]] = canheight
+      ctr <- ctr + 1
+    }
+    # Define site measurement height:
+    if(!is.na(siteInfo$MeasurementHeight)){
+      measheight=ncvar_def('measurement_height','m',dim=list(xd,yd),
+                           missval=Nc_MissingVal,longname='Measurement height')
+      opt_vars[[ctr]] = measheight
+      ctr <- ctr + 1
     }
     # Define site elevation:
     if(!is.na(siteInfo$SiteElevation)){
-        elev=ncvar_def('elevation','m',dim=list(xd,yd),
-                       missval=Nc_MissingVal,longname='Site elevation')
-        opt_vars[[ctr]] = elev
-        ctr <- ctr + 1
+      elev=ncvar_def('elevation','m',dim=list(xd,yd),
+                     missval=Nc_MissingVal,longname='Site elevation')
+      opt_vars[[ctr]] = elev
+      ctr <- ctr + 1
     }
     # Define IGBP short vegetation type:
     if(!is.na(siteInfo$IGBP_vegetation_short)){
-        short_veg=ncvar_def('IGBP_veg_short','-',dim=list(dimnchar), missval=NULL,
-                            longname='IGBP vegetation type (short)', prec="char")
-        opt_vars[[ctr]] = short_veg
-        ctr <- ctr + 1
+      short_veg=ncvar_def('IGBP_veg_short','-',dim=list(dimnchar), missval=NULL,
+                          longname='IGBP vegetation type (short)', prec="char")
+      opt_vars[[ctr]] = short_veg
+      ctr <- ctr + 1
     }
     # Define IGBP long vegetation type:
     if(!is.na(siteInfo$IGBP_vegetation_long)){
-        long_veg=ncvar_def('IGBP_veg_long','-',dim=list(dimnchar), missval=NULL,
-                           longname='IGBP vegetation type (long)', prec="char")
-        opt_vars[[ctr]] = long_veg
-        ctr <- ctr + 1
+      long_veg=ncvar_def('IGBP_veg_long','-',dim=list(dimnchar), missval=NULL,
+                         longname='IGBP vegetation type (long)', prec="char")
+      opt_vars[[ctr]] = long_veg
+      ctr <- ctr + 1
     }
-
+    
 
     # END VARIABLE DEFINITIONS #########################################
 
@@ -386,7 +425,7 @@ CreateMetNetcdfFile = function(metfilename, datain,             # outfile file a
 
 
     #### Write global attributes ###
-
+    
     ncatt_put(ncid,varid=0,attname='Production_time',
               attval=as.character(Sys.time()))
     ncatt_put(ncid,varid=0,attname='Github_revision',
@@ -395,44 +434,69 @@ CreateMetNetcdfFile = function(metfilename, datain,             # outfile file a
               attval=site_code, prec="text")
     ncatt_put(ncid,varid=0,attname='site_name',
               attval=as.character(siteInfo$Fullname), prec="text")
-    if(!is.na(siteInfo$Description)) { ncatt_put(ncid,varid=0,attname='site_description',
-              attval=as.character(siteInfo$Description), prec="text") }
+    ncatt_put(ncid,varid=0,attname='country',
+              attval=as.character(siteInfo$Country), prec="text")
     ncatt_put(ncid,varid=0,attname='Fluxnet_dataset_version',
               attval=arg_info$datasetversion, prec="text")
+    if(!is.na(siteInfo$Tier)) {
+      ncatt_put(ncid,varid=0,attname='Fluxnet site tier',
+                attval=siteInfo$Tier)}
+    if(!is.na(siteInfo$Description)) { 
+      ncatt_put(ncid,varid=0,attname='site_description',
+                attval=as.character(siteInfo$Description), prec="text") }
+    if(!is.na(siteInfo$VegetationDescription)) { 
+      ncatt_put(ncid,varid=0,attname='vegetation_description',
+                attval=as.character(siteInfo$VegetationDescription), prec="text") }
+    if(!is.na(siteInfo$SoilType)) { 
+      ncatt_put(ncid,varid=0,attname='soil_type',
+                attval=as.character(siteInfo$SoilType), prec="text") }
+    if(!is.na(siteInfo$Disturbance)) { 
+      ncatt_put(ncid,varid=0,attname='disturbance',
+                attval=as.character(siteInfo$Disturbance), prec="text") }
+    if(!is.na(siteInfo$CropDescription)) { 
+      ncatt_put(ncid,varid=0,attname='crop_description',
+                attval=as.character(siteInfo$CropDescription), prec="text") }
+    if(!is.na(siteInfo$Irrigation)) { 
+      ncatt_put(ncid,varid=0,attname='irrigation',
+                attval=as.character(siteInfo$Irrigation), prec="text") }
+    if(!is.na(siteInfo$TowerStatus)) { 
+      ncatt_put(ncid,varid=0,attname='tower_status',
+                attval=as.character(siteInfo$TowerStatus), prec="text") }
+    
+    #Qc flag descriptions
     ncatt_put(ncid,varid=0,attname='QC_flag_descriptions',
               attval=qcInfo, prec="text")
-
+    
+    
     # args info
     add_processing_info(ncid, arg_info, datain, cat="Met")
-
-    # tier
-    if(!is.na(siteInfo$Tier)) {
-        ncatt_put(ncid,varid=0,attname='Fluxnet site tier',
-                  attval=siteInfo$Tier)
-    }
-
+    
+    
     # contact info
     ncatt_put(ncid,varid=0,attname='Package contact',
               attval='a.ukkola@unsw.edu.au')
-
-
+    
+    
     # Add variable data to file:
     ncvar_put(ncid, latdim, vals=siteInfo$SiteLatitude)
     ncvar_put(ncid, londim, vals=siteInfo$SiteLongitude)
-
-
+    
+    
     # Optional meta data for each site:
     if(!is.na(siteInfo$SiteElevation)) {
-        ncvar_put(ncid,elev,vals=siteInfo$SiteElevation)}
+      ncvar_put(ncid,elev,vals=siteInfo$SiteElevation)}
     if(!is.na(siteInfo$TowerHeight)) {
-        ncvar_put(ncid,towheight,vals=siteInfo$TowerHeight)}
+      ncvar_put(ncid,towheight,vals=siteInfo$TowerHeight)}
     if(!is.na(siteInfo$CanopyHeight)) {
-        ncvar_put(ncid,canheight,vals=siteInfo$CanopyHeight)}
+      ncvar_put(ncid,canheight,vals=siteInfo$CanopyHeight)}
+    if(!is.na(siteInfo$MeasurementHeight)) {
+      ncvar_put(ncid,measheight,vals=siteInfo$MeasurementHeight)}
     if(!is.na(siteInfo$IGBP_vegetation_short)) {
-        ncvar_put(ncid,short_veg,vals=sprintf("%-200s", siteInfo$IGBP_vegetation_short))}
+      ncvar_put(ncid,short_veg,vals=sprintf("%-200s", siteInfo$IGBP_vegetation_short))}
     if(!is.na(siteInfo$IGBP_vegetation_long)) {
-        ncvar_put(ncid,long_veg,vals=sprintf("%-200s", siteInfo$IGBP_vegetation_long))}
-
+      ncvar_put(ncid,long_veg,vals=sprintf("%-200s", siteInfo$IGBP_vegetation_long))}
+    
+    
 
     # Time dependent variables:
     lapply(1:length(var_defs), function(x) ncvar_put(nc=ncid,

@@ -11,7 +11,8 @@ Description: Scripts for quality control of FLUXNET data, and
         converting from CSV format to NetCDF, and managing metadata.
 License: TODO: What license is it under?
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.1
 Imports: R.utils, ncdf4, rvest
 Suggests: testthat
-git_revision: cb6112097f1e4f2987c4c38c0fbb3f6cf834d30c-dirty
+git_revision: 6a39bac5a675e371671f54c19e558981368df567-dirty
+Encoding: UTF-8

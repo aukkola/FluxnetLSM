@@ -4,7 +4,8 @@
 \alias{Rel2SpecHumidity}
 \title{Converts relative humidity to specific humidity.}
 \usage{
-Rel2SpecHumidity(relHum, airtemp, tair_units, pressure, psurf_units, site_log)
+Rel2SpecHumidity(relHum, airtemp, tair_units, pressure, psurf_units,
+  site_log)
 }
 \value{
 specific humidity in kg/kg

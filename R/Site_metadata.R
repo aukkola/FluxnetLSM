@@ -24,7 +24,16 @@ site_metadata_template <- function(site_code) {
         Tier = NA,
         Exclude = FALSE,
         Exclude_reason = NA,
-        Description = NA
+        Description = NA,
+        TowerStatus = NA,	
+        Country = NA,	
+        MeasurementHeight = NA,	
+        VegetationDescription = NA,	
+        SoilType = NA,	
+        Disturbance = NA,	
+        CropDescription = NA,	
+        Irrigation = NA        
+        
     )
 
     return(metadata)

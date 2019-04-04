@@ -4,9 +4,9 @@
 \alias{DiurnalCycle}
 \title{Plots a diurnal cycle}
 \usage{
-DiurnalCycle(obslabel, dcdata, varname, ytext, legendtext, timestepsize, whole,
-  plotcolours, modlabel = "no", vqcdata = matrix(-1, nrow = 1, ncol = 1),
-  plot.cex, na.rm = FALSE)
+DiurnalCycle(obslabel, dcdata, varname, ytext, legendtext, timestepsize,
+  whole, plotcolours, modlabel = "no", vqcdata = matrix(-1, nrow = 1,
+  ncol = 1), plot.cex, na.rm = FALSE)
 }
 \description{
 Plots a diurnal cycle
