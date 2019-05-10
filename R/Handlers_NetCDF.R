@@ -75,26 +75,20 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,            # outfile file 
     # Then optional non-time variables:
     opt_vars <- list()
     ctr <- 1
-    # Define measurement height on tower:
-    if(!is.na(siteInfo$TowerHeight)){
-        towheight=ncvar_def('tower_height','m',dim=list(xd,yd),
-                            missval=Nc_MissingVal,longname='Height of flux tower')
-        opt_vars[[ctr]] = towheight
+    # Define reference height of tower:
+    # Use measurement height if available, else take tower height
+    if (!is.na(siteInfo$MeasurementHeight) | !is.na(siteInfo$TowerHeight)) {
+        refheight=ncvar_def('reference_height','m',dim=list(xd,yd),
+                            missval=Nc_MissingVal,longname='Reference height of flux tower')
+        opt_vars[[ctr]] = refheight
         ctr <- ctr + 1
-    }
+    } 
     # Define site canopy height:
     if(!is.na(siteInfo$CanopyHeight)){
         canheight=ncvar_def('canopy_height','m',dim=list(xd,yd),
                             missval=Nc_MissingVal,longname='Canopy height')
         opt_vars[[ctr]] = canheight
         ctr <- ctr + 1
-    }
-    # Define site measurement height:
-    if(!is.na(siteInfo$MeasurementHeight)){
-      measheight=ncvar_def('measurement_height','m',dim=list(xd,yd),
-                          missval=Nc_MissingVal,longname='Measurement height')
-      opt_vars[[ctr]] = measheight
-      ctr <- ctr + 1
     }
     # Define site elevation:
     if(!is.na(siteInfo$SiteElevation)){
@@ -192,17 +186,25 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,            # outfile file 
     # Optional meta data for each site:
     if(!is.na(siteInfo$SiteElevation)) {
         ncvar_put(ncid,elev,vals=siteInfo$SiteElevation)}
-    if(!is.na(siteInfo$TowerHeight)) {
-        ncvar_put(ncid,towheight,vals=siteInfo$TowerHeight)}
     if(!is.na(siteInfo$CanopyHeight)) {
         ncvar_put(ncid,canheight,vals=siteInfo$CanopyHeight)}
-    if(!is.na(siteInfo$MeasurementHeight)) {
-      ncvar_put(ncid,measheight,vals=siteInfo$MeasurementHeight)}
     if(!is.na(siteInfo$IGBP_vegetation_short)) {
         ncvar_put(ncid,short_veg,vals=sprintf("%-200s", siteInfo$IGBP_vegetation_short))}
     if(!is.na(siteInfo$IGBP_vegetation_long)) {
         ncvar_put(ncid,long_veg,vals=sprintf("%-200s", siteInfo$IGBP_vegetation_long))}
-
+    
+    #Reference height, use measurement if available, else tower height
+    if (!is.na(siteInfo$MeasurementHeight)) { 
+      ncvar_put(ncid,refheight,vals=siteInfo$MeasurementHeight)
+      #also add source of data as an attribute
+      ncatt_put(nc=ncid, varid=refheight, attname="Source",
+                attval="measurement height", prec="text")
+    } else if (!is.na(siteInfo$TowerHeight)) {
+      ncvar_put(ncid,refheight,vals=siteInfo$TowerHeight)
+      #also add source of data as an attribute
+      ncatt_put(nc=ncid, varid=refheight, attname="Source",
+                attval="tower height", prec="text")
+    }
 
     # Time dependent variables:
     lapply(1:length(var_defs), function(x) ncvar_put(nc=ncid,
@@ -238,7 +240,7 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,            # outfile file 
                                                      attname="Gap-filled_%",
                                                      attval=round(total_gapfilled[x],1)))
 
-
+    
     # Add variable-specific gap-filling methods to file
     if(!is.na(arg_info$flux_gapfill)){
 
@@ -366,25 +368,19 @@ CreateMetNetcdfFile = function(metfilename, datain,             # outfile file a
     # Then optional non-time variables:
     opt_vars <- list()
     ctr <- 1
-    # Define measurement height on tower:
-    if(!is.na(siteInfo$TowerHeight)){
-      towheight=ncvar_def('tower_height','m',dim=list(xd,yd),
-                          missval=Nc_MissingVal,longname='Height of flux tower')
-      opt_vars[[ctr]] = towheight
+    # Define reference height of tower:
+    # Use measurement height if available, else take tower height
+    if (!is.na(siteInfo$MeasurementHeight) | !is.na(siteInfo$TowerHeight)) {
+      refheight=ncvar_def('reference_height','m',dim=list(xd,yd),
+                          missval=Nc_MissingVal,longname='Reference height of flux tower')
+      opt_vars[[ctr]] = refheight
       ctr <- ctr + 1
-    }
+    } 
     # Define site canopy height:
     if(!is.na(siteInfo$CanopyHeight)){
       canheight=ncvar_def('canopy_height','m',dim=list(xd,yd),
                           missval=Nc_MissingVal,longname='Canopy height')
       opt_vars[[ctr]] = canheight
-      ctr <- ctr + 1
-    }
-    # Define site measurement height:
-    if(!is.na(siteInfo$MeasurementHeight)){
-      measheight=ncvar_def('measurement_height','m',dim=list(xd,yd),
-                           missval=Nc_MissingVal,longname='Measurement height')
-      opt_vars[[ctr]] = measheight
       ctr <- ctr + 1
     }
     # Define site elevation:
@@ -485,17 +481,25 @@ CreateMetNetcdfFile = function(metfilename, datain,             # outfile file a
     # Optional meta data for each site:
     if(!is.na(siteInfo$SiteElevation)) {
       ncvar_put(ncid,elev,vals=siteInfo$SiteElevation)}
-    if(!is.na(siteInfo$TowerHeight)) {
-      ncvar_put(ncid,towheight,vals=siteInfo$TowerHeight)}
     if(!is.na(siteInfo$CanopyHeight)) {
       ncvar_put(ncid,canheight,vals=siteInfo$CanopyHeight)}
-    if(!is.na(siteInfo$MeasurementHeight)) {
-      ncvar_put(ncid,measheight,vals=siteInfo$MeasurementHeight)}
     if(!is.na(siteInfo$IGBP_vegetation_short)) {
       ncvar_put(ncid,short_veg,vals=sprintf("%-200s", siteInfo$IGBP_vegetation_short))}
     if(!is.na(siteInfo$IGBP_vegetation_long)) {
       ncvar_put(ncid,long_veg,vals=sprintf("%-200s", siteInfo$IGBP_vegetation_long))}
     
+    #Reference height, use measurement if available, else tower height
+    if (!is.na(siteInfo$MeasurementHeight)) { 
+      ncvar_put(ncid,refheight,vals=siteInfo$MeasurementHeight)
+      #also add source of data as an attribute
+      ncatt_put(nc=ncid, varid=refheight, attname="Source",
+                attval="measurement height", prec="text")
+    } else if (!is.na(siteInfo$TowerHeight)) {
+      ncvar_put(ncid,refheight,vals=siteInfo$TowerHeight)
+      #also add source of data as an attribute
+      ncatt_put(nc=ncid, varid=refheight, attname="Source",
+                attval="tower height", prec="text")
+    }
     
 
     # Time dependent variables:
