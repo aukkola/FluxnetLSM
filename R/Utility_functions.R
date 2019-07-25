@@ -208,7 +208,7 @@ get_qc_flags <- function(dataset, subset=NA) {
                   excl_dates      = "QA/QC: Excluded Dates",                              #6
                   excl_hrs        = "QA/QC: Excluded Hours",                              #7
                   missing_qc      = "QA/QC: Missing value found with QC flag = 0",        #8
-                  linear          = "Corrections: Apply Linear",                          #10
+                  #linear          = "Corrections: Apply Linear",                          #10 (considered measured, see below)
                   coor_rot        = paste0("Corrections/Combinations: Coordinate ",       #11
                                            "Rotation (Ux, Uy, Uz, UxT, UyT, UzT, UxA,",
                                            " UyA, UzA, UxC, UyC, UzC, UxUz, UxUx, ",
@@ -270,11 +270,11 @@ get_qc_flags <- function(dataset, subset=NA) {
     
     
     #QC flags (100 added for statistical gapfilling, others provided with original data)
-    #Measured
-    QCmeasured <- 0
+    #Measured (using 0 and 10 as per what is done in PALS and following advice from Peter Isaac and Gab)
+    QCmeasured <- c(0, 10)
     
     #Gapfilled
-    QCgapfilled <- c(1:8, 10:21, 30:40, 50:52, 60:64, 70, 80:82, 100)
+    QCgapfilled <- c(1:8, 11:21, 30:40, 50:52, 60:64, 70, 80:82, 100)
     names(QCgapfilled) <- names(qc_flags)
     
     #Append qc flags
@@ -360,7 +360,7 @@ get_varnames <- function(datasetname, flx2015_version, add_psurf) {
   co2         <- list(c("CO2_F_MDS"),
                       c("CO2_F_MDS"),
                       c("CO2"),
-                      c("C_ppm"))
+                      c("Cc"))
   par         <- list(c("PPFD_IN"),
                       c("PPFD_IN"),
                       c("PPFD_f"),

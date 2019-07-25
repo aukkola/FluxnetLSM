@@ -73,7 +73,8 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   
   #First check that fluxnet2015 version specified correctly, if using it
   check_flx2015_version(conv_opts$datasetname, conv_opts$flx2015_version)
-  
+
+  #Get QC flag information  
   qc_flags <- get_qc_flags(conv_opts$datasetname, conv_opts$flx2015_version)
   
   Sprd_MissingVal <<- -9999 # missing value in spreadsheet
@@ -692,11 +693,13 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
         
         out1 <- plot_nc(ncfile=nc_met, analysis_type=plot, 
                         vars=DataFromText$out_vars[DataFromText$categories=="Met"],
-                        varnames=dataset_vars, outfile=outfile_met)      
+                        varnames=dataset_vars, outfile=outfile_met,
+                        qc_flags=qc_flags)      
         
         out2 <- plot_nc(ncfile=nc_flux, analysis_type=plot,
                         vars=DataFromText$out_vars[flux_ind[[k]]],
-                        varnames=dataset_vars, outfile=outfile_flux)
+                        varnames=dataset_vars, outfile=outfile_flux,
+                        qc_flags=qc_flags)
         
         #Log possible warnings
         site_log <- log_warning(warn=out1, site_log)

@@ -110,7 +110,8 @@ gapfill_with_ERA <- function(datain, era_data, era_vars, tair_units, vpd_units,
                       avail_flux[k], "gap-filled with ERA data. Creating QC flag."))
         
         #Initialise QC flag with zeros and replace with ERA value where gap-filled
-        qc_var <- rep(qc_flags$QC_measured, length(datain[,flx_col]))
+        #(use first value of QC_measured as OzFlux contains several obs qc values)
+        qc_var <- rep(qc_flags$QC_measured[1], length(datain[,flx_col]))
         qc_var[missing] <- qc_flags$QC_gapfilled["ERA"]
         
         #Create name for QC variable and save data and name to data.frame

@@ -4,7 +4,7 @@
 \alias{plot_nc}
 \title{Plots standard analysis plots from netcdf data}
 \usage{
-plot_nc(ncfile, analysis_type, vars, varnames, outfile)
+plot_nc(ncfile, analysis_type, vars, varnames, outfile, qc_flags)
 }
 \arguments{
 \item{ncfile}{an open netcdf file}

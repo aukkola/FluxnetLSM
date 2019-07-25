@@ -174,7 +174,7 @@ CheckDataGaps <- function(datain, qc_flags, missing_met, missing_flux,
             
             #Find values that are not measured or missing
             perc_gapfilled[[k]] <- sapply(1:length(start), function(x)
-                                          length( which(qcdata[start[x]:end[x]] != qc_flags$QC_measured &
+                                          length( which(!(qcdata[start[x]:end[x]] %in% qc_flags$QC_measured) &
                                           !is.na(qcdata[start[x]:end[x]]))) /
                                           length(start[x]:end[x]) * 100)
             

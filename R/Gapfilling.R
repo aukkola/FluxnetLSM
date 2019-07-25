@@ -658,7 +658,8 @@ update_qc <- function(data, temp_data, varname, qc_name, qc_value, qc_flags,...)
                   "methods. Creating QC flag."))     
     
     #Initialise QC flag with zeros and replace with "4" where gap-filled
-    qc_var <- rep(qc_flags$QC_measured, length(data$data[,varname]))
+    #(use first value of QC_measured as OzFlux contains several obs qc values)
+    qc_var <- rep(qc_flags$QC_measured[1], length(data$data[,varname]))
     qc_var[temp_data$missing] <- qc_value
     
     #Create name for QC variable and save data and name to data.frame

@@ -11,7 +11,7 @@
 #' @param outfile output path prefix, including directory
 #'
 #' 
-plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
+plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile, qc_flags){
   
   #Initialise warnings
   warnings <- ""
@@ -168,8 +168,8 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
           
           var_qc <- qc_data[[qc_ind]]
           
-          var_qc[var_qc > 0]  <- 2 #replace gap-filled values with a temporary value
-          var_qc[var_qc == 0] <- 1 #set measured to 1
+          var_qc[!(var_qc %in% qc_flags$QC_measured)]  <- 2 #replace gap-filled values with a temporary value
+          var_qc[var_qc %in% qc_flags$QC_measured]     <- 1 #set measured to 1
           var_qc[var_qc == 2] <- 0 #set gap-filled to 0
           
           #Else set to PALS option corresponding to no QC data
@@ -216,8 +216,8 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile){
           
           var_qc <- qc_data[[qc_ind]]
           
-          var_qc[var_qc > 0]  <- 2 #replace gap-filled values with a temporary value
-          var_qc[var_qc == 0] <- 1 #set measured to 1
+          var_qc[!(var_qc %in% qc_flags$QC_measured)]  <- 2 #replace gap-filled values with a temporary value
+          var_qc[var_qc %in% qc_flags$QC_measured]     <- 1 #set measured to 1
           var_qc[var_qc == 2] <- 0 #set gap-filled to 0
           
           #If first value missing, set to measured (to avoid an error when PALS
