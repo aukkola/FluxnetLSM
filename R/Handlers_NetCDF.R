@@ -6,6 +6,8 @@
 # author: Anna Ukkola UNSW 2017
 #
 
+library(lutz) #to get time zone
+
 
 #' Creates a netcdf file for flux variables
 CreateFluxNetcdfFile = function(fluxfilename, datain,            # outfile file and data
@@ -45,8 +47,10 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,            # outfile file 
     timedata = as.double(tt*timestepsize)
 
     # Define time dimension:
-    td = ncdim_def('time', unlim=TRUE, units=timeunits, vals=timedata)
+    td = ncdim_def('time', unlim=TRUE, units=timeunits, 
+                   vals=timedata, calendar="standard")
 
+    
     # VARIABLE DEFINITIONS ##############################################
 
     # Create variable definitions for time series variables
@@ -168,6 +172,14 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,            # outfile file 
     ncatt_put(ncid,varid=0,attname='QC_flag_descriptions',
               attval=qcInfo, prec="text")
 
+    #Add info for time stamp and time zone
+    ncatt_put(ncid,varid="time",attname='info',
+              attval="Time stamp indicates start time", prec="text")
+    
+    ncatt_put(ncid,varid="time",attname='time_zone',
+              attval=tz_lookup_coords(siteInfo$SiteLatitude, 
+              siteInfo$SiteLongitude, method="accurate"), prec="text")
+    
     
     # args info
     add_processing_info(ncid, arg_info, datain, cat="Flux")
@@ -220,10 +232,19 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,            # outfile file 
 
     # Add CF-compliant name to file (if not missing)
     lapply(1:length(var_defs), function(x)  ncatt_put(nc=ncid, varid=var_defs[[x]],
-                                                      attname="Standard_name",
+                                                      attname="standard_name",
                                                       attval=datain$attributes[var_ind[x],3],
                                                       prec="text"))
 
+    #Also add this for time, lat and lon
+    ncatt_put(nc=ncid, varid="time", attname="standard_name",       #time
+              attval="time", prec="text")
+    ncatt_put(nc=ncid, varid="latitude", attname="standard_name",   #lat
+              attval="latitude", prec="text")
+    ncatt_put(nc=ncid, varid="longitude", attname="standard_name",  #lon
+              attval="longitude", prec="text")
+    
+    
     # Add CMIP name to file (if not missing)
     lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]],
                                                      attname="CMIP_short_name",
@@ -326,8 +347,10 @@ CreateMetNetcdfFile = function(metfilename, datain,             # outfile file a
     timedata = as.double(tt*timestepsize)
 
     # Define time dimension:
-    td = ncdim_def('time', unlim=TRUE, units=timeunits, vals=timedata)
+    td = ncdim_def('time', unlim=TRUE, units=timeunits, 
+                   vals=timedata, calendar="standard")
 
+    
     # VARIABLE DEFINITIONS ##############################################
 
     # #First set correct dimensions (Tair, Qair, CO2air and Wind need an extra z-dimension, as well
@@ -464,6 +487,15 @@ CreateMetNetcdfFile = function(metfilename, datain,             # outfile file a
               attval=qcInfo, prec="text")
     
     
+    #Add info for time stamp and time zone
+    ncatt_put(ncid,varid="time",attname='info',
+              attval="Time stamp indicates start time", prec="text")
+    
+    ncatt_put(ncid,varid="time",attname='time_zone',
+              attval=tz_lookup_coords(siteInfo$SiteLatitude, 
+              siteInfo$SiteLongitude, method="accurate"), prec="text")
+    
+    
     # args info
     add_processing_info(ncid, arg_info, datain, cat="Met")
     
@@ -514,11 +546,20 @@ CreateMetNetcdfFile = function(metfilename, datain,             # outfile file a
 
     # Add CF-compliant name to file (if not missing)
     lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]],
-                                                     attname="Standard_name",
+                                                     attname="standard_name",
                                                      attval=datain$attributes[var_ind[x],3],
                                                      prec="text"))
   
-      
+    #Also add this for time, lat and lon
+    ncatt_put(nc=ncid, varid="time", attname="standard_name",       #time
+              attval="time", prec="text")
+    ncatt_put(nc=ncid, varid="latitude", attname="standard_name",   #lat
+              attval="latitude", prec="text")
+    ncatt_put(nc=ncid, varid="longitude", attname="standard_name",  #lon
+              attval="longitude", prec="text")
+    
+    
+    
     # Add CMIP name to file (if not missing)
     lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]],
                                                      attname="CMIP_short_name",
