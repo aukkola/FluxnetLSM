@@ -15,8 +15,8 @@ Ws,m/s,numeric,Wind,m/s,Scalar windspeed,wind_speed,ws,0,75,2,FALSE,Met,WS_ERA,m
 Ws_QCFlag,-,integer,Wind_qc,-,Wind quality control flag,NULL,NULL,0,100,NA,FALSE,Met,NA,NA
 RH,%,numeric,RH,%,Near surface relative humidity,relative_humidty,hur,0,100,1,FALSE,Met,VPD_ERA,mean
 RH_QCFlag,-,integer,RH_qc,-,RH quality control flag,NULL,NULL,0,100,NA,FALSE,Met,NA,NA
-q,kg/kg,numeric,Qair,kg/kg,Near surface specific humidity,specific_humidity,huss,0,0.1,1,FALSE,Met,VPD_ERA,mean
-q_QCFlag,-,integer,Qair_qc,-,Qair quality control flag,NULL,NULL,0,100,NA,FALSE,Met,NA,NA
+SH,kg/kg,numeric,Qair,kg/kg,Near surface specific humidity,specific_humidity,huss,0,0.1,1,FALSE,Met,VPD_ERA,mean
+SH_QCFlag,-,integer,Qair_qc,-,Qair quality control flag,NULL,NULL,0,100,NA,FALSE,Met,NA,NA
 Cc,umolCO2/mol,numeric,CO2air,ppm,Near surface CO2 concentration,mole_fraction_of_carbon_dioxide_in_air,co2c,200,900,NA,FALSE,Eval,NA,mean
 Cc_QCFlag,-,integer,CO2air_qc,-,CO2air quality control flag,NULL,NULL,0,100,NA,FALSE,Eval,NA,NA
 Fsu,W/m2,numeric,SWup,W/m2,Reflected shortwave radiation,surface_upwelling_shortwave_flux_in_air,rsus,-100,1360,NA,FALSE,Eval,NA,mean
