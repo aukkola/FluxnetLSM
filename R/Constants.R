@@ -14,7 +14,7 @@
 # Variable names in spreadsheet to be processed:
 findColIndices <-  function(fileinname, var_names, var_classes, 
                             essential_vars, preferred_vars,
-                            time_vars, site_log, datasetname, ...) {
+                            time_vars, dset_vars, site_log, datasetname, ...) {
   
   #CSV files in Fluxnet2015 Nov '16 release do not follow a set template
   #and not all files include all variables
@@ -52,16 +52,78 @@ findColIndices <-  function(fileinname, var_names, var_classes,
   #List failed variables
   failed_vars <- var_names[failed_ind]
   
-
+  
+  # #Add an exception for VPD and relative humidity
+  # #Some sites have one or the other available
+  # #Missing RH
+  # if (any(failed_vars %in% dset_vars$relhumidity)) {
+  #   
+  #   #Check if VPD available, if so don't worry about missing RH
+  #   if (any(as.matrix(headers) %in% dset_vars$vpd)) {
+  #     
+  #     #Remove RH from failed vars list
+  #     ind <- which(failed_vars %in% dset_vars$relhumidity)
+  #     
+  #     failed_ind <- failed_ind[-ind]
+  #     failed_vars <- failed_vars[-ind]
+  #     
+  #   }
+  #   
+  # }
+  # #Missing VPD
+  # if (any(failed_vars %in% dset_vars$vpd)) {
+  #   #Check if relative humidity available
+  #   
+  #   #Check if RH available, if so don't worry about missing VPD
+  #   if (any(as.matrix(headers) %in% dset_vars$relhumidity)) {
+  #     
+  #     #Remove VPD from failed vars list
+  #     ind <- which(failed_vars %in% dset_vars$vpd)
+  #     
+  #     failed_ind  <- failed_ind[-ind]
+  #     failed_vars <- failed_vars[-ind]
+  #     
+  #   }
+  #   
+  # }
+  # 
+  
   #If found variables not present in file
   if(length(failed_ind) > 0){
 
     #Check if any essential meteorological variables missing, abort if so
     if(any(!is.na(essential_vars[failed_ind]))){
-      error <- paste("Cannot find all essential variables in input file (missing: ", 
-                     paste(var_names[failed_ind[which(!is.na(essential_vars[failed_ind]))]], collapse=","),
-                     "), aborting", sep="")
-      stop_and_log(error, site_log)
+      
+      #Add an exception for VPD and relative humidity
+      #Some sites have one or the other available, can use either to derive Qair
+      
+      essential_failed <- var_names[failed_ind[which(!is.na(essential_vars[failed_ind]))]]
+      
+      stop <- TRUE
+      
+      #If RH only missing variable: Check if VPD available, if so don't worry about missing RH
+      if (any(failed_vars %in% dset_vars$relhumidity) & length(essential_failed) == 1) {
+        #If found VPD, don't stop
+        if (any(as.matrix(headers) %in% dset_vars$vpd)) stop <- FALSE
+        
+      }
+      
+      
+      #If VPD only missing variable: Check if RH available, if so don't worry about missing VPD
+      if (any(failed_vars %in% dset_vars$vpd) & length(essential_failed) == 1) {
+        #If found RH, don't stop
+        if (any(as.matrix(headers) %in% dset_vars$relhumidity)) stop <- FALSE
+        
+      }
+      
+      
+      if (stop) {
+        error <- paste("Cannot find all essential variables in input file (missing: ", 
+                       paste(essential_failed, collapse=","),
+                       "), aborting", sep="")
+        stop_and_log(error, site_log)
+        
+      }
     }
     
     #Check if no desired evaluation variables present, abort if so

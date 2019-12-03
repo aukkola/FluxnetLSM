@@ -233,11 +233,12 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   # Read text file containing flux data
   DataFromText <- ReadCSVFluxData(fileinname=infile, vars=vars_csv, 
                                   datasetname=conv_opts$datasetname,
-                                  time_vars=time_vars, site_log,
+                                  time_vars=time_vars, site_log=site_log,
                                   add_psurf=conv_opts$add_psurf,
                                   fair_usage=conv_opts$fair_use,
                                   fair_usage_vec=conv_opts$fair_use_vec,
                                   min_yrs=conv_opts$min_yrs,
+                                  dset_vars=dataset_vars,
                                   site_code=site_code)
   
   

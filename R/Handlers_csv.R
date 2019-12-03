@@ -24,8 +24,9 @@ ReadCSVFluxData <- function(fileinname, vars, datasetname, time_vars, add_psurf,
                            var_classes=vars$Fluxnet_class,
                            essential_vars=vars$Essential_met,
                            preferred_vars=vars$Preferred_eval,
-                           time_vars=time_vars, site_log,
-                           datasetname=datasetname)
+                           time_vars=time_vars, #dset_vars=dset_vars,
+                           site_log=site_log,
+                           datasetname=datasetname, ...)
 
 
     # If using La Thuile or OzFlux dataset, convert time to Fluxnet2015 format
