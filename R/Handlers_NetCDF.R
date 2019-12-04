@@ -7,7 +7,6 @@
 #
 
 
-
 #' Creates a netcdf file for flux variables
 CreateFluxNetcdfFile = function(fluxfilename, datain,            # outfile file and data
                                 site_code,                       # Fluxnet site code

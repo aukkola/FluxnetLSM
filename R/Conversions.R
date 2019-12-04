@@ -104,7 +104,7 @@ ChangeUnits <- function(datain, varnames, site_log){
         
         temp_relhumidity <- VPD2RelHum(VPD=datain$data[,colnames(datain$data) %in% varnames$vpd],  
                                        airtemp=datain$data[,colnames(datain$data) %in% varnames$tair],  
-                                       vpd_units=flx_units[names(flx_units) %in% varnames$vpd], 
+                                       vpd_units=flx_units[colnames(datain$data) %in% varnames$vpd], #names(flx_units) %in% varnames$vpd], replacing because sometimes finds multiple cases in units
                                        tair_units=tair_units, 
                                        site_log)
         

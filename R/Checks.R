@@ -270,7 +270,7 @@ CheckDataGaps <- function(datain, qc_flags, missing_met, missing_flux,
         # If ANY Tier 1/2 met vars have too many gapfilled or missing values OR 
         # ALL preferred flux vars have too many gapfilled or missing values,
         # don't process year 
-        if(any(gaps[tier1_met_ind] > threshold["tier1"] | gaps[tier2_met_ind] > threshold["tier2"] ) | 
+        if( (any(gaps[tier1_met_ind] > threshold["tier1"]) | any(gaps[tier2_met_ind] > threshold["tier2"] )) | 
            all(gaps[preferred_ind] > threshold["flux"])){
           
           message("Removing ", year, " due to too many gapfilled or missing values.")
