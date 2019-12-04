@@ -6,7 +6,6 @@
 # author: Anna Ukkola UNSW 2017
 #
 
-library(lutz) #to get time zone
 
 
 #' Creates a netcdf file for flux variables
@@ -27,7 +26,8 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,            # outfile file 
 
     # load netcdf library
     library(ncdf4)
-
+    library(lutz) #to get time zone
+  
     # Time step size
     timestepsize <- datain$timestepsize
 
@@ -326,7 +326,9 @@ CreateMetNetcdfFile = function(metfilename, datain,             # outfile file a
 
     # load netcdf library
     library(ncdf4)
-
+    library(lutz) #to get time zone
+  
+  
     # Time step size
     timestepsize <- datain$timestepsize
 
