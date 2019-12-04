@@ -14,5 +14,5 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 6.1.1
 Imports: R.utils, ncdf4, rvest
 Suggests: testthat
-git_revision: 3e3d87a5061eee37aea7f41dad0ff82a256640e6-dirty
+git_revision: 70c54762462ad89aa79ca2ad81564d4ec4759933-dirty
 Encoding: UTF-8
