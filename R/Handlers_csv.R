@@ -224,7 +224,7 @@ read_era <- function(ERA_file, datain) {
 
 #' Converts La Thuile files to FLUXNET2015 format
 convert_LaThuile <- function(infiles, fair_usage=NA, fair_usage_vec=NA,
-                             min_yrs, tcol, add_psurf, site_log, site_code) {
+                             min_yrs, tcol, add_psurf, site_log, site_code, ...) {
 
     library(R.utils) # seqToIntervals
 
