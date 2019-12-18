@@ -360,7 +360,7 @@ get_varnames <- function(datasetname, flx2015_version, add_psurf) {
   co2         <- list(c("CO2_F_MDS"),
                       c("CO2_F_MDS"),
                       c("CO2"),
-                      c("Cc"))
+                      c("Cc", "CO2")) #seems to depend on data release...
   par         <- list(c("PPFD_IN"),
                       c("PPFD_IN"),
                       c("PPFD_f"),
