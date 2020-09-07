@@ -12,7 +12,7 @@ Description: Scripts for quality control of FLUXNET data, and
 License: TODO: What license is it under?
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 6.1.1
-Imports: R.utils, ncdf4, rvest
+Imports: R.utils, ncdf4, rvest, lutz
 Suggests: testthat
-git_revision: c3b869ded222d9bd7f9f32dabd9590a01a72af97
+git_revision: a4c6b396d97b853742778e9b4ce1ed55f680e66d-dirty
 Encoding: UTF-8
