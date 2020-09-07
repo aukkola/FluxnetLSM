@@ -12,7 +12,7 @@ Precip_fqc,-,numeric,Precip_qc,-,Precip quality control flag,NULL,NULL,0,5,NA,FA
 WS_f,m/s,numeric,Wind,m/s,Scalar windspeed,wind_speed,ws,0,75,2,FALSE,Met,NA,mean
 WS_fqc,-,numeric,Wind_qc,-,Wind quality control flag,NULL,NULL,0,5,NA,FALSE,Met,NA,NA
 Rh,%,numeric,RH,%,Near surface relative humidity,relative_humidty,hur,0,100,1,FALSE,Met,NA,mean
-CO2,umolCO2/mol,numeric,CO2air,ppm,Near surface CO2 concentration,mole_fraction_of_carbon_dioxide_in_air,co2c,200,600,NA,FALSE,Met,NA,mean
+CO2,umolCO2/mol,numeric,CO2air,ppm,Near surface CO2 concentration,mole_fraction_of_carbon_dioxide_in_air,co2c,200,900,NA,FALSE,Met,NA,mean
 SWout,W/m2,numeric,SWup,W/m2,Reflected shortwave radiation,surface_upwelling_shortwave_flux_in_air,rsus,-100,1360,NA,FALSE,Eval,NA,mean
 Rn_f,W/m2,numeric,Rnet,W/m2,Net absorbed radiation,surface_net_downward_radiative_flux,NULL,-1000,1360,NA,TRUE,Eval,NA,mean
 Rn_fqc,-,numeric,Rnet_qc,-,Rnet quality control flag,NULL,NULL,0,5,NA,FALSE,Eval,NA,NA
