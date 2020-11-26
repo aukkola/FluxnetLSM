@@ -4,10 +4,24 @@
 \alias{CheckDataGaps}
 \title{Checks for missing and gap-filled data and determines output years}
 \usage{
-CheckDataGaps(datain, qc_flags, missing_met, missing_flux,
-  gapfill_met_tier1, gapfill_met_tier2, gapfill_flux, gapfill_good,
-  gapfill_med, gapfill_poor, gapfill_era, gapfill_stat, min_yrs, qc_name,
-  aggregate = NA, site_log)
+CheckDataGaps(
+  datain,
+  qc_flags,
+  missing_met,
+  missing_flux,
+  gapfill_met_tier1,
+  gapfill_met_tier2,
+  gapfill_flux,
+  gapfill_good,
+  gapfill_med,
+  gapfill_poor,
+  gapfill_era,
+  gapfill_stat,
+  min_yrs,
+  qc_name,
+  aggregate = NA,
+  site_log
+)
 }
 \arguments{
 \item{datain}{Input data list}

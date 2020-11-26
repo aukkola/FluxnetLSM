@@ -4,9 +4,15 @@
 \alias{convert_fluxnet_to_netcdf}
 \title{ConvertSpreadsheetToNcdf.R}
 \usage{
-convert_fluxnet_to_netcdf(site_code, infile, era_file = NA, out_path,
-  conv_opts = get_default_conversion_options(), plot = c("annual",
-  "diurnal", "timeseries"), ...)
+convert_fluxnet_to_netcdf(
+  site_code,
+  infile,
+  era_file = NA,
+  out_path,
+  conv_opts = get_default_conversion_options(),
+  plot = c("annual", "diurnal", "timeseries"),
+  ...
+)
 }
 \arguments{
 \item{site_code}{Fluxnet site code e.g. "AU-How"}

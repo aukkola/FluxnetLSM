@@ -76,7 +76,6 @@ convert_LaThuile_time <- function(timestep, tstepsize){
     
   } 
   
-  
   #Extract time info
   year <- timestep["Year"]
   doy  <- doydate(doy=timestep["DoY"], leap=is.leap(timestep["Year"]))

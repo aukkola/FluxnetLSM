@@ -4,8 +4,17 @@
 \alias{gapfill_LWdown_Pair}
 \title{Synthesizes incoming longwave radiation and air pressure}
 \usage{
-gapfill_LWdown_Pair(data, var, var_ind, TairK = NA, RH = NA,
-  technique = NA, elev = NA, varnames, site_log)
+gapfill_LWdown_Pair(
+  data,
+  var,
+  var_ind,
+  TairK = NA,
+  RH = NA,
+  technique = NA,
+  elev = NA,
+  varnames,
+  site_log
+)
 }
 \description{
 Synthesizes incoming longwave radiation and air pressure

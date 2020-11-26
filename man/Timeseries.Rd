@@ -4,9 +4,21 @@
 \alias{Timeseries}
 \title{Plots a smoothed and non-smoothed time seris}
 \usage{
-Timeseries(obslabel, tsdata, varname, ytext, legendtext, plotcex, timing,
-  smoothed = FALSE, winsize = 1, plotcolours, modlabel = "no",
-  vqcdata = matrix(-1, nrow = 1, ncol = 1), na.rm = FALSE)
+Timeseries(
+  obslabel,
+  tsdata,
+  varname,
+  ytext,
+  legendtext,
+  plotcex,
+  timing,
+  smoothed = FALSE,
+  winsize = 1,
+  plotcolours,
+  modlabel = "no",
+  vqcdata = matrix(-1, nrow = 1, ncol = 1),
+  na.rm = FALSE
+)
 }
 \description{
 Plots a smoothed and non-smoothed time seris

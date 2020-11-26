@@ -4,8 +4,18 @@
 \alias{gapfill_with_ERA}
 \title{Gapfills met data}
 \usage{
-gapfill_with_ERA(datain, era_data, era_vars, tair_units, vpd_units,
-  out_vars, qc_name, qc_flags, varnames, site_log)
+gapfill_with_ERA(
+  datain,
+  era_data,
+  era_vars,
+  tair_units,
+  vpd_units,
+  out_vars,
+  qc_name,
+  qc_flags,
+  varnames,
+  site_log
+)
 }
 \value{
 out
