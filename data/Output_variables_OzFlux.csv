@@ -5,7 +5,7 @@ Fsd,W/m2,numeric,SWdown,W/m2,Surface incident shortwave radiation,surface_downwe
 Fsd_QCFlag,-,integer,SWdown_qc,-,SWdown quality control flag,NULL,NULL,0,100,NA,FALSE,Met,NA,NA
 Fld,W/m2,numeric,LWdown,W/m2,Surface incident longwave radiation,surface_downwelling_longwave_flux_in_air,rlds,0,750,2,FALSE,Met,LW_IN_ERA,mean
 Fld_QCFlag,-,integer,LWdown_qc,-,LWdown quality control flag,NULL,NULL,0,100,NA,FALSE,Met,NA,NA
-VPD,hPa,numeric,VPD,hPa,Vapour pressure deficit,water_vapor_saturation_deficit_in_air,NULL,0,100,1,FALSE,Met,VPD_ERA,mean
+VPD,kPa,numeric,VPD,hPa,Vapour pressure deficit,water_vapor_saturation_deficit_in_air,NULL,0,100,1,FALSE,Met,VPD_ERA,mean
 VPD_QCFlag,-,integer,VPD_qc,-,VPD quality control flag,NULL,NULL,0,100,NA,FALSE,Met,NA,NA
 ps,kPa,numeric,Psurf,Pa,Surface air pressure,surface_air_pressure,ps,50000,110000,2,FALSE,Met,PA_ERA,mean
 ps_QCFlag,-,integer,Psurf_qc,-,PSurf quality control flag,NULL,NULL,0,100,NA,FALSE,Met,NA,NA
