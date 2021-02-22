@@ -117,6 +117,13 @@ ChangeUnits <- function(datain, varnames, site_log){
         
 
         
+      ## VPD from kPa to hPas
+      } else if(datain$vars[k] %in% varnames$vpd & flx_units[k]=="kPa" & alma_units[k]=="hPa"){
+        
+        datain$data[[k]] <- datain$data[[k]] * 10
+        
+        
+        
       ###--- Template for adding a new conversion ---###
       #Use the Fluxnet variable name and unit, and output unit as specified in data/Output_variables_xxx.csv
 #       } else if(datain$vars[k]=="Fluxnet variable name" & flx_units[k]=="Fluxnet variable unit" & 
