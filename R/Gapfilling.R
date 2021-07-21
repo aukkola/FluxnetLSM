@@ -231,7 +231,7 @@ GapfillMet_statistical <- function(datain, qc_name, qc_flags,
         
     if(length(temp_data$missing) > 0){
       
-      #Save information to QC flags (creat qc flag if doesn't exist)
+      #Save information to QC flags (create qc flag if doesn't exist)
       datain <- update_qc(datain, temp_data, names(lwdown_ind), qc_name, 
                           qc_value, qc_flags, outname=datain$out_vars[names(lwdown_ind)], 
                           cat="Met")  
@@ -607,7 +607,7 @@ create_qc_var <- function(datain, qc_name, qc_flags, outname, cat){
   #era_vars
   datain$era_vars <- append_qc(datain$era_vars, NA, qc_name)
   
-  #era_vars
+  #aggregation method
   datain$aggr_method <- append_qc(datain$aggr_method, NA, qc_name)
   
   #attributes
@@ -641,20 +641,34 @@ create_qc_var <- function(datain, qc_name, qc_flags, outname, cat){
 #-----------------------------------------------------------------------------
 
 #' Updates QC flags after gap-filling
-update_qc <- function(data, temp_data, varname, qc_name, qc_value, qc_flags,...){
+update_qc <- function(data, temp_data, varname, qc_name, qc_value, qc_flags, outname, ...){
   
-  #Find index for QC variable
-  qc_col <- which(data$vars==paste(varname, qc_name, sep=""))
+
+  #Find index for QC variable 
+  qc_col <- which(data$vars==paste0(varname, qc_name))
+  
+  #Check if duplicate variable
+  duplicate <- length(which(data$vars == varname)) > 1
+  
+  #Check if qc flag output available for duplicate variable
+  #Not ideal, hard-codes output variable name as "qc". Cannot work out a way round this
+  qc_out_col <- which(data$out_vars==paste0(outname, "_qc"))
+  
   
   #QC variable exists, replace gapfilled tsteps with correct flag
-  if(length(qc_col) > 0){
+  if (length(qc_col) == 1 & !duplicate) { 
     
     data$data[temp_data$missing, qc_col] <- qc_value
     
+  #Duplicate variable, qc flag exists (e.g. when VPD outputted as VPD and Qair)
+  } else if (duplicate & length(qc_out_col) ==1) {
+  
+    data$data[temp_data$missing, qc_out_col] <- qc_value
+    
   } else {
     
-    message(paste("Could not find QC flag for variable", 
-                  varname, "gap-filled with statistical",
+    message(paste0("Could not find QC flag for variable ", 
+                  varname, " (output: ", outname, ") gap-filled with statistical ",
                   "methods. Creating QC flag."))     
     
     #Initialise QC flag with zeros and replace with "4" where gap-filled
@@ -673,7 +687,7 @@ update_qc <- function(data, temp_data, varname, qc_name, qc_value, qc_flags,...)
     colnames(data$data)[ncol(data$data)] <- qc_varname
     
     #Add new QC var to attributes
-    data <- create_qc_var(data, qc_varname, qc_flags,  ...)
+    data <- create_qc_var(data, qc_varname, qc_flags,  outname, ...)
     
   }
   

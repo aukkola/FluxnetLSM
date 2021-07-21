@@ -64,9 +64,11 @@ ChangeUnits <- function(datain, varnames, site_log){
         datain$data[[k]][datain$data[[k]] < 0] <- 5 * (1 / 2.3)
         
         
-      ## Specific humidity from relative humidity (in kg/kg, calculate from tair, rel humidity and psurf)
-      } else if(datain$vars[k] %in% varnames$relhumidity & flx_units[k]=="%" & alma_units[k]=="kg/kg"){  
+      ## Specific humidity from relative humidity or VPD (in kg/kg, calculate from tair, rel humidity/VPD and psurf)
+      } else if(datain$vars[k] %in% c(varnames$relhumidity, varnames$vpd) & 
+                flx_units[k] %in% c("hPa","%") & alma_units[k]=="kg/kg"){  
         
+
         #Find Tair and PSurf units
         psurf_units <- flx_units[names(flx_units) %in% varnames$airpressure]
         tair_units  <- flx_units[names(flx_units) %in% varnames$tair]
@@ -79,7 +81,32 @@ ChangeUnits <- function(datain, varnames, site_log){
           tair_units <- alma_units[names(alma_units) %in% varnames$tair]
         }          
 
-        datain$data[[k]] <- Rel2SpecHumidity(relHum=datain$data[,colnames(datain$data) %in% varnames$relhumidity], 
+        
+        #Calculate relative humidity
+        if (datain$vars[k] %in% varnames$vpd) {
+          
+          #Find index for VPD and Tair
+          vpd_ind  <- which(colnames(datain$data) %in% varnames$vpd)
+          tair_ind <- which(colnames(datain$data) %in% varnames$tair)
+          
+          
+          #Calculate relative humidity from VPD
+          temp_relhumidity <- VPD2RelHum(VPD=datain$data[,vpd_ind],  
+                                         airtemp=datain$data[,tair_ind],  
+                                         vpd_units=flx_units[colnames(datain$data) %in% varnames$vpd], #names(flx_units) %in% varnames$vpd], replacing because sometimes finds multiple cases in units
+                                         tair_units=tair_units, 
+                                         site_log)
+        #If converting from RH
+        } else {
+          
+          #Else take relative humidity data
+          temp_relhumidity <- datain$data[,colnames(datain$data) %in% varnames$relhumidity]
+        }
+        
+        
+        
+        #Then calculate specific humidity from relative humidity
+        datain$data[[k]] <- Rel2SpecHumidity(relHum=temp_relhumidity, 
                                              airtemp=datain$data[,colnames(datain$data) %in% varnames$tair], 
                                              tair_units=tair_units, 
                                              pressure=datain$data[,colnames(datain$data) %in% varnames$airpressure], 
@@ -87,37 +114,39 @@ ChangeUnits <- function(datain, varnames, site_log){
                                              site_log)
       
         
-      ## Specific humidity from VPD (in kg/kg, calculate from tair, VPD and psurf)
-      } else if(datain$vars[k] %in% varnames$vpd & flx_units[k]=="hPa" & alma_units[k]=="kg/kg"){  
+        #Fix QC flag. In this case, will use QC flags for VPD and Tair to determine Qair quality
+        #Psurf not used as it is less critical for calculation. Taking the worse flag out of VPD
+        #and Tair (e.g. if VPD observed but Tair gap-filled, will label Qair gap-filled as well)
         
-        #Find Tair and PSurf units
-        psurf_units <- flx_units[names(flx_units) %in% varnames$airpressure]
-        tair_units  <- flx_units[names(flx_units) %in% varnames$tair]
+        #Create Qair qc flag 
         
-        #If already converted, reset units to new converted units
-        if(converted[which(datain$vars %in% varnames$airpressure)]) {
-          psurf_units <- alma_units[names(alma_units) %in% varnames$airpressure]         
-        } 
-        if (converted[which(datain$vars %in% varnames$tair)]){
-          tair_units <- alma_units[names(alma_units) %in% varnames$tair]
-        }          
+        #Get indices for VPD and Tair qc flags
+        #Not ideal, hard-codes output variable name as "qc". Cannot work out a way round this
         
-        temp_relhumidity <- VPD2RelHum(VPD=datain$data[,colnames(datain$data) %in% varnames$vpd],  
-                                       airtemp=datain$data[,colnames(datain$data) %in% varnames$tair],  
-                                       vpd_units=flx_units[colnames(datain$data) %in% varnames$vpd], #names(flx_units) %in% varnames$vpd], replacing because sometimes finds multiple cases in units
-                                       tair_units=tair_units, 
-                                       site_log)
-        
-        datain$data[[k]] <- Rel2SpecHumidity(relHum=temp_relhumidity, 
-                                             airtemp=datain$data[,colnames(datain$data) %in% varnames$tair], 
-                                             tair_units=tair_units, 
-                                             pressure=datain$data[,colnames(datain$data) %in% varnames$airpressure], 
-                                             psurf_units=psurf_units,
-                                             site_log)
-        
+        if (datain$vars[k] %in% varnames$vpd) { #VPD
+          humidity_qc_ind  <- which(datain$out_vars == paste0(datain$out_vars[vpd_ind], "_qc"))
+          
+        } else if(datain$vars[k] %in% varnames$relhumidity) { #relative humidity
+          humidity_qc_ind  <- which(datain$out_vars == paste0(datain$out_vars[vpd_ind], "_qc"))
+        }
 
+        tair_qc_ind <- which(datain$out_vars == paste0(datain$out_vars[tair_ind], "_qc"))
         
-      ## VPD from kPa to hPas
+        
+        if (any(c(length(humidity_qc_ind), length(tair_qc_ind)) == 0)) {
+          stop("Cannot find VPD/RH or Tair QC flag in unit conversions")
+        }
+        
+        #Find index for Qair qc flag
+        #Not ideal, hard-codes output variable name as "qc". Cannot work out a way round this
+        qair_qc_ind <- which(datain$out_vars == paste0(datain$out_vars[k], "_qc"))
+        
+        #Replace data with new adjusted qc flag
+        #Take the pairwise maximum of each element
+        datain$data[[qair_qc_ind]] <- pmax(datain$data[[humidity_qc_ind]], datain$data[[tair_qc_ind]])
+        
+        
+      ## VPD from kPa to hPa
       } else if(datain$vars[k] %in% varnames$vpd & flx_units[k]=="kPa" & alma_units[k]=="hPa"){
         
         datain$data[[k]] <- datain$data[[k]] * 10

@@ -158,7 +158,12 @@ CheckDataGaps <- function(datain, qc_flags, missing_met, missing_flux,
     if (any(!is.na(threshold))) {
       
       #Check if QC variable exists
-      qc_var <- which(datain$vars==paste(datain$vars[k], qc_name, sep="")) 
+      qc_var <- which(datain$vars==paste0(datain$vars[k], qc_name)) 
+      
+      #If duplicates, pick the correct one
+      #Not ideal, hard-codes output variable name as "_qc". Cannot work out a way round this
+      if (length(qc_var) > 1) { qc_var <- which(datain$out_vars==paste0(datain$out_vars[k], "_qc"))  }
+      
       
       #If found QC variable, calculate percentage of gap-filling
       if (length(qc_var) > 0) {
@@ -221,7 +226,7 @@ CheckDataGaps <- function(datain, qc_flags, missing_met, missing_flux,
   ### Check that essential variables have at least one common year of data
   ### without too many gaps
   ### and the year has one or more evaluation variables available
-  all_met_ind   <- sapply(all_met, function(x) which(names(perc_missing) == x))
+  all_met_ind   <- unique(unlist(sapply(all_met, function(x) which(names(perc_missing) == x)))) #add so can deal with duplicate vars
   tier1_met_ind <- sapply(tier1_met, function(x) which(names(perc_missing) == x))
   tier2_met_ind <- sapply(tier2_met, function(x) which(names(perc_missing) == x))
   

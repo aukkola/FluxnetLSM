@@ -4,7 +4,7 @@
 \alias{update_qc}
 \title{Updates QC flags after gap-filling}
 \usage{
-update_qc(data, temp_data, varname, qc_name, qc_value, qc_flags, ...)
+update_qc(data, temp_data, varname, qc_name, qc_value, qc_flags, outname, ...)
 }
 \description{
 Updates QC flags after gap-filling
