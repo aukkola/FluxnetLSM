@@ -6,6 +6,14 @@
 \usage{
 convert_OzFlux(infile, tcol)
 }
+\arguments{
+\item{infile}{input file}
+
+\item{tcol}{tcol??}
+}
+\value{
+input file
+}
 \description{
 Converts OzFlux files to FLUXNET2015 format
 }

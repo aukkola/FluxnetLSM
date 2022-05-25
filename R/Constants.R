@@ -7,11 +7,24 @@
 #
 # TODO: Check and merge back in to palsR
 
-#-----------------------------------------------------------------------------
-
-#' Finds variables present in input file
+#' Find list of column variables
+#' 
+#' Process files for their column variables
+#'
+#' @param fileinname input file
+#' @param var_names varnames
+#' @param var_classes var classes
+#' @param essential_vars essential variables
+#' @param preferred_vars preferred variables
+#' @param time_vars time step
+#' @param dset_vars dataset variables?
+#' @param site_log log file
+#' @param datasetname dataset name
+#' @param ... additional parameters
+#'
 #' @return list of variables and their attributes
-# Variable names in spreadsheet to be processed:
+#' @export
+
 findColIndices <-  function(fileinname, var_names, var_classes, 
                             essential_vars, preferred_vars,
                             time_vars, dset_vars, site_log, datasetname, ...) {
@@ -177,10 +190,16 @@ findColIndices <-  function(fileinname, var_names, var_classes,
 
 }
 
-#-----------------------------------------------------------------------------
-
 #' Extract time stamp information
+#'
+#' @param time_vars time variables
+#' @param headers headers
+#' @param site_log log files
+#' @param datasetname filename
+#'
 #' @return time stamp variables
+#' @export
+
 findTimeInfo <- function(time_vars, headers, site_log, datasetname){
     
   #Find index of time variables
@@ -214,10 +233,15 @@ findTimeInfo <- function(time_vars, headers, site_log, datasetname){
   return(tcols)
 }
 
-#-----------------------------------------------------------------------------
-
 #' Retrieves variable information
-#' @return variable information
+#'
+#' @param vars_present 
+#' @param all_vars 
+#' @param attribute 
+#'
+#' @return
+#' @export
+
 retrieve_varinfo <- function(vars_present, all_vars, attribute){
   
   #Find index for fluxnet variables present in file
@@ -235,10 +259,14 @@ retrieve_varinfo <- function(vars_present, all_vars, attribute){
   return(var_info)
 }
 
-#-----------------------------------------------------------------------------
-
 #' Retrieves original and target variable units
-#' @return original and target units
+#'
+#' @param vars_present 
+#' @param all_vars 
+#'
+#' @return
+#' @export
+
 retrieve_units <- function(vars_present, all_vars){
   
   #Find index for fluxnet variables present in file
@@ -262,10 +290,14 @@ retrieve_units <- function(vars_present, all_vars){
   return(units)
 }
 
-#-----------------------------------------------------------------------------
-
 #' Retrieve variables longnames to be written in NetCDF
-#' @return Long name attributes
+#'
+#' @param vars_present current variables?
+#' @param all_vars all variables?
+#'
+#' @return
+#' @export
+
 retrieve_atts <- function(vars_present, all_vars){
   
   #Find index for fluxnet variables present in file
@@ -288,10 +320,14 @@ retrieve_atts <- function(vars_present, all_vars){
 }
 
 
-#-----------------------------------------------------------------------------
-
 #' Retrieves acceptable variable ranges
-#' @return variable ranges
+#'
+#' @param vars_present current variable ranges
+#' @param all_vars all variable ranges
+#'
+#' @return
+#' @export
+
 retrieve_ranges <- function(vars_present, all_vars){
 
   #Find index for fluxnet variables present in file
@@ -314,10 +350,15 @@ retrieve_ranges <- function(vars_present, all_vars){
 }
 
 
-#-----------------------------------------------------------------------------
-
-#' Removes duplicate indices if a Fluxnet variable is processed more than once
-#' @return duplicate indices
+#' Removes duplicate indices
+#' 
+#' If a Fluxnet variable is processed more than once remove doubless
+#'
+#' @param indices indices to remove
+#'
+#' @return
+#' @export
+#'
 remove_duplicates <- function(indices){
   
   #Determine how many variables duplicated
@@ -337,11 +378,16 @@ remove_duplicates <- function(indices){
   
 }
 
-
-#-----------------------------------------------------------------------------
-
-#' Duplicates columns in Fluxnet data if a variable is being processes multiple times
-#' @return data with duplicated columns
+#' Duplicates columns in Fluxnet data 
+#' 
+#' If a variable is being processes multiple times duplicate column
+#'
+#' @param data input data
+#' @param vars variables
+#'
+#' @return
+#' @export
+#' 
 duplicate_columns <- function(data, vars){
   
   #Find variables that are duplicated

@@ -39,12 +39,13 @@ Imports:
     graphics,
     stats,
     utils,
+    R.utils,
     grDevices
 License: AGPL-3
 LazyData: false
 Encoding: UTF-8
 ByteCompile: true
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Suggests:
     knitr,
     rmarkdown,

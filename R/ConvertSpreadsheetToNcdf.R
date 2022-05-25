@@ -41,7 +41,7 @@
 #'
 #' @export
 #'
-#'
+
 convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
                                       conv_opts=get_default_conversion_options(),
                                       plot=c("annual", "diurnal", "timeseries"),
@@ -843,7 +843,7 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
 #' - add_psurf: La Thuile dataset does not include surface air pressure (PSurf). When set to TRUE,
 #'              it will be synthesised from air temperature and elevation.
 #' @export
-#'
+
 get_default_conversion_options <- function() {
     conv_opts <- list(
         datasetname = "FLUXNET2015",

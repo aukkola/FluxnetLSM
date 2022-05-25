@@ -6,8 +6,13 @@
 \usage{
 retrieve_atts(vars_present, all_vars)
 }
+\arguments{
+\item{vars_present}{current variables?}
+
+\item{all_vars}{all variables?}
+}
 \value{
-Long name attributes
+
 }
 \description{
 Retrieve variables longnames to be written in NetCDF

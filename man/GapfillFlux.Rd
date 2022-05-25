@@ -15,6 +15,26 @@ GapfillFlux(
   site_log
 )
 }
+\arguments{
+\item{datain}{}
+
+\item{qc_name}{}
+
+\item{qc_flags}{}
+
+\item{regfill}{}
+
+\item{linfill}{}
+
+\item{copyfill}{}
+
+\item{varnames}{}
+
+\item{site_log}{}
+}
+\value{
+gapfilled flux variables
+}
 \description{
 Gapfill flux variables using statistical methods
 }

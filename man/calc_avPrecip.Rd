@@ -6,6 +6,14 @@
 \usage{
 calc_avPrecip(datain, gaps)
 }
+\arguments{
+\item{datain}{input data}
+
+\item{gaps}{gaps?}
+}
+\value{
+mean annual preciptitation
+}
 \description{
 Calculates mean annual precipitation
 }

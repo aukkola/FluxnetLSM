@@ -7,6 +7,13 @@ as set in the "variables" auxiliary file}
 \usage{
 CheckDataRanges(datain, site_log, action = "stop")
 }
+\arguments{
+\item{datain}{input data}
+
+\item{site_log}{log file}
+
+\item{action}{action to execute upon failure?}
+}
 \description{
 Checks that data are within specified ranges
 as set in the "variables" auxiliary file

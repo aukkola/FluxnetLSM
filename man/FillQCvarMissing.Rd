@@ -2,15 +2,21 @@
 % Please edit documentation in R/Gapfilling.R
 \name{FillQCvarMissing}
 \alias{FillQCvarMissing}
-\title{Fills QC flags with 3 (poor gap-filling) when
-QC flag missing but data variable available}
+\title{Fills QC flags}
 \usage{
 FillQCvarMissing(datain, gapfillVal, qc_name)
 }
+\arguments{
+\item{datain}{input data}
+
+\item{gapfillVal}{gapfilling value}
+
+\item{qc_name}{qc name?}
+}
 \value{
-datain
+gapfilled qc flags
 }
 \description{
-Fills QC flags with 3 (poor gap-filling) when
+with 3 (poor gap-filling) when
 QC flag missing but data variable available
 }

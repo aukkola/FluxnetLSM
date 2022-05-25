@@ -6,6 +6,20 @@
 \usage{
 FindExcludeEval(datain, all_missing, gaps, include_all, qc_name)
 }
+\arguments{
+\item{datain}{input data}
+
+\item{all_missing}{all missing??}
+
+\item{gaps}{gaps??}
+
+\item{include_all}{exclude all?? TRUE FALSE}
+
+\item{qc_name}{gc name}
+}
+\value{
+list of variables to exclude
+}
 \description{
 Finds evaluation variables to exlude
 }

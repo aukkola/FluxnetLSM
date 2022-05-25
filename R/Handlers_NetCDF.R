@@ -1,27 +1,41 @@
-# Handlers_NetCDF.R
-#
-# A collection of functions to read and convert
-# flux tower data to netcdf.
-#
-# author: Anna Ukkola UNSW 2017
-#
-
-
 #' Creates a netcdf file for flux variables
-CreateFluxNetcdfFile = function(fluxfilename, datain,            # outfile file and data
-                                site_code,                       # Fluxnet site code
-                                siteInfo,                        # Site attributes
-                                ind_start, ind_end,              # time period indices
-                                starttime,                       # timing info
-                                flux_varname, cf_name,           # Original Fluxnet variable names and CF_compliant names
-                                total_missing, total_gapfilled,  # Percentage missing and gap-filled
-                                qcInfo,                          # QC flag values
-                                arg_info,                        # Processing information
-                                var_ind,                         # Indices to extract variables to be written
-                                varnames,                        # Original FLUXNET names corresponding to dataset
-                                modelInfo,                       # Model parameters
-                                global_atts){                    # Global attributes from original OzFlux nc-files
-
+#'
+#' @param fluxfilename output file name
+#' @param datain input data
+#' @param site_code site code
+#' @param siteInfo meta-data
+#' @param ind_start start year
+#' @param ind_end end year
+#' @param starttime timing info
+#' @param flux_varname flux variable names
+#' @param cf_name cf name
+#' @param total_missing percentage missing and gap filled
+#' @param total_gapfilled percentage missing and gap filled
+#' @param qcInfo qc flag information
+#' @param arg_info processing information
+#' @param var_ind variable indices?
+#' @param varnames original varnames corresponding to the dataset
+#' @param modelInfo model parameters
+#' @param global_atts global attributes (from origianl Ozflux nc-files)
+#'
+#' @return netcdf file with flux variables
+#' @export
+#'
+CreateFluxNetcdfFile = function(
+    fluxfilename, datain,            # outfile file and data
+    site_code,                       # Fluxnet site code
+    siteInfo,                        # Site attributes
+    ind_start, ind_end,              # time period indices
+    starttime,                       # timing info
+    flux_varname, cf_name,           # Original Fluxnet variable names and CF_compliant names
+    total_missing, total_gapfilled,  # Percentage missing and gap-filled
+    qcInfo,                          # QC flag values
+    arg_info,                        # Processing information
+    var_ind,                         # Indices to extract variables to be written
+    varnames,                        # Original FLUXNET names corresponding to dataset
+    modelInfo,                       # Model parameters
+    global_atts){                    # Global attributes from original OzFlux nc-files
+  
 
     # load netcdf library
     library(ncdf4)
@@ -301,32 +315,49 @@ CreateFluxNetcdfFile = function(fluxfilename, datain,            # outfile file 
     nc_close(ncid)
 }
 
-
-#-----------------------------------------------------------------------------
-
-
-# TODO: This function exists in palsR/Gab and has a different signature. Merge?
 #' Creates a netcdf file for met variables
-CreateMetNetcdfFile = function(metfilename, datain,             # outfile file and data
-                               site_code,                       # Fluxnet site code
-                               siteInfo,                        # Site attributes
-                               ind_start, ind_end,              # time period indices
-                               starttime,                       # timing info
-                               flux_varname, cf_name,           # Original Fluxnet variable names and CF_compliant names
-                               av_precip=NA,                    # average annual rainfall
-                               total_missing, total_gapfilled,  # Percentage missing and gap-filled
-                               qcInfo,                          # QC flag values
-                               qc_name,                         # Name of qc flag in original dataset
-                               arg_info,                        # Arguments passed to main function
-                               var_ind,                         # Indices to extract variables to be written
-                               varnames,                        # Original FLUXNET names corresponding to dataset
-                               modelInfo,                       # Model parameters
-                               global_atts){                    # Global attributes from original OzFlux nc-files
-
-    # load netcdf library
-    library(ncdf4)
-    library(lutz) #to get time zone
-  
+#'
+#' @param metfilename 
+#' @param datain 
+#' @param site_code 
+#' @param siteInfo 
+#' @param ind_start 
+#' @param ind_end 
+#' @param starttime 
+#' @param flux_varname 
+#' @param cf_name 
+#' @param av_precip 
+#' @param total_missing 
+#' @param total_gapfilled 
+#' @param qcInfo 
+#' @param qc_name 
+#' @param arg_info 
+#' @param var_ind 
+#' @param varnames 
+#' @param modelInfo 
+#' @param global_atts 
+#'
+#' @import ncdf4
+#' @import lutz
+#'
+#' @return
+#' @export
+CreateMetNetcdfFile <- function(
+    metfilename, datain,             # outfile file and data
+    site_code,                       # Fluxnet site code
+    siteInfo,                        # Site attributes
+    ind_start, ind_end,              # time period indices
+    starttime,                       # timing info
+    flux_varname, cf_name,           # Original Fluxnet variable names and CF_compliant names
+    av_precip=NA,                    # average annual rainfall
+    total_missing, total_gapfilled,  # Percentage missing and gap-filled
+    qcInfo,                          # QC flag values
+    qc_name,                         # Name of qc flag in original dataset
+    arg_info,                        # Arguments passed to main function
+    var_ind,                         # Indices to extract variables to be written
+    varnames,                        # Original FLUXNET names corresponding to dataset
+    modelInfo,                       # Model parameters
+    global_atts){                    # Global attributes from original OzFlux nc-files
   
     # Time step size
     timestepsize <- datain$timestepsize

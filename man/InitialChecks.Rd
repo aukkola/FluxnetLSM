@@ -6,6 +6,11 @@
 \usage{
 InitialChecks(opts, era_file)
 }
+\arguments{
+\item{opts}{options}
+
+\item{era_file}{ERA file to process}
+}
 \description{
 Performs initial checks on function arguments
 }

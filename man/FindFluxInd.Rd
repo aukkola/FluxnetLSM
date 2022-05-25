@@ -6,6 +6,18 @@
 \usage{
 FindFluxInd(datain, exclude_eval, k, site_log)
 }
+\arguments{
+\item{datain}{input data}
+
+\item{exclude_eval}{stuff to exclude from evaluation?}
+
+\item{k}{k?}
+
+\item{site_log}{log file?}
+}
+\value{
+indices to be returned
+}
 \description{
 Finds indices for flux variables to be outputted
 }

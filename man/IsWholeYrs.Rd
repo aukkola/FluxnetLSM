@@ -6,6 +6,13 @@
 \usage{
 IsWholeYrs(datain, gaps, site_log)
 }
+\arguments{
+\item{datain}{input data}
+
+\item{gaps}{gaps}
+
+\item{site_log}{log file}
+}
 \description{
 Checks that whole years were extracted
 }

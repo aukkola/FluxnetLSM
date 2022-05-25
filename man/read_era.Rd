@@ -6,6 +6,14 @@
 \usage{
 read_era(ERA_file, datain)
 }
+\arguments{
+\item{ERA_file}{ERA5 file}
+
+\item{datain}{input data file}
+}
+\value{
+extracted values
+}
 \description{
 Reads ERA data and extracts time steps corresponding to obs
 }

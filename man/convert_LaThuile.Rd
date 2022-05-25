@@ -15,6 +15,26 @@ convert_LaThuile(
   site_code
 )
 }
+\arguments{
+\item{infiles}{input file}
+
+\item{fair_usage}{fair use?}
+
+\item{fair_usage_vec}{fair use?}
+
+\item{min_yrs}{min year}
+
+\item{tcol}{tcol?}
+
+\item{add_psurf}{psurf?}
+
+\item{site_log}{log file}
+
+\item{site_code}{site code}
+}
+\value{
+converted file in FLUXNET format
+}
 \description{
 Converts La Thuile files to FLUXNET2015 format
 }

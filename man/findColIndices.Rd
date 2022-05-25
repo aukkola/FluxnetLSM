@@ -2,7 +2,7 @@
 % Please edit documentation in R/Constants.R
 \name{findColIndices}
 \alias{findColIndices}
-\title{Finds variables present in input file}
+\title{Find list of column variables}
 \usage{
 findColIndices(
   fileinname,
@@ -17,9 +17,30 @@ findColIndices(
   ...
 )
 }
+\arguments{
+\item{fileinname}{input file}
+
+\item{var_names}{varnames}
+
+\item{var_classes}{var classes}
+
+\item{essential_vars}{essential variables}
+
+\item{preferred_vars}{preferred variables}
+
+\item{time_vars}{time step}
+
+\item{dset_vars}{dataset variables?}
+
+\item{site_log}{log file}
+
+\item{datasetname}{dataset name}
+
+\item{...}{additional parameters}
+}
 \value{
 list of variables and their attributes
 }
 \description{
-Finds variables present in input file
+Process files for their column variables
 }

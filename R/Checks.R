@@ -8,6 +8,8 @@
 
 
 #' Checks for missing and gap-filled data and determines output years
+#' 
+#' 
 #' @param datain Input data list
 #' @param qc_flags Values of qc flags
 #' @param missing_met Threshold for missing values per year for met variables (as percentage)
@@ -26,6 +28,7 @@
 #' @param showWarn Print warning?
 #' @param site_log Site log
 #' @return out
+
 CheckDataGaps <- function(datain, qc_flags, missing_met, missing_flux, 
                           gapfill_met_tier1, gapfill_met_tier2, gapfill_flux,
                           gapfill_good, gapfill_med, gapfill_poor,
@@ -451,10 +454,12 @@ CheckDataGaps <- function(datain, qc_flags, missing_met, missing_flux,
 }
 
 
-
-#-----------------------------------------------------------------------------
-
 #' Checks that whole years were extracted
+#'
+#' @param datain input data
+#' @param gaps gaps
+#' @param site_log log file
+ 
 IsWholeYrs <- function(datain, gaps, site_log){
   
   start_times <- sapply(gaps$tseries_start, function(x) format(strptime(datain$time[x,1], 
@@ -468,11 +473,13 @@ IsWholeYrs <- function(datain, gaps, site_log){
   
 }
 
-#-----------------------------------------------------------------------------
-
 #' Checks that data are within specified ranges
 #' as set in the "variables" auxiliary file
 #'
+#' @param datain input data 
+#' @param site_log log file
+#' @param action action to execute upon failure?
+#' 
 CheckDataRanges <- function(datain, site_log, action="stop"){
 
     # Loop through variables
@@ -529,12 +536,13 @@ CheckDataRanges <- function(datain, site_log, action="stop"){
 } # function
 
 
-#-----------------------------------------------------------------------------
-
 #' Performs initial checks on function arguments
+#'
+#' @param opts options
+#' @param era_file ERA file to process
+#' 
 InitialChecks <- function(opts, era_file){
 
-  
   #Check that ERA file supplied if using ERAinterim met_gapfilling
   if(!is.na(opts$met_gapfill) && opts$met_gapfill=="ERAinterim"){
     if (length(era_file) == 0 || is.na(era_file)){
