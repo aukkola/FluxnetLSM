@@ -6,6 +6,14 @@
 \usage{
 define_model_params(modelInfo, dims)
 }
+\arguments{
+\item{modelInfo}{model parameters}
+
+\item{dims}{dimensions}
+}
+\value{
+
+}
 \description{
 Writes model parameters as global attribute to NetCDF file
 }

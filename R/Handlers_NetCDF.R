@@ -20,7 +20,7 @@
 #'
 #' @return netcdf file with flux variables
 #' @export
-#'
+
 CreateFluxNetcdfFile = function(
     fluxfilename, datain,            # outfile file and data
     site_code,                       # Fluxnet site code
@@ -658,9 +658,15 @@ CreateMetNetcdfFile <- function(
     nc_close(ncid)
 }
 
-#-----------------------------------------------------------------------------
-
 #' Writes model parameters as global attribute to NetCDF file
+#'
+#'
+#' @param modelInfo model parameters
+#' @param dims dimensions
+#'
+#' @return
+#' @export
+#' 
 define_model_params <- function(modelInfo, dims){
 
     nc_vars <- list()
@@ -693,9 +699,16 @@ define_model_params <- function(modelInfo, dims){
     return(outs)
 }
 
-#-----------------------------------------------------------------------------
-
 #' Writes attributes common to met and flux NC files
+#'
+#' @param ncid netcdf id
+#' @param arg_info arguments
+#' @param datain input data
+#' @param cat category??
+#'
+#' @return
+#' @export
+#' 
 add_processing_info <- function(ncid, arg_info, datain, cat){
 
     # Input file
