@@ -141,37 +141,29 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
     }
   }
   
-  vars_csv <- read.csv(var_file, header=TRUE,
-                       colClasses=c(
-                                    "character",  # Fluxnet_variable
-                                    "character",  # Fluxnet_unit
-                                    "character",  # Fluxnet_class
-                                    "character",  # Output_variable
-                                    "character",  # Output_unit
-                                    "character",  # Longname
-                                    "character",  # Standard_name
-                                    "character",  # Short_name_cmip
-                                    "numeric",    # Data_min
-                                    "numeric",    # Data_max
-                                    "numeric",    # Essential_met
-                                    "logical",    # Preferred_eval
-                                    "character",  # Category
-                                    "character",  # ERAinterim_variable
-                                    "character"   # Aggregate_method
-                                    ))
+  vars_csv <- read.csv(var_file, header=TRUE)
 
   # Add Psurf (air pressure) for La Thuile as this is not available in the dataset
   # but can be synthesised
   if (conv_opts$datasetname == "LaThuile" & conv_opts$add_psurf) {
     
-    psurf_var <- list(Fluxnet_variable="PSurf_synth",  #Removing Fluxnet variable from metadata later but 
-                                                       #needed to keep track of variable. DO NOT change name
-                      Fluxnet_unit="Pa", #Not original unit but what synthesis produces, DO NOT change
-                      Fluxnet_class="numeric", Output_variable="Psurf",
-                      Output_unit="Pa", Longname="Surface air pressure (synthesised)",
-                      Standard_name="surface_air_pressure", CMIP_short_name="ps", 
-                      Data_min=50000, Data_max=110000, Essential_met=NA, Preferred_eval=FALSE, 
-                      Category="Met", ERAinterim_variable=NA, Aggregate_method="mean")
+    psurf_var <- list(
+      Fluxnet_variable="PSurf_synth",  #Removing Fluxnet variable from metadata later but 
+                                       #needed to keep track of variable. DO NOT change name
+      Fluxnet_unit="Pa", #Not original unit but what synthesis produces, DO NOT change
+      Fluxnet_class="numeric", Output_variable="Psurf",
+      Output_unit="Pa",
+      Longname="Surface air pressure (synthesised)",
+      Standard_name="surface_air_pressure",
+      CMIP_short_name="ps", 
+      Data_min=50000,
+      Data_max=110000,
+      Essential_met=NA,
+      Preferred_eval=FALSE, 
+      Category="Met",
+      ERAinterim_variable=NA,
+      Aggregate_method="mean"
+      )
     
     if (!all(names(psurf_var) %in% colnames(vars_csv))) stop("PSurf variable not defined correctly!")
     
@@ -205,7 +197,6 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   site_log  <- log_warning(warn=site_info$warn, site_log)
   site_info <- site_info$out
   
-  
   # Should site be excluded? If so, abort and print reason.
   # This option is set in the site info file (inside data folder)
   # Mainly excludes sites with mean annual ET excluding P, implying
@@ -225,16 +216,19 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   
   
   # Read text file containing flux data
-  DataFromText <- ReadCSVFluxData(fileinname=infile, vars=vars_csv, 
-                                  datasetname=conv_opts$datasetname,
-                                  time_vars=time_vars, site_log=site_log,
-                                  add_psurf=conv_opts$add_psurf,
-                                  fair_usage=conv_opts$fair_use,
-                                  fair_usage_vec=conv_opts$fair_use_vec,
-                                  min_yrs=conv_opts$min_yrs,
-                                  dset_vars=dataset_vars,
-                                  site_code=site_code)
-  
+  DataFromText <- ReadCSVFluxData(
+    fileinname=infile,
+    vars=vars_csv, 
+    datasetname=conv_opts$datasetname,
+    time_vars=time_vars,
+    site_log=site_log,
+    add_psurf=conv_opts$add_psurf,
+    fair_usage=conv_opts$fair_use,
+    fair_usage_vec=conv_opts$fair_use_vec,
+    min_yrs=conv_opts$min_yrs,
+    dset_vars=dataset_vars,
+    site_code=site_code
+    )
   
   # Make sure whole number of days in dataset
   CheckCSVTiming(DataFromText, site_log)
