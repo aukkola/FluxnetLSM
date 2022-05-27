@@ -497,13 +497,13 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   if (conv_opts$datasetname == "OzFlux") {
     
     #Open file handle
-    nc_oz <- nc_open(infile)
+    nc_oz <- ncdf4::nc_open(infile)
     
     #Get global attributes
-    global_atts <- ncatt_get(nc_oz, varid=0)
+    global_atts <- ncdf4::ncatt_get(nc_oz, varid=0)
     
     #Close file
-    nc_close(nc_oz)
+    ncdf4::nc_close(nc_oz)
     
   } else {
     global_atts <- NA
@@ -669,8 +669,8 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
     for(k in 1:length(met_files)){
       
       #Open met and flux NetCDF file handles
-      nc_met <- nc_open(met_files[k])
-      nc_flux <- nc_open(flux_files[k])
+      nc_met <- ncdf4::nc_open(met_files[k])
+      nc_flux <- ncdf4::nc_open(flux_files[k])
       
       #Initialise output file names (completed in plotting code)
       outfile_met  <- paste(out_paths$plot, "/", site_code, "_", start_yr[k], "_", end_yr[k], "_plot_Met_", sep="")
@@ -705,8 +705,8 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
       
       
       #Close file handles
-      nc_close(nc_met)
-      nc_close(nc_flux)  
+      ncdf4::nc_close(nc_met)
+      ncdf4::nc_close(nc_flux)  
       
     }
     

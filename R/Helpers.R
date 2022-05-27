@@ -121,7 +121,7 @@ preprocess_OzFlux <- function(infile, outpath) {
   library(tools)
   
   #Open file handle
-  nc <- nc_open(infile)
+  nc <- ncdf4::nc_open(infile)
   
   
   #Flag for re-writing data
@@ -132,9 +132,9 @@ preprocess_OzFlux <- function(infile, outpath) {
   
   #Read time data and origin
   #Time stamps are the END time of each time step (pers. comm. Peter Isaac)
-  time_var <- ncvar_get(nc, "time")
+  time_var <- ncdf4::ncvar_get(nc, "time")
   
-  time_origin <- strsplit(ncatt_get(nc, "time")$units, "days since ")[[1]][2]
+  time_origin <- strsplit(ncdf4::ncatt_get(nc, "time")$units, "days since ")[[1]][2]
   
   #Convert to Y-M-D h-m-s
   time_date <- as.POSIXct(time_var * 24*60*60,  origin=time_origin, tz="GMT")
@@ -144,8 +144,6 @@ preprocess_OzFlux <- function(infile, outpath) {
   
   #No. of time steps per day
   tsteps_per_day <- (24*60) / as.numeric(difftime(time_date[2], time_date[1], units="mins"))
-  
-  
   
   ### Get all data variables with a time dimension ###
   
@@ -163,8 +161,6 @@ preprocess_OzFlux <- function(infile, outpath) {
   
   #Set names
   names(var_data) <- vars[var_inds]  
-  
-  
   
   ### First check if starts/ends at midnight  ###
   
@@ -447,7 +443,7 @@ preprocess_OzFlux <- function(infile, outpath) {
     
     
     #Close input file
-    nc_close(nc)
+    ncdf4::nc_close(nc)
     
     
     
@@ -460,7 +456,7 @@ preprocess_OzFlux <- function(infile, outpath) {
     
     #For some reason this crashes if using lapply, loop works ok-ish    
     for(a in 1:length(new_atts)){
-      ncatt_put(out_nc, varid=0, attname=names(new_atts)[a], 
+      ncdf4::ncatt_put(out_nc, varid=0, attname=names(new_atts)[a], 
                 attval=unlist(new_atts[a]))
     }
     
@@ -471,7 +467,7 @@ preprocess_OzFlux <- function(infile, outpath) {
       #CRS returns an error, skip
       if (new_vars[[v]]$name != "crs") {
         
-        ncvar_put(nc=out_nc, varid=new_vars[[v]],
+        ncdf4::ncvar_put(nc=out_nc, varid=new_vars[[v]],
                   vals=new_vars[[v]]$vals)
       }
     }
@@ -479,7 +475,7 @@ preprocess_OzFlux <- function(infile, outpath) {
   
     
     #Close output file
-    nc_close(out_nc)
+    ncdf4::nc_close(out_nc)
     
     
   }

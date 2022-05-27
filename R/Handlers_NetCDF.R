@@ -18,6 +18,8 @@
 #' @param modelInfo model parameters
 #' @param global_atts global attributes (from origianl Ozflux nc-files)
 #'
+#' @import lutz
+#' @import ncdf4
 #' @return netcdf file with flux variables
 #' @export
 
@@ -36,11 +38,6 @@ CreateFluxNetcdfFile = function(
     modelInfo,                       # Model parameters
     global_atts){                    # Global attributes from original OzFlux nc-files
   
-
-    # load netcdf library
-    library(ncdf4)
-    library(lutz) #to get time zone
-  
     # Time step size
     timestepsize <- datain$timestepsize
 
@@ -48,9 +45,9 @@ CreateFluxNetcdfFile = function(
     datain$data <- datain$data[ind_start:ind_end,]
 
     # Define x, y and z dimensions
-    xd = ncdim_def('x',vals=c(1),units='')
-    yd = ncdim_def('y',vals=c(1),units='')
-    dimnchar = ncdim_def("nchar", "", 1:200, create_dimvar=FALSE)
+    xd = ncdf4::ncdim_def('x',vals=c(1),units='')
+    yd = ncdf4::ncdim_def('y',vals=c(1),units='')
+    dimnchar = ncdf4::ncdim_def("nchar", "", 1:200, create_dimvar=FALSE)
 
     # Determine data start date and time:
     timeunits = CreateTimeunits(starttime)
@@ -60,14 +57,14 @@ CreateFluxNetcdfFile = function(
     timedata = as.double(tt*timestepsize)
 
     # Define time dimension:
-    td = ncdim_def('time', unlim=TRUE, units=timeunits, 
+    td = ncdf4::ncdim_def('time', unlim=TRUE, units=timeunits, 
                    vals=timedata, calendar="standard")
 
     
     # VARIABLE DEFINITIONS ##############################################
 
     # Create variable definitions for time series variables
-    var_defs <- lapply(var_ind, function(x) ncvar_def(name=datain$out_vars[x],
+    var_defs <- lapply(var_ind, function(x) ncdf4::ncvar_def(name=datain$out_vars[x],
                                                       units=datain$units$target_units[x],
                                                       dim=list(xd,yd,td),
                                                       missval=Nc_MissingVal,
@@ -82,10 +79,10 @@ CreateFluxNetcdfFile = function(
 
     # First necessary non-time variables:
     # Define latitude:
-    latdim <- ncvar_def('latitude','degrees_north',dim=list(xd,yd),
+    latdim <- ncdf4::ncvar_def('latitude','degrees_north',dim=list(xd,yd),
                         missval=Nc_MissingVal, longname='Latitude')
     # Define longitude:
-    londim <- ncvar_def('longitude','degrees_east',dim=list(xd,yd),
+    londim <- ncdf4::ncvar_def('longitude','degrees_east',dim=list(xd,yd),
                         missval=Nc_MissingVal,longname='Longitude')
 
 
@@ -95,35 +92,35 @@ CreateFluxNetcdfFile = function(
     # Define reference height of tower:
     # Use measurement height if available, else take tower height
     if (!is.na(siteInfo$MeasurementHeight) | !is.na(siteInfo$TowerHeight)) {
-        refheight=ncvar_def('reference_height','m',dim=list(xd,yd),
+        refheight=ncdf4::ncvar_def('reference_height','m',dim=list(xd,yd),
                             missval=Nc_MissingVal,longname='Reference height of flux tower')
         opt_vars[[ctr]] = refheight
         ctr <- ctr + 1
     } 
     # Define site canopy height:
     if(!is.na(siteInfo$CanopyHeight)){
-        canheight=ncvar_def('canopy_height','m',dim=list(xd,yd),
+        canheight=ncdf4::ncvar_def('canopy_height','m',dim=list(xd,yd),
                             missval=Nc_MissingVal,longname='Canopy height')
         opt_vars[[ctr]] = canheight
         ctr <- ctr + 1
     }
     # Define site elevation:
     if(!is.na(siteInfo$SiteElevation)){
-        elev=ncvar_def('elevation','m',dim=list(xd,yd),
+        elev=ncdf4::ncvar_def('elevation','m',dim=list(xd,yd),
                        missval=Nc_MissingVal,longname='Site elevation')
         opt_vars[[ctr]] = elev
         ctr <- ctr + 1
     }
     # Define IGBP short vegetation type:
     if(!is.na(siteInfo$IGBP_vegetation_short)){
-        short_veg=ncvar_def('IGBP_veg_short','-',dim=list(dimnchar), missval=NULL,
+        short_veg=ncdf4::ncvar_def('IGBP_veg_short','-',dim=list(dimnchar), missval=NULL,
                             longname='IGBP vegetation type (short)', prec="char")
         opt_vars[[ctr]] = short_veg
         ctr <- ctr + 1
     }
     # Define IGBP long vegetation type:
     if(!is.na(siteInfo$IGBP_vegetation_long)){
-        long_veg=ncvar_def('IGBP_veg_long','-',dim=list(dimnchar), missval=NULL,
+        long_veg=ncdf4::ncvar_def('IGBP_veg_long','-',dim=list(dimnchar), missval=NULL,
                            longname='IGBP vegetation type (long)', prec="char")
         opt_vars[[ctr]] = long_veg
         ctr <- ctr + 1
@@ -139,58 +136,58 @@ CreateFluxNetcdfFile = function(
     if(any(!is.na(modelInfo)))  { all_vars <- append(all_vars, model_defs$nc_vars) }
 
     # Create
-    ncid <- nc_create(fluxfilename, vars=all_vars)
+    ncid <- ncdf4::nc_create(fluxfilename, vars=all_vars)
 
 
     #### Write global attributes ###
     
-    ncatt_put(ncid,varid=0,attname='Production_time',
+    ncdf4::ncatt_put(ncid,varid=0,attname='Production_time',
               attval=as.character(Sys.time()))
-    ncatt_put(ncid,varid=0,attname='Github_revision',
+    ncdf4::ncatt_put(ncid,varid=0,attname='Github_revision',
               attval=siteInfo$Processing$git_rev, prec="text")
-    ncatt_put(ncid,varid=0,attname='site_code',
+    ncdf4::ncatt_put(ncid,varid=0,attname='site_code',
               attval=site_code, prec="text")
-    ncatt_put(ncid,varid=0,attname='site_name',
+    ncdf4::ncatt_put(ncid,varid=0,attname='site_name',
               attval=as.character(siteInfo$Fullname), prec="text")
-    ncatt_put(ncid,varid=0,attname='country',
+    ncdf4::ncatt_put(ncid,varid=0,attname='country',
               attval=as.character(siteInfo$Country), prec="text")
-    ncatt_put(ncid,varid=0,attname='Fluxnet_dataset_version',
+    ncdf4::ncatt_put(ncid,varid=0,attname='Fluxnet_dataset_version',
               attval=arg_info$datasetversion, prec="text")
     if(!is.na(siteInfo$Tier)) {
-              ncatt_put(ncid,varid=0,attname='Fluxnet site tier',
+              ncdf4::ncatt_put(ncid,varid=0,attname='Fluxnet site tier',
               attval=siteInfo$Tier)}
     if(!is.na(siteInfo$Description)) { 
-              ncatt_put(ncid,varid=0,attname='site_description',
+              ncdf4::ncatt_put(ncid,varid=0,attname='site_description',
               attval=as.character(siteInfo$Description), prec="text") }
     if(!is.na(siteInfo$VegetationDescription)) { 
-              ncatt_put(ncid,varid=0,attname='vegetation_description',
+              ncdf4::ncatt_put(ncid,varid=0,attname='vegetation_description',
               attval=as.character(siteInfo$VegetationDescription), prec="text") }
     if(!is.na(siteInfo$SoilType)) { 
-              ncatt_put(ncid,varid=0,attname='soil_type',
+              ncdf4::ncatt_put(ncid,varid=0,attname='soil_type',
               attval=as.character(siteInfo$SoilType), prec="text") }
     if(!is.na(siteInfo$Disturbance)) { 
-              ncatt_put(ncid,varid=0,attname='disturbance',
+              ncdf4::ncatt_put(ncid,varid=0,attname='disturbance',
               attval=as.character(siteInfo$Disturbance), prec="text") }
     if(!is.na(siteInfo$CropDescription)) { 
-              ncatt_put(ncid,varid=0,attname='crop_description',
+              ncdf4::ncatt_put(ncid,varid=0,attname='crop_description',
               attval=as.character(siteInfo$CropDescription), prec="text") }
     if(!is.na(siteInfo$Irrigation)) { 
-              ncatt_put(ncid,varid=0,attname='irrigation',
+              ncdf4::ncatt_put(ncid,varid=0,attname='irrigation',
               attval=as.character(siteInfo$Irrigation), prec="text") }
     if(!is.na(siteInfo$TowerStatus)) { 
-      ncatt_put(ncid,varid=0,attname='tower_status',
+      ncdf4::ncatt_put(ncid,varid=0,attname='tower_status',
                 attval=as.character(siteInfo$TowerStatus), prec="text") }
     
     #Qc flag descriptions
-    ncatt_put(ncid,varid=0,attname='QC_flag_descriptions',
+    ncdf4::ncatt_put(ncid,varid=0,attname='QC_flag_descriptions',
               attval=qcInfo, prec="text")
 
     #Add info for time stamp and time zone
-    ncatt_put(ncid,varid="time",attname='info',
+    ncdf4::ncatt_put(ncid,varid="time",attname='info',
               attval="Time stamp indicates start time", prec="text")
     
-    ncatt_put(ncid,varid="time",attname='time_zone',
-              attval=tz_lookup_coords(siteInfo$SiteLatitude, 
+    ncdf4::ncatt_put(ncid,varid="time",attname='time_zone',
+              attval=lutz::tz_lookup_coords(siteInfo$SiteLatitude, 
               siteInfo$SiteLongitude, method="accurate"), prec="text")
     
     
@@ -199,78 +196,78 @@ CreateFluxNetcdfFile = function(
 
 
     # contact info
-    ncatt_put(ncid,varid=0,attname='Package contact',
+    ncdf4::ncatt_put(ncid,varid=0,attname='Package contact',
               attval='a.ukkola@unsw.edu.au')
 
 
     # Add variable data to file:
-    ncvar_put(ncid, latdim, vals=siteInfo$SiteLatitude)
-    ncvar_put(ncid, londim, vals=siteInfo$SiteLongitude)
+    ncdf4::ncvar_put(ncid, latdim, vals=siteInfo$SiteLatitude)
+    ncdf4::ncvar_put(ncid, londim, vals=siteInfo$SiteLongitude)
 
 
     # Optional meta data for each site:
     if(!is.na(siteInfo$SiteElevation)) {
-        ncvar_put(ncid,elev,vals=siteInfo$SiteElevation)}
+      ncdf4::ncvar_put(ncid,elev,vals=siteInfo$SiteElevation)}
     if(!is.na(siteInfo$CanopyHeight)) {
-        ncvar_put(ncid,canheight,vals=siteInfo$CanopyHeight)}
+      ncdf4::ncvar_put(ncid,canheight,vals=siteInfo$CanopyHeight)}
     if(!is.na(siteInfo$IGBP_vegetation_short)) {
-        ncvar_put(ncid,short_veg,vals=sprintf("%-200s", siteInfo$IGBP_vegetation_short))}
+      ncdf4::ncvar_put(ncid,short_veg,vals=sprintf("%-200s", siteInfo$IGBP_vegetation_short))}
     if(!is.na(siteInfo$IGBP_vegetation_long)) {
-        ncvar_put(ncid,long_veg,vals=sprintf("%-200s", siteInfo$IGBP_vegetation_long))}
+      ncdf4::ncvar_put(ncid,long_veg,vals=sprintf("%-200s", siteInfo$IGBP_vegetation_long))}
     
     #Reference height, use measurement if available, else tower height
     if (!is.na(siteInfo$MeasurementHeight)) { 
-      ncvar_put(ncid,refheight,vals=siteInfo$MeasurementHeight)
+      ncdf4::ncvar_put(ncid,refheight,vals=siteInfo$MeasurementHeight)
       #also add source of data as an attribute
-      ncatt_put(nc=ncid, varid=refheight, attname="Source",
+      ncdf4::ncatt_put(nc=ncid, varid=refheight, attname="Source",
                 attval="measurement height", prec="text")
     } else if (!is.na(siteInfo$TowerHeight)) {
-      ncvar_put(ncid,refheight,vals=siteInfo$TowerHeight)
+      ncdf4::ncvar_put(ncid,refheight,vals=siteInfo$TowerHeight)
       #also add source of data as an attribute
-      ncatt_put(nc=ncid, varid=refheight, attname="Source",
+      ncdf4::ncatt_put(nc=ncid, varid=refheight, attname="Source",
                 attval="tower height", prec="text")
     }
 
     # Time dependent variables:
-    lapply(1:length(var_defs), function(x) ncvar_put(nc=ncid,
+    lapply(1:length(var_defs), function(x) ncdf4::ncvar_put(nc=ncid,
                                                      varid=var_defs[[x]],
                                                      vals=datain$data[,var_ind[x]]))
 
 
     # Add original Fluxnet variable name to file
-    lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]],
+    lapply(1:length(var_defs), function(x) ncdf4::ncatt_put(nc=ncid, varid=var_defs[[x]],
                                                      attname="Fluxnet_name",
                                                      attval=datain$attributes[var_ind[x],1],
                                                      prec="text"))
 
     # Add CF-compliant name to file (if not missing)
-    lapply(1:length(var_defs), function(x)  ncatt_put(nc=ncid, varid=var_defs[[x]],
+    lapply(1:length(var_defs), function(x)  ncdf4::ncatt_put(nc=ncid, varid=var_defs[[x]],
                                                       attname="standard_name",
                                                       attval=datain$attributes[var_ind[x],3],
                                                       prec="text"))
 
     #Also add this for time, lat and lon
-    ncatt_put(nc=ncid, varid="time", attname="standard_name",       #time
+    ncdf4::ncatt_put(nc=ncid, varid="time", attname="standard_name",       #time
               attval="time", prec="text")
-    ncatt_put(nc=ncid, varid="latitude", attname="standard_name",   #lat
+    ncdf4::ncatt_put(nc=ncid, varid="latitude", attname="standard_name",   #lat
               attval="latitude", prec="text")
-    ncatt_put(nc=ncid, varid="longitude", attname="standard_name",  #lon
+    ncdf4::ncatt_put(nc=ncid, varid="longitude", attname="standard_name",  #lon
               attval="longitude", prec="text")
     
     
     # Add CMIP name to file (if not missing)
-    lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]],
+    lapply(1:length(var_defs), function(x) ncdf4::ncatt_put(nc=ncid, varid=var_defs[[x]],
                                                      attname="CMIP_short_name",
                                                      attval=datain$attributes[var_ind[x],4],
                                                      prec="text"))
     
     # Add missing percentage to file
-    lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]],
+    lapply(1:length(var_defs), function(x) ncdf4::ncatt_put(nc=ncid, varid=var_defs[[x]],
                                                      attname="Missing_%",
                                                      attval=round(total_missing[x],1)))
 
     # Add gap-filled percentage to file
-    lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]],
+    lapply(1:length(var_defs), function(x) ncdf4::ncatt_put(nc=ncid, varid=var_defs[[x]],
                                                      attname="Gap-filled_%",
                                                      attval=round(total_gapfilled[x],1)))
 
@@ -281,7 +278,7 @@ CreateFluxNetcdfFile = function(
         gap_methods <- datain$gapfill_flux[which(!is.na(datain$gapfill_flux))]
         gap_vars <- names(gap_methods)
         lapply(1:length(var_defs), function(x) if(any(gap_vars==names(var_defs[[x]]$name))){
-               ncatt_put(nc=ncid, varid=var_defs[[x]],
+               ncdf4::ncatt_put(nc=ncid, varid=var_defs[[x]],
                          attname="Gapfilling_method",
                          attval=gap_methods[names(var_defs[[x]]$name)],
                          prec="text")} )
@@ -293,7 +290,7 @@ CreateFluxNetcdfFile = function(
 
         # If created new variables, add to file
         if(length(model_defs$nc_vars) > 0){
-            lapply(1:length(model_defs$nc_vars), function(x) ncvar_put(nc=ncid,
+            lapply(1:length(model_defs$nc_vars), function(x) ncdf4::ncvar_put(nc=ncid,
                                                                        varid=model_defs$nc_vars[[x]],
                                                                        vals=model_defs$vals[[x]]))
         }
@@ -304,7 +301,7 @@ CreateFluxNetcdfFile = function(
     if (!is.na(global_atts[1])) {
       
       for(n in 1:length(global_atts)) {
-        ncatt_put(nc=ncid, varid=0, attname=names(global_atts)[n],
+        ncdf4::ncatt_put(nc=ncid, varid=0, attname=names(global_atts)[n],
                   attval=global_atts[[n]])
       }
     }
@@ -312,7 +309,7 @@ CreateFluxNetcdfFile = function(
     
     
     # Close netcdf file:
-    nc_close(ncid)
+    ncdf4::nc_close(ncid)
 }
 
 #' Creates a netcdf file for met variables
@@ -366,10 +363,10 @@ CreateMetNetcdfFile <- function(
     datain$data <- datain$data[ind_start:ind_end,]
 
     # Define x, y and z dimensions
-    xd = ncdim_def('x',vals=c(1),units='')
-    yd = ncdim_def('y',vals=c(1),units='')
-    #zd = ncdim_def('z',vals=c(1),units='')
-    dimnchar = ncdim_def("nchar", "", 1:200, create_dimvar=FALSE )
+    xd = ncdf4::ncdim_def('x',vals=c(1),units='')
+    yd = ncdf4::ncdim_def('y',vals=c(1),units='')
+    #zd = ncdf4::ncdim_def('z',vals=c(1),units='')
+    dimnchar = ncdf4::ncdim_def("nchar", "", 1:200, create_dimvar=FALSE )
 
     # Determine data start date and time:
     timeunits = CreateTimeunits(starttime)
@@ -379,7 +376,7 @@ CreateMetNetcdfFile <- function(
     timedata = as.double(tt*timestepsize)
 
     # Define time dimension:
-    td = ncdim_def('time', unlim=TRUE, units=timeunits, 
+    td = ncdf4::ncdim_def('time', unlim=TRUE, units=timeunits, 
                    vals=timedata, calendar="standard")
 
     
@@ -399,7 +396,7 @@ CreateMetNetcdfFile <- function(
     
     
     # Create variable definitions for time series variables
-    var_defs <- mapply(function(i, dim) ncvar_def(name=datain$out_vars[i],
+    var_defs <- mapply(function(i, dim) ncdf4::ncvar_def(name=datain$out_vars[i],
                                                   units=datain$units$target_units[i],
                                                   dim=dim, missval=Nc_MissingVal,
                                                   longname=datain$attributes[i,2]), 
@@ -413,10 +410,10 @@ CreateMetNetcdfFile <- function(
 
     # First necessary non-time variables:
     # Define latitude:
-    latdim <- ncvar_def('latitude','degrees_north',dim=list(xd,yd),
+    latdim <- ncdf4::ncvar_def('latitude','degrees_north',dim=list(xd,yd),
                         missval=Nc_MissingVal, longname='Latitude')
     # Define longitude:
-    londim <- ncvar_def('longitude','degrees_east',dim=list(xd,yd),
+    londim <- ncdf4::ncvar_def('longitude','degrees_east',dim=list(xd,yd),
                         missval=Nc_MissingVal,longname='Longitude')
 
 
@@ -426,35 +423,35 @@ CreateMetNetcdfFile <- function(
     # Define reference height of tower:
     # Use measurement height if available, else take tower height
     if (!is.na(siteInfo$MeasurementHeight) | !is.na(siteInfo$TowerHeight)) {
-      refheight=ncvar_def('reference_height','m',dim=list(xd,yd),
+      refheight=ncdf4::ncvar_def('reference_height','m',dim=list(xd,yd),
                           missval=Nc_MissingVal,longname='Reference height of flux tower')
       opt_vars[[ctr]] = refheight
       ctr <- ctr + 1
     } 
     # Define site canopy height:
     if(!is.na(siteInfo$CanopyHeight)){
-      canheight=ncvar_def('canopy_height','m',dim=list(xd,yd),
+      canheight=ncdf4::ncvar_def('canopy_height','m',dim=list(xd,yd),
                           missval=Nc_MissingVal,longname='Canopy height')
       opt_vars[[ctr]] = canheight
       ctr <- ctr + 1
     }
     # Define site elevation:
     if(!is.na(siteInfo$SiteElevation)){
-      elev=ncvar_def('elevation','m',dim=list(xd,yd),
+      elev=ncdf4::ncvar_def('elevation','m',dim=list(xd,yd),
                      missval=Nc_MissingVal,longname='Site elevation')
       opt_vars[[ctr]] = elev
       ctr <- ctr + 1
     }
     # Define IGBP short vegetation type:
     if(!is.na(siteInfo$IGBP_vegetation_short)){
-      short_veg=ncvar_def('IGBP_veg_short','-',dim=list(dimnchar), missval=NULL,
+      short_veg=ncdf4::ncvar_def('IGBP_veg_short','-',dim=list(dimnchar), missval=NULL,
                           longname='IGBP vegetation type (short)', prec="char")
       opt_vars[[ctr]] = short_veg
       ctr <- ctr + 1
     }
     # Define IGBP long vegetation type:
     if(!is.na(siteInfo$IGBP_vegetation_long)){
-      long_veg=ncvar_def('IGBP_veg_long','-',dim=list(dimnchar), missval=NULL,
+      long_veg=ncdf4::ncvar_def('IGBP_veg_long','-',dim=list(dimnchar), missval=NULL,
                          longname='IGBP vegetation type (long)', prec="char")
       opt_vars[[ctr]] = long_veg
       ctr <- ctr + 1
@@ -472,59 +469,59 @@ CreateMetNetcdfFile <- function(
     if(any(!is.na(modelInfo)))  { all_vars <- append(all_vars, model_defs$nc_vars) }
 
     # Create
-    ncid <- nc_create(metfilename, vars=all_vars)
+    ncid <- ncdf4::nc_create(metfilename, vars=all_vars)
 
 
     #### Write global attributes ###
     
-    ncatt_put(ncid,varid=0,attname='Production_time',
+    ncdf4::ncatt_put(ncid,varid=0,attname='Production_time',
               attval=as.character(Sys.time()))
-    ncatt_put(ncid,varid=0,attname='Github_revision',
+    ncdf4::ncatt_put(ncid,varid=0,attname='Github_revision',
               attval=siteInfo$Processing$git_rev, prec="text")
-    ncatt_put(ncid,varid=0,attname='site_code',
+    ncdf4::ncatt_put(ncid,varid=0,attname='site_code',
               attval=site_code, prec="text")
-    ncatt_put(ncid,varid=0,attname='site_name',
+    ncdf4::ncatt_put(ncid,varid=0,attname='site_name',
               attval=as.character(siteInfo$Fullname), prec="text")
-    ncatt_put(ncid,varid=0,attname='country',
+    ncdf4::ncatt_put(ncid,varid=0,attname='country',
               attval=as.character(siteInfo$Country), prec="text")
-    ncatt_put(ncid,varid=0,attname='Fluxnet_dataset_version',
+    ncdf4::ncatt_put(ncid,varid=0,attname='Fluxnet_dataset_version',
               attval=arg_info$datasetversion, prec="text")
     if(!is.na(siteInfo$Tier)) {
-      ncatt_put(ncid,varid=0,attname='Fluxnet site tier',
+      ncdf4::ncatt_put(ncid,varid=0,attname='Fluxnet site tier',
                 attval=siteInfo$Tier)}
     if(!is.na(siteInfo$Description)) { 
-      ncatt_put(ncid,varid=0,attname='site_description',
+      ncdf4::ncatt_put(ncid,varid=0,attname='site_description',
                 attval=as.character(siteInfo$Description), prec="text") }
     if(!is.na(siteInfo$VegetationDescription)) { 
-      ncatt_put(ncid,varid=0,attname='vegetation_description',
+      ncdf4::ncatt_put(ncid,varid=0,attname='vegetation_description',
                 attval=as.character(siteInfo$VegetationDescription), prec="text") }
     if(!is.na(siteInfo$SoilType)) { 
-      ncatt_put(ncid,varid=0,attname='soil_type',
+      ncdf4::ncatt_put(ncid,varid=0,attname='soil_type',
                 attval=as.character(siteInfo$SoilType), prec="text") }
     if(!is.na(siteInfo$Disturbance)) { 
-      ncatt_put(ncid,varid=0,attname='disturbance',
+      ncdf4::ncatt_put(ncid,varid=0,attname='disturbance',
                 attval=as.character(siteInfo$Disturbance), prec="text") }
     if(!is.na(siteInfo$CropDescription)) { 
-      ncatt_put(ncid,varid=0,attname='crop_description',
+      ncdf4::ncatt_put(ncid,varid=0,attname='crop_description',
                 attval=as.character(siteInfo$CropDescription), prec="text") }
     if(!is.na(siteInfo$Irrigation)) { 
-      ncatt_put(ncid,varid=0,attname='irrigation',
+      ncdf4::ncatt_put(ncid,varid=0,attname='irrigation',
                 attval=as.character(siteInfo$Irrigation), prec="text") }
     if(!is.na(siteInfo$TowerStatus)) { 
-      ncatt_put(ncid,varid=0,attname='tower_status',
+      ncdf4::ncatt_put(ncid,varid=0,attname='tower_status',
                 attval=as.character(siteInfo$TowerStatus), prec="text") }
     
     #Qc flag descriptions
-    ncatt_put(ncid,varid=0,attname='QC_flag_descriptions',
+    ncdf4::ncatt_put(ncid,varid=0,attname='QC_flag_descriptions',
               attval=qcInfo, prec="text")
     
     
     #Add info for time stamp and time zone
-    ncatt_put(ncid,varid="time",attname='info',
+    ncdf4::ncatt_put(ncid,varid="time",attname='info',
               attval="Time stamp indicates start time", prec="text")
     
-    ncatt_put(ncid,varid="time",attname='time_zone',
-              attval=tz_lookup_coords(siteInfo$SiteLatitude, 
+    ncdf4::ncatt_put(ncid,varid="time",attname='time_zone',
+              attval=lutz::tz_lookup_coords(siteInfo$SiteLatitude, 
               siteInfo$SiteLongitude, method="accurate"), prec="text")
     
     
@@ -533,67 +530,67 @@ CreateMetNetcdfFile <- function(
     
     
     # contact info
-    ncatt_put(ncid,varid=0,attname='Package contact',
+    ncdf4::ncatt_put(ncid,varid=0,attname='Package contact',
               attval='a.ukkola@unsw.edu.au')
     
     
     # Add variable data to file:
-    ncvar_put(ncid, latdim, vals=siteInfo$SiteLatitude)
-    ncvar_put(ncid, londim, vals=siteInfo$SiteLongitude)
+    ncdf4::ncvar_put(ncid, latdim, vals=siteInfo$SiteLatitude)
+    ncdf4::ncvar_put(ncid, londim, vals=siteInfo$SiteLongitude)
     
     
     # Optional meta data for each site:
     if(!is.na(siteInfo$SiteElevation)) {
-      ncvar_put(ncid,elev,vals=siteInfo$SiteElevation)}
+      ncdf4::ncvar_put(ncid,elev,vals=siteInfo$SiteElevation)}
     if(!is.na(siteInfo$CanopyHeight)) {
-      ncvar_put(ncid,canheight,vals=siteInfo$CanopyHeight)}
+      ncdf4::ncvar_put(ncid,canheight,vals=siteInfo$CanopyHeight)}
     if(!is.na(siteInfo$IGBP_vegetation_short)) {
-      ncvar_put(ncid,short_veg,vals=sprintf("%-200s", siteInfo$IGBP_vegetation_short))}
+      ncdf4::ncvar_put(ncid,short_veg,vals=sprintf("%-200s", siteInfo$IGBP_vegetation_short))}
     if(!is.na(siteInfo$IGBP_vegetation_long)) {
-      ncvar_put(ncid,long_veg,vals=sprintf("%-200s", siteInfo$IGBP_vegetation_long))}
+      ncdf4::ncvar_put(ncid,long_veg,vals=sprintf("%-200s", siteInfo$IGBP_vegetation_long))}
     
     #Reference height, use measurement if available, else tower height
     if (!is.na(siteInfo$MeasurementHeight)) { 
-      ncvar_put(ncid,refheight,vals=siteInfo$MeasurementHeight)
+      ncdf4::ncvar_put(ncid,refheight,vals=siteInfo$MeasurementHeight)
       #also add source of data as an attribute
-      ncatt_put(nc=ncid, varid=refheight, attname="Source",
+      ncdf4::ncatt_put(nc=ncid, varid=refheight, attname="Source",
                 attval="measurement height", prec="text")
     } else if (!is.na(siteInfo$TowerHeight)) {
-      ncvar_put(ncid,refheight,vals=siteInfo$TowerHeight)
+      ncdf4::ncvar_put(ncid,refheight,vals=siteInfo$TowerHeight)
       #also add source of data as an attribute
-      ncatt_put(nc=ncid, varid=refheight, attname="Source",
+      ncdf4::ncatt_put(nc=ncid, varid=refheight, attname="Source",
                 attval="tower height", prec="text")
     }
     
 
     # Time dependent variables:
-    lapply(1:length(var_defs), function(x) ncvar_put(nc=ncid,
+    lapply(1:length(var_defs), function(x) ncdf4::ncvar_put(nc=ncid,
                                                      varid=var_defs[[x]],
                                                      vals=datain$data[,var_ind[x]]))
 
 
     # Add original Fluxnet variable name to file
-    lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]], attname="Fluxnet_name",
+    lapply(1:length(var_defs), function(x) ncdf4::ncatt_put(nc=ncid, varid=var_defs[[x]], attname="Fluxnet_name",
                                                      attval=datain$attributes[var_ind[x],1], prec="text"))
 
     # Add CF-compliant name to file (if not missing)
-    lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]],
+    lapply(1:length(var_defs), function(x) ncdf4::ncatt_put(nc=ncid, varid=var_defs[[x]],
                                                      attname="standard_name",
                                                      attval=datain$attributes[var_ind[x],3],
                                                      prec="text"))
   
     #Also add this for time, lat and lon
-    ncatt_put(nc=ncid, varid="time", attname="standard_name",       #time
+    ncdf4::ncatt_put(nc=ncid, varid="time", attname="standard_name",       #time
               attval="time", prec="text")
-    ncatt_put(nc=ncid, varid="latitude", attname="standard_name",   #lat
+    ncdf4::ncatt_put(nc=ncid, varid="latitude", attname="standard_name",   #lat
               attval="latitude", prec="text")
-    ncatt_put(nc=ncid, varid="longitude", attname="standard_name",  #lon
+    ncdf4::ncatt_put(nc=ncid, varid="longitude", attname="standard_name",  #lon
               attval="longitude", prec="text")
     
     
     
     # Add CMIP name to file (if not missing)
-    lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]],
+    lapply(1:length(var_defs), function(x) ncdf4::ncatt_put(nc=ncid, varid=var_defs[[x]],
                                                      attname="CMIP_short_name",
                                                      attval=datain$attributes[var_ind[x],4],
                                                      prec="text"))
@@ -602,19 +599,19 @@ CreateMetNetcdfFile <- function(
     # Add ERA-Interim name to file when available (if used)
     if(!is.na(arg_info$met_gapfill) & (arg_info$met_gapfill=="ERAinterim")){
         lapply(1:length(var_defs), function(x) if(!is.na(datain$era_vars[var_ind[x]])){
-               ncatt_put(nc=ncid, varid=var_defs[[x]],
+               ncdf4::ncatt_put(nc=ncid, varid=var_defs[[x]],
                          attname="ERA-Interim variable used in gapfilling",
                          attval=datain$era_vars[var_ind[x]],
                          prec="text")})
     }
 
     # Add missing percentage to file
-    lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]],
+    lapply(1:length(var_defs), function(x) ncdf4::ncatt_put(nc=ncid, varid=var_defs[[x]],
                                                      attname="Missing_%",
                                                      attval=round(total_missing[x],1)))
 
     # Add gap-filled percentage to file
-    lapply(1:length(var_defs), function(x) ncatt_put(nc=ncid, varid=var_defs[[x]],
+    lapply(1:length(var_defs), function(x) ncdf4::ncatt_put(nc=ncid, varid=var_defs[[x]],
                                                      attname="Gap-filled_%",
                                                      attval=round(total_gapfilled[x],1)))
 
@@ -625,7 +622,7 @@ CreateMetNetcdfFile <- function(
         gap_methods <- datain$gapfill_met[which(!is.na(datain$gapfill_met))]
         gap_vars <- names(gap_methods)
         lapply(1:length(var_defs), function(x) if(any(gap_vars==names(var_defs[[x]]$name))){
-               ncatt_put(nc=ncid, varid=var_defs[[x]],
+               ncdf4::ncatt_put(nc=ncid, varid=var_defs[[x]],
                          attname="Gapfilling_method",
                          attval=gap_methods[names(var_defs[[x]]$name)],
                          prec="text")} )
@@ -637,7 +634,7 @@ CreateMetNetcdfFile <- function(
 
         # If created new variables, add to file
         if(length(model_defs$nc_vars) > 0){
-            lapply(1:length(model_defs$nc_vars), function(x) ncvar_put(nc=ncid,
+            lapply(1:length(model_defs$nc_vars), function(x) ncdf4::ncvar_put(nc=ncid,
                                                                        varid=model_defs$nc_vars[[x]],
                                                                        vals=model_defs$vals[[x]]))
         }
@@ -648,14 +645,14 @@ CreateMetNetcdfFile <- function(
     if (!is.na(global_atts[1])) {
       
       for(n in 1:length(global_atts)) {
-        ncatt_put(nc=ncid, varid=0, attname=names(global_atts)[n],
+        ncdf4::ncatt_put(nc=ncid, varid=0, attname=names(global_atts)[n],
                   attval=global_atts[[n]])
       }
     }
     
     
     # Close netcdf file:
-    nc_close(ncid)
+    ncdf4::nc_close(ncid)
 }
 
 #' Writes model parameters as global attribute to NetCDF file
@@ -664,6 +661,8 @@ CreateMetNetcdfFile <- function(
 #' @param modelInfo model parameters
 #' @param dims dimensions
 #'
+#' @import lutz
+#' @import ncdf4
 #' @return
 #' @export
 #' 
@@ -681,7 +680,7 @@ define_model_params <- function(modelInfo, dims){
         if(val != Nc_MissingVal & val != Sprd_MissingVal & !is.na(val)){
 
             # Append to netcdf variables
-            nc_vars <- append(nc_vars, list(ncvar_def(name=modelInfo[[k]]$varname,
+            nc_vars <- append(nc_vars, list(ncdf4::ncvar_def(name=modelInfo[[k]]$varname,
                                                       units=modelInfo[[k]]$units,
                                                       dim=dims,
                                                       missval=Nc_MissingVal,
@@ -705,19 +704,20 @@ define_model_params <- function(modelInfo, dims){
 #' @param arg_info arguments
 #' @param datain input data
 #' @param cat category??
-#'
+#' @import lutz
+#' @import ncdf4
 #' @return
 #' @export
 #' 
 add_processing_info <- function(ncid, arg_info, datain, cat){
 
     # Input file
-    ncatt_put(ncid,varid=0,attname='Input_file',
+    ncdf4::ncatt_put(ncid,varid=0,attname='Input_file',
               attval=arg_info$infile, prec="text")
 
 
     # Processing thresholds
-    ncatt_put(ncid,varid=0,attname='Processing_thresholds(%)',
+    ncdf4::ncatt_put(ncid,varid=0,attname='Processing_thresholds(%)',
               attval=paste("missing: ", arg_info$missing,
                            ", gapfill_all: ", arg_info$gapfill_all,
                            ", gapfill_good: ", arg_info$gapfill_good,
@@ -728,7 +728,7 @@ add_processing_info <- function(ncid, arg_info, datain, cat){
 
     # Aggregation
     if(!is.na(arg_info$aggregate)){
-        ncatt_put(ncid,varid=0,attname='Timestep_aggregation',
+        ncdf4::ncatt_put(ncid,varid=0,attname='Timestep_aggregation',
                   attval=paste("Aggregated from", (datain$original_timestepsize/60/60),
                                "hours to", datain$timestepsize/60/60, "hours"))
     }
@@ -738,19 +738,19 @@ add_processing_info <- function(ncid, arg_info, datain, cat){
     # Met data
     if(cat=="Met" & !is.na(arg_info$met_gapfill)){
 
-        ncatt_put(ncid,varid=0,attname='Gapfilling_method',
+        ncdf4::ncatt_put(ncid,varid=0,attname='Gapfilling_method',
                   attval=arg_info$met_gapfill, prec="text")
 
         if(arg_info$met_gapfill=="statistical") {
 
-            ncatt_put(ncid,varid=0,attname='Gapfilling_thresholds',
+            ncdf4::ncatt_put(ncid,varid=0,attname='Gapfilling_thresholds',
                       attval=paste("linfill: ", arg_info$linfill,", copyfill: ", arg_info$copyfill,
                                    ", lwdown_method: ", arg_info$lwdown_method, sep=""),
                       prec="text")
 
         } else if(arg_info$met_gapfill=="ERAinterim"){
 
-            ncatt_put(ncid,varid=0,attname='ERAinterim_file',
+            ncdf4::ncatt_put(ncid,varid=0,attname='ERAinterim_file',
                       attval=arg_info$era_file, prec="text")
         }
 
@@ -758,10 +758,10 @@ add_processing_info <- function(ncid, arg_info, datain, cat){
     # Flux data
     } else if(cat=="Flux" & !is.na(arg_info$flux_gapfill)){
 
-        ncatt_put(ncid,varid=0,attname='Gapfilling_method',
+        ncdf4::ncatt_put(ncid,varid=0,attname='Gapfilling_method',
                   attval=arg_info$flux_gapfill, prec="text")
 
-        ncatt_put(ncid,varid=0,attname='Gapfilling_thresholds',
+        ncdf4::ncatt_put(ncid,varid=0,attname='Gapfilling_thresholds',
                   attval=paste("linfill: ", arg_info$linfill,", copyfill: ", arg_info$copyfill,
                                ", regfill: ", arg_info$regfill, sep=""),
                   prec="text")
@@ -770,13 +770,13 @@ add_processing_info <- function(ncid, arg_info, datain, cat){
 
     # La Thuile fair use
     if(arg_info$datasetname=="LaThuile"){
-        ncatt_put(ncid,varid=0,attname="LaThuile_fair_use_policies",
+        ncdf4::ncatt_put(ncid,varid=0,attname="LaThuile_fair_use_policies",
                   attval=arg_info$fair_use, prec="text")
     }
 
     # FLUXNET2015 subset
     if(arg_info$datasetname=="FLUXNET2015"){
-        ncatt_put(ncid,varid=0,attname='FLUXNET2015_version',
+        ncdf4::ncatt_put(ncid,varid=0,attname='FLUXNET2015_version',
                   attval=arg_info$flx2015_version, prec="text")
     }
 

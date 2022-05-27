@@ -12,12 +12,12 @@ lapply(files, function(file){
 #--- User must define these ---#
 
 #Fluxnet site ID (see http://fluxnet.fluxdata.org/sites/site-list-and-pages/)
-site_code <- "AU-How"
+site_code <- "BE-Bra"
 
 # This directory should contain appropriate data from 
 # http://fluxnet.fluxdata.org/data/fluxnet2015-dataset/
-in_path <- "/home/khufkens/Desktop/flux_data_kit/data-raw/flux_data/fluxnet2015/"
-ERA_path <- "/home/khufkens/Desktop/flux_data_kit/data-raw/flux_data/fluxnet2015/"
+in_path <- "/home/khufkens/Desktop/flux_data_kit/data-raw/flux_data/icos/"
+ERA_path <- "/home/khufkens/Desktop/flux_data_kit/data-raw/flux_data/icos/"
 
 #Outputs will be saved to this directory
 out_path <- "~/Desktop/"
@@ -28,7 +28,8 @@ out_path <- "~/Desktop/"
 infile <- get_fluxnet_files(
   in_path,
   site_code,
-  #datasetversion = "[A-Z]{4}-[0-9]{1}"
+  resolution = "HH",
+  datasetversion = "[A-Z]{4}-[0-9]{1}"
   )
 
 #Retrieve dataset version
@@ -40,7 +41,8 @@ datasetversion <- get_fluxnet_version_no(
 era_file <- get_fluxnet_erai_files(
   ERA_path,
   site_code,
-  #datasetversion = "[A-Z]{4}-[0-9]{1}"
+  resolution = "HH",
+  datasetversion = "[A-Z]{4}-[0-9]{1}"
   )
 
 

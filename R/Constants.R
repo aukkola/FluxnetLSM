@@ -64,7 +64,6 @@ findColIndices <-  function(fileinname, var_names, var_classes,
   #List failed variables
   failed_vars <- var_names[failed_ind]
   
-  
   # #Add an exception for VPD and relative humidity
   # #Some sites have one or the other available
   # #Missing RH
@@ -99,6 +98,7 @@ findColIndices <-  function(fileinname, var_names, var_classes,
   # 
   # }
 
+  print(failed_ind)
   
   #If found variables not present in file
   if(length(failed_ind) > 0){

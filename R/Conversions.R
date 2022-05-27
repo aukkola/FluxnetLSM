@@ -192,7 +192,7 @@ VPD2RelHum <- function(VPD, airtemp, vpd_units, tair_units, site_log){
 
   
   #Check that VPD in Pascals
-  if(vpd_units != "hPa"){
+  if(any(vpd_units != "hPa")){
     error <- paste("Cannot convert VPD to relative humidity. VPD units not recognised,",
                    "expecting VPD in hectopascals [ function:", match.call()[[1]], "]")
     stop_and_log(error, site_log)
