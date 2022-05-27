@@ -124,13 +124,13 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   #La Thuile or OzFlux
   if(conv_opts$datasetname %in% c("LaThuile", "OzFlux")){
     
-    var_file     <- system.file("data", paste0("Output_variables_", conv_opts$datasetname, 
+    var_file     <- system.file("extdata", paste0("Output_variables_", conv_opts$datasetname, 
                                                ".csv"), package="FluxnetLSM")
     
     #Fair use information for La Thuile
     if(conv_opts$datasetname == "LaThuile") {
       
-      fair_use_file          <- system.file("data","LaThuile_site_policy.csv", package="FluxnetLSM")
+      fair_use_file          <- system.file("extdata","LaThuile_site_policy.csv", package="FluxnetLSM")
       fair_use_vec           <- read.csv(fair_use_file, header=TRUE, check.names=FALSE)
       conv_opts$fair_use_vec <- fair_use_vec[fair_use_vec$site==site_code,]
       
@@ -139,9 +139,9 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   #Fluxnet2015
   } else {
     if(conv_opts$flx2015_version=="SUBSET"){
-      var_file <- system.file("data","Output_variables_FLUXNET2015_SUBSET.csv", package="FluxnetLSM")
+      var_file <- system.file("extdata","Output_variables_FLUXNET2015_SUBSET.csv", package="FluxnetLSM")
     } else {
-      var_file <- system.file("data","Output_variables_FLUXNET2015_FULLSET.csv", package="FluxnetLSM")
+      var_file <- system.file("extdata","Output_variables_FLUXNET2015_FULLSET.csv", package="FluxnetLSM")
     }
   }
   
