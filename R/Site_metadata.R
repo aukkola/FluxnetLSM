@@ -145,7 +145,7 @@ update_metadata <- function(metadata, new_metadata, overwrite=TRUE) {
 #Find site info file path (not using data() command directly because reads a CSV with a
 #semicolon separator and this leads to incorrect table headers)
 
-site_csv_file <- system.file("data", "Site_metadata.csv", package = "FluxnetLSM")
+site_csv_file <- system.file("extdata", "Site_metadata.csv", package = "FluxnetLSM")
 
 #' Tries to gather metadata from the included site CSV
 #'
