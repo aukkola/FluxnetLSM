@@ -39,6 +39,7 @@
 #' @param plot Should annual, diurnal and/or 14-day running mean plots be produced?
 #'        Set to NA if not required.
 #'
+#' @import R.utils
 #' @export
 #'
 
@@ -58,9 +59,6 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
     conv_opts$limit_vars <- c(conv_opts$limit_vars, paste0(conv_opts$limit_vars, '_qc'))
   }
 
-  
-  library(R.utils)  
-  
   ### Create sub-folders for outputs ###
   out_paths <- create_outdir(out_path, site_code, plot)
   
@@ -107,8 +105,6 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   dataset_vars <- get_varnames(conv_opts$datasetname, conv_opts$flx2015_version, 
                                conv_opts$add_psurf)
   
-  
-  
   ################################
   ###--- Read variable data ---###
   ################################
@@ -145,7 +141,6 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
     }
   }
   
-  
   vars_csv <- read.csv(var_file, header=TRUE,
                        colClasses=c(
                                     "character",  # Fluxnet_variable
@@ -165,8 +160,8 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
                                     "character"   # Aggregate_method
                                     ))
 
-  #Add Psurf (air pressure) for La Thuile as this is not available in the dataset
-  #but can be synthesised
+  # Add Psurf (air pressure) for La Thuile as this is not available in the dataset
+  # but can be synthesised
   if (conv_opts$datasetname == "LaThuile" & conv_opts$add_psurf) {
     
     psurf_var <- list(Fluxnet_variable="PSurf_synth",  #Removing Fluxnet variable from metadata later but 
@@ -189,8 +184,7 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
       }
   }
   
-  
-  #Read site information (lon, lat, elevation)
+  # Read site information (lon, lat, elevation)
   if (conv_opts$metadata_source == 'all') {
       site_info <- get_site_metadata(site_code, model=conv_opts$model)
   } else if (conv_opts$metadata_source == 'csv') {
@@ -207,15 +201,15 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
       stop("Unknown metadata source '", conv_opts$metadata_source, "'")
   }
   
-  #Log possible warnings and remove warnings from output var
+  # Log possible warnings and remove warnings from output var
   site_log  <- log_warning(warn=site_info$warn, site_log)
   site_info <- site_info$out
   
   
-  #Should site be excluded? If so, abort and print reason.
-  #This option is set in the site info file (inside data folder)
-  #Mainly excludes sites with mean annual ET excluding P, implying
-  #irrigation or other additional water source.
+  # Should site be excluded? If so, abort and print reason.
+  # This option is set in the site info file (inside data folder)
+  # Mainly excludes sites with mean annual ET excluding P, implying
+  # irrigation or other additional water source.
   if(!is.null(site_info$Exclude) & site_info$Exclude){
     
     error <- paste("Site not processed. Reason:", site_info$Exclude_reason,

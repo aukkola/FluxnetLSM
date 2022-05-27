@@ -24,9 +24,9 @@ GapfillMet_with_ERA <- function(datain, ERA_file, qc_name, varnames, site_log, .
   vpd_units  <- datain$units$original_units[names(datain$units$original_units) %in% varnames$vpd]
   
   #If not found, set to unknown
-  if (is.na(tair_units) | length(tair_units) == 0){ tair_units = "UNKNOWN" }
+  if (all(is.na(tair_units)) | length(tair_units) == 0){ tair_units = "UNKNOWN" }
   #If not found, assume hectopascals
-  if (is.na(vpd_units) | length(vpd_units) == 0){ vpd_units = "hPa" }
+  if (all(is.na(vpd_units)) | length(vpd_units) == 0){ vpd_units = "hPa" }
   
   #Gapfill met variables
   temp_data <- gapfill_with_ERA(datain=datain$data[,ind], era_data=era_data,

@@ -21,7 +21,8 @@
 #' @param site_log log file
 #' @param datasetname dataset name
 #' @param ... additional parameters
-#'
+#' 
+#' @import ncdf
 #' @return list of variables and their attributes
 #' @export
 
@@ -39,8 +40,6 @@ findColIndices <-  function(fileinname, var_names, var_classes,
   #NetCDF file
   if (datasetname == "OzFlux") {
   
-    library(ncdf4) 
-    
     #Open file handle
     nc <- nc_open(fileinname)
     
@@ -70,36 +69,36 @@ findColIndices <-  function(fileinname, var_names, var_classes,
   # #Some sites have one or the other available
   # #Missing RH
   # if (any(failed_vars %in% dset_vars$relhumidity)) {
-  #   
+  # 
   #   #Check if VPD available, if so don't worry about missing RH
   #   if (any(as.matrix(headers) %in% dset_vars$vpd)) {
-  #     
+  # 
   #     #Remove RH from failed vars list
   #     ind <- which(failed_vars %in% dset_vars$relhumidity)
-  #     
+  # 
   #     failed_ind <- failed_ind[-ind]
   #     failed_vars <- failed_vars[-ind]
-  #     
+  # 
   #   }
-  #   
+  # 
   # }
   # #Missing VPD
   # if (any(failed_vars %in% dset_vars$vpd)) {
   #   #Check if relative humidity available
-  #   
+  # 
   #   #Check if RH available, if so don't worry about missing VPD
   #   if (any(as.matrix(headers) %in% dset_vars$relhumidity)) {
-  #     
+  # 
   #     #Remove VPD from failed vars list
   #     ind <- which(failed_vars %in% dset_vars$vpd)
-  #     
+  # 
   #     failed_ind  <- failed_ind[-ind]
   #     failed_vars <- failed_vars[-ind]
-  #     
-  #   }
-  #   
-  # }
   # 
+  #   }
+  # 
+  # }
+
   
   #If found variables not present in file
   if(length(failed_ind) > 0){
