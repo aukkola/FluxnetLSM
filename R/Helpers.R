@@ -45,7 +45,6 @@ get_fluxnet_erai_template <- function(site_code, ...) {
 get_fluxnet_files <- function(path, site_code = "[A-Z]{2}-[A-Za-z0-9]{3}", ...) {
     template <- get_fluxnet_file_template(site_code = site_code, ...)
     files <- list.files(path, template, full.names = TRUE, ignore.case=TRUE)
-
     return(files)
 }
 
@@ -68,7 +67,10 @@ get_fluxnet_erai_files <- function(path, site_code = "[A-Z]{2}-[A-Za-z0-9]{3}", 
 #' @export
 get_fluxnet_version_no <- function(file) {
   #assumes a FLUXNET2015 file, e.g FLX_US-Ha1_FLUXNET2015_FULLSET_HR_1991-2012_1-3.csv
-  version <- substr(file, start=nchar(file)-6, stop=nchar(file)-4) 
+  #version <- substr(file, start=nchar(file)-6, stop=nchar(file)-4)
+  
+  # agnostic solution based upon delimiter not positions of characters
+  version <- rev(unlist(strsplit(tools::file_path_sans_ext(basename(infile)), "_")))[1]
   return(version)
 }
 
