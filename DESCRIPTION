@@ -50,6 +50,7 @@ Suggests:
     knitr,
     rmarkdown,
     covr,
-    testthat
+    testthat,
+    dplyr
 VignetteBuilder: 
     knitr

@@ -70,7 +70,7 @@ get_fluxnet_version_no <- function(file) {
   #version <- substr(file, start=nchar(file)-6, stop=nchar(file)-4)
   
   # agnostic solution based upon delimiter not positions of characters
-  version <- rev(unlist(strsplit(tools::file_path_sans_ext(basename(infile)), "_")))[1]
+  version <- rev(unlist(strsplit(tools::file_path_sans_ext(basename(file)), "_")))[1]
   return(version)
 }
 

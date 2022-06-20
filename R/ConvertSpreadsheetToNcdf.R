@@ -459,23 +459,18 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   ### Convert units and check data ranges ###
   ###########################################
   
-  
   # Convert data units from original Fluxnet units
   # to desired units as set in variables.csv
   ConvertedData <- ChangeUnits(DataFromText, dataset_vars, site_log)
   
-  
   # Check that data are within acceptable ranges: 
   site_log <- CheckDataRanges(ConvertedData, site_log, conv_opts$check_range_action)
-  
   
   #Replace original data with converted data
   DataFromText <- ConvertedData
   
-  
   #Determine number of files to be written 
   no_files <- length(unique(gaps$consec))
-  
   
   #Remove PSurf fluxnet name if added earlier
   if (conv_opts$datasetname == "LaThuile" & conv_opts$add_psurf) {
