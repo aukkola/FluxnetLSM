@@ -98,8 +98,6 @@ findColIndices <-  function(fileinname, var_names, var_classes,
   # 
   # }
 
-  print(failed_ind)
-  
   #If found variables not present in file
   if(length(failed_ind) > 0){
 
