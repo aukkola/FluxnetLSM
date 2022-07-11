@@ -273,6 +273,55 @@ Rel2SpecHumidity <- function(relHum, airtemp, tair_units,
 
 #-----------------------------------------------------------------------------
 
+SpecHumidity2Rel <- function(
+    specHum,
+    airtemp,
+    tair_units,
+    pressure,
+    psurf_units
+    ){
+  
+  # required units: airtemp - temp in C; pressure in Pa; relHum as %
+  
+  #Check that temperature in Celcius. Convert if not
+  if(tair_units=="K"){
+    airtemp <- airtemp - 273.15
+    
+  } else if(tair_units != "C"){
+    error <- paste("Unknown air temperature units, cannot convert",
+                   "relative to specific humidity. Accepts air temperature in K or C")
+    stop(error)
+  }
+  
+  #Check that PSurf is in Pa. Convert if not
+  if(psurf_units=="kPa"){
+    pressure <- pressure * 1000
+    
+  } else if(psurf_units != "Pa"){
+    error <- paste("Unknown air pressure units, cannot convert",
+                   "relative to specific humidity. Accepts air pressure",
+                   "in kPa or Pa")
+    stop(error)
+  }
+  
+  
+  # Sat vapour pressure in Pa (reference as above)
+  esat <- calc_esat(airtemp)
+  
+  # Then specific humidity at saturation:
+  ws <- 0.622*esat / (pressure - esat)
+  
+  # Re-ordering this equation to get RH:
+  #specHum <- (relHum/100) * ws
+  
+  relHum <- 100 * (specHum / ws)
+  
+  return(relHum)
+  
+}
+
+#-----------------------------------------------------------------------------
+
 #' Calculates saturation vapour pressure
 #' @return saturation vapour pressure
 calc_esat <- function(airtemp){
