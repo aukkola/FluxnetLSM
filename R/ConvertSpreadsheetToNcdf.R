@@ -568,8 +568,6 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
     start_yr[k] <- substring(DataFromText$time[gaps$tseries_start[k],1], 1, 4)
     end_yr[k]   <- substring(DataFromText$time[gaps$tseries_end[k],1], 1, 4)
     
-    
-    
     ### Create output file names ###
     metfilename  <- paste(out_paths$nc_met, "/", site_code, "_", start_yr[k], 
                           "-", end_yr[k], "_", conv_opts$datasetname, "_Met.nc", sep="")
@@ -701,7 +699,7 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
       
       #Close file handles
       ncdf4::nc_close(nc_met)
-      ncdf4::nc_close(nc_flux)  
+      ncdf4::nc_close(nc_flux)
       
     }
     
@@ -727,9 +725,17 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   #Write log to file
   write_log(site_log)
   
-  return(cat("Site", site_code, "processed successfully. Refer to log file for details.\n"))
-  
-} #function
+  # verbose reporting
+  message("Site", site_code, "processed successfully. Refer to log file for details.\n")
+
+  # return a list of the generated filenames
+  return(
+    list(
+      flux = fluxfilename,
+      met = metfilename
+    )
+  )
+}
 
 #-----------------------------------------------------------------------------
 
