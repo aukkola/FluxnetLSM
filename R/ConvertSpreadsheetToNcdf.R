@@ -77,7 +77,6 @@ convert_fluxnet_to_netcdf <- function(
   ### Create sub-folders for outputs ###
   out_paths <- create_outdir(out_path, site_code, plot)
   
-  
   ### Initialise site log ###
   site_log <- initialise_sitelog(site_code, out_paths)
   
