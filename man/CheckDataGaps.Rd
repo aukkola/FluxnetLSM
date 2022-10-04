@@ -38,13 +38,13 @@ CheckDataGaps(
 
 \item{gapfill_flux}{Threshold for all gap_filling per year for flux variables (as percentage)}
 
-\item{gapfill_good}{Threshold for good quality gap_filling
+\item{gapfill_good}{Threshold for good quality gap_filling 
 per year (as percentage, ignored if gapfill_all set)}
 
-\item{gapfill_med}{Threshold for medium quality
+\item{gapfill_med}{Threshold for medium quality 
 gap_filling per year (as percentage, ignored if gapfill_all set)}
 
-\item{gapfill_poor}{Threshold for poor quality gap_filling
+\item{gapfill_poor}{Threshold for poor quality gap_filling 
 per year (as percentage, ignored if gapfill_all set)}
 
 \item{min_yrs}{Minimum number of consecutive years}

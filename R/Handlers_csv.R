@@ -1,18 +1,13 @@
-# Handlers_csv.R
-#
-# A collection of functions to read and convert
-# flux tower data from spreadsheet.
-#
-# author: Anna Ukkola UNSW 2017
-#
-
-
 #' Reads comma-delimited text files containing Fluxnet2015 data
+#' 
 #' @param fileinname fluxnet data file, including directory
 #' @param vars data.table of variables and their attributes
 #' @param time_vars vector of time variables
+#' 
 #' @return list of flux data, variables and timing information
-ReadCSVFluxData <- function(fileinname, vars, datasetname, time_vars, add_psurf, site_log, ...) {
+
+ReadCSVFluxData <- function(
+    fileinname, vars, datasetname, time_vars, add_psurf, site_log, ...) {
 
     ####### First read available variables, corresponding units and ranges ####
 
@@ -24,7 +19,8 @@ ReadCSVFluxData <- function(fileinname, vars, datasetname, time_vars, add_psurf,
                            var_classes=vars$Fluxnet_class,
                            essential_vars=vars$Essential_met,
                            preferred_vars=vars$Preferred_eval,
-                           time_vars=time_vars, #dset_vars=dset_vars,
+                           time_vars=time_vars,
+                           #dset_vars=dset_vars,
                            site_log=site_log,
                            datasetname=datasetname, ...)
 
@@ -198,9 +194,14 @@ ReadCSVFluxData <- function(fileinname, vars, datasetname, time_vars, add_psurf,
 
 }
 
-#-----------------------------------------------------------------------------
-
 #' Reads ERA data and extracts time steps corresponding to obs
+#'
+#' @param ERA_file ERA5 file
+#' @param datain input data file
+#'
+#' @return extracted values
+#' @export
+ 
 read_era <- function(ERA_file, datain) {
 
     # read data
@@ -220,13 +221,25 @@ read_era <- function(ERA_file, datain) {
 
 }
 
-#-----------------------------------------------------------------------------
-
 #' Converts La Thuile files to FLUXNET2015 format
-convert_LaThuile <- function(infiles, fair_usage=NA, fair_usage_vec=NA,
-                             min_yrs, tcol, add_psurf, site_log, site_code) {
+#'
+#' @param infiles input file
+#' @param fair_usage fair use?
+#' @param fair_usage_vec fair use?
+#' @param min_yrs min year
+#' @param tcol tcol?
+#' @param add_psurf psurf?
+#' @param site_log log file
+#' @param site_code site code 
+#'
+#' @import R.utils
+#' 
+#' @return converted file in FLUXNET format
+#' @export
 
-    library(R.utils) # seqToIntervals
+convert_LaThuile <- function(
+    infiles, fair_usage=NA, fair_usage_vec=NA,
+    min_yrs, tcol, add_psurf, site_log, site_code) {
 
     ### Find files to process ###
 
@@ -375,13 +388,17 @@ convert_LaThuile <- function(infiles, fair_usage=NA, fair_usage_vec=NA,
 
 }
 
-
-#-----------------------------------------------------------------------------
-
 #' Converts OzFlux files to FLUXNET2015 format
+#'
+#' @param infile input file
+#' @param tcol tcol??
+#'
+#' @import ncdf4
+#'
+#' @return input file
+#' @export
+#' 
 convert_OzFlux <- function(infile, tcol) {
-  
-  library(ncdf4)
   
   #Open file handle
   nc <- nc_open(infile)

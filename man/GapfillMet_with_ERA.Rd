@@ -6,6 +6,22 @@
 \usage{
 GapfillMet_with_ERA(datain, ERA_file, qc_name, varnames, site_log, ...)
 }
+\arguments{
+\item{datain}{input met data}
+
+\item{ERA_file}{ERA interim data}
+
+\item{qc_name}{qc values}
+
+\item{varnames}{varnames?}
+
+\item{site_log}{logfile?}
+
+\item{...}{additional parameters}
+}
+\value{
+gapfilled meteorological data
+}
 \description{
 Gapfills meteorological data with down-scaled ERAinterim estimates
 }

@@ -1,18 +1,56 @@
 Package: FluxnetLSM
-Type: Package
-Title: Quality control and data conversion scripts for processing
-        FLUXNET data for land surface modelling
-Version: 1.0
-Date: 2017-01-31
-Author: Anna Ukkola and Ned Haughton (UNSW, Australia)
-Maintainer: Who to complain to <a.ukkola@unsw.edu.au>
-URL: https://github.com/aukkola/FluxnetLSM
+Title: Quality Control and Data Conversion for 'FLUXNET' Data for Land Surface Modelling
+Version: 1.1
+Authors@R: c(person(
+               family = "Anna",
+               given = "Ukkola",
+               email = "a.ukkola@unsw.edu.au",
+               role = c("aut", "cre")
+               ),
+             person(
+               family = "Ned",
+               given = "Haughton",
+               role = c("ctb")
+               ),
+             person(
+               family = "De Kauwe",
+               given = "Martin",
+               role = c("ctb")
+               ),
+             person(
+              family = "Hufkens",
+               given = "Koen",
+               email = "koen.hufkens@gmail.com",
+               role = c("ctb"),
+               comment = c(ORCID = "0000-0002-5070-8109")
+             )
+           )
 Description: Scripts for quality control of FLUXNET data, and
         converting from CSV format to NetCDF, and managing metadata.
-License: TODO: What license is it under?
-Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.1
-Imports: R.utils, ncdf4, rvest, lutz
-Suggests: testthat
-git_revision: 154d2eef64e9d78a4ee43dcd2b16904687151290-dirty
+URL: https://github.com/aukkola/FluxnetLSM
+BugReports: https://github.com/aukkola/FluxnetLSM/issues
+Depends:
+    R (>= 3.6)
+Imports:
+    ncdf4,
+    rvest,
+    lutz,
+    jsonlite,
+    graphics,
+    stats,
+    utils,
+    R.utils,
+    grDevices
+License: AGPL-3
+LazyData: false
 Encoding: UTF-8
+ByteCompile: true
+RoxygenNote: 7.1.2
+Suggests:
+    knitr,
+    rmarkdown,
+    covr,
+    testthat,
+    dplyr
+VignetteBuilder: 
+    knitr

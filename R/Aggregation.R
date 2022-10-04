@@ -1,11 +1,10 @@
-# Aggregation.R
-# 
-# Functions to aggregate data to a coarser temporal resolution
-#
-# Author: Anna Ukkola UNSW 2017
-
-
 #' Aggregates original time resolution to a coarser time step
+#'
+#' @param datain input data 
+#' @param new_tstep time step
+#' @param qc_flags condider quality flags
+#' @param qc_name which qc to consider
+
 aggregate_tsteps <- function(datain, new_tstep, qc_flags, qc_name){
   
   #First save old original tstep
@@ -105,10 +104,14 @@ aggregate_tsteps <- function(datain, new_tstep, qc_flags, qc_name){
   
 }
 
-#-----------------------------------------------------------------------------
+#' Calculates fraction of good quality data
+#' 
+#' Returns gapfilled fraction given two data frames
+#' of original and gappfilled data
+#'
+#' @param data original input data
+#' @param good_data gapfilled data
 
-#' Calculates fraction of good quality gapfilled and observed data
-#' for aggregated time steps
 qc_frac <- function(data, good_data){
   
   good_frac <- which(sapply(good_data, function(x) data==x))

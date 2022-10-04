@@ -17,6 +17,30 @@ GapfillMet_statistical(
   site_log
 )
 }
+\arguments{
+\item{datain}{input data}
+
+\item{qc_name}{qc name}
+
+\item{qc_flags}{qc flag?}
+
+\item{copyfill}{copyfill?}
+
+\item{linfill}{linear interpollation?}
+
+\item{lwdown_method}{long wave radiation method}
+
+\item{elevation}{elevation}
+
+\item{varnames}{varnames?}
+
+\item{limit_vars}{limits vars?}
+
+\item{site_log}{log file}
+}
+\value{
+
+}
 \description{
 Gapfill meteorological variables using statistical methods
 }

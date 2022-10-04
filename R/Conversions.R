@@ -114,14 +114,14 @@ ChangeUnits <- function(datain, varnames, site_log){
                                              site_log)
       
         
-        #Fix QC flag. In this case, will use QC flags for VPD and Tair to determine Qair quality
-        #Psurf not used as it is less critical for calculation. Taking the worse flag out of VPD
-        #and Tair (e.g. if VPD observed but Tair gap-filled, will label Qair gap-filled as well)
+        # Fix QC flag. In this case, will use QC flags for VPD and Tair to determine Qair quality
+        # Psurf not used as it is less critical for calculation. Taking the worse flag out of VPD
+        # and Tair (e.g. if VPD observed but Tair gap-filled, will label Qair gap-filled as well)
         
-        #Create Qair qc flag 
+        # Create Qair qc flag 
         
-        #Get indices for VPD and Tair qc flags
-        #Not ideal, hard-codes output variable name as "qc". Cannot work out a way round this
+        # Get indices for VPD and Tair qc flags
+        # Not ideal, hard-codes output variable name as "qc". Cannot work out a way round this
         
         if (datain$vars[k] %in% varnames$vpd) { #VPD
           humidity_qc_ind  <- which(datain$out_vars == paste0(datain$out_vars[vpd_ind], "_qc"))
@@ -137,14 +137,23 @@ ChangeUnits <- function(datain, varnames, site_log){
           stop("Cannot find VPD/RH or Tair QC flag in unit conversions")
         }
         
-        #Find index for Qair qc flag
-        #Not ideal, hard-codes output variable name as "qc". Cannot work out a way round this
+        # Find index for Qair qc flag
+        # Not ideal, hard-codes output variable name as "qc"
+        # Cannot work out a way round this
         qair_qc_ind <- which(datain$out_vars == paste0(datain$out_vars[k], "_qc"))
         
-        #Replace data with new adjusted qc flag
-        #Take the pairwise maximum of each element
-        datain$data[[qair_qc_ind]] <- pmax(datain$data[[humidity_qc_ind]], datain$data[[tair_qc_ind]])
+        # Replace data with new adjusted qc flag
+        # Take the pairwise maximum of each element
         
+        # FIX Koen Hufkens: When the Qair_qc column does not exist, create it.
+        # I do not know how to trace this back to its origin due
+        # to the complexity of the code but somewhere the Qair_qc
+        # columns does not get generated
+        if(length(qair_qc_ind) == 0 ){
+          datain$data$Qair_qc <- pmax(datain$data[[humidity_qc_ind]], datain$data[[tair_qc_ind]])
+        } else {
+          datain$data[[qair_qc_ind]] <- pmax(datain$data[[humidity_qc_ind]], datain$data[[tair_qc_ind]])  
+        }
         
       ## VPD from kPa to hPa
       } else if(datain$vars[k] %in% varnames$vpd & flx_units[k]=="kPa" & alma_units[k]=="hPa"){
@@ -192,7 +201,7 @@ VPD2RelHum <- function(VPD, airtemp, vpd_units, tair_units, site_log){
 
   
   #Check that VPD in Pascals
-  if(vpd_units != "hPa"){
+  if(any(vpd_units != "hPa")){
     error <- paste("Cannot convert VPD to relative humidity. VPD units not recognised,",
                    "expecting VPD in hectopascals [ function:", match.call()[[1]], "]")
     stop_and_log(error, site_log)
@@ -261,6 +270,55 @@ Rel2SpecHumidity <- function(relHum, airtemp, tair_units,
   return(specHum)
 }
 
+
+#-----------------------------------------------------------------------------
+
+SpecHumidity2Rel <- function(
+    specHum,
+    airtemp,
+    tair_units,
+    pressure,
+    psurf_units
+    ){
+  
+  # required units: airtemp - temp in C; pressure in Pa; relHum as %
+  
+  #Check that temperature in Celcius. Convert if not
+  if(tair_units=="K"){
+    airtemp <- airtemp - 273.15
+    
+  } else if(tair_units != "C"){
+    error <- paste("Unknown air temperature units, cannot convert",
+                   "relative to specific humidity. Accepts air temperature in K or C")
+    stop(error)
+  }
+  
+  #Check that PSurf is in Pa. Convert if not
+  if(psurf_units=="kPa"){
+    pressure <- pressure * 1000
+    
+  } else if(psurf_units != "Pa"){
+    error <- paste("Unknown air pressure units, cannot convert",
+                   "relative to specific humidity. Accepts air pressure",
+                   "in kPa or Pa")
+    stop(error)
+  }
+  
+  
+  # Sat vapour pressure in Pa (reference as above)
+  esat <- calc_esat(airtemp)
+  
+  # Then specific humidity at saturation:
+  ws <- 0.622*esat / (pressure - esat)
+  
+  # Re-ordering this equation to get RH:
+  #specHum <- (relHum/100) * ws
+  
+  relHum <- 100 * (specHum / ws)
+  
+  return(relHum)
+  
+}
 
 #-----------------------------------------------------------------------------
 

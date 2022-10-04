@@ -383,13 +383,13 @@ GetTimeUnits = function(fid,timevarname){
   errtext = 'ok'
   if(substr(timevarname,1,5)=='mscur'){ # i.e. CLM file
     # Read date variable:
-    date1=as.character(ncvar_get(fid,'mcdate',start=1,count=1))
+    date1=as.character(ncdf4::ncvar_get(fid,'mcdate',start=1,count=1))
     syear = as.numeric(substr(date1,1,4))
     smonth = as.numeric(substr(date1,5,6))
     sdoy = as.numeric(substr(date1,7,8))
     units = 'clm_blah'
   }else{
-    units = ncatt_get(fid,timevarname,'units')
+    units = ncdf4::ncatt_get(fid,timevarname,'units')
     if(! units$hasatt){
       errtext = paste('T1: Unable to find time units in', stripFilename(fid$filename))
       tunits = list(err=TRUE,errtext=errtext)
@@ -422,8 +422,8 @@ GetTimestepSize = function(fid,timevarname,tunits,ntsteps){
   # Fetches time step size
   errtext = 'ok'
   # Read first 2 timesteps of time variable:
-  time=ncvar_get(fid,timevarname,start=1,count=2)
-  time_end=ncvar_get(fid,timevarname,start=ntsteps,count=1)
+  time=ncdf4::ncvar_get(fid,timevarname,start=1,count=2)
+  time_end=ncdf4::ncvar_get(fid,timevarname,start=ntsteps,count=1)
   # Define time step size:
   tsize=time[2]-time[1]
   tperiod=time_end - time[1] + tsize

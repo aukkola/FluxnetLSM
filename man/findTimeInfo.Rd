@@ -6,6 +6,15 @@
 \usage{
 findTimeInfo(time_vars, headers, site_log, datasetname)
 }
+\arguments{
+\item{time_vars}{time variables}
+
+\item{headers}{headers}
+
+\item{site_log}{log files}
+
+\item{datasetname}{filename}
+}
 \value{
 time stamp variables
 }

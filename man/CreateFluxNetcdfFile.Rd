@@ -24,6 +24,44 @@ CreateFluxNetcdfFile(
   global_atts
 )
 }
+\arguments{
+\item{fluxfilename}{output file name}
+
+\item{datain}{input data}
+
+\item{site_code}{site code}
+
+\item{siteInfo}{meta-data}
+
+\item{ind_start}{start year}
+
+\item{ind_end}{end year}
+
+\item{starttime}{timing info}
+
+\item{flux_varname}{flux variable names}
+
+\item{cf_name}{cf name}
+
+\item{total_missing}{percentage missing and gap filled}
+
+\item{total_gapfilled}{percentage missing and gap filled}
+
+\item{qcInfo}{qc flag information}
+
+\item{arg_info}{processing information}
+
+\item{var_ind}{variable indices?}
+
+\item{varnames}{original varnames corresponding to the dataset}
+
+\item{modelInfo}{model parameters}
+
+\item{global_atts}{global attributes (from origianl Ozflux nc-files)}
+}
+\value{
+netcdf file with flux variables
+}
 \description{
 Creates a netcdf file for flux variables
 }

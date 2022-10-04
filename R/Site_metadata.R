@@ -137,28 +137,33 @@ update_metadata <- function(metadata, new_metadata, overwrite=TRUE) {
     return(metadata)
 }
 
-
 ################################################
 # CSV-stored metadata
 ################################################
 
-#Find site info file path (not using data() command directly because reads a CSV with a
-#semicolon separator and this leads to incorrect table headers)
-
-site_csv_file <- system.file("data", "Site_metadata.csv", package = "FluxnetLSM")
+# Find site info file path (not using data() command directly because reads a CSV with a
+# semicolon separator and this leads to incorrect table headers)
 
 #' Tries to gather metadata from the included site CSV
 #'
 #' @return metadata list
 #' @export
-get_site_metadata_from_CSV <- function(metadata=NA, incl_processing=TRUE, model) {
+ 
+get_site_metadata_from_CSV <- function(
+    metadata = NA,
+    incl_processing = TRUE,
+    model,
+    site_csv_file = system.file("extdata", "Site_metadata.csv", package = "FluxnetLSM")
+    ) {
 
     if (!is.list(metadata)) {
         metadata <- site_metadata_template(metadata)
     }
 
-    csv_data <- read.csv(site_csv_file, header = TRUE,
-                    stringsAsFactors = FALSE)
+    # allow for an external file to be called instead of a
+    # a hard coded one using a new argument
+    csv_data <- try(read.csv(site_csv_file, header = TRUE,
+                    stringsAsFactors = FALSE))
 
     if (is.na(metadata[1])) {  # [1] to skip if site_code is set
         # get all existing metadata as a list of lists

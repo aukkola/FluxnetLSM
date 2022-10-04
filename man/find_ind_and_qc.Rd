@@ -6,6 +6,16 @@
 \usage{
 find_ind_and_qc(inds, var, qc_name = NA)
 }
+\arguments{
+\item{inds}{indices}
+
+\item{var}{variables}
+
+\item{qc_name}{qc names}
+}
+\value{
+indices for variables and QC flags
+}
 \description{
 Find index for a variable and its QC flag
 }

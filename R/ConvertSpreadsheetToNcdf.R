@@ -38,14 +38,30 @@
 #'        See \code{\link{get_default_conversion_options}}.
 #' @param plot Should annual, diurnal and/or 14-day running mean plots be produced?
 #'        Set to NA if not required.
+#' @param site_csv_file CSV file with site meta-data which is parsed to populate
+#'        ancillary data provided with the flux data. By default the hard coded
+#'        packaged data are used, but alternatively an external file can be
+#'        provided. This limits the need to recompile the package when processing
+#'        files which were not originally selected.
 #'
+#' @import R.utils
 #' @export
 #'
-#'
-convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
-                                      conv_opts=get_default_conversion_options(),
-                                      plot=c("annual", "diurnal", "timeseries"),
-                                      ...) {
+
+convert_fluxnet_to_netcdf <- function(
+    site_code,
+    infile,
+    era_file=NA,
+    out_path,
+    conv_opts = get_default_conversion_options(),
+    plot=c("annual", "diurnal", "timeseries"),
+    site_csv_file = system.file(
+      "extdata",
+      "Site_metadata.csv",
+      package = "FluxnetLSM"
+      ),
+    ...
+    ) {
   
   # We allow options to be passed directly into the function, to override conv_opts
   opt_args <- list(...)
@@ -58,12 +74,8 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
     conv_opts$limit_vars <- c(conv_opts$limit_vars, paste0(conv_opts$limit_vars, '_qc'))
   }
 
-  
-  library(R.utils)  
-  
   ### Create sub-folders for outputs ###
   out_paths <- create_outdir(out_path, site_code, plot)
-  
   
   ### Initialise site log ###
   site_log <- initialise_sitelog(site_code, out_paths)
@@ -107,8 +119,6 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   dataset_vars <- get_varnames(conv_opts$datasetname, conv_opts$flx2015_version, 
                                conv_opts$add_psurf)
   
-  
-  
   ################################
   ###--- Read variable data ---###
   ################################
@@ -124,13 +134,13 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   #La Thuile or OzFlux
   if(conv_opts$datasetname %in% c("LaThuile", "OzFlux")){
     
-    var_file     <- system.file("data", paste0("Output_variables_", conv_opts$datasetname, 
+    var_file     <- system.file("extdata", paste0("Output_variables_", conv_opts$datasetname, 
                                                ".csv"), package="FluxnetLSM")
     
     #Fair use information for La Thuile
     if(conv_opts$datasetname == "LaThuile") {
       
-      fair_use_file          <- system.file("data","LaThuile_site_policy.csv", package="FluxnetLSM")
+      fair_use_file          <- system.file("extdata","LaThuile_site_policy.csv", package="FluxnetLSM")
       fair_use_vec           <- read.csv(fair_use_file, header=TRUE, check.names=FALSE)
       conv_opts$fair_use_vec <- fair_use_vec[fair_use_vec$site==site_code,]
       
@@ -139,44 +149,35 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   #Fluxnet2015
   } else {
     if(conv_opts$flx2015_version=="SUBSET"){
-      var_file <- system.file("data","Output_variables_FLUXNET2015_SUBSET.csv", package="FluxnetLSM")
+      var_file <- system.file("extdata","Output_variables_FLUXNET2015_SUBSET.csv", package="FluxnetLSM")
     } else {
-      var_file <- system.file("data","Output_variables_FLUXNET2015_FULLSET.csv", package="FluxnetLSM")
+      var_file <- system.file("extdata","Output_variables_FLUXNET2015_FULLSET.csv", package="FluxnetLSM")
     }
   }
   
-  
-  vars_csv <- read.csv(var_file, header=TRUE,
-                       colClasses=c(
-                                    "character",  # Fluxnet_variable
-                                    "character",  # Fluxnet_unit
-                                    "character",  # Fluxnet_class
-                                    "character",  # Output_variable
-                                    "character",  # Output_unit
-                                    "character",  # Longname
-                                    "character",  # Standard_name
-                                    "character",  # Short_name_cmip
-                                    "numeric",    # Data_min
-                                    "numeric",    # Data_max
-                                    "numeric",    # Essential_met
-                                    "logical",    # Preferred_eval
-                                    "character",  # Category
-                                    "character",  # ERAinterim_variable
-                                    "character"   # Aggregate_method
-                                    ))
+  vars_csv <- read.csv(var_file, header=TRUE)
 
-  #Add Psurf (air pressure) for La Thuile as this is not available in the dataset
-  #but can be synthesised
+  # Add Psurf (air pressure) for La Thuile as this is not available in the dataset
+  # but can be synthesised
   if (conv_opts$datasetname == "LaThuile" & conv_opts$add_psurf) {
     
-    psurf_var <- list(Fluxnet_variable="PSurf_synth",  #Removing Fluxnet variable from metadata later but 
-                                                       #needed to keep track of variable. DO NOT change name
-                      Fluxnet_unit="Pa", #Not original unit but what synthesis produces, DO NOT change
-                      Fluxnet_class="numeric", Output_variable="Psurf",
-                      Output_unit="Pa", Longname="Surface air pressure (synthesised)",
-                      Standard_name="surface_air_pressure", CMIP_short_name="ps", 
-                      Data_min=50000, Data_max=110000, Essential_met=NA, Preferred_eval=FALSE, 
-                      Category="Met", ERAinterim_variable=NA, Aggregate_method="mean")
+    psurf_var <- list(
+      Fluxnet_variable="PSurf_synth",  #Removing Fluxnet variable from metadata later but 
+                                       #needed to keep track of variable. DO NOT change name
+      Fluxnet_unit="Pa", #Not original unit but what synthesis produces, DO NOT change
+      Fluxnet_class="numeric", Output_variable="Psurf",
+      Output_unit="Pa",
+      Longname="Surface air pressure (synthesised)",
+      Standard_name="surface_air_pressure",
+      CMIP_short_name="ps", 
+      Data_min=50000,
+      Data_max=110000,
+      Essential_met=NA,
+      Preferred_eval=FALSE, 
+      Category="Met",
+      ERAinterim_variable=NA,
+      Aggregate_method="mean"
+      )
     
     if (!all(names(psurf_var) %in% colnames(vars_csv))) stop("PSurf variable not defined correctly!")
     
@@ -189,12 +190,14 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
       }
   }
   
-  
-  #Read site information (lon, lat, elevation)
+  # Read site information (lon, lat, elevation)
   if (conv_opts$metadata_source == 'all') {
       site_info <- get_site_metadata(site_code, model=conv_opts$model)
   } else if (conv_opts$metadata_source == 'csv') {
-      site_info <- get_site_metadata_from_CSV(site_code, model=conv_opts$model)
+      site_info <- get_site_metadata_from_CSV(
+        site_code,
+        model = conv_opts$model
+        )
   } else if (conv_opts$metadata_source == 'web') {
       
       #Stop if using this option and trying to pass model information
@@ -207,15 +210,14 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
       stop("Unknown metadata source '", conv_opts$metadata_source, "'")
   }
   
-  #Log possible warnings and remove warnings from output var
+  # Log possible warnings and remove warnings from output var
   site_log  <- log_warning(warn=site_info$warn, site_log)
   site_info <- site_info$out
   
-  
-  #Should site be excluded? If so, abort and print reason.
-  #This option is set in the site info file (inside data folder)
-  #Mainly excludes sites with mean annual ET excluding P, implying
-  #irrigation or other additional water source.
+  # Should site be excluded? If so, abort and print reason.
+  # This option is set in the site info file (inside data folder)
+  # Mainly excludes sites with mean annual ET excluding P, implying
+  # irrigation or other additional water source.
   if(!is.null(site_info$Exclude) & site_info$Exclude){
     
     error <- paste("Site not processed. Reason:", site_info$Exclude_reason,
@@ -231,16 +233,19 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   
   
   # Read text file containing flux data
-  DataFromText <- ReadCSVFluxData(fileinname=infile, vars=vars_csv, 
-                                  datasetname=conv_opts$datasetname,
-                                  time_vars=time_vars, site_log=site_log,
-                                  add_psurf=conv_opts$add_psurf,
-                                  fair_usage=conv_opts$fair_use,
-                                  fair_usage_vec=conv_opts$fair_use_vec,
-                                  min_yrs=conv_opts$min_yrs,
-                                  dset_vars=dataset_vars,
-                                  site_code=site_code)
-  
+  DataFromText <- ReadCSVFluxData(
+    fileinname=infile,
+    vars=vars_csv, 
+    datasetname=conv_opts$datasetname,
+    time_vars=time_vars,
+    site_log=site_log,
+    add_psurf=conv_opts$add_psurf,
+    fair_usage=conv_opts$fair_use,
+    fair_usage_vec=conv_opts$fair_use_vec,
+    min_yrs=conv_opts$min_yrs,
+    dset_vars=dataset_vars,
+    site_code=site_code
+    )
   
   # Make sure whole number of days in dataset
   CheckCSVTiming(DataFromText, site_log)
@@ -471,23 +476,22 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   ### Convert units and check data ranges ###
   ###########################################
   
-  
   # Convert data units from original Fluxnet units
   # to desired units as set in variables.csv
   ConvertedData <- ChangeUnits(DataFromText, dataset_vars, site_log)
   
-  
   # Check that data are within acceptable ranges: 
-  site_log <- CheckDataRanges(ConvertedData, site_log, conv_opts$check_range_action)
-  
+  site_log <- CheckDataRanges(
+    ConvertedData,
+    site_log,
+    conv_opts$check_range_action
+    )
   
   #Replace original data with converted data
   DataFromText <- ConvertedData
   
-  
   #Determine number of files to be written 
   no_files <- length(unique(gaps$consec))
-  
   
   #Remove PSurf fluxnet name if added earlier
   if (conv_opts$datasetname == "LaThuile" & conv_opts$add_psurf) {
@@ -509,13 +513,13 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   if (conv_opts$datasetname == "OzFlux") {
     
     #Open file handle
-    nc_oz <- nc_open(infile)
+    nc_oz <- ncdf4::nc_open(infile)
     
     #Get global attributes
-    global_atts <- ncatt_get(nc_oz, varid=0)
+    global_atts <- ncdf4::ncatt_get(nc_oz, varid=0)
     
     #Close file
-    nc_close(nc_oz)
+    ncdf4::nc_close(nc_oz)
     
   } else {
     global_atts <- NA
@@ -584,8 +588,6 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
     #Extract start and end years
     start_yr[k] <- substring(DataFromText$time[gaps$tseries_start[k],1], 1, 4)
     end_yr[k]   <- substring(DataFromText$time[gaps$tseries_end[k],1], 1, 4)
-    
-    
     
     ### Create output file names ###
     metfilename  <- paste(out_paths$nc_met, "/", site_code, "_", start_yr[k], 
@@ -681,8 +683,8 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
     for(k in 1:length(met_files)){
       
       #Open met and flux NetCDF file handles
-      nc_met <- nc_open(met_files[k])
-      nc_flux <- nc_open(flux_files[k])
+      nc_met <- ncdf4::nc_open(met_files[k])
+      nc_flux <- ncdf4::nc_open(flux_files[k])
       
       #Initialise output file names (completed in plotting code)
       outfile_met  <- paste(out_paths$plot, "/", site_code, "_", start_yr[k], "_", end_yr[k], "_plot_Met_", sep="")
@@ -717,8 +719,8 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
       
       
       #Close file handles
-      nc_close(nc_met)
-      nc_close(nc_flux)  
+      ncdf4::nc_close(nc_met)
+      ncdf4::nc_close(nc_flux)
       
     }
     
@@ -744,9 +746,17 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   #Write log to file
   write_log(site_log)
   
-  return(cat("Site", site_code, "processed successfully. Refer to log file for details.\n"))
-  
-} #function
+  # verbose reporting
+  message("Site", site_code, "processed successfully. Refer to log file for details.\n")
+
+  # return a list of the generated filenames
+  return(
+    list(
+      flux = fluxfilename,
+      met = metfilename
+    )
+  )
+}
 
 #-----------------------------------------------------------------------------
 
@@ -843,7 +853,7 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
 #' - add_psurf: La Thuile dataset does not include surface air pressure (PSurf). When set to TRUE,
 #'              it will be synthesised from air temperature and elevation.
 #' @export
-#'
+
 get_default_conversion_options <- function() {
     conv_opts <- list(
         datasetname = "FLUXNET2015",

@@ -2,12 +2,12 @@
 % Please edit documentation in R/Synthesize_and_gapfill_functions.R
 \name{regtrain}
 \alias{regtrain}
-\title{Trains multiple linear regression for flux gap-filling
+\title{Trains multiple linear regression for flux gap-filling 
 separately for day and night}
 \usage{
 regtrain(traindata, ydata, ...)
 }
 \description{
-Trains multiple linear regression for flux gap-filling
+Trains multiple linear regression for flux gap-filling 
 separately for day and night
 }

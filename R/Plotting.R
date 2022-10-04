@@ -29,19 +29,19 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile, qc_flags){
   
     
   #Load data variables and units from NetCDF file
-  data        <- lapply(data_vars, ncvar_get, nc=ncfile)
-  data_units  <- lapply(data_vars, function(x) ncatt_get(nc=ncfile, varid=x, 
+  data        <- lapply(data_vars, ncdf4::ncvar_get, nc=ncfile)
+  data_units  <- lapply(data_vars, function(x) ncdf4::ncatt_get(nc=ncfile, varid=x, 
                                                         attname="units")$value)
   #fluxnet_names
-  fluxnet_names  <- lapply(data_vars, function(x) ncatt_get(nc=ncfile, varid=x, 
+  fluxnet_names  <- lapply(data_vars, function(x) ncdf4::ncatt_get(nc=ncfile, varid=x, 
                                                          attname="Fluxnet_name")$value)
   names(data)       <- data_vars
   names(data_units) <- data_vars
   
   
   #Retrieve time variable and units
-  time       <- ncvar_get(ncfile, "time")
-  time_units <- ncatt_get(ncfile, "time", "units")$value
+  time       <- ncdf4::ncvar_get(ncfile, "time")
+  time_units <- ncdf4::ncatt_get(ncfile, "time", "units")$value
   
   #Find time attributes
   timing <- GetTimingNcfile(ncfile)  
@@ -90,7 +90,7 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile, qc_flags){
   
   ## Load qc variables if available ##
   if(length(qc_vars) > 0) {
-    qc_data <- lapply(qc_vars, ncvar_get, nc=ncfile)
+    qc_data <- lapply(qc_vars, ncdf4::ncvar_get, nc=ncfile)
     names(qc_data) <- qc_vars  
   }
 
@@ -100,8 +100,8 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile, qc_flags){
 
 
   ## Site name:
-  site_name <- paste0(ncatt_get(ncfile, 0, attname='site_name')$value, ' (',
-                      ncatt_get(ncfile, 0, attname='site_code')$value, ')')
+  site_name <- paste0(ncdf4::ncatt_get(ncfile, 0, attname='site_name')$value, ' (',
+                      ncdf4::ncatt_get(ncfile, 0, attname='site_code')$value, ')')
  
   ### Loop through analysis types ###
   for(k in 1:length(analysis_type)){

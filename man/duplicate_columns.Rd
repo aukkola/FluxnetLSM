@@ -2,13 +2,18 @@
 % Please edit documentation in R/Constants.R
 \name{duplicate_columns}
 \alias{duplicate_columns}
-\title{Duplicates columns in Fluxnet data if a variable is being processes multiple times}
+\title{Duplicates columns in Fluxnet data}
 \usage{
 duplicate_columns(data, vars)
 }
+\arguments{
+\item{data}{input data}
+
+\item{vars}{variables}
+}
 \value{
-data with duplicated columns
+
 }
 \description{
-Duplicates columns in Fluxnet data if a variable is being processes multiple times
+If a variable is being processes multiple times duplicate column
 }

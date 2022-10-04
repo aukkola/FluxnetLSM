@@ -6,8 +6,19 @@
 \usage{
 create_qc_var(datain, qc_name, qc_flags, outname, cat)
 }
+\arguments{
+\item{datain}{input data}
+
+\item{qc_name}{qc name}
+
+\item{qc_flags}{qc flag}
+
+\item{outname}{outname}
+
+\item{cat}{category?}
+}
 \value{
-datain
+input data frame
 }
 \description{
 Creates attributes for a new QC variable

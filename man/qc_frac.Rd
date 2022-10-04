@@ -2,12 +2,16 @@
 % Please edit documentation in R/Aggregation.R
 \name{qc_frac}
 \alias{qc_frac}
-\title{Calculates fraction of good quality gapfilled and observed data
-for aggregated time steps}
+\title{Calculates fraction of good quality data}
 \usage{
 qc_frac(data, good_data)
 }
+\arguments{
+\item{data}{original input data}
+
+\item{good_data}{gapfilled data}
+}
 \description{
-Calculates fraction of good quality gapfilled and observed data
-for aggregated time steps
+Returns gapfilled fraction given two data frames
+of original and gappfilled data
 }

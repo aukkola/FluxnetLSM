@@ -6,6 +6,18 @@
 \usage{
 add_processing_info(ncid, arg_info, datain, cat)
 }
+\arguments{
+\item{ncid}{netcdf id}
+
+\item{arg_info}{arguments}
+
+\item{datain}{input data}
+
+\item{cat}{category??}
+}
+\value{
+
+}
 \description{
 Writes attributes common to met and flux NC files
 }

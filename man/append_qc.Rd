@@ -2,10 +2,20 @@
 % Please edit documentation in R/Gapfilling.R
 \name{append_qc}
 \alias{append_qc}
-\title{Appends information for new QC flag}
+\title{Appends information for new QC flag title}
 \usage{
 append_qc(old_data, new_value, new_name)
 }
+\arguments{
+\item{old_data}{old data}
+
+\item{new_value}{new value}
+
+\item{new_name}{new name}
+}
+\value{
+input data with appended qc flag
+}
 \description{
-Appends information for new QC flag
+Appends information for new QC flag title
 }

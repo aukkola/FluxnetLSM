@@ -6,6 +6,26 @@
 \usage{
 update_qc(data, temp_data, varname, qc_name, qc_value, qc_flags, outname, ...)
 }
+\arguments{
+\item{data}{input data}
+
+\item{temp_data}{temporary data?}
+
+\item{varname}{variable name}
+
+\item{qc_name}{qc name}
+
+\item{qc_value}{qc value}
+
+\item{qc_flags}{qc flag}
+
+\item{outname}{output name}
+
+\item{...}{additional parameters}
+}
+\value{
+input data with updated qc flags
+}
 \description{
 Updates QC flags after gap-filling
 }
