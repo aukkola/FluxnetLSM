@@ -68,8 +68,3 @@ convert_fluxnet_to_netcdf(
   out_path = out_path,
   conv_opts = conv_opts
   )
-
-#Alternatively you can pass the gapfilling option directly to the main function:
-# convert_fluxnet_to_netcdf(site_code = site_code, infile = infile, 
-#                           era_file = era_file, out_path = out_path,
-#   
