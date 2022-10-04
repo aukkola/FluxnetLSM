@@ -38,15 +38,30 @@
 #'        See \code{\link{get_default_conversion_options}}.
 #' @param plot Should annual, diurnal and/or 14-day running mean plots be produced?
 #'        Set to NA if not required.
+#' @param site_csv_file CSV file with site meta-data which is parsed to populate
+#'        ancillary data provided with the flux data. By default the hard coded
+#'        packaged data are used, but alternatively an external file can be
+#'        provided. This limits the need to recompile the package when processing
+#'        files which were not originally selected.
 #'
 #' @import R.utils
 #' @export
 #'
 
-convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
-                                      conv_opts=get_default_conversion_options(),
-                                      plot=c("annual", "diurnal", "timeseries"),
-                                      ...) {
+convert_fluxnet_to_netcdf <- function(
+    site_code,
+    infile,
+    era_file=NA,
+    out_path,
+    conv_opts = get_default_conversion_options(),
+    plot=c("annual", "diurnal", "timeseries"),
+    site_csv_file = system.file(
+      "extdata",
+      "Site_metadata.csv",
+      package = "FluxnetLSM"
+      ),
+    ...
+    ) {
   
   # We allow options to be passed directly into the function, to override conv_opts
   opt_args <- list(...)
@@ -180,7 +195,10 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   if (conv_opts$metadata_source == 'all') {
       site_info <- get_site_metadata(site_code, model=conv_opts$model)
   } else if (conv_opts$metadata_source == 'csv') {
-      site_info <- get_site_metadata_from_CSV(site_code, model=conv_opts$model)
+      site_info <- get_site_metadata_from_CSV(
+        site_code,
+        model = conv_opts$model
+        )
   } else if (conv_opts$metadata_source == 'web') {
       
       #Stop if using this option and trying to pass model information
@@ -464,7 +482,11 @@ convert_fluxnet_to_netcdf <- function(site_code, infile, era_file=NA, out_path,
   ConvertedData <- ChangeUnits(DataFromText, dataset_vars, site_log)
   
   # Check that data are within acceptable ranges: 
-  site_log <- CheckDataRanges(ConvertedData, site_log, conv_opts$check_range_action)
+  site_log <- CheckDataRanges(
+    ConvertedData,
+    site_log,
+    conv_opts$check_range_action
+    )
   
   #Replace original data with converted data
   DataFromText <- ConvertedData

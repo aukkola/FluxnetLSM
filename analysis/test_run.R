@@ -16,8 +16,8 @@ site_code <- "BE-Bra"
 
 # This directory should contain appropriate data from 
 # http://fluxnet.fluxdata.org/data/fluxnet2015-dataset/
-in_path <- "/home/khufkens/Desktop/flux_data_kit/data-raw/flux_data/icos/"
-ERA_path <- "/home/khufkens/Desktop/flux_data_kit/data-raw/flux_data/icos/"
+in_path <- "../FluxDataKit/data-raw/flux_data/icos/"
+ERA_path <- "../FluxDataKit/data-raw/flux_data/icos/"
 
 #Outputs will be saved to this directory
 out_path <- "~/Desktop/"
