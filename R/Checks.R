@@ -499,9 +499,9 @@ CheckDataRanges <- function(datain, site_log, action="stop"){
         # Get acceptable ranges for variables:
         valid_range <- datain$var_ranges[,k]
 
-
         # Check if variable outside specified range
         if (data_range[1] < valid_range[1] | data_range[2] > valid_range[2]){
+          
             warning_tpl <- paste("Variable outside expected ranges.",
                                  "Check variable %s;",
                                  "data range is [%.1f, %.1f], valid range is [%.1f, %.1f].",
