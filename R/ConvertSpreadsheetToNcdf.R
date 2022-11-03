@@ -155,7 +155,29 @@ convert_fluxnet_to_netcdf <- function(
     }
   }
   
-  vars_csv <- read.csv(var_file, header=TRUE)
+  #vars_csv <- read.csv(var_file, header=TRUE)
+
+ vars_csv <- read.csv(var_file, header=TRUE,
+                       colClasses=c(
+                                    "character",  # Fluxnet_variable
+                                    "character",  # Fluxnet_unit
+                                    "character",  # Fluxnet_class
+                                    "character",  # Output_variable
+                                    "character",  # Output_unit
+                                    "character",  # Longname
+                                    "character",  # Standard_name
+                                    "character",  # Short_name_cmip
+                                    "numeric",    # Data_min
+                                    "numeric",    # Data_max
+                                    "numeric",    # Essential_met
+                                    "logical",    # Preferred_eval
+                                    "character",  # Category
+                                    "character",  # ERAinterim_variable
+                                    "character"   # Aggregate_method
+                                    ))
+
+
+
 
   # Add Psurf (air pressure) for La Thuile as this is not available in the dataset
   # but can be synthesised
