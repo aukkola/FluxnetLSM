@@ -291,10 +291,10 @@ update_csv_from_web <- function() {
             # Overwrite with fluxdata.org data
             site_md <- get_fluxdata_org_site_metadata(site_md)
         }
-        if (any(check_missing(site_md)) && sc %in% ornl_site_codes) {
-            # Don't overwrite with ORNL data, just gapfill
-            site_md <- get_ornl_site_metadata(site_md, overwrite = FALSE)
-        }
+        #if (any(check_missing(site_md)) && sc %in% ornl_site_codes) {
+        #    # Don't overwrite with ORNL data, just gapfill
+        #    site_md <- get_ornl_site_metadata(site_md, overwrite = FALSE)
+        #}
         metadata[[sc]] <- site_md
     }
 
