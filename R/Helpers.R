@@ -197,7 +197,9 @@ preprocess_OzFlux <- function(infile, outpath) {
       warning(paste0("Modifying start time in file: ", infile))
       
       
-      #Fix missing time steps by duplicating first available time step
+      #Fix missing time steps by filling with NA values
+      #(Changing this from previous method where filled with first available
+      #time step as will mess up any variables with a strong diurnal cycle)
       
       #First fix time variable by adding missing time steps
       #Calculate new time steps (use next days tsteps for correct decimals and deduct 1 day)
@@ -211,8 +213,8 @@ preprocess_OzFlux <- function(infile, outpath) {
       time_date <- as.POSIXct(time_var * 24*60*60,  origin=time_origin, tz="GMT")
     
       
-      #For each time-varying variable, copy first time step
-      var_data <- lapply(var_data, function(x) append(rep(x[1], no_missing_start), x))
+      #For each time-varying variable, fill with NA
+      var_data <- lapply(var_data, function(x) append(rep(NA, no_missing_start), x))
       
       #Data amended, set rewrite flag to TRUE
       rewrite_data <- TRUE
@@ -274,7 +276,7 @@ preprocess_OzFlux <- function(infile, outpath) {
       warning(paste0("Modifying end time in file: ", infile))
               
               
-      #Fix missing time steps by duplicating last available time step
+      #Fix missing time steps by filling with NA values
       
       #First calculate no. of time steps available for last day
       avail_last_day <- tsteps_per_day - no_missing_end
@@ -292,7 +294,7 @@ preprocess_OzFlux <- function(infile, outpath) {
       
       
       #For each time-varying variable, copy first time step
-      var_data <- lapply(var_data, function(x) append(x, rep(x[length(x)], no_missing_end)))
+      var_data <- lapply(var_data, function(x) append(x, rep(NA, no_missing_end)))
       
       #Data amended, set rewrite flag to TRUE
       rewrite_data <- TRUE
@@ -319,39 +321,73 @@ preprocess_OzFlux <- function(infile, outpath) {
   end_day <- day_month[length(day_month)]
   
   
-  #If not full years, remove incomplete years
+  #If not full years, gapfill incomplete years with NA
   #Because time stamp is the end time, end_day should also be 1 Jan
-  if (any(c(start_day, end_day) != "0101")) {
+  
+  #First check start time
+  if (start_day != "0101") {
     
-
+      #Create start time stamp for Jan 1 (get start year from date vector)
+      start_date <- as.POSIXct(paste0(format(time_date[1], format="%Y"), "-01-01"), tz="GMT")
+      
+      #Missing dates
+      dates_missing_start <-seq(from=start_date+tstep_size,  
+                                to=as.POSIXct(time_date[1]-tstep_size, tz="GMT"), 
+                                by=tstep_size)
+      
+      #Append to time vector
+      time_date <- c(dates_missing_start, time_date)
+      
+      #For some reason this changes the time zone from GMT to AEST
+      #even forcing it to GMT through as.POSIXct(..., tz="GMT") doesn't work
+      #Setting time zone with this function as the only solution that seems to work
+      attr(time_date, "tzone") <- "GMT"
+      
+      
+      
+      #Check that time steps equally spaced as set by tstep_size
+      if (any (diff(time_date) != tstep_size)) {
+        stop("new start time stamps not created correctly")
+      }
+      
+      
+      #Fill data with NAs
+      var_data <- lapply(var_data, function(x) append(rep(NA, length(dates_missing_start)), x))
+      
+  }
+  
+  
+  #Then check end time
+  
+  if (end_day != "0101") {
     
-    #Create target start time (0101 00:00:00 plus time step size, normally 00:30)
-    #Year not used but included so posixct works
-    target_start <- format(as.POSIXct(paste("2018-01-01 00:00:00 GMT")) + tstep_size, "%m%d %H:%M")
-               
+    #Get end year from time vector (add one as end date should be 1 Jan as above)
+    end_year <- as.numeric(format(tail(time_date, n=1), format="%Y")) + 1
     
-    #Find first instance of Jan 1 (time stamp at 00:30)
-    start_ind <- which(day_hour == target_start)[1]
+    #Create time stamp for end time of 1 Jan next year
+    end_date <- as.POSIXct(paste0(end_year, "-01-01"), tz="GMT")
     
-    #Find last instance of Dec 31
-    end_ind <- tail(which(day_hour == "0101 00:00"), n=1)
+    #Missing dates
+    dates_missing_end <-seq(from=as.POSIXct(tail(time_date, n=1) +tstep_size, tz="GMT"),  to=end_date, by=tstep_size)
     
     
-    #Check that have a whole number of days
+    #Append to time vector
+    time_date <- c(time_date, dates_missing_end)
     
-    #Total no. of time tsteps
-    no_tsteps <- length(start_ind:end_ind)
+    #For some reason this changes the time zone from GMT to AEST
+    #even forcing it to GMT through as.POSIXct(..., tz="GMT") doesn't work
+    #Setting time zone with this function as the only solution that seems to work
+    attr(time_date, "tzone") <- "GMT"
     
-    #Check for an even no. of time steps
-    if ( !round(no_tsteps / tsteps_per_day) == (no_tsteps / tsteps_per_day)) {
-      stop("Incomplete days present!")
+    
+    #Check that time steps equally spaced as set by tstep_size
+    if (any (diff(time_date) != tstep_size)) {
+      stop("new end time stamps not created correctly")
     }
     
     
-    #Change size of data variables and time vector
-    var_data <- lapply(var_data, function(x) x[start_ind:end_ind])
-    
-    time_var <- time_var[start_ind:end_ind]
+    #Fill data with NAs
+    var_data <- lapply(var_data, function(x) append(x, rep(NA, length(dates_missing_end))))
     
     
     #Data amended, set rewrite flag to TRUE
@@ -360,7 +396,14 @@ preprocess_OzFlux <- function(infile, outpath) {
   }
 
   
+  #Check for an even no. of time steps
+  no_tsteps <- length(time_date)
+  if ( !round(no_tsteps / tsteps_per_day) == (no_tsteps / tsteps_per_day)) {
+    stop("Incomplete days present!")
+  }
   
+  
+
   
   ### Write output file ###
   
@@ -382,6 +425,11 @@ preprocess_OzFlux <- function(infile, outpath) {
     
   #If data amended, rewrite time info and time-varying variabless
   } else {
+    
+    
+    #Reset time var
+    time_origin_gmt <- as.POSIXct(time_origin, tz="GMT")
+    time_var <- as.numeric(julian(time_date, time_origin_gmt, tz="GMT"))
     
     
     ### Set dimensions ###
