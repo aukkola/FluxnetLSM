@@ -7,6 +7,7 @@
 
 #' Converts units from original Fluxnet to target ALMA units
 #' @return datain
+#' @export
 ChangeUnits <- function(datain, varnames, site_log){
     
   #Loop through variables. If original and target units do not match,

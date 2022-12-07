@@ -4,7 +4,12 @@
 \alias{get_site_metadata_from_CSV}
 \title{Tries to gather metadata from the included site CSV}
 \usage{
-get_site_metadata_from_CSV(metadata = NA, incl_processing = TRUE, model)
+get_site_metadata_from_CSV(
+  metadata = NA,
+  incl_processing = TRUE,
+  model,
+  site_csv_file = system.file("extdata", "Site_metadata.csv", package = "FluxnetLSM")
+)
 }
 \value{
 metadata list

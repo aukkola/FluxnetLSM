@@ -6,15 +6,8 @@
 \usage{
 retrieve_varinfo(vars_present, all_vars, attribute)
 }
-\arguments{
-\item{vars_present}{}
-
-\item{all_vars}{}
-
-\item{attribute}{}
-}
 \value{
-
+variable information
 }
 \description{
 Retrieves variable information

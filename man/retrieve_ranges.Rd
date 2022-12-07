@@ -6,13 +6,8 @@
 \usage{
 retrieve_ranges(vars_present, all_vars)
 }
-\arguments{
-\item{vars_present}{current variable ranges}
-
-\item{all_vars}{all variable ranges}
-}
 \value{
-
+variable ranges
 }
 \description{
 Retrieves acceptable variable ranges

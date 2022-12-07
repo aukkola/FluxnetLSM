@@ -11,6 +11,7 @@ convert_fluxnet_to_netcdf(
   out_path,
   conv_opts = get_default_conversion_options(),
   plot = c("annual", "diurnal", "timeseries"),
+  site_csv_file = system.file("extdata", "Site_metadata.csv", package = "FluxnetLSM"),
   ...
 )
 }
@@ -32,6 +33,12 @@ See \code{\link{get_default_conversion_options}}.}
 
 \item{plot}{Should annual, diurnal and/or 14-day running mean plots be produced?
 Set to NA if not required.}
+
+\item{site_csv_file}{CSV file with site meta-data which is parsed to populate
+ancillary data provided with the flux data. By default the hard coded
+packaged data are used, but alternatively an external file can be
+provided. This limits the need to recompile the package when processing
+files which were not originally selected.}
 }
 \description{
 Converts data from a FLUXNET2015 formatted spreadsheet to

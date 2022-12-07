@@ -2,16 +2,13 @@
 % Please edit documentation in R/Constants.R
 \name{remove_duplicates}
 \alias{remove_duplicates}
-\title{Removes duplicate indices}
+\title{Removes duplicate indices if a Fluxnet variable is processed more than once}
 \usage{
 remove_duplicates(indices)
 }
-\arguments{
-\item{indices}{indices to remove}
-}
 \value{
-
+duplicate indices
 }
 \description{
-If a Fluxnet variable is processed more than once remove doubless
+Removes duplicate indices if a Fluxnet variable is processed more than once
 }

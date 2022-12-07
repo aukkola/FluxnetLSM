@@ -7,25 +7,11 @@
 #
 # TODO: Check and merge back in to palsR
 
-#' Find list of column variables
-#' 
-#' Process files for their column variables
-#'
-#' @param fileinname input file
-#' @param var_names varnames
-#' @param var_classes var classes
-#' @param essential_vars essential variables
-#' @param preferred_vars preferred variables
-#' @param time_vars time step
-#' @param dset_vars dataset variables?
-#' @param site_log log file
-#' @param datasetname dataset name
-#' @param ... additional parameters
-#' 
-#' @import ncdf
-#' @return list of variables and their attributes
-#' @export
+#-----------------------------------------------------------------------------
 
+#' Finds variables present in input file
+#' @return list of variables and their attributes
+# Variable names in spreadsheet to be processed:
 findColIndices <-  function(fileinname, var_names, var_classes, 
                             essential_vars, preferred_vars,
                             time_vars, dset_vars, site_log, datasetname, ...) {
@@ -40,6 +26,8 @@ findColIndices <-  function(fileinname, var_names, var_classes,
   #NetCDF file
   if (datasetname == "OzFlux") {
   
+    library(ncdf4) 
+    
     #Open file handle
     nc <- nc_open(fileinname)
     
@@ -55,7 +43,7 @@ findColIndices <-  function(fileinname, var_names, var_classes,
   
   #Find file header indices corresponding to desired variables
   #(returns an empty integer if cannot find variable)
-  ind <- sapply(var_names, function(x) which(headers==x))
+  ind <- sapply(as.character(var_names), function(x) which(headers==x))
   
   #List variables that could not be found in file (instances where ind length equals 0)
   #and remove failed variables from var_name and var_classes vectors
@@ -64,40 +52,42 @@ findColIndices <-  function(fileinname, var_names, var_classes,
   #List failed variables
   failed_vars <- var_names[failed_ind]
   
+  
   # #Add an exception for VPD and relative humidity
   # #Some sites have one or the other available
   # #Missing RH
   # if (any(failed_vars %in% dset_vars$relhumidity)) {
-  # 
+  #   
   #   #Check if VPD available, if so don't worry about missing RH
   #   if (any(as.matrix(headers) %in% dset_vars$vpd)) {
-  # 
+  #     
   #     #Remove RH from failed vars list
   #     ind <- which(failed_vars %in% dset_vars$relhumidity)
-  # 
+  #     
   #     failed_ind <- failed_ind[-ind]
   #     failed_vars <- failed_vars[-ind]
-  # 
+  #     
   #   }
-  # 
+  #   
   # }
   # #Missing VPD
   # if (any(failed_vars %in% dset_vars$vpd)) {
   #   #Check if relative humidity available
-  # 
+  #   
   #   #Check if RH available, if so don't worry about missing VPD
   #   if (any(as.matrix(headers) %in% dset_vars$relhumidity)) {
-  # 
+  #     
   #     #Remove VPD from failed vars list
   #     ind <- which(failed_vars %in% dset_vars$vpd)
-  # 
+  #     
   #     failed_ind  <- failed_ind[-ind]
   #     failed_vars <- failed_vars[-ind]
-  # 
+  #     
   #   }
-  # 
+  #   
   # }
-
+  # 
+  
   #If found variables not present in file
   if(length(failed_ind) > 0){
 
@@ -187,16 +177,10 @@ findColIndices <-  function(fileinname, var_names, var_classes,
 
 }
 
-#' Extract time stamp information
-#'
-#' @param time_vars time variables
-#' @param headers headers
-#' @param site_log log files
-#' @param datasetname filename
-#'
-#' @return time stamp variables
-#' @export
+#-----------------------------------------------------------------------------
 
+#' Extract time stamp information
+#' @return time stamp variables
 findTimeInfo <- function(time_vars, headers, site_log, datasetname){
     
   #Find index of time variables
@@ -230,15 +214,10 @@ findTimeInfo <- function(time_vars, headers, site_log, datasetname){
   return(tcols)
 }
 
-#' Retrieves variable information
-#'
-#' @param vars_present 
-#' @param all_vars 
-#' @param attribute 
-#'
-#' @return
-#' @export
+#-----------------------------------------------------------------------------
 
+#' Retrieves variable information
+#' @return variable information
 retrieve_varinfo <- function(vars_present, all_vars, attribute){
   
   #Find index for fluxnet variables present in file
@@ -256,14 +235,10 @@ retrieve_varinfo <- function(vars_present, all_vars, attribute){
   return(var_info)
 }
 
-#' Retrieves original and target variable units
-#'
-#' @param vars_present 
-#' @param all_vars 
-#'
-#' @return
-#' @export
+#-----------------------------------------------------------------------------
 
+#' Retrieves original and target variable units
+#' @return original and target units
 retrieve_units <- function(vars_present, all_vars){
   
   #Find index for fluxnet variables present in file
@@ -287,14 +262,10 @@ retrieve_units <- function(vars_present, all_vars){
   return(units)
 }
 
-#' Retrieve variables longnames to be written in NetCDF
-#'
-#' @param vars_present current variables?
-#' @param all_vars all variables?
-#'
-#' @return
-#' @export
+#-----------------------------------------------------------------------------
 
+#' Retrieve variables longnames to be written in NetCDF
+#' @return Long name attributes
 retrieve_atts <- function(vars_present, all_vars){
   
   #Find index for fluxnet variables present in file
@@ -317,14 +288,10 @@ retrieve_atts <- function(vars_present, all_vars){
 }
 
 
-#' Retrieves acceptable variable ranges
-#'
-#' @param vars_present current variable ranges
-#' @param all_vars all variable ranges
-#'
-#' @return
-#' @export
+#-----------------------------------------------------------------------------
 
+#' Retrieves acceptable variable ranges
+#' @return variable ranges
 retrieve_ranges <- function(vars_present, all_vars){
 
   #Find index for fluxnet variables present in file
@@ -347,15 +314,10 @@ retrieve_ranges <- function(vars_present, all_vars){
 }
 
 
-#' Removes duplicate indices
-#' 
-#' If a Fluxnet variable is processed more than once remove doubless
-#'
-#' @param indices indices to remove
-#'
-#' @return
-#' @export
-#'
+#-----------------------------------------------------------------------------
+
+#' Removes duplicate indices if a Fluxnet variable is processed more than once
+#' @return duplicate indices
 remove_duplicates <- function(indices){
   
   #Determine how many variables duplicated
@@ -375,16 +337,11 @@ remove_duplicates <- function(indices){
   
 }
 
-#' Duplicates columns in Fluxnet data 
-#' 
-#' If a variable is being processes multiple times duplicate column
-#'
-#' @param data input data
-#' @param vars variables
-#'
-#' @return
-#' @export
-#' 
+
+#-----------------------------------------------------------------------------
+
+#' Duplicates columns in Fluxnet data if a variable is being processes multiple times
+#' @return data with duplicated columns
 duplicate_columns <- function(data, vars){
   
   #Find variables that are duplicated

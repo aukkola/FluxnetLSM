@@ -6,13 +6,8 @@
 \usage{
 retrieve_units(vars_present, all_vars)
 }
-\arguments{
-\item{vars_present}{}
-
-\item{all_vars}{}
-}
 \value{
-
+original and target units
 }
 \description{
 Retrieves original and target variable units
