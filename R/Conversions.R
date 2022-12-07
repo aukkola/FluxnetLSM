@@ -81,13 +81,15 @@ ChangeUnits <- function(datain, varnames, site_log){
           tair_units <- alma_units[names(alma_units) %in% varnames$tair]
         }          
 
+        #Find index for Tair
+        tair_ind <- which(colnames(datain$data) %in% varnames$tair)
+        
         
         #Calculate relative humidity
         if (datain$vars[k] %in% varnames$vpd) {
           
-          #Find index for VPD and Tair
+          #Find index for VPD
           vpd_ind  <- which(colnames(datain$data) %in% varnames$vpd)
-          tair_ind <- which(colnames(datain$data) %in% varnames$tair)
           
           
           #Calculate relative humidity from VPD
