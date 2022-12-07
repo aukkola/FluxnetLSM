@@ -470,10 +470,8 @@ preprocess_OzFlux <- function(infile, outpath) {
       #Change values
       new_vars[[var_inds[v]]]$vals <- var_data[[v]]
       
-      #Change chunk size (no idea what this is but produces an error otherwise
-      #during nc_create)
-      new_vars[[var_inds[v]]]$chunksizes <- NA
     }
+    
     
     
     #Fix missing values (some are text and cause an error)
@@ -483,6 +481,11 @@ preprocess_OzFlux <- function(infile, outpath) {
         new_vars[[v]]$missval <- -9999
       }
 
+      #Change chunk size (no idea what this is but produces an error otherwise
+      #during nc_create)
+      #Do this for all variables
+      new_vars[[v]]$chunksizes <- NA #sapply(new_vars[[v]]$dim, function(x) x$len) #NA #length(new_vars[[var_inds[v]]]$dim)
+      
     }
 
     
@@ -513,7 +516,7 @@ preprocess_OzFlux <- function(infile, outpath) {
     for (v in 1:length(new_vars)) {
       
       #CRS returns an error, skip
-      if (new_vars[[v]]$name != "crs") {
+      if (!(new_vars[[v]]$name %in% c("crs", "station_name"))) {
         
         ncdf4::ncvar_put(nc=out_nc, varid=new_vars[[v]],
                   vals=new_vars[[v]]$vals)
