@@ -127,7 +127,8 @@ ChangeUnits <- function(datain, varnames, site_log){
           humidity_qc_ind  <- which(datain$out_vars == paste0(datain$out_vars[vpd_ind], "_qc"))
           
         } else if(datain$vars[k] %in% varnames$relhumidity) { #relative humidity
-          humidity_qc_ind  <- which(datain$out_vars == paste0(datain$out_vars[vpd_ind], "_qc"))
+          rh_ind  <- which(colnames(datain$data) %in% varnames$relhumidity)
+          humidity_qc_ind  <- which(datain$out_vars == paste0(datain$out_vars[rh_ind], "_qc"))
         }
 
         tair_qc_ind <- which(datain$out_vars == paste0(datain$out_vars[tair_ind], "_qc"))
