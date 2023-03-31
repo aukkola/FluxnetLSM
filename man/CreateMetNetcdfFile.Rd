@@ -65,9 +65,6 @@ CreateMetNetcdfFile(
 
 \item{global_atts}{}
 }
-\value{
-
-}
 \description{
 Creates a netcdf file for met variables
 }

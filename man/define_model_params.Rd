@@ -11,9 +11,6 @@ define_model_params(modelInfo, dims)
 
 \item{dims}{dimensions}
 }
-\value{
-
-}
 \description{
 Writes model parameters as global attribute to NetCDF file
 }

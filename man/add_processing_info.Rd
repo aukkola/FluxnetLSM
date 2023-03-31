@@ -15,9 +15,6 @@ add_processing_info(ncid, arg_info, datain, cat)
 
 \item{cat}{category??}
 }
-\value{
-
-}
 \description{
 Writes attributes common to met and flux NC files
 }

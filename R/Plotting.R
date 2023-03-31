@@ -179,7 +179,7 @@ plot_nc <- function(ncfile, analysis_type, vars, varnames, outfile, qc_flags){
         
         DiurnalCycle(obslabel=data_vars[n],dcdata=as.matrix(data[[n]]),
                      varname=data_vars[n], 
-                     ytext=paste(data_vars[n], " (", data_units[n], ")", sep=""), 
+                     ytext=paste0(data_vars[n], " (", data_units[n], ")"), 
                      legendtext=data_vars[n], timestepsize=timestepsize,
                      whole=timing$whole, plotcolours="black",
                      #vqcdata=as.matrix(var_qc),
@@ -370,13 +370,15 @@ DiurnalCycle <- function(obslabel,dcdata,varname,ytext,legendtext,
             }
           }
         }else{ # no gap-filling information - assume all data are useable:
+          
           for(i in 1:tstepinday){
             # Sum all values for each timestep:
             if(all(is.na(data_days[(stid[k]+(l-1)*365):(fnid[k]+(l-1)*365),i]))){
               avday[k,i,p] <- NA
             } else{
-              avday[k,i,p]=avday[k,i,p] + 
-                sum(data_days[(stid[k]+(l-1)*365):(fnid[k]+(l-1)*365),i], na.rm=na.rm)
+              avday[k,i,p]=sum(avday[k,i,p],
+                               sum(data_days[(stid[k]+(l-1)*365):(fnid[k]+(l-1)*365),i], na.rm=na.rm),
+                               na.rm=TRUE)
              }
             missing_vals[k] = missing_vals[k] + 
               sum(is.na(data_days[(stid[k]+(l-1)*365):(fnid[k]+(l-1)*365),i])) #count missing values
@@ -387,8 +389,9 @@ DiurnalCycle <- function(obslabel,dcdata,varname,ytext,legendtext,
               if(all(is.na(data_days[(stid[k+4]+(l-1)*365):(fnid[k+4]+(l-1)*365),i]))){
                 avday[k,i,p] <- NA
               } else{
-                avday[k,i,p]=avday[k,i,p] + 
-                  sum(data_days[(stid[k+4]+(l-1)*365):(fnid[k+4]+(l-1)*365),i], na.rm=na.rm)
+                avday[k,i,p]=sum(avday[k,i,p],
+                                 sum(data_days[(stid[k+4]+(l-1)*365):(fnid[k+4]+(l-1)*365),i], na.rm=na.rm),
+                                 na.rm=TRUE)
               }
               missing_vals[k] = missing_vals[k] + 
                 sum(is.na(data_days[(stid[k]+(l-1)*365):(fnid[k]+(l-1)*365),i])) #count missing values
@@ -396,16 +399,15 @@ DiurnalCycle <- function(obslabel,dcdata,varname,ytext,legendtext,
           }
         } # use gap-filling info or not
       } # for each year in the data set
-      
-      # Then find the average of these values:
+            # Then find the average of these values:
       if(k==1){ # i.e. DJF, which is split in any year
         avday[k,,p]=avday[k,,p]/(90*nyears - exclvals[k,] - (missing_vals[k]/tstepinday))
         removefrac[k] = sum(exclvals[k,])/(90*nyears*tstepinday)
-        perc_missing[k,p] <- missing_vals[k]/tstepinday/(90*nyears)*100
+        perc_missing[k,p] <- missing_vals[k]/tstepinday/(90*nyears) #*100 commenting out, multiplied by 100 below in plotting code
       }else{
         avday[k,,p]=avday[k,,p]/((fnid[k]-stid[k])*nyears - exclvals[k,] - (missing_vals[k]/tstepinday))
         removefrac[k] =  sum(exclvals[k,]) / ((fnid[k]-stid[k])*nyears*tstepinday)
-        perc_missing[k,p] <- missing_vals[k]/tstepinday/((fnid[k]-stid[k])*nyears)*100
+        perc_missing[k,p] <- missing_vals[k]/tstepinday/((fnid[k]-stid[k])*nyears) #*100 commenting out, multiplied by 100 below in plotting code
       }
     } # over each season
     if(p>1){

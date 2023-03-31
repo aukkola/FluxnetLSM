@@ -38,9 +38,6 @@ GapfillMet_statistical(
 
 \item{site_log}{log file}
 }
-\value{
-
-}
 \description{
 Gapfill meteorological variables using statistical methods
 }
