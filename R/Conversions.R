@@ -176,12 +176,11 @@ ChangeUnits <- function(datain, varnames, site_log){
                 
       ## If cannot find conversion, abort  
       } else {
-        error <- paste("Unknown unit conversion. cannot convert between original ", 
+        error <- paste0("Unknown unit conversion. cannot convert between original ", 
                        "Fluxnet and required units, check variable: ", datain$vars[k], 
                        ". Available conversions: air temp C to K, rainfall mm to kg/m2/s, ",
-                       "air pressure kPa to Pa, humidity from relative (%) to specific (kg/kg)",
-                       "and PAR (umol/m2/s) to shortwave radiation (W/m2)",
-                       sep="")
+                       "air pressure kPa to Pa, humidity from relative (%) to specific (kg/kg), ",
+                       "VPD from kPa to hPa and PAR (umol/m2/s) to shortwave radiation (W/m2)")
         stop_and_log(error, site_log)
       }
       
