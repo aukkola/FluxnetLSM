@@ -516,6 +516,7 @@ get_site_metadata_web <- function(metadata, incl_processing=TRUE) {
 
     metadata <- get_fluxdata_org_site_metadata(metadata)
 
+    #Commented this out as ORNL metadata no longer available
     #if (any(check_missing(metadata))) {
     #    # Don't overwrite with ORNL data, only gap-fill Fluxnet Data
     #    metadata <- get_ornl_site_metadata(metadata, overwrite=FALSE)
