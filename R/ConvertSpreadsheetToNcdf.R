@@ -503,14 +503,15 @@ convert_fluxnet_to_netcdf <- function(
   ConvertedData <- ChangeUnits(DataFromText, dataset_vars, site_log)
   
   # Check that data are within acceptable ranges: 
-  site_log <- CheckDataRanges(
-    ConvertedData,
-    site_log,
-    conv_opts$check_range_action
-    )
+  check_ranges <- CheckDataRanges(
+                  ConvertedData,
+                  site_log,
+                  conv_opts$check_range_action)
   
-  #Replace original data with converted data
-  DataFromText <- ConvertedData
+  #Replace original data with converted data and checked data
+  DataFromText <- check_ranges$data
+  site_log     <- check_ranges$site_log    
+  
   
   #Determine number of files to be written 
   no_files <- length(unique(gaps$consec))

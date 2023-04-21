@@ -479,7 +479,7 @@ IsWholeYrs <- function(datain, gaps, site_log){
 #' @param datain input data 
 #' @param site_log log file
 #' @param action action to execute upon failure?
-#' 
+#' @return out
 CheckDataRanges <- function(datain, site_log, action="stop"){
 
     # Loop through variables
@@ -532,7 +532,7 @@ CheckDataRanges <- function(datain, site_log, action="stop"){
 
     } # variables
 
-    return(site_log)
+    return(list(data=datain, site_log=site_log))
 } # function
 
 

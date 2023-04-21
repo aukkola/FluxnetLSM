@@ -14,6 +14,9 @@ CheckDataRanges(datain, site_log, action = "stop")
 
 \item{action}{action to execute upon failure?}
 }
+\value{
+out
+}
 \description{
 Checks that data are within specified ranges
 as set in the "variables" auxiliary file
