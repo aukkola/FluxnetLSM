@@ -463,6 +463,7 @@ get_fluxdata_org_site_metadata <- function(metadata, site_url=NULL) {
 
     message("Trying to load new_metadata for ", site_code, " from Fluxdata.org (", site_url, ")")
 
+    #Try to open site URL
     page_html <- tryCatch(read_html(site_url), error = function(e) NULL)
 
     # General info
