@@ -770,7 +770,7 @@ convert_fluxnet_to_netcdf <- function(
   write_log(site_log)
   
   # verbose reporting
-  message("Site", site_code, "processed successfully. Refer to log file for details.\n")
+  message("Site ", site_code, " processed successfully. Refer to log file for details.\n")
 
   # return a list of the generated filenames
   return(
