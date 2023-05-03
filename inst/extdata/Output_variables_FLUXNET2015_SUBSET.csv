@@ -6,6 +6,7 @@ SW_IN_F_QC,-,integer,SWdown_qc,-,SWdown quality control flag,NULL,NULL,0,5,NA,FA
 LW_IN_F,W/m2,numeric,LWdown,W/m2,Surface incident longwave radiation,surface_downwelling_longwave_flux_in_air,rlds,0,750,2,FALSE,Met,LW_IN_ERA,mean
 LW_IN_F_QC,-,integer,LWdown_qc,-,LWdown quality control flag,NULL,NULL,0,5,NA,FALSE,Met,NA,NA
 VPD_F,hPa,numeric,VPD,hPa,Vapour pressure deficit,water_vapor_saturation_deficit_in_air,NULL,0,100,1,FALSE,Met,VPD_ERA,mean
+VPD_F,hPa,numeric,Qair,kg/kg,Near surface specific humidity,specific_humidity,huss,0,0.1,1,FALSE,Met,VPD_ERA,mean
 VPD_F_QC,-,integer,VPD_qc,-,VPD quality control flag,NULL,NULL,0,5,NA,FALSE,Met,NA,NA
 PA_F,kPa,numeric,PSurf,Pa,Surface air pressure,air_pressure,ps,50000,110000,2,FALSE,Met,PA_ERA,mean
 PA_F_QC,-,integer,PSurf_qc,-,PSurf quality control flag,NULL,NULL,0,5,NA,FALSE,Met,NA,NA
@@ -14,7 +15,6 @@ P_F_QC,-,integer,Precip_qc,-,Precip quality control flag,NULL,NULL,0,5,NA,FALSE,
 WS_F,m/s,numeric,Wind,m/s,Scalar windspeed,wind_speed,ws,0,75,2,FALSE,Met,WS_ERA,mean
 WS_F_QC,-,integer,Wind_qc,-,Wind quality control flag,NULL,NULL,0,5,NA,FALSE,Met,NA,NA
 RH,%,numeric,RH,%,Near surface relative humidity,relative_humidty,hur,0,100,1,FALSE,Met,VPD_ERA,mean
-RH,%,numeric,Qair,kg/kg,Near surface specific humidity,specific_humidity,huss,0,0.1,1,FALSE,Met,VPD_ERA,mean
 CO2_F_MDS,umolCO2/mol,numeric,CO2air,ppm,Near surface CO2 concentration,mole_fraction_of_carbon_dioxide_in_air,co2c,200,600,NA,FALSE,Met,NA,mean
 CO2_F_MDS_QC,-,integer,CO2air_qc,-,CO2air quality control flag,NULL,NULL,0,5,NA,FALSE,Met,NA,NA
 SW_OUT,W/m2,numeric,SWup,W/m2,Reflected shortwave radiation,surface_upwelling_shortwave_flux_in_air,rsus,-100,1360,NA,FALSE,Eval,NA,mean
