@@ -479,7 +479,7 @@ FillQCvarMissing <- function(datain, gapfillVal, qc_name) {
   qc_vars <- datain$vars[qc_ind]
   data_vars <- unlist(strsplit(qc_vars, qc_name))
   
-  #If found qc variables
+  #If found qc variables, replace missing QC values
   if (length(qc_ind) > 0) {
     
     #Check when flag missing but data available
@@ -496,7 +496,7 @@ FillQCvarMissing <- function(datain, gapfillVal, qc_name) {
         
       }  
     }
-    
+  
   }
   
   return(datain)
