@@ -479,20 +479,24 @@ FillQCvarMissing <- function(datain, gapfillVal, qc_name) {
   qc_vars <- datain$vars[qc_ind]
   data_vars <- unlist(strsplit(qc_vars, qc_name))
   
-  
-  #Check when flag missing but data available
-  for (k in 1:length(data_vars)) {
+  #If found qc variables
+  if (length(qc_ind) > 0) {
     
-    #Find these instances
-    ind <- which(!is.na(datain$data[data_vars[k]]) & 
-                   is.na(datain$data[qc_vars[k]]))
-    
-    #If they exists, replace missing QC flag with poor gapfilling
-    if(length(ind) > 0){
+    #Check when flag missing but data available
+    for (k in 1:length(data_vars)) {
       
-      datain$data[qc_vars[k]][ind,1] <- gapfillVal[3]
+      #Find these instances
+      ind <- which(!is.na(datain$data[data_vars[k]]) & 
+                     is.na(datain$data[qc_vars[k]]))
+      
+      #If they exists, replace missing QC flag with poor gapfilling
+      if(length(ind) > 0){
+        
+        datain$data[qc_vars[k]][ind,1] <- gapfillVal[3]
+        
+      }  
+    }
     
-    }  
   }
   
   return(datain)
